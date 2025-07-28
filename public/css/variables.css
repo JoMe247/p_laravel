@@ -1,0 +1,21 @@
+:root{
+  --red1:#e50055;
+  --red2:#a60853;
+  --pink2:#fe6e63;
+  --white:#f3f3f3;
+  --white2:#ffffff;
+  --whiteText:#f9fafb;
+  --text1:#333;
+  --text2:#535353;
+
+  /* Fonts */
+  --montserrat: 'Montserrat', sans-serif;
+  --josefin: 'Josefin Sans', sans-serif;
+  --quick: 'Quicksand', sans-serif;
+  --lato: 'Lato', sans-serif;
+  --poppins: 'Poppins', sans-serif;
+
+
+  /*Button Border Radius*/
+  --radius:7px;
+}

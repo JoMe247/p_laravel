@@ -1,0 +1,90 @@
+#bottom-menu-close{
+    position: fixed;
+    width: 90%;
+    height: 50px;
+    z-index: 11;
+    background-color: #fff;
+    bottom: 0;
+
+    display: none;
+    align-items: center;
+    align-content: center;
+    justify-content: right;
+    border-top: 1px solid #ebebeb;
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+#bottom-menu-close img{
+    width: 200px;
+    margin-left: 20px;
+    margin-right: auto;
+    object-fit: contain;
+    filter: saturate(0) brightness(0);
+}
+
+#bottom-menu-close h3{
+    margin-left: 10px;
+    font-family: var(--lato);
+}
+
+#bottom-menu-close label{
+    width: 30px;
+    height: 28px;
+    display: flex;
+    flex-flow: wrap;
+    justify-items: center;
+
+    margin-top: 10px;
+
+    /* Para cambiarle la posición usa estos dos, cuando position sea absolute */
+    /* position: absolute; */
+    /* top: 55px; */
+    /* right: 35px; */
+
+    /* Para cambiarle el tamaño usa el transform */
+    transform: scale(1);
+    transition: 0.3s;
+
+    /* El z index es para que se ponga encima del nav */
+    z-index: 3;
+    cursor: pointer;
+}
+
+#bottom-menu-close label div{
+    width: 30px;
+    height: 2px;
+    transition: 0.4s;
+    background-color: #111;
+
+    /* Estas son las barritas del menu, puedes cambiarle el color */
+}
+
+#menu-chk:checked ~ #lateral{
+    transform: translate(0%);
+} 
+
+#menu-chk:checked ~ #bottom-menu-close label{
+    /* right: 105px; */
+    transition: 0.3s;
+} 
+
+#menu-chk:checked ~ #bottom-menu-close label div:nth-child(1){
+    transform: rotate(45deg) translateY(10px) translateX(2px);
+    transition: 0.3s;
+} 
+
+#menu-chk:checked ~ #bottom-menu-close label div:nth-child(2){
+    display: none;
+} 
+
+#menu-chk:checked ~ #bottom-menu-close label div:nth-child(3){
+    transform: rotate(-45deg) translateY(-8px);
+    transition: 0.3s;
+} 
+
+@media (min-width:200px) and (max-width:1024px) {
+    #bottom-menu-close{
+        display: flex;
+    }
+}

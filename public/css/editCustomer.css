@@ -1,0 +1,112 @@
+#edit-customer{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 10;
+
+    top: 0;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    
+    /* display: flex; */
+    display: none;
+    flex-flow: wrap;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+#outer-box{
+    width: 80%;
+    height: 90%;
+    overflow-y: scroll;
+
+    border: 10px solid #fff;
+    background-color: #fff;
+    border-radius: 10px;
+
+    transform: translateY(150%);
+    transition: 0.3s ease-in-out;
+}
+
+#customer-inputs{
+    /* width: 80%;
+    height: 80%; */
+
+    background-color: white;
+    border-radius: 20px;
+
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-items: center;
+    /* align-content: center; */
+
+    overflow-y: hidden;
+    overflow-x: hidden;
+    padding: 20px;
+}
+
+
+
+.customer-row{
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    width: 100%;
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+
+    font-family: var(--montserrat);
+}
+
+.input-container-row{
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+p.input-name-upper{
+   text-transform: uppercase;
+   margin-bottom: 4px;
+   font-weight: bold;
+   color: #555;
+   padding-left: 10px;
+   user-select: none;
+}
+
+#customer-inputs input{
+    font-family: var(--montserrat);
+    height: 30px;
+    font-size: 1em;
+    font-weight: 500;
+    position: relative;
+    padding-left: 10px;
+    outline: none;
+}
+
+#input-name-upper{
+    content: attr(data-value);
+    position: absolute;
+    top: -10px;
+}
+
+#outer-box::-webkit-scrollbar {
+    width: 8px;
+    padding-right: 10px;
+    margin-right: 10px;
+}
+
+#outer-box::-webkit-scrollbar-track {
+    /* -webkit-box-shadow: 0 0 6px rgb(0, 0, 0);  */
+    border-radius: 10px;
+    
+}
+
+#outer-box::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgba(200, 200, 200, 0.5);
+    backdrop-filter: blur(4px);
+    
+    /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);  */
+}
