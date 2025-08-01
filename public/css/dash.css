@@ -515,6 +515,12 @@ body{
     /* flex-flow: wrap; */
 }
 
+#lower-table-clients[type="fullscreen"]{
+    width: 98%;
+    height: 97%;
+    margin-top: 10px;
+}
+
 #lower-table-clients icon{
     display: none;
 }
@@ -526,7 +532,7 @@ body{
     /* border-left: 1px solid #ddd; */
 }
 
-#bottom-container h3{
+#lower-table-clients h3{
     text-align: left;
     width: max-content;
     padding-left: 30px;
