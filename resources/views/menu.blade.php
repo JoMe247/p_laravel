@@ -67,10 +67,10 @@
             <i class='bx bx-file'></i> Documents 
         </div>
 
-        <div class="lateral-row" data="option">
+        <div class="lateral-row" data="option" onclick="window.location='./inbox'">
             <i class='bx bx-envelope'></i> Messages 
         </div>
-
+        
         <div class="lateral-row" data="option">
             <i class='bx bx-receipt'></i> Payments 
         </div>
