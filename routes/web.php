@@ -22,7 +22,7 @@ Route::get('/customers', [CustomersController::class, 'show'])->name('customers'
 
 Route::get('/', function () { return redirect()->route('send.form'); });
 
-Route::get('/send', [WhatsappController::class, 'showSendForm'])->name('send.form');
+//Route::get('/send', [WhatsappController::class, 'showSendForm'])->name('send.form');
 Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('send.action');
 
 Route::get('/inbox', [WhatsappController::class, 'showInbox'])->name('inbox');
@@ -35,4 +35,4 @@ Route::post('/inbox/sync', [WhatsappController::class, 'syncFromTwilio'])->name(
 Route::delete('/inbox/delete/{id}', [App\Http\Controllers\WhatsappController::class, 'delete'])->name('inbox.delete');
 Route::delete('/inbox/delete-multiple', [App\Http\Controllers\WhatsappController::class, 'deleteMultiple'])->name('inbox.deleteMultiple');
 
-
+Route::get('/sent', [WhatsappController::class, 'showSent'])->name('sent');

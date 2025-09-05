@@ -34,7 +34,7 @@
                     <h1>📥 Inbox WhatsApp</h1>
 
                     <div class="inbox-actions">
-                        <a href="{{ route('send.form') }}" class="btn btn-primary">📤 Ir a Enviar</a>
+                        <a href="{{ route('sent') }}" class="btn btn-primary">📤 Ir a Enviar</a>
 
                         <form method="POST" action="{{ route('inbox.sync') }}">
                             @csrf

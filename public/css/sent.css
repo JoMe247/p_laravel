@@ -1,0 +1,51 @@
+.sent-container {
+    padding: 20px;
+}
+
+.sent-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.sent-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.sent-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sent-table th, .sent-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+.sent-table th {
+    background: #f3f4f6;
+    text-align: left;
+}
+
+.message-body {
+    max-width: 480px;
+    white-space: pre-wrap;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #fff;
+}
+
+.badge-success { background-color: #16a34a; }
+.badge-warning { background-color: #facc15; color: #000; }
+.badge-error { background-color: #dc2626; }
+.badge-default { background-color: #6b7280; }

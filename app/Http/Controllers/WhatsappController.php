@@ -11,11 +11,11 @@ class WhatsappController extends Controller
 {
     public function __construct(private TwilioService $twilio) {}
 
-    
-    public function showSendForm()
+
+    /*public function showSendForm()
     {
         return view('send');
-    }
+    }*/
 
     // Acción: enviar mensaje
     public function sendMessage(Request $request)
@@ -58,8 +58,10 @@ class WhatsappController extends Controller
     // VISTA: Inbox (lee de tu BD local y permite sincronizar)
     public function showInbox(Request $request)
     {
-        // Paginar historial
-        $messages = Message::orderByDesc('date_sent')->orderByDesc('id')->paginate(20);
+        $messages = Message::where('direction', 'inbound')
+            ->orderByDesc('date_sent')
+            ->orderByDesc('id')
+            ->paginate(20);
 
         return view('inbox', compact('messages'));
     }
@@ -70,7 +72,7 @@ class WhatsappController extends Controller
         $client = $this->twilio->client();
         $toNumber = $this->twilio->fromNumber(); // Tus entrantes llegan a TU número
 
-       
+
         $after = now()->subDays(7);
 
         // Twilio PHP: read permite filtros; aquí pedimos muchos (p.ej. 500)
@@ -140,5 +142,15 @@ class WhatsappController extends Controller
         return view('send', compact('to'));
     }
 
-    
+    // VISTA: Enviados
+    public function showSent(Request $request)
+    {
+        // Solo mensajes outbound
+        $messages = Message::where('direction', 'outbound-api')
+            ->orderByDesc('date_sent')
+            ->orderByDesc('id')
+            ->paginate(20);
+
+        return view('sent', compact('messages'));
+    }
 }
