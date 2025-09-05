@@ -70,7 +70,7 @@ class WhatsappController extends Controller
         $client = $this->twilio->client();
         $toNumber = $this->twilio->fromNumber(); // Tus entrantes llegan a TU número
 
-        // Opcional: filtra por fecha para optimizar. Tomamos los últimos 7 días
+       
         $after = now()->subDays(7);
 
         // Twilio PHP: read permite filtros; aquí pedimos muchos (p.ej. 500)
@@ -139,4 +139,6 @@ class WhatsappController extends Controller
         $to = $request->query('to'); // capturar número del inbox
         return view('send', compact('to'));
     }
+
+    
 }
