@@ -34,8 +34,13 @@
                         <a href="{{ route('inbox') }}" class="btn btn-secondary">📥 Volver al Inbox</a>
                     </div>
 
+                    <!-- 🔍 Cuadro de búsqueda -->
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Buscar por fecha, número o mensaje...">
+                    </div>
+
                     <div class="overflow-x-auto">
-                        <table class="sent-table">
+                        <table class="sent-table" id="sentTable">
                             <thead>
                                 <tr>
                                     <th>Fecha</th>
@@ -79,5 +84,6 @@
 <script src="{{ asset('js/table.js') }}"></script>
 <script src="{{ asset('js/settings.js') }}"></script>
 <script src="{{ asset('js/operations.js') }}"></script>
+<script src="{{ asset('js/sent.js') }}"></script>
 </body>
 </html>

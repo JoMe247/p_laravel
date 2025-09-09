@@ -91,3 +91,72 @@
 .no-reply {
     color: #9ca3af;
 }
+
+/* Buscador */
+.inbox-search input.input-text {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  min-width: 200px;
+}
+
+.inbox-search input.input-date {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.inbox-search .btn {
+  padding: 8px 12px;
+}
+
+/* Textarea de respuesta */
+.reply-textarea {
+    width: 100%;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 40px;
+}
+
+/* Botón Responder (activo menos de 24h) */
+.reply-form .btn-primary {
+    background-color: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.reply-form .btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+/* Botón estilo WhatsApp */
+.btn-whatsapp {
+    background-color: #25D366;
+    color: #fff !important;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.btn-whatsapp:hover {
+    background-color: #20b954;
+    transform: scale(1.05);
+}
+
+.btn-whatsapp i {
+    font-size: 18px;
+}
