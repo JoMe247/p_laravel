@@ -67,8 +67,12 @@
             <i class='bx bx-file'></i> Documents 
         </div>
 
+        <div class="lateral-row" data="option" onclick="window.location='./sms'">
+            <i class='bx bx-envelope'></i> SMS 
+        </div>
+        
         <div class="lateral-row" data="option" onclick="window.location='./inbox'">
-            <i class='bx bx-envelope'></i> Messages 
+            <i class='bx bxl-whatsapp'></i> WhatsApp 
         </div>
         
         <div class="lateral-row" data="option">
