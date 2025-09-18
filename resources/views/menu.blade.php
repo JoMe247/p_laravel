@@ -72,6 +72,13 @@
         </div>
         
         <div class="lateral-row" data="option" onclick="window.location='./inbox'">
+<<<<<<< HEAD
+=======
+            <i class='bx bx-envelope'></i> SMS 
+        </div>
+
+        <div class="lateral-row" data="option" onclick="window.location='./inbox'">
+>>>>>>> 8b05fe28954013fd443dd07e8cdd4bc1ee084ee9
             <i class='bx bxl-whatsapp'></i> WhatsApp 
         </div>
         
