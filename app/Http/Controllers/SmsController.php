@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -36,11 +37,11 @@ class SmsController extends Controller
         // prepara lista con último mensaje por contacto
         $list = [];
         foreach ($contacts as $c) {
-            $last = SmsMessage::where(function($q) use ($c,$twilio){
+            $last = SmsMessage::where(function ($q) use ($c, $twilio) {
                 $q->where('from', $c)->where('to', $twilio);
-            })->orWhere(function($q) use ($c,$twilio){
+            })->orWhere(function ($q) use ($c, $twilio) {
                 $q->where('from', $twilio)->where('to', $c);
-            })->orderBy('date_sent','desc')->first();
+            })->orderBy('date_sent', 'desc')->first();
 
             $list[] = [
                 'contact' => $c,
@@ -50,7 +51,7 @@ class SmsController extends Controller
         }
 
         // order by last_at desc
-        usort($list, function($a,$b){
+        usort($list, function ($a, $b) {
             return strtotime($b['last_at']) <=> strtotime($a['last_at']);
         });
 
@@ -64,11 +65,11 @@ class SmsController extends Controller
     public function messages($contact)
     {
         $twilio = $this->twilioFrom;
-        $msgs = SmsMessage::where(function($q) use ($contact,$twilio){
+        $msgs = SmsMessage::where(function ($q) use ($contact, $twilio) {
             $q->where('from', $contact)->where('to', $twilio);
-        })->orWhere(function($q) use ($contact,$twilio){
+        })->orWhere(function ($q) use ($contact, $twilio) {
             $q->where('from', $twilio)->where('to', $contact);
-        })->orderBy('date_sent','asc')->get();
+        })->orderBy('date_sent', 'asc')->get();
 
         return response()->json($msgs);
     }
@@ -94,12 +95,12 @@ class SmsController extends Controller
             $exists = SmsMessage::where('sid', $sid)->exists();
             $mediaUrls = [];
             $numMedia = intval($m->numMedia ?? 0);
-            for ($i=0; $i < $numMedia; $i++) {
+            for ($i = 0; $i < $numMedia; $i++) {
                 $field = "mediaUrl{$i}";
                 // MessageInstance no expone MediaUrlN directamente en SDK; si lo necesitas, usa the REST endpoint or the webhook.
                 // Aquí intentamos acceder desde array form (si no existe, lo dejamos vacío)
-                if (isset($m->{"mediaUrl".$i})) {
-                    $mediaUrls[] = $m->{"mediaUrl".$i};
+                if (isset($m->{"mediaUrl" . $i})) {
+                    $mediaUrls[] = $m->{"mediaUrl" . $i};
                 }
             }
 
@@ -143,7 +144,7 @@ class SmsController extends Controller
 
         // guarda en DB
         SmsMessage::updateOrCreate(
-            ['sid'=>$message->sid],
+            ['sid' => $message->sid],
             [
                 'from' => $message->from ?? $this->twilioFrom,
                 'to' => $message->to ?? $to,
@@ -156,21 +157,41 @@ class SmsController extends Controller
             ]
         );
 
-        return response()->json(['ok'=>true,'sid'=>$message->sid]);
+        return response()->json(['ok' => true, 'sid' => $message->sid]);
     }
 
     // Eliminar mensajes
     public function deleteOne($contact)
-{
-    DB::table('sms')->where('contact', $contact)->delete();
-    return response()->json(['message' => 'Conversación eliminada']);
-}
+    {
+        $twilio = $this->twilioFrom;
 
-public function deleteMany(Request $request)
-{
-    $contacts = $request->contacts ?? [];
-    DB::table('sms')->whereIn('contact', $contacts)->delete();
-    return response()->json(['message' => 'Conversaciones eliminadas']);
-}
+        DB::table('sms')
+            ->where(function ($q) use ($contact, $twilio) {
+                $q->where('from', $contact)->where('to', $twilio);
+            })
+            ->orWhere(function ($q) use ($contact, $twilio) {
+                $q->where('from', $twilio)->where('to', $contact);
+            })
+            ->delete();
 
+        return response()->json(['message' => 'Conversación eliminada']);
+    }
+
+
+    public function deleteMany(Request $request)
+    {
+        $contacts = $request->contacts ?? [];
+        $twilio   = $this->twilioFrom;
+
+        DB::table('sms')
+            ->where(function ($q) use ($contacts, $twilio) {
+                $q->whereIn('from', $contacts)->where('to', $twilio);
+            })
+            ->orWhere(function ($q) use ($contacts, $twilio) {
+                $q->where('from', $twilio)->whereIn('to', $contacts);
+            })
+            ->delete();
+
+        return response()->json(['message' => 'Conversaciones eliminadas']);
+    }
 }
