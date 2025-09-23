@@ -57,9 +57,12 @@
                                             <div style="font-size:12px;color:#999; margin-right:10px;">
                                                 {{ $c['last_at'] ? \Carbon\Carbon::parse($c['last_at'])->diffForHumans() : '' }}
                                             </div>
+                                            <button class="btn btnDeleteOne danger" 
+                                                    style="margin-left:8px;" 
+                                                    title="Eliminar esta conversación">🗑️</button>
                                         </div>
                                     @empty
-                                        <div class="empty">No hay conversaciones. Presiona <strong>Sincronizar</strong>
+                                        <div class="empty">No hay conversaciones. Presiona <strong>Actualizar</strong>
                                             para leer mensajes desde Twilio.</div>
                                     @endforelse
                                 </div>
