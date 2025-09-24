@@ -36,10 +36,10 @@ class SmsController extends Controller
         $list = [];
         foreach ($contacts as $c) {
             $last = SmsMessage::where(function ($q) use ($c, $twilio) {
-                    $q->where('from', $c)->where('to', $twilio);
-                })->orWhere(function ($q) use ($c, $twilio) {
-                    $q->where('from', $twilio)->where('to', $c);
-                })
+                $q->where('from', $c)->where('to', $twilio);
+            })->orWhere(function ($q) use ($c, $twilio) {
+                $q->where('from', $twilio)->where('to', $c);
+            })
                 ->whereNull('deleted')
                 ->orderBy('date_sent', 'desc')
                 ->first();
@@ -68,10 +68,10 @@ class SmsController extends Controller
         $twilio = $this->twilioFrom;
 
         $msgs = SmsMessage::where(function ($q) use ($contact, $twilio) {
-                $q->where('from', $contact)->where('to', $twilio);
-            })->orWhere(function ($q) use ($contact, $twilio) {
-                $q->where('from', $twilio)->where('to', $contact);
-            })
+            $q->where('from', $contact)->where('to', $twilio);
+        })->orWhere(function ($q) use ($contact, $twilio) {
+            $q->where('from', $twilio)->where('to', $contact);
+        })
             ->whereNull('deleted')
             ->orderByRaw('COALESCE(date_sent, date_created, created_at)')
             ->get();
@@ -181,13 +181,18 @@ class SmsController extends Controller
     {
         $twilio = $this->twilioFrom;
 
-        SmsMessage::where(function ($q) use ($contact, $twilio) {
+        $updated = SmsMessage::where(function ($q) use ($contact, $twilio) {
             $q->where('from', $contact)->where('to', $twilio);
         })->orWhere(function ($q) use ($contact, $twilio) {
             $q->where('from', $twilio)->where('to', $contact);
         })->update(['deleted' => 'YES']);
 
-        return response()->json(['message' => 'Conversación eliminada']);
+        return response()->json([
+            'success' => true,
+            'deleted_count' => $updated,
+            'contact' => $contact,
+            'message' => 'Conversación eliminada correctamente'
+        ]);
     }
 
     // 🗑️ Eliminar múltiples conversaciones
@@ -196,12 +201,25 @@ class SmsController extends Controller
         $contacts = $request->contacts ?? [];
         $twilio = $this->twilioFrom;
 
-        SmsMessage::where(function ($q) use ($contacts, $twilio) {
+        if (empty($contacts)) {
+            return response()->json([
+                'success' => false,
+                'deleted_count' => 0,
+                'message' => 'No se seleccionaron conversaciones'
+            ], 400);
+        }
+
+        $updated = SmsMessage::where(function ($q) use ($contacts, $twilio) {
             $q->whereIn('from', $contacts)->where('to', $twilio);
         })->orWhere(function ($q) use ($contacts, $twilio) {
             $q->where('from', $twilio)->whereIn('to', $contacts);
         })->update(['deleted' => 'YES']);
 
-        return response()->json(['message' => 'Conversaciones eliminadas']);
+        return response()->json([
+            'success' => true,
+            'deleted_count' => $updated,
+            'contacts' => $contacts,
+            'message' => 'Conversaciones eliminadas correctamente'
+        ]);
     }
 }

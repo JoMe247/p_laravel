@@ -30,21 +30,23 @@
                 <div class="inbox-container mt-10">
                     <div class="inbox-card">
                         <h1>📥 SMS Inbox</h1>
+                        <div class="top-actions">
+                            <button id="btnSync" class="btn secondary">Actualizar</button>
+                            <input id="search" placeholder="Buscar..."
+                                style="margin-left:10px;padding:8px;border-radius:6px;border:1px solid #ddd" />
+                            <button style="margin-left: auto;" id="openNew" class="btn secondary">Nuevo
+                                mensaje</button>
+                        </div>
 
                         <div class="sms-app">
                             <!-- Lista de contactos -->
                             <div class="sms-list">
                                 <div class="top-actions">
-                                    <button id="btnSync" class="btn secondary">Actualizar</button>
-                                    <button id="btnDeleteSelected" class="btn danger" disabled>Eliminar
-                                        seleccionadas</button>
-                                    <label style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+                                    <label style="margin-right:auto;display:flex;align-items:center;gap:6px;">
                                         <input type="checkbox" id="checkAll"> Seleccionar todo
                                     </label>
-                                    <input id="search" placeholder="Buscar..."
-                                        style="margin-left:10px;padding:8px;border-radius:6px;border:1px solid #ddd" />
+                                    <button id="btnDeleteSelected" class="btn danger" disabled>Eliminar seleccionadas</button>
                                 </div>
-
                                 <div id="contacts">
                                     @forelse ($contacts as $c)
                                         <div class="sms-contact" data-contact="{{ $c['contact'] }}">
@@ -57,26 +59,22 @@
                                             <div style="font-size:12px;color:#999; margin-right:10px;">
                                                 {{ $c['last_at'] ? \Carbon\Carbon::parse($c['last_at'])->diffForHumans() : '' }}
                                             </div>
-                                            <button class="btn btnDeleteOne danger" 
-                                                    style="margin-left:8px;" 
-                                                    title="Eliminar esta conversación">🗑️</button>
                                         </div>
                                     @empty
-                                        <div class="empty">No hay conversaciones. Presiona <strong>Actualizar</strong>
-                                            para leer mensajes desde Twilio.</div>
+                                        <div class="empty">No hay conversaciones. Presiona
+                                            <strong>Actualizar</strong>
+                                            para leer mensajes desde Twilio.
+                                        </div>
                                     @endforelse
                                 </div>
                             </div>
 
                             <!-- Panel de chat -->
                             <div class="sms-chat">
-                                <div
-                                    style="padding:12px;border-bottom:1px solid #eee; display:flex;align-items:center; gap:12px;">
+                                <div style="padding:12px;border-bottom:1px solid #eee; display:flex;align-items:center; gap:12px;">
                                     <div id="currentContact" style="font-weight:700">Selecciona una conversación</div>
                                     <div style="margin-left:auto">
-                                        <button type="button" id="btnDeleteCurrent" class="btn danger"
-                                            style="margin-left:10px;">Eliminar conversación</button>
-                                        <button id="openNew" class="btn secondary">Nuevo mensaje</button>
+                                        <button type="button" id="btnDeleteCurrent" class="btn danger" style="margin-left:10px;">Eliminar conversación</button>
                                     </div>
                                 </div>
 
@@ -106,7 +104,6 @@
                                 deleteMany: "{{ route('sms.deleteMany') }}"
                             };
                         </script>
-
                         <script src="{{ asset('js/sms-inbox.js') }}"></script>
                     </div>
                 </div>
