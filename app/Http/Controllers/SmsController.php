@@ -21,7 +21,7 @@ class SmsController extends Controller
         $this->twilioFrom = config('services.twilio.from') ?: env('TWILIO_SMS_FROM');
     }
 
-    // Vista principal (inbox)
+    // 📩 Vista principal (inbox)
     public function index()
     {
         $twilio = $this->twilioFrom;
@@ -32,17 +32,17 @@ class SmsController extends Controller
 
         $contacts = array_values(array_unique(array_merge($froms, $tos)));
 
-        // lista con último mensaje por contacto
+        // Lista con último mensaje por contacto
         $list = [];
         foreach ($contacts as $c) {
             $last = SmsMessage::where(function ($q) use ($c, $twilio) {
-                        $q->where('from', $c)->where('to', $twilio);
-                    })->orWhere(function ($q) use ($c, $twilio) {
-                        $q->where('from', $twilio)->where('to', $c);
-                    })
-                    ->whereNull('deleted')
-                    ->orderBy('date_sent', 'desc')
-                    ->first();
+                    $q->where('from', $c)->where('to', $twilio);
+                })->orWhere(function ($q) use ($c, $twilio) {
+                    $q->where('from', $twilio)->where('to', $c);
+                })
+                ->whereNull('deleted')
+                ->orderBy('date_sent', 'desc')
+                ->first();
 
             if ($last) {
                 $list[] = [
@@ -53,7 +53,7 @@ class SmsController extends Controller
             }
         }
 
-        // order by last_at desc
+        // Ordenar por último mensaje (descendente)
         usort($list, fn($a, $b) => strtotime($b['last_at']) <=> strtotime($a['last_at']));
 
         return view('sms.inbox', [
@@ -62,20 +62,21 @@ class SmsController extends Controller
         ]);
     }
 
-    // Devuelve mensajes de una conversación
+    // 📜 Devuelve mensajes de una conversación
     public function messages($contact)
     {
         $twilio = $this->twilioFrom;
 
         $msgs = SmsMessage::where(function ($q) use ($contact, $twilio) {
-                    $q->where('from', $contact)->where('to', $twilio);
-                })->orWhere(function ($q) use ($contact, $twilio) {
-                    $q->where('from', $twilio)->where('to', $contact);
-                })
-                ->orderBy('date_sent', 'asc')
-                ->get();
+                $q->where('from', $contact)->where('to', $twilio);
+            })->orWhere(function ($q) use ($contact, $twilio) {
+                $q->where('from', $twilio)->where('to', $contact);
+            })
+            ->whereNull('deleted')
+            ->orderByRaw('COALESCE(date_sent, date_created, created_at)')
+            ->get();
 
-        // Mostrar solo mensajes no eliminados, pero siempre mostrar el más reciente si deleted=YES
+        // Filtrar mensajes eliminados
         $filtered = [];
         $latest = null;
         foreach ($msgs as $m) {
@@ -95,7 +96,7 @@ class SmsController extends Controller
         return response()->json($filtered);
     }
 
-    // Sincronización con Twilio
+    // 🔄 Sincronización con Twilio
     public function sync(Request $request)
     {
         $client = new Client($this->twilioSid, $this->twilioToken);
@@ -127,8 +128,8 @@ class SmsController extends Controller
                     'status' => $m->status ?? '',
                     'num_media' => $numMedia,
                     'media_urls' => $mediaUrls ?: null,
-                    'date_sent' => isset($m->dateSent) ? Carbon::parse($m->dateSent) : null,
-                    'date_created' => isset($m->dateCreated) ? Carbon::parse($m->dateCreated) : null,
+                    'date_sent' => isset($m->dateSent) ? Carbon::parse($m->dateSent)->setTimezone('America/Mexico_City') : now(),
+                    'date_created' => isset($m->dateCreated) ? Carbon::parse($m->dateCreated)->setTimezone('America/Mexico_City') : now(),
                     'deleted' => DB::raw('IF(deleted="YES", "YES", NULL)')
                 ]
             );
@@ -139,7 +140,7 @@ class SmsController extends Controller
         return response()->json(['synced' => $count]);
     }
 
-    // Enviar SMS
+    // 📤 Enviar SMS
     public function send(Request $request)
     {
         $request->validate([
@@ -166,7 +167,8 @@ class SmsController extends Controller
                 'status' => $message->status ?? null,
                 'num_media' => intval($message->numMedia ?? 0),
                 'media_urls' => [],
-                'date_sent' => isset($message->dateSent) ? Carbon::parse($message->dateSent) : now(),
+                'date_sent' => isset($message->dateSent) ? Carbon::parse($message->dateSent)->setTimezone('America/Mexico_City') : now(),
+                'date_created' => now(),
                 'deleted' => null
             ]
         );
@@ -174,7 +176,7 @@ class SmsController extends Controller
         return response()->json(['ok' => true, 'sid' => $message->sid]);
     }
 
-    // Eliminar conversación (solo marcar deleted=YES)
+    // 🗑️ Eliminar conversación (marcar deleted=YES)
     public function deleteOne($contact)
     {
         $twilio = $this->twilioFrom;
@@ -188,7 +190,7 @@ class SmsController extends Controller
         return response()->json(['message' => 'Conversación eliminada']);
     }
 
-    // Eliminar múltiples conversaciones
+    // 🗑️ Eliminar múltiples conversaciones
     public function deleteMany(Request $request)
     {
         $contacts = $request->contacts ?? [];
