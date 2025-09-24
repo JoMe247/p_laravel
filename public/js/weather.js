@@ -4,21 +4,28 @@ let divWeather = document.getElementById('weather');
 let weatherImg = document.getElementById('weather-img');
 let jeyson;
 
-const apiKey = '8f57cb746c4c1d4b48b7f35eba6f6230';
+const apiKey = 'ebe0133254fc50d11cc677bf6c90d773';
 
 // const URL_MAIN = 'https://api.openweathermap.org/data/2.5/weather';
 // const apiKey = 'ebe0133254fc50d11cc677bf6c90d773';
 
 // const UNITS = 'metric';
 
-navigator.geolocation.getCurrentPosition(loadUrl);
 
-function loadUrl(pos) {
-  let lat = pos.coords.latitude;
-  let lon = pos.coords.longitude;
 
-  getTemperatura(lat,lon);
+function loadUrl() {
+
+  navigator.geolocation.getCurrentPosition((position) => {
+    let lat = position.coords.latitude;
+    let lon = position.coords.longitude;
+
+    getTemperatura(lat,lon);
+
+  });
+
 };
+
+loadUrl();
 
 // async function fetchApi(urlWeather) {
 //   response = await fetch(urlWeather);
