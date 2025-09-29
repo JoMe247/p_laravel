@@ -49,15 +49,15 @@
                                 </div>
                                 <div id="contacts">
                                     @forelse ($contacts as $c)
-                                        <div class="sms-contact" data-contact="{{ $c['contact'] }}">
+                                        <div class="sms-contact" data-contact="{{ $c['contact'] }}" data-last-at="{{ $c['last_at'] }}">
                                             <input type="checkbox" class="contact-check" value="{{ $c['contact'] }}"
                                                 style="margin-right:8px;">
                                             <div class="meta" style="flex:1;">
                                                 <div style="font-weight:600">{{ $c['contact'] }}</div>
                                                 <div class="last">{{ Str::limit($c['last_body'], 60) }}</div>
                                             </div>
-                                            <div style="font-size:12px;color:#999; margin-right:10px;">
-                                                {{ $c['last_at'] ? \Carbon\Carbon::parse($c['last_at'])->diffForHumans() : '' }}
+                                            <div class="contact-date">
+                                                {{ $c['last_at'] ? \Carbon\Carbon::parse($c['last_at'])->format('d/m/Y H:i') : '' }}
                                             </div>
                                         </div>
                                     @empty
@@ -74,12 +74,25 @@
                                 <div style="padding:12px;border-bottom:1px solid #eee; display:flex;align-items:center; gap:12px;">
                                     <div id="currentContact" style="font-weight:700">Selecciona una conversación</div>
                                     <div style="margin-left:auto">
-                                        <button type="button" id="btnDeleteCurrent" class="btn danger" style="margin-left:10px;">Eliminar conversación</button>
+                                        <button id="btnDeleteConversation" class="btn btn-danger" disabled>Eliminar conversación</button>
                                     </div>
                                 </div>
 
                                 <div class="messages" id="messagesPane">
                                     <div class="empty">Selecciona un contacto a la izquierda para ver el chat</div>
+                                    {{-- 
+                                    Ejemplo para cuando cargues los mensajes:
+                                    @foreach($messages as $message)
+                                        <div class="message-wrapper {{ $message->from == $twilio ? 'sent' : 'received' }}">
+                                            <div class="message-box">
+                                                {{ $message->body }}
+                                            </div>
+                                            <span class="message-date">
+                                                {{ \Carbon\Carbon::parse($message->date_sent)->format('d/m/Y H:i') }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                    --}}
                                 </div>
 
                                 <div class="composer" id="composer" style="display:none;">
