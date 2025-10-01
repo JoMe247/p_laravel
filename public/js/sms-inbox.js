@@ -128,13 +128,136 @@ btnDeleteConversation?.addEventListener('click', async function () {
     }
 });
 
-// ------------------ Funciones de búsqueda ------------------
+// ------------------ BÚSQUEDA (REEMPLAZAR BLOQUE) ------------------
+let searchTimeout = null;
+
+function escapeHTML(s) {
+    return (s || '').toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+function escapeRegex(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+function highlightHTML(text, q) {
+    if (!q) return text;
+    const re = new RegExp('(' + escapeRegex(q) + ')', 'gi');
+    return text.replace(re, '<span class="highlighted">$1</span>');
+}
+
 el('#search')?.addEventListener('input', function (e) {
-    const q = e.target.value.toLowerCase();
-    els('.sms-contact').forEach(c => {
-        c.style.display = c.innerText.toLowerCase().includes(q) ? '' : 'none';
-    });
+    const q = e.target.value.trim();
+
+    // Debounce
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+        // If empty, restore contacts list and remove results panel
+        if (!q) {
+            els('.sms-contact').forEach(c => c.style.display = '');
+            const prev = el('#searchResults');
+            if (prev) prev.remove();
+            return;
+        }
+
+        // pick search route (fallback if window.routes.search undefined)
+        const route = (window.routes && window.routes.search) ? window.routes.search : '/sms/search';
+
+        try {
+            const res = await fetch(route + '?q=' + encodeURIComponent(q));
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            // Normalize response to an array of message-like items
+            let items = [];
+            if (Array.isArray(data)) {
+                items = data;
+            } else if (Array.isArray(data.conversations)) {
+                // supports a possible controller format returning conversations
+                items = data.conversations.map(c => ({
+                    contact: c.contact,
+                    body: c.first_match_excerpt ?? c.last_body ?? '',
+                    date: c.last_at ?? ''
+                }));
+            } else if (Array.isArray(data.results)) {
+                items = data.results;
+            } else if (data && typeof data === 'object') {
+                // Single-object fallback
+                items = [data];
+            }
+
+            // Remove previous panel
+            const old = el('#searchResults');
+            if (old) old.remove();
+
+            // Build results panel
+            const panel = document.createElement('div');
+            panel.id = 'searchResults';
+            panel.className = 'search-results';
+
+            if (!items.length) {
+                panel.innerHTML = '<div class="empty">Sin resultados</div>';
+            } else {
+                items.forEach(m => {
+                    const contact = m.contact ?? (m.from === twilioFrom ? m.to : m.from);
+                    const rawBody = m.body ?? m.last_body ?? '';
+                    const bodyPreview = escapeHTML(rawBody).slice(0, 300); // limit preview length
+                    const highlightedPreview = highlightHTML(bodyPreview, q);
+                    const when = m.date_sent ?? m.date_created ?? m.created_at ?? m.date ?? '';
+
+                    const item = document.createElement('div');
+                    item.className = 'search-item';
+                    item.innerHTML = `
+                        <div class="search-contact">${escapeHTML(contact)}</div>
+                        <div class="search-body">${highlightedPreview}</div>
+                        <div class="search-date">${escapeHTML(when ? new Date(when).toLocaleString() : '')}</div>
+                    `;
+
+                    item.addEventListener('click', async () => {
+                        // load conversation and then scroll/highlight first match
+                        await loadConversation(contact);
+
+                        // small delay to allow messages to be rendered
+                        setTimeout(() => {
+                            const msgs = els('#messagesPane .message-box');
+                            for (const msgEl of msgs) {
+                                if (msgEl.innerText.toLowerCase().includes(q.toLowerCase())) {
+                                    // highlight occurrences in message-box HTML
+                                    // operate on innerHTML (safe-ish since we escaped above), but escape q in regex
+                                    try {
+                                        const re = new RegExp('(' + escapeRegex(q) + ')', 'gi');
+                                        msgEl.innerHTML = msgEl.innerHTML.replace(re, '<span class="highlighted">$1</span>');
+                                    } catch (err) { /* ignore regex errors */ }
+                                    msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    // briefly add a class for bg highlight (if CSS provided)
+                                    msgEl.classList.add('highlight');
+                                    setTimeout(() => msgEl.classList.remove('highlight'), 3000);
+                                    break;
+                                }
+                            }
+                        }, 350);
+                    });
+
+                    panel.appendChild(item);
+                });
+            }
+
+            // Insert panel above contacts list
+            const contactsContainer = el('#contacts');
+            if (contactsContainer && contactsContainer.parentNode) {
+                contactsContainer.parentNode.insertBefore(panel, contactsContainer);
+            } else {
+                document.body.appendChild(panel);
+            }
+        } catch (err) {
+            console.error('Error en búsqueda:', err);
+        }
+    }, 300);
 });
+
+
 
 // ------------------ Sincronización ------------------
 el('#btnSync')?.addEventListener('click', async function () {

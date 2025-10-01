@@ -204,3 +204,59 @@
     margin-left: 10px;
     white-space: nowrap;
 }
+
+/* 🔍 Panel de resultados de búsqueda */
+.search-results {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    margin: 10px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 6px;
+}
+
+.search-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.search-item:hover {
+    background: #f7f7f7;
+}
+
+.search-contact {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 3px;
+}
+
+.search-body {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 3px;
+}
+
+.search-date {
+    font-size: 12px;
+    color: #999;
+}
+
+/* ✨ Resaltado cuando se hace scroll a coincidencia */
+.message-box.highlight {
+    background: #fffa9c !important;
+    transition: background 0.5s;
+}
+
+/* Resaltado de coincidencias en la búsqueda */
+.highlight {
+    background-color: yellow;
+    color: #000;
+    font-weight: bold;
+    padding: 0 2px;
+    border-radius: 3px;
+}
+

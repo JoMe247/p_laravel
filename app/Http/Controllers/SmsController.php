@@ -222,4 +222,30 @@ class SmsController extends Controller
             'message' => 'Conversaciones eliminadas correctamente'
         ]);
     }
+
+// 🔍 Búsqueda global en mensajes
+// ------------------ Método search para SmsController ------------------
+public function search(Request $request)
+{
+    $q = trim((string) $request->query('q', ''));
+
+    if ($q === '') {
+        return response()->json([]);
+    }
+
+    // Buscar mensajes no eliminados que contengan la palabra en body/from/to
+    $results = SmsMessage::whereNull('deleted')
+        ->where(function($qBuilder) use ($q) {
+            $qBuilder->where('body', 'LIKE', "%{$q}%")
+                     ->orWhere('from', 'LIKE', "%{$q}%")
+                     ->orWhere('to', 'LIKE', "%{$q}%");
+        })
+        ->orderByRaw('COALESCE(date_sent, date_created, created_at) DESC')
+        ->limit(200)
+        ->get(['id','from','to','body','date_sent','date_created','created_at']);
+
+    return response()->json($results);
+}
+
+
 }
