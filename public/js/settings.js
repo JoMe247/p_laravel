@@ -19,32 +19,6 @@ function closeSettings(){
 }
 
 
-//Blur Value Settings
-
-let blurEffect = 'blurEffect';
-let blurValue = "1";
-
-// Verificar si el valor está en blurEffect
-let blurConfig = localStorage.getItem(blurEffect);
-
-function saveLocalValue(blurEffect, blurValue) {
-    localStorage.setItem(blurEffect, blurValue);
-}
-
-saveLocalValue(blurEffect, blurValue);
-
-if (!blurConfig) {
-
-    
-}else{
-     setTimeout(function(){
-    
-        document.getElementById("home-image-content").style.backdropFilter = `blur(${localStorage.getItem(blurEffect)}px)`;
-        
-    }, 100);
-
-}
-
 let imageN;
 
 //Sleecionar Imagen Side y Guardar sideImage en localstorage
@@ -144,10 +118,14 @@ if (localStorage.getItem("sideBlur")) {
     let blurValue = localStorage.getItem("sideBlur");
     $("#lateral-blur").css("backdrop-filter", `blur(${blurValue}rem)`);
     document.querySelector("#frac").value = blurValue;
-}else{
-     
-//   $("#lateral-blur").css("backdrop-filter", `blur(${}rem)`);
+}
 
+
+if (localStorage.getItem("homeBlur")) {
+
+    let homeBlur = localStorage.getItem("homeBlur");
+    $("#home-image-content").css("backdrop-filter", `blur(${homeBlur}rem)`);
+    document.querySelector("#frac2").value = homeBlur;
 }
 
 //Slider Blur Script
@@ -177,4 +155,29 @@ if (localStorage.getItem("sideBlur")) {
     
     // Init
     update(slider.value);
-  })();
+})();
+
+(function () {
+    const slider2 = document.getElementById('frac2');
+    const outDec2 = document.getElementById('val-dec2');
+    const outPct2 = document.getElementById('val-pct2');
+
+    function update(v) {
+      // Normaliza a 2 decimales
+      const dec2 = Number(v).toFixed(2);
+      const pct2 = Math.round(Number(v) * 100);
+    //   outDec.textContent = dec;
+      outPct2.textContent = pct2 + '%';
+    //   console.log('slider value:', Number(dec)); // <- aquí el console.log en cada movimiento
+      localStorage.setItem("homeBlur", dec2);
+      $("#home-image-content").css("backdrop-filter", `blur(${dec2}rem)`);
+    }
+
+    // Dispara en tiempo real mientras se arrastra
+    slider2.addEventListener('input', (e) => update(e.target.value));
+    // (Opcional) también al soltar
+    slider2.addEventListener('change', (e) => update(e.target.value));
+    
+    // Init
+    update(slider2.value);
+})();

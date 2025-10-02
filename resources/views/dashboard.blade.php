@@ -739,12 +739,22 @@
                 </div>
 
                 <div id="sideBlur-slider">
-                    <div class="slider-wrap">
-                        <label for="frac" style="display:block;margin-bottom:8px;">Home Image Blur</label>
+                    <div class="slider-wrap" id="side-image-slider">
+                        <label for="frac" style="display:block;margin-bottom:8px;">Side Image Blur</label>
                         <div class="row">
                         <input id="frac" type="range" min="0" max="1" step="0.01" value="0.00" />
                         <div class="value">
                             <span id="val-pct">0%</span>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="slider-wrap" id="home-image-slider">
+                        <label for="frac2" style="display:block;margin-bottom:8px;">Home Image Blur</label>
+                        <div class="row">
+                        <input id="frac2" type="range" min="0" max="1" step="0.01" value="0.00" />
+                        <div class="value">
+                            <span id="val-pct2">0%</span>
                         </div>
                         </div>
                     </div>
