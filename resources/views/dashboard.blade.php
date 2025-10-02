@@ -100,7 +100,7 @@
 
                 <div id="lower-table-clients">
 
-                    <h3>Recent Clients</h3>
+                    <h3 class="sub-title">Recent Clients</h3>
 
                     <div id="table-menu">
                         <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
@@ -458,7 +458,7 @@
                 <div id="lower-table-container">
 
                     <div id="recent-1">
-                        <h3>Recent Documents</h3>
+                        <h3 class="sub-title">Recent Documents</h3>
 
                         <div id="recent-documents">
 
@@ -557,7 +557,7 @@
 
                     <div id="recent-2">
 
-                        <h3>Weekly Income</h3>
+                        <h3 class="sub-title">Weekly Income</h3>
 
                         <div class="graph-container">
                             <div class="graph-levels-container">
@@ -684,7 +684,7 @@
             <div class="color-pick" color="yellow"></div>
             <div class="color-pick" color="green"></div>
             <div class="color-pick" color="aquamarine"></div>
-            <div class="color-pick" color="blue"></div>
+            <div class="color-pick" color="dodgerblue"></div>
             <div class="color-pick" color="royal"></div>
             <div class="color-pick" color="purple"></div>
             <div class="color-pick" color="pink"></div>
@@ -696,33 +696,37 @@
         <div class="settings-sub-title">Side Panel Settings</div>
         
         <div id="background-side-settings">
-            <p style="width:100%;">
-                <input type="radio" id="background1" name="background-settings" checked>
-                <label for="background1">Background Color</label>
-            </p>
-
-            <div class='settings-sub-title'>Select Color</div>
-
-            <div class="color-pick-container">
-                <div class="color-pick" color="red"></div>
-                <div class="color-pick" color="reddish"></div>
-                <div class="color-pick" color="orange"></div>
-                <div class="color-pick" color="yellow"></div>
-                <div class="color-pick" color="green"></div>
-                <div class="color-pick" color="aquamarine"></div>
-                <div class="color-pick" color="blue"></div>
-                <div class="color-pick" color="royal"></div>
-                <div class="color-pick" color="purple"></div>
-                <div class="color-pick" color="pink"></div>
-                <div class="color-pick" color="gray"></div>
-                <div class="color-pick" color="black"></div>
-                <div class="color-pick" color="white"></div>
+            <div id="background-color-option-container">
+                <p style="width:100%;">
+                    <input type="radio" id="background1" name="background-settings" checked>
+                    <label for="background1">Background Color</label>
+                </p>
+    
+                <div class='settings-sub-title'>Select Color</div>
+    
+                <div class="color-pick-container">
+                    <div class="color-pick" color="red"></div>
+                    <div class="color-pick" color="reddish"></div>
+                    <div class="color-pick" color="orange"></div>
+                    <div class="color-pick" color="yellow"></div>
+                    <div class="color-pick" color="green"></div>
+                    <div class="color-pick" color="aquamarine"></div>
+                    <div class="color-pick" color="dodgerblue"></div>
+                    <div class="color-pick" color="royal"></div>
+                    <div class="color-pick" color="purple"></div>
+                    <div class="color-pick" color="pink"></div>
+                    <div class="color-pick" color="gray"></div>
+                    <div class="color-pick" color="black"></div>
+                    <div class="color-pick" color="white"></div>
+                </div>
             </div>
 
-            <p>
-                <input type="radio" id="background2" name="background-settings">
-                <label for="background2">Background Image</label>
-            </p>
+            <div id="background-image-option-container">
+                <p>
+                    <input type="radio" id="background2" name="background-settings">
+                    <label for="background2">Background Image</label>
+                </p>
+            </div>
         </div>
 
     </div>

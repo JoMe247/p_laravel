@@ -550,6 +550,25 @@ body{
     margin-right: 20px;
 }
 
+.sub-title{
+    width: 100% !important;
+    text-align: center;
+    width: max-content;
+    padding-left: 30px;
+    padding-top: 10px;
+    /* margin-left: 30px; */
+    /* margin-bottom: 10px; */
+    /* margin-top: 10px; */
+    /* position: absolute; */
+    /* margin-top: -8px; */
+    color: #444;
+    font-family: var(--montserrat);
+    font-weight: bold;
+    /* border-left: 1px solid #ddd; */
+
+    margin-right: 20px;
+}
+
 #lower-table-container{
     width: 40%;
     height: 510px;
