@@ -104,9 +104,159 @@
 }
 .btn.secondary { background: #e6eefc; color: #0b74ff; }
 
+#btnDeleteSelected:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* --- Estados vacíos --- */
 .empty {
     padding: 28px;
     text-align: center;
     color: #888;
 }
+
+#messagesPane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+
+.msg {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Contenedor del mensaje */
+.message-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+    max-width: 70%;
+}
+
+/* Recuadro del mensaje */
+.message-box {
+    padding: 10px 14px;
+    border-radius: 8px;
+    word-wrap: break-word;
+}
+
+/* Recibidos a la izquierda */
+.message-wrapper.received {
+    align-items: flex-start;
+}
+.message-wrapper.received .message-box {
+    background: #fff;
+    border: 1px solid #ddd;
+}
+
+/* Enviados a la derecha */
+.message-wrapper.sent {
+    align-items: flex-end;
+    margin-left: auto;
+}
+.message-wrapper.sent .message-box {
+    background: #dcf8c6;
+}
+
+/* Fecha en el recuadro parte inferior */
+.message-date {
+    font-size: 12px;
+    color: #777;
+    margin-top: 4px;
+    position: relative;
+    left: 0;
+}
+
+/* ===== Panel izquierdo: fecha del último mensaje ===== */
+.sms-contact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.sms-contact .meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sms-contact .meta .last {
+    font-size: 13px;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sms-contact .contact-date {
+    font-size: 12px;
+    color: #999;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+/* 🔍 Panel de resultados de búsqueda */
+.search-results {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    margin: 10px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 6px;
+}
+
+.search-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.search-item:hover {
+    background: #f7f7f7;
+}
+
+.search-contact {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 3px;
+}
+
+.search-body {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 3px;
+}
+
+.search-date {
+    font-size: 12px;
+    color: #999;
+}
+
+/* ✨ Resaltado cuando se hace scroll a coincidencia */
+.message-box.highlight {
+    background: #fffa9c !important;
+    transition: background 0.5s;
+}
+
+/* Resaltado de coincidencias en la búsqueda */
+.highlight {
+    background-color: yellow;
+    color: #000;
+    font-weight: bold;
+    padding: 0 2px;
+    border-radius: 3px;
+}
+

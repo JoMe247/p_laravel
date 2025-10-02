@@ -48,3 +48,7 @@ Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
 // Eliminar mensajes sms
 Route::delete('/sms/delete/{contact}', [SmsController::class, 'deleteOne'])->name('sms.deleteOne');
 Route::post('/sms/delete-multiple', [SmsController::class, 'deleteMany'])->name('sms.deleteMany');
+
+Route::get('/sms/search', [App\Http\Controllers\SmsController::class, 'search'])->name('sms.search');
+
+
