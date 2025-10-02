@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dashboard</title>
     <link rel="icon" href="img/favicon.png">
 
     <!-- Styles -->
@@ -21,9 +21,6 @@
 
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <!-- Tailwind CSS -->
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 
 </head>
 <body>
@@ -649,86 +646,113 @@
     </div>
 
     <div id="settings-menu">
-        <i class='bx bx-x' id="close-settings" onclick="closeSettings();"></i>
-        <h2>Settings</h2>
-
-        <div class="settings-sub-title">Language</div>
-
-        <div id="language-settings">
-            <p>
-                <input type="radio" id="test1" name="radio-group" checked>
-                <label for="test1">English</label>
-            </p>
-            <p>
-                <input type="radio" id="test2" name="radio-group">
-                <label for="test2">Spanish</label>
-            </p>
-        </div>
-        
-        <div class='settings-sub-title'>Theme</div>
-        
-        <div id="dark-mode">
-            <span class="switch">
-                <input id="switch-rounded" type="checkbox" />
-                <label for="switch-rounded"></label>
-            </span>
-            <p>Dark Mode</p>
-        </div>
-
-        <div class='settings-sub-title'>Action Color</div>
-
-        <div class="color-pick-container">
-            <div class="color-pick" color="red"></div>
-            <div class="color-pick" color="reddish"></div>
-            <div class="color-pick" color="orange"></div>
-            <div class="color-pick" color="yellow"></div>
-            <div class="color-pick" color="green"></div>
-            <div class="color-pick" color="aquamarine"></div>
-            <div class="color-pick" color="dodgerblue"></div>
-            <div class="color-pick" color="royal"></div>
-            <div class="color-pick" color="purple"></div>
-            <div class="color-pick" color="pink"></div>
-            <div class="color-pick" color="gray"></div>
-            <div class="color-pick" color="black"></div>
-            <div class="color-pick" color="white"></div>
-        </div>
-
-        <div class="settings-sub-title">Side Panel Settings</div>
-        
-        <div id="background-side-settings">
-            <div id="background-color-option-container">
-                <p style="width:100%;">
-                    <input type="radio" id="background1" name="background-settings" checked>
-                    <label for="background1">Background Color</label>
-                </p>
+        <div id="table-border">
+            <i class='bx bx-x' id="close-settings" onclick="closeSettings();"></i>
+            <h2>Settings</h2>
     
-                <div class='settings-sub-title'>Select Color</div>
+            <div class="settings-sub-title">Language</div>
     
-                <div class="color-pick-container">
-                    <div class="color-pick" color="red"></div>
-                    <div class="color-pick" color="reddish"></div>
-                    <div class="color-pick" color="orange"></div>
-                    <div class="color-pick" color="yellow"></div>
-                    <div class="color-pick" color="green"></div>
-                    <div class="color-pick" color="aquamarine"></div>
-                    <div class="color-pick" color="dodgerblue"></div>
-                    <div class="color-pick" color="royal"></div>
-                    <div class="color-pick" color="purple"></div>
-                    <div class="color-pick" color="pink"></div>
-                    <div class="color-pick" color="gray"></div>
-                    <div class="color-pick" color="black"></div>
-                    <div class="color-pick" color="white"></div>
-                </div>
-            </div>
-
-            <div id="background-image-option-container">
+            <div id="language-settings">
                 <p>
-                    <input type="radio" id="background2" name="background-settings">
-                    <label for="background2">Background Image</label>
+                    <input type="radio" id="test1" name="radio-group" checked>
+                    <label for="test1">English</label>
+                </p>
+                <p>
+                    <input type="radio" id="test2" name="radio-group">
+                    <label for="test2">Spanish</label>
                 </p>
             </div>
-        </div>
+            
+            <!-- <div class='settings-sub-title'>Theme</div>
+            
+            <div id="dark-mode">
+                <span class="switch">
+                    <input id="switch-rounded" type="checkbox" />
+                    <label for="switch-rounded"></label>
+                </span>
+                <p>Dark Mode</p>
+            </div> -->
+    
+            <div class='settings-sub-title'>Action Color</div>
+    
+            <div class="color-pick-container">
+                <div class="color-pick" color="red"></div>
+                <div class="color-pick" color="reddish"></div>
+                <div class="color-pick" color="orange"></div>
+                <div class="color-pick" color="yellow"></div>
+                <div class="color-pick" color="green"></div>
+                <div class="color-pick" color="aquamarine"></div>
+                <div class="color-pick" color="dodgerblue"></div>
+                <div class="color-pick" color="royal"></div>
+                <div class="color-pick" color="purple"></div>
+                <div class="color-pick" color="pink"></div>
+                <div class="color-pick" color="gray"></div>
+                <div class="color-pick" color="black"></div>
+                <div class="color-pick" color="white"></div>
+            </div>
+    
+            <div class="settings-sub-title" style="margin-top:50px;">Side Panel Background</div>
+            
+            <div id="background-side-settings">
+                <div id="background-color-option-container">
 
+                    <div class='settings-sub-title'>Select Color</div>
+        
+                    <div class="color-pick-container">
+                        <div class="color-pick" color="default" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="red" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="reddish" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="orange" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="yellow" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="green" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="aquamarine" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="dodgerblue" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="royal" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="purple" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="pink" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="gray" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="black" onclick="selectColor(this)"></div>
+                        <div class="color-pick" color="white" onclick="selectColor(this)"></div>
+                    </div>
+                </div>
+    
+                <div id="background-image-option-container">
+                    
+                    <div id="images-container">
+                        <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
+                        <div class='settings-sub-title'>Select Image</div>
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg" alt="" ></label>
+                        <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(4)"><img src="img/menu/thumbs/4.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(5)"><img src="img/menu/thumbs/5.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(6)"><img src="img/menu/thumbs/6.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(7)"><img src="img/menu/thumbs/7.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(8)"><img src="img/menu/thumbs/8.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(9)"><img src="img/menu/thumbs/9.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(10)"><img src="img/menu/thumbs/10.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(11)"><img src="img/menu/thumbs/11.jpg" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(12)"><img src="img/menu/thumbs/12.jpg" alt=""></label>
+                        
+                      
+                    </div>
+                </div>
+
+                <div id="sideBlur-slider">
+                    <div class="slider-wrap">
+                        <label for="frac" style="display:block;margin-bottom:8px;">Home Image Blur</label>
+                        <div class="row">
+                        <input id="frac" type="range" min="0" max="1" step="0.01" value="0.00" />
+                        <div class="value">
+                            <span id="val-pct">0%</span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+    
+        </div>
     </div>
 
     <div id="dim-screen"></div>
@@ -742,6 +766,6 @@
     <script src="js/table.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/operations.js"></script>
-    
+
 </body>
 </html>

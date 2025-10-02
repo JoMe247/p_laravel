@@ -17,7 +17,7 @@
 <section id="lateral">
 
     <!-- Logo Row -->
-    <div class="lateral-row" style="backdrop-filter: blur(4px);">
+    <div class="lateral-row">
         <img id="main-logo" src="img/logo-short-white.png" alt="DoClient Logo">
     </div>
 
