@@ -15,7 +15,9 @@
 
 <?php
 
-// require 'db_connection.php';
+//require 'db_connection.php';
+
+
 
 // Check if user session is already active
 if (!isset($_SESSION['user_id'])) {
