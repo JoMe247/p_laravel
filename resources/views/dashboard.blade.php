@@ -58,36 +58,43 @@
 
                 <div class="quick-item">
                     <p>Total Customers</p>
+                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bxs-user-badge'></i><text>1234</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Commercial Insurance</p>
+                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bx-buildings'></i><text>12</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Personal Insurance</p>
+                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bx-building-house'></i><text>38</text>
                 </div>
 
                 <div class="quick-item">
                     <p>To Do List</p>
+                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bx-list-check'></i><text>8</text>
                 </div>
                     
                 <div class="quick-item">
                     <p>Today Messages</p>
+                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bx-mail-send'></i><text>12</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Announcements</p>
+                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bxs-megaphone'></i><text>5</text>
                 </div>
 
                 <div class="quick-item" data="last-quick-item">
                     <p>Comments</p>
+                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bx-message-rounded-dots'></i><text style="font-size: 1.6em">20 New</text>
                 </div>
 
@@ -675,20 +682,21 @@
     
             <div class='settings-sub-title'>Action Color</div>
     
-            <div class="color-pick-container">
-                <div class="color-pick" color="red"></div>
-                <div class="color-pick" color="reddish"></div>
-                <div class="color-pick" color="orange"></div>
-                <div class="color-pick" color="yellow"></div>
-                <div class="color-pick" color="green"></div>
-                <div class="color-pick" color="aquamarine"></div>
-                <div class="color-pick" color="dodgerblue"></div>
-                <div class="color-pick" color="royal"></div>
-                <div class="color-pick" color="purple"></div>
-                <div class="color-pick" color="pink"></div>
-                <div class="color-pick" color="gray"></div>
-                <div class="color-pick" color="black"></div>
-                <div class="color-pick" color="white"></div>
+            <div class="color-pick-container" id="action-color-container">
+                <div class="color-pick" color="default" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="red" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="reddish" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="orange" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="yellow" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="green" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="aquamarine" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="blue" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="royal" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="purple" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="pink" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="gray" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="black" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="white" onclick="selectActionColor(this)"></div>
             </div>
     
             <div class="settings-sub-title" style="margin-top:50px;">Side Panel Background</div>
