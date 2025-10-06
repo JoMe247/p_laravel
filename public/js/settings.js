@@ -69,115 +69,192 @@ function selectColor(element){
     }
 }
 
-//Función que Carga la config guardada en localStorage
-if(localStorage.getItem("sideImage")){
-    let imageN = localStorage.getItem("sideImage");
+function selectActionColor(element){
 
-    document.getElementById("dash-options").style.backgroundColor = "unset";
+    $(".color-pick").removeAttr("color-action");
+    element.setAttribute("color-action", "selected");
+    
+    let colorAction = element.getAttribute("color");
 
-    $(".thumb-options").eq(imageN-1).attr("image", "selected");
+    localStorage.setItem("actionColor", colorAction);
+    // console.log(color);
 
-    $(".lateral-row").eq(0).css("background-color", "unset");
-    $("#lateral-blur").css("backdrop-filter", `blur(4px)`);
+    $(".quick-item").attr("color", colorAction);
+    $(".graph-bar-text").css("color", "#111");
 
-    document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(img/menu/${imageN}.jpg)`;
-   
-}else{
+    if(colorAction == "white"){
+        $(".quick-item text").css("color","#333");
+        $(".quick-item i").css("color","#333");
+        $(".graph-bar-height").attr("color", "black");
+    }
+    else if(colorAction == "gray"){
+        $(".quick-item text").css("color","#111");
+        $(".quick-item i").css("color","#fff");
+        $(".graph-bar-height").attr("color", colorAction);
+    }else{
+        $(".quick-item text").css("color","#fff");
+        $(".quick-item i").css("color","#fff");
+        $(".graph-bar-height").attr("color", colorAction); 
+    }
+}
 
-    if(localStorage.getItem("sideColor")){
 
-        let colorN = localStorage.getItem("sideColor");
-        $(".lateral-row").eq(0).attr("color", colorN);
-        document.getElementById("dash-options").setAttribute("color", colorN);
+try {
 
-        if(colorN == "white"){
-            document.getElementById("main-logo").setAttribute("src", "img/logo-black.png")
+    //Función que Carga la config guardada en localStorage
+    if(localStorage.getItem("sideImage")){
+        let imageN = localStorage.getItem("sideImage");
+
+        document.getElementById("dash-options").style.backgroundColor = "unset";
+
+        $(".thumb-options").eq(imageN-1).attr("image", "selected");
+
+        $(".lateral-row").eq(0).css("background-color", "unset");
+        $("#lateral-blur").css("backdrop-filter", `blur(4px)`);
+
+        document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(img/menu/${imageN}.jpg)`;
+    
+    }else{
+
+        if(localStorage.getItem("sideColor")){
+
+            let colorN = localStorage.getItem("sideColor");
+            $(".lateral-row").eq(0).attr("color", colorN);
+            document.getElementById("dash-options").setAttribute("color", colorN);
+
+            if(colorN == "white"){
+                document.getElementById("main-logo").setAttribute("src", "img/logo-black.png")
+            }else{
+                document.getElementById("main-logo").setAttribute("src", "img/logo-short-white.png")
+            }
+
+            document.querySelectorAll('#background-color-option-container > .color-pick-container .color-pick')
+            .forEach(el => {
+                if (el.getAttribute('color') === colorN) {
+                el.setAttribute('color-tile', 'selected');
+                }
+            });
+
         }else{
-            document.getElementById("main-logo").setAttribute("src", "img/logo-short-white.png")
+            console.log("no existe");
+            localStorage.setItem("sideColor", "default");
+            $(".lateral-row").eq(0).attr("color", "default");
+            document.getElementById("dash-options").setAttribute("color", "default");
+            document.querySelectorAll('#background-color-option-container > .color-pick-container .color-pick')[0].setAttribute("color-tile", "selected")
+        }
+        $("#lateral-blur").css("backdrop-filter", `blur(4px)`);
+    }
+
+    if(localStorage.getItem("actionColor")){
+
+        let colorA = localStorage.getItem("actionColor");
+       
+        $(".quick-item").attr("color", colorA);
+        
+        $(".graph-bar-text").css("color", "#111");
+
+        if(colorA == "white"){
+            $(".quick-item text").css("color","#333");
+            $(".quick-item i").css("color","#333");
+            $(".graph-bar-height").attr("color", "black");
+        }
+        else if(colorA == "gray"){
+            $(".quick-item text").css("color","#111");
+            $(".quick-item i").css("color","#fff");
+            $(".graph-bar-height").attr("color", colorA);
+        }else{
+            $(".quick-item text").css("color","#fff");
+            $(".quick-item i").css("color","#fff");
+            $(".graph-bar-height").attr("color", colorA);
         }
 
-        document.querySelectorAll('#background-color-option-container > .color-pick-container .color-pick')
-        .forEach(el => {
-            if (el.getAttribute('color') === colorN) {
-            el.setAttribute('color-tile', 'selected');
-            }
+        document.querySelectorAll('#action-color-container .color-pick')
+            .forEach(el => {
+                if (el.getAttribute('color') === colorA) {
+                  el.setAttribute('color-action', 'selected');
+                }
         });
+
+        
 
     }else{
         console.log("no existe");
-        localStorage.setItem("sideColor", "default");
-        $(".lateral-row").eq(0).attr("color", "default");
+        localStorage.setItem("actionColor", "default");
+        $(".color-pick").eq(0).attr("color", "default");
+        $(".color-pick").eq(0).attr("color-action", "selected");
         document.getElementById("dash-options").setAttribute("color", "default");
         document.querySelectorAll('#background-color-option-container > .color-pick-container .color-pick')[0].setAttribute("color-tile", "selected")
     }
-    $("#lateral-blur").css("backdrop-filter", `blur(4px)`);
-}
 
-if (localStorage.getItem("sideBlur")) {
+    if (localStorage.getItem("sideBlur")) {
 
-    let blurValue = localStorage.getItem("sideBlur");
-    $("#lateral-blur").css("backdrop-filter", `blur(${blurValue}rem)`);
-    document.querySelector("#frac").value = blurValue;
-}
-
-
-if (localStorage.getItem("homeBlur")) {
-
-    let homeBlur = localStorage.getItem("homeBlur");
-    $("#home-image-content").css("backdrop-filter", `blur(${homeBlur}rem)`);
-    document.querySelector("#frac2").value = homeBlur;
-}
-
-//Slider Blur Script
-
-(function () {
-    const slider = document.getElementById('frac');
-    const outDec = document.getElementById('val-dec');
-    const outPct = document.getElementById('val-pct');
-
-    function update(v) {
-      // Normaliza a 2 decimales
-      const dec = Number(v).toFixed(2);
-      const pct = Math.round(Number(v) * 100);
-    //   outDec.textContent = dec;
-      outPct.textContent = pct + '%';
-    //   console.log('slider value:', Number(dec)); // <- aquí el console.log en cada movimiento
-      localStorage.setItem("sideBlur", dec);
-      $("#lateral-blur").css("backdrop-filter", `blur(${dec}rem)`);
+        let blurValue = localStorage.getItem("sideBlur");
+        $("#lateral-blur").css("backdrop-filter", `blur(${blurValue}rem)`);
+        document.querySelector("#frac").value = blurValue;
     }
 
-    // Dispara en tiempo real mientras se arrastra
-    slider.addEventListener('input', (e) => update(e.target.value));
-    // (Opcional) también al soltar
-    slider.addEventListener('change', (e) => update(e.target.value));
 
+    if (localStorage.getItem("homeBlur")) {
 
-    
-    // Init
-    update(slider.value);
-})();
-
-(function () {
-    const slider2 = document.getElementById('frac2');
-    const outDec2 = document.getElementById('val-dec2');
-    const outPct2 = document.getElementById('val-pct2');
-
-    function update(v) {
-      // Normaliza a 2 decimales
-      const dec2 = Number(v).toFixed(2);
-      const pct2 = Math.round(Number(v) * 100);
-    //   outDec.textContent = dec;
-      outPct2.textContent = pct2 + '%';
-    //   console.log('slider value:', Number(dec)); // <- aquí el console.log en cada movimiento
-      localStorage.setItem("homeBlur", dec2);
-      $("#home-image-content").css("backdrop-filter", `blur(${dec2}rem)`);
+        let homeBlur = localStorage.getItem("homeBlur");
+        $("#home-image-content").css("backdrop-filter", `blur(${homeBlur}rem)`);
+        document.querySelector("#frac2").value = homeBlur;
     }
 
-    // Dispara en tiempo real mientras se arrastra
-    slider2.addEventListener('input', (e) => update(e.target.value));
-    // (Opcional) también al soltar
-    slider2.addEventListener('change', (e) => update(e.target.value));
+    //Slider Blur Script
+
+    (function () {
+        const slider = document.getElementById('frac');
+        const outDec = document.getElementById('val-dec');
+        const outPct = document.getElementById('val-pct');
+
+        function update(v) {
+        // Normaliza a 2 decimales
+        const dec = Number(v).toFixed(2);
+        const pct = Math.round(Number(v) * 100);
+        //   outDec.textContent = dec;
+        outPct.textContent = pct + '%';
+        //   console.log('slider value:', Number(dec)); // <- aquí el console.log en cada movimiento
+        localStorage.setItem("sideBlur", dec);
+        $("#lateral-blur").css("backdrop-filter", `blur(${dec}rem)`);
+        }
+
+        // Dispara en tiempo real mientras se arrastra
+        slider.addEventListener('input', (e) => update(e.target.value));
+        // (Opcional) también al soltar
+        slider.addEventListener('change', (e) => update(e.target.value));
+
+
+        
+        // Init
+        update(slider.value);
+    })();
+
+    (function () {
+        const slider2 = document.getElementById('frac2');
+        const outDec2 = document.getElementById('val-dec2');
+        const outPct2 = document.getElementById('val-pct2');
+
+        function update(v) {
+        // Normaliza a 2 decimales
+        const dec2 = Number(v).toFixed(2);
+        const pct2 = Math.round(Number(v) * 100);
+        //   outDec.textContent = dec;
+        outPct2.textContent = pct2 + '%';
+        //   console.log('slider value:', Number(dec)); // <- aquí el console.log en cada movimiento
+        localStorage.setItem("homeBlur", dec2);
+        $("#home-image-content").css("backdrop-filter", `blur(${dec2}rem)`);
+        }
+
+        // Dispara en tiempo real mientras se arrastra
+        slider2.addEventListener('input', (e) => update(e.target.value));
+        // (Opcional) también al soltar
+        slider2.addEventListener('change', (e) => update(e.target.value));
+        
+        // Init
+        update(slider2.value);
+    })();
     
-    // Init
-    update(slider2.value);
-})();
+} catch (error) {
+    
+}
