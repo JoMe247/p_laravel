@@ -326,6 +326,8 @@ async function loadConversation(contact) {
     }
 }
 
+
+
 // ------------------ Enviar mensaje ------------------
 el('#sendForm')?.addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -410,3 +412,66 @@ function updateContactsPanel() {
 
 // Ejecutar después de cargar la lista de contactos
 updateContactsPanel();
+
+/* --- NUEVO PANEL PARA ENVIAR MENSAJES --- */
+document.addEventListener('DOMContentLoaded', function () {
+    const newMsgBtn = document.getElementById('newMessageBtn');
+    const newMsgPanel = document.getElementById('newMessagePanel');
+    const newMsgClose = document.getElementById('closeNewMessage');
+    const newMsgForm = document.getElementById('newMessageForm');
+
+    if (!newMsgBtn || !newMsgPanel || !newMsgForm) return;
+
+    // Mostrar panel
+    newMsgBtn.addEventListener('click', () => {
+        newMsgPanel.classList.add('show');
+        document.getElementById('newTo').focus();
+    });
+
+    // Cerrar panel
+    newMsgClose.addEventListener('click', () => {
+        newMsgPanel.classList.remove('show');
+        newMsgForm.reset();
+    });
+
+    // Enviar mensaje
+    newMsgForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const to = document.getElementById('newTo').value.trim();
+        const body = document.getElementById('newBody').value.trim();
+
+        if (!to || !body) {
+            alert('Por favor, completa ambos campos.');
+            return;
+        }
+
+        try {
+            const response = await fetch(window.routes.send, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ to, body }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert('Mensaje enviado con éxito ✅');
+                newMsgPanel.classList.remove('show');
+                newMsgForm.reset();
+
+                // (Opcional) Si deseas refrescar el panel actual:
+                if (typeof loadConversations === 'function') loadConversations();
+
+            } else {
+                const err = await response.text();
+                alert('Error al enviar el mensaje ❌: ' + err);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ocurrió un error al enviar el mensaje.');
+        }
+    });
+});
+

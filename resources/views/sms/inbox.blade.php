@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>SMS Inbox</title>
     <link rel="icon" href="img/favicon.png">
 
@@ -38,7 +39,7 @@
                             <button id="btnSync" class="btn secondary">Actualizar</button>
                             <input id="search" placeholder="Buscar..."
                                 style="margin-left:10px;padding:8px;border-radius:6px;border:1px solid #ddd" />
-                            <button style="margin-left: auto;" id="openNew" class="btn secondary">Nuevo
+                            <button style="margin-left: auto;" id="newMessageBtn" class="btn secondary">Nuevo
                                 mensaje</button>
                         </div>
 
@@ -128,6 +129,9 @@
                         <script src="{{ asset('js/sms-inbox.js') }}"></script>
                         <script src="{{ asset('js/settings.js') }}"></script>
                         <script src="{{ asset('js/menu.js') }}"></script>
+                        
+
+
                     </div>
                 </div>
             </div>
@@ -268,6 +272,26 @@
     </div>
 
     <div id="dim-screen"></div>
-</body>
 
+<!-- Overlay oscuro -->
+<div id="overlay"></div>
+
+<!-- Panel lateral para nuevo mensaje -->
+<div id="newMessagePanel">
+    <button id="closeNewMessage" title="Cerrar">&times;</button>
+    <h3>✉️ Nuevo mensaje</h3>
+
+    <form id="newMessageForm">
+        @csrf
+        <label for="newTo">Enviar a (número con código de país):</label>
+        <input type="text" id="newTo" name="to" placeholder="+521234567890" required>
+
+        <label for="newBody">Mensaje:</label>
+        <textarea id="newBody" name="body" placeholder="Escribe tu mensaje..." required></textarea>
+
+        <button type="submit">Enviar</button>
+    </form>
+</div>
+
+</body>
 </html>
