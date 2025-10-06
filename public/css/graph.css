@@ -46,7 +46,7 @@
 
 .graph-bar-height{
     width: 20px;
-    background-color: #e90c56;
+    filter: brightness(1.2) contrast(1.27) hue-rotate(0deg);
 
     position: relative;
 
@@ -88,7 +88,8 @@
 }
 
 .graph-bar-height:hover{
-    background-color: #ab1044;
+    /* background-color: inherit; */
+    filter: unset;
     /* opacity: 0.8; */
     cursor: pointer;
       

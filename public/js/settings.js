@@ -85,11 +85,12 @@ function selectActionColor(element){
     if(colorAction == "white"){
         $(".quick-item text").css("color","#333");
         $(".quick-item i").css("color","#333");
-         $(".graph-bar-height").attr("color", "black");
+        $(".graph-bar-height").attr("color", "black");
     }
     else if(colorAction == "gray"){
         $(".quick-item text").css("color","#111");
         $(".quick-item i").css("color","#fff");
+        $(".graph-bar-height").attr("color", colorAction);
     }else{
         $(".quick-item text").css("color","#fff");
         $(".quick-item i").css("color","#fff");
@@ -149,19 +150,22 @@ try {
         let colorA = localStorage.getItem("actionColor");
        
         $(".quick-item").attr("color", colorA);
-        $(".graph-bar-height").attr("color", colorA);
+        
         $(".graph-bar-text").css("color", "#111");
 
         if(colorA == "white"){
             $(".quick-item text").css("color","#333");
             $(".quick-item i").css("color","#333");
+            $(".graph-bar-height").attr("color", "black");
         }
         else if(colorA == "gray"){
             $(".quick-item text").css("color","#111");
             $(".quick-item i").css("color","#fff");
+            $(".graph-bar-height").attr("color", colorA);
         }else{
             $(".quick-item text").css("color","#fff");
             $(".quick-item i").css("color","#fff");
+            $(".graph-bar-height").attr("color", colorA);
         }
 
         document.querySelectorAll('#action-color-container .color-pick')
