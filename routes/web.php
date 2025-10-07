@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomersController;
 use Illuminate\Support\Facades\Route; //por defecto
 use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\AuthController;
+use Twilio\TwiML\Voice\WhatsApp;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,7 +46,7 @@ Route::get('/sent', [WhatsappController::class, 'showSent'])->name('sent');
 
 // Rutas SMS
 
-Route::get('/sms', [SmsController::class, 'index'])->name('sms.index');
+//Route::get('/sms', [SmsController::class, 'index'])->name('sms.index');
 Route::get('/sms/messages/{contact}', [SmsController::class, 'messages'])->name('sms.messages');
 Route::post('/sms/sync', [SmsController::class, 'sync'])->name('sms.sync'); // botón para sincronizar
 Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
@@ -60,3 +61,12 @@ Route::get('/sms/search', [App\Http\Controllers\SmsController::class, 'search'])
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
+
+Route::get('/sms', [SmsController::class, 'index'], function () {
+    return view('sms');
+})->middleware('auth')->name('sms');
+
+Route::get('/inbox', [WhatsappController::class, 'inbox'], function () {
+    return view('inbox');
+})->middleware('auth')->name('inbox');
+
