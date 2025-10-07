@@ -22,10 +22,10 @@ class SmsController extends Controller
     }
 
     // 📩 Vista principal (inbox)
-    public function index()
+    public function index(Request $request)
     {
         $twilio = $this->twilioFrom;
-
+        $list = $this->buildInboxList($twilio);
         // Números de contactos con mensajes no eliminados
         $froms = SmsMessage::where('from', '!=', $twilio)->whereNull('deleted')->pluck('from')->toArray();
         $tos   = SmsMessage::where('to', '!=', $twilio)->whereNull('deleted')->pluck('to')->toArray();
@@ -55,6 +55,14 @@ class SmsController extends Controller
 
         // Ordenar por último mensaje (descendente)
         usort($list, fn($a, $b) => strtotime($b['last_at']) <=> strtotime($a['last_at']));
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'contacts' => $list,
+                'twilio'   => $twilio,
+            ]);
+        }
+
 
         return view('sms.inbox', [
             'contacts' => $list,
@@ -135,9 +143,17 @@ class SmsController extends Controller
             );
 
             $count++;
-        }
 
-        return response()->json(['synced' => $count]);
+           
+        }
+         // Reusa la misma lista que ve index()
+        $list = $this->buildInboxList($twilio);
+
+        return response()->json([
+            'synced'   => $count,
+            'contacts' => $list,
+        ]);
+        // return response()->json(['synced' => $count]);
     }
 
     // 📤 Enviar SMS
@@ -246,6 +262,41 @@ public function search(Request $request)
 
     return response()->json($results);
 }
+
+
+// Dentro del mismo controlador
+private function buildInboxList(string $twilio): array
+{
+    $froms = SmsMessage::where('from', '!=', $twilio)->whereNull('deleted')->pluck('from')->toArray();
+    $tos   = SmsMessage::where('to', '!=', $twilio)->whereNull('deleted')->pluck('to')->toArray();
+    $contacts = array_values(array_unique(array_merge($froms, $tos)));
+
+    $list = [];
+    foreach ($contacts as $c) {
+        $last = SmsMessage::where(function ($q) use ($c, $twilio) {
+                $q->where('from', $c)->where('to', $twilio);
+            })->orWhere(function ($q) use ($c, $twilio) {
+                $q->where('from', $twilio)->where('to', $c);
+            })
+            ->whereNull('deleted')
+            ->orderBy('date_sent', 'desc')
+            ->first();
+
+        if ($last) {
+            $list[] = [
+                'contact'   => $c,
+                'last_body' => $last->body,
+                'last_at'   => $last->date_sent,
+            ];
+        }
+    }
+
+    // Ordena por último mensaje
+    usort($list, fn($a, $b) => strtotime($b['last_at']) <=> strtotime($a['last_at']));
+
+    return $list;
+}
+
 
 
 }
