@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomersController;
 use Illuminate\Support\Facades\Route;//por defecto
 use App\Http\Controllers\WhatsappController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,6 +14,7 @@ Route::get('/', function () {
 
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
@@ -51,4 +53,7 @@ Route::post('/sms/delete-multiple', [SmsController::class, 'deleteMany'])->name(
 
 Route::get('/sms/search', [App\Http\Controllers\SmsController::class, 'search'])->name('sms.search');
 
-
+// Ejemplo de ruta protegida
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware('auth')->name('dashboard');
