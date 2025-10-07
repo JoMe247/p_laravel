@@ -25,6 +25,9 @@
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+    <!-- Alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body>
@@ -32,26 +35,24 @@
         @include('menu')
         <section id="dash">
             <div id="lower-table-clients" type="fullscreen">
-                <div class="inbox-container mt-10">
+                <!-- <div class="inbox-container mt-10"> -->
                     <div class="inbox-card">
-                        <h1>📥 SMS Inbox</h1>
+                        <!-- <h1>📥 SMS Inbox</h1> -->
                         <div class="top-actions">
-                            <button id="btnSync" class="btn secondary">Actualizar</button>
+                            <button id="btnSync" class="btn secondary"><i class='bx bx-sync'></i></button>
                             <input id="search" placeholder="Buscar..."
                                 style="margin-left:10px;padding:8px;border-radius:6px;border:1px solid #ddd" />
-                            <button style="margin-left: auto;" id="newMessageBtn" class="btn secondary">Nuevo
-                                mensaje</button>
+                            <button style="margin-left: auto;" id="newMessageBtn" class="btn secondary"><i class='bx bxs-comment-add'></i> &nbsp;NUEVO MENSAJE</button>
                         </div>
 
                         <div class="sms-app">
                             <!-- Lista de contactos -->
                             <div class="sms-list">
-                                <div class="top-actions">
-                                    <label style="margin-right:auto;display:flex;align-items:center;gap:6px;">
-                                        <input type="checkbox" id="checkAll"> Seleccionar todo
+                                <div class="top-actions" style="background-color:#ebeef5;">
+                                    <label style="margin-left:12px;margin-right:10px;display:flex;align-items:center;gap:6px;">
+                                        <input type="checkbox" id="checkAll">
                                     </label>
-                                    <button id="btnDeleteSelected" class="btn danger" disabled>Eliminar
-                                        seleccionadas</button>
+                                    <button id="btnDeleteSelected" class="btn danger" disabled><i class='bx bxs-trash' ></i></button>
                                 </div>
                                 <div id="contacts">
                                     @forelse ($contacts as $c)
@@ -60,7 +61,7 @@
                                             <input type="checkbox" class="contact-check" value="{{ $c['contact'] }}"
                                                 style="margin-right:8px;">
                                             <div class="meta" style="flex:1;">
-                                                <div style="font-weight:600">{{ $c['contact'] }}</div>
+                                                <div style="font-weight:600;text-align:left;">{{ preg_replace('/^1?(\d{3})(\d{3})(\d{4})$/', '+1 ($1) $2-$3', preg_replace('/\D+/', '', $c['contact'])) ?: $c['contact'] }}</div>
                                                 <div class="last">{{ Str::limit($c['last_body'], 60) }}</div>
                                             </div>
                                             <div class="contact-date">
@@ -79,16 +80,15 @@
                             <!-- Panel de chat -->
                             <div class="sms-chat">
                                 <div
-                                    style="padding:12px;border-bottom:1px solid #eee; display:flex;align-items:center; gap:12px;">
-                                    <div id="currentContact" style="font-weight:700">Selecciona una conversación</div>
+                                    style="height:33px;padding:12px;border-bottom:1px solid #eee; display:flex;align-items:center; gap:12px;">
+                                    <div id="currentContact" style="font-weight:400"></div>
                                     <div style="margin-left:auto">
-                                        <button id="btnDeleteConversation" class="btn btn-danger" disabled>Eliminar
-                                            conversación</button>
+                                        <button id="btnDeleteConversation" class="btn btn-danger" disabled><i class='bx bx-trash-alt' ></i> &nbsp;Delete this chat</button>
                                     </div>
                                 </div>
 
                                 <div class="messages" id="messagesPane">
-                                    <div class="empty">Selecciona un contacto a la izquierda para ver el chat</div>
+                                    <div class="empty">Selecciona un contacto a la izquierda para ver su chat</div>
                                     {{-- 
                                     Ejemplo para cuando cargues los mensajes:
                                     @foreach ($messages as $message)
@@ -109,7 +109,7 @@
                                         @csrf
                                         <input type="hidden" name="to" id="toInput" />
                                         <textarea name="body" id="bodyInput" placeholder="Escribe un mensaje..."></textarea>
-                                        <button type="submit" class="btn">Enviar</button>
+                                        <button type="submit" class="btn"><i class='bx bxs-send'></i></button>
                                     </form>
                                 </div>
                             </div>
@@ -133,7 +133,7 @@
 
 
                     </div>
-                </div>
+                <!-- </div> -->
             </div>
         </section>
     </div>
@@ -279,18 +279,42 @@
 <!-- Panel lateral para nuevo mensaje -->
 <div id="newMessagePanel">
     <button id="closeNewMessage" title="Cerrar">&times;</button>
-    <h3>✉️ Nuevo mensaje</h3>
+    <h3>NEW MESSAGE</h3>
 
     <form id="newMessageForm">
         @csrf
-        <label for="newTo">Enviar a (número con código de país):</label>
-        <input type="text" id="newTo" name="to" placeholder="+521234567890" required>
+        <label for="newTo">To (+1):</label>
+        <input type="text" id="newTo" name="to" placeholder="+12144696789" required>
 
-        <label for="newBody">Mensaje:</label>
-        <textarea id="newBody" name="body" placeholder="Escribe tu mensaje..." required></textarea>
+        <label for="newBody">Message:</label>
+        <textarea id="newBody" name="body" placeholder="Type a message..." required></textarea>
 
-        <button type="submit">Enviar</button>
+        <button type="submit">SEND</button>
     </form>
+</div>
+
+<!-- UI Elements -->
+<div class="window-confirm">
+    <div class="confirm-window-container">
+        <div class="confirm-window-content">
+            <div class="confirm-window-header">
+            <!-- <div class="confirm-window-icon"></div> -->
+            <!-- <div class="confirm-window-close-btn">
+                <button>
+                    <i class='bx bx-x'></i>
+                </button>
+            </div> -->
+            </div>
+            <div class="confirm-window-text-content">
+                <div class="confirm-window-title"></div>
+                <div class="confirm-window-description"></div>
+            </div>
+        </div>
+        <div class="confirm-window-buttons">
+            <button class="confirm-window-confirm-btn">Confirm</button>
+            <button class="confirm-window-cancel-btn" onclick="confirmBoxOff()">Cancel</button>
+        </div>
+    </div>
 </div>
 
 </body>

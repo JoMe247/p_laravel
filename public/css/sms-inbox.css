@@ -1,10 +1,10 @@
 /* --- Layout general --- */
 .sms-app {
     display: flex;
-    height: calc(100vh - 80px);
-    gap: 16px;
-    padding: 16px;
-    box-sizing: border-box;
+    height: 92%;
+    /* gap: 16px; */
+    /* padding: 16px; */
+    /* box-sizing: border-box; */
 }
 .sms-header {
     padding: 10px 18px;
@@ -19,25 +19,56 @@
     background: #fff;
     box-shadow: 0 2px 6px rgba(0,0,0,.06);
     overflow: auto;
+    height: 100%;
+    border-right: 5px solid transparent;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    padding-right: 5px;
 }
+
+.sms-list::-webkit-scrollbar {
+    width: 8px;
+    padding-right: 10px;
+    margin-right: 10px;
+}
+
+.sms-list::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgba(200, 200, 200, 0.5);
+    backdrop-filter: blur(4px);
+    /* -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5); */
+}
+
+.sms-list::-webkit-scrollbar-track {
+    /* -webkit-box-shadow: 0 0 6px rgb(0, 0, 0); */
+    border-radius: 10px;
+}
+
 .sms-contact {
-    padding: 12px;
+    /* padding: 12px; */
     border-bottom: 1px solid #f1f1f1;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
 }
-.sms-contact:hover { background: #f9fafb; }
+.sms-contact:hover { 
+    background: #f4f4f5; 
+}
+.sms-contact[selected=true]{
+    background: #e6e8e9;
+}
 .sms-contact .meta { flex: 1; }
 .sms-contact .last { font-size: 13px; color: #777; }
 .top-actions {
     display: flex;
     gap: 8px;
-    padding: 12px;
+    /* padding: 12px; */
     align-items: center;
     border-bottom: 1px solid #eee;
     background: #fff;
+    padding-bottom: 10px;
+    padding-top: 10px;
 }
 
 /* --- Panel de chat --- */
@@ -49,12 +80,13 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    height: 100%;
 }
 .messages {
     flex: 1;
     padding: 18px;
     overflow: auto;
-    background: linear-gradient(#fafafa, #fff);
+    /* background: linear-gradient(#fafafa, #fff); */
 }
 .msg {
     max-width: 70%;
@@ -85,12 +117,13 @@
 }
 .composer textarea {
     width: 100%;
-    min-height: 48px;
-    max-height: 140px;
+    height: 40px;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 8px;
     resize: none;
+    font-family: var(--montserrat);
+    outline: none;
 }
 
 /* --- Botones --- */
@@ -101,12 +134,97 @@
     border-radius: 8px;
     border: none;
     cursor: pointer;
+    /* font-size: 2em; */
 }
-.btn.secondary { background: #e6eefc; color: #0b74ff; }
+
+#btnDeleteConversation{
+    display: none;
+    align-items: center;
+    background-color: #f1f1f1;
+    border: 1px solid #d9d9d9;
+    color: #333;
+}
+
+#btnDeleteConversation:hover{
+    background-color: #e1e1e1;
+}
+
+#sendForm .btn {
+    width: 62px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    background: var(--red1);
+    color: #fff;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 2em;
+}
+
+#sendForm .btn:hover{
+    background: var(--red2);
+}
+
+.btn.secondary { 
+    background: #e6eefc; 
+    color: #fff;
+    background-color: var(--red1);
+    font-family: var(--montserrat);
+    font-weight: bold;
+}
+
+#btnSync{
+    font-size: 1.5em; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    padding: 8px;
+    margin-left: 12px;
+}
+
+#btnSync:hover{
+    background-color: var(--red2);  
+}
+
+#newMessageBtn{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    font-size: 1.1em;
+    transition: 0.3s;
+}
+
+#newMessageBtn:hover{
+    background-color: var(--red2);
+}
+
+#newMessageBtn i{
+    padding-top: 4px;
+    transition: 0.3s;
+}
+
+#newMessageBtn:hover i{
+    /* transform: rotate(180deg); */
+    transition: 0.3s;
+}
 
 #btnDeleteSelected:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+#contacts{
+    font-family: var(--montserrat);
+    margin-bottom: 60px;
+}
+
+#currentContact{
+    font-family: var(--montserrat);
+    
 }
 
 /* --- Estados vacíos --- */
@@ -114,6 +232,7 @@
     padding: 28px;
     text-align: center;
     color: #888;
+    font-family: var(--montserrat);
 }
 
 #messagesPane {
@@ -138,10 +257,13 @@
     flex-direction: column;
     margin: 10px 0;
     max-width: 70%;
+    font-family: var(--montserrat);
+    text-align: left;
 }
 
 /* Recuadro del mensaje */
 .message-box {
+    font-size: 1.15em;
     padding: 10px 14px;
     border-radius: 8px;
     word-wrap: break-word;
@@ -152,8 +274,8 @@
     align-items: flex-start;
 }
 .message-wrapper.received .message-box {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: #f1f3f4;
+    /* border: 1px solid #ddd; */
 }
 
 /* Enviados a la derecha */
@@ -162,13 +284,14 @@
     margin-left: auto;
 }
 .message-wrapper.sent .message-box {
-    background: #dcf8c6;
+    background: var(--red1);
+    color: #fff;
 }
 
 /* Fecha en el recuadro parte inferior */
 .message-date {
     font-size: 12px;
-    color: #777;
+    color: #b9b9b9;
     margin-top: 4px;
     position: relative;
     left: 0;
@@ -180,6 +303,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px;
+    height: 45px;
     border-bottom: 1px solid #eee;
 }
 
@@ -196,6 +320,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: left;
 }
 
 .sms-contact .contact-date {
@@ -265,8 +390,9 @@
 #newMessagePanel {
     position: fixed;
     top: 0;
-    right: -420px;
+    right: 0;
     width: 400px;
+    transform: translateX(120%);
     height: 100%;
     background-color: #ffffff;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
@@ -275,10 +401,13 @@
     display: flex;
     flex-direction: column;
     padding: 20px;
+    padding-right: 50px;
+    transition: 0.3s;
+    font-family: var(--montserrat);
 }
 
 #newMessagePanel.show {
-    right: 0;
+   transform: translateX(0%);
 }
 
 #newMessagePanel h3 {
@@ -289,6 +418,7 @@
 
 #newMessagePanel label {
     font-weight: 600;
+    margin-bottom: 10px;
     color: #555;
 }
 
@@ -298,8 +428,11 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 8px 10px;
+    margin-top: 10px;
     margin-bottom: 15px;
     font-size: 0.95rem;
+    font-family: var(--montserrat);
+    outline: none;
 }
 
 #newMessagePanel textarea {
@@ -308,7 +441,7 @@
 }
 
 #newMessagePanel button {
-    background-color: #007bff;
+    background-color: var(--red1);
     color: #fff;
     border: none;
     padding: 10px 12px;
@@ -318,8 +451,19 @@
     transition: background-color 0.2s ease;
 }
 
+#closeNewMessage{
+    padding: 10px !important;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    font-size: 1.8em !important;
+}
+
 #newMessagePanel button:hover {
-    background-color: #0056b3;
+    background-color: var(--red2);
 }
 
 #closeNewMessage {
@@ -349,4 +493,41 @@
 #overlay.active {
     opacity: 1;
     pointer-events: all;
+}
+
+/* Animación Sync */
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(-360deg);
+    -moz-transform: rotate(-360deg);
+    -webkit-transform: rotate(-360deg);
+    -o-transform: rotate(-360deg);
+    transform: rotate(-360deg);
+  }
+}
+[syncAnimation=true] i {
+  -webkit-animation: rotating 1s linear infinite;
+  -moz-animation: rotating 1s linear infinite;
+  -ms-animation: rotating 1s linear infinite;
+  -o-animation: rotating 1s linear infinite;
+  animation: rotating 1s linear infinite;
 }
