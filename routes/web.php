@@ -32,7 +32,7 @@ Route::get('/', function () {
 //Route::get('/send', [WhatsappController::class, 'showSendForm'])->name('send.form');
 Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('send.action');
 
-Route::get('/inbox', [WhatsappController::class, 'showInbox'])->name('inbox');
+//Route::get('/inbox', [WhatsappController::class, 'showInbox'])->name('inbox');
 
 // Botón/manual: sincroniza desde Twilio y guarda en tu BD
 Route::post('/inbox/sync', [WhatsappController::class, 'syncFromTwilio'])->name('inbox.sync');
@@ -66,7 +66,7 @@ Route::get('/sms', [SmsController::class, 'index'], function () {
     return view('sms');
 })->middleware('auth')->name('sms');
 
-Route::get('/inbox', [WhatsappController::class, 'inbox'], function () {
+Route::get('/inbox', [WhatsappController::class, 'showInbox'], function () {
     return view('inbox');
 })->middleware('auth')->name('inbox');
 
