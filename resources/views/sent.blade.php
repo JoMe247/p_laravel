@@ -18,72 +18,78 @@
     <link rel="stylesheet" href="{{ asset('css/sent.css') }}">
 
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- Jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 
 <body>
-<div id="main-container">
-    @include('menu')
+    <div id="main-container">
+        @include('menu')
+        <section id="dash">
+            <div id="lower-table-clients" type="fullscreen">
+                <div class="sent-container mt-10">
+                    <div class="sent-card">
+                        <h1>📨 Mensajes Enviados</h1>
 
-    <section id="dash">
-        <div id="lower-table-clients" type="fullscreen">
-            <div class="sent-container mt-10">
-                <div class="sent-card">
-                    <h1>📨 Mensajes Enviados</h1>
+                        <div class="sent-actions">
+                            <a href="{{ route('whatsapp.inbox') }}" class="btn btn-secondary">📥 Volver al Inbox</a>
+                        </div>
 
-                    <div class="sent-actions">
-                        <a href="{{ route('whatsapp.inbox') }}" class="btn btn-secondary">📥 Volver al Inbox</a>
-                    </div>
+                        <!-- 🔍 Cuadro de búsqueda -->
+                        <div class="search-bar">
+                            <input type="text" id="searchInput" placeholder="Buscar por fecha, número o mensaje...">
+                        </div>
 
-                    <!-- 🔍 Cuadro de búsqueda -->
-                    <div class="search-bar">
-                        <input type="text" id="searchInput" placeholder="Buscar por fecha, número o mensaje...">
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="sent-table" id="sentTable">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Para</th>
-                                    <th>Estado</th>
-                                    <th>Mensaje</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($messages as $m)
+                        <div class="overflow-x-auto">
+                            <table class="sent-table" id="sentTable">
+                                <thead>
                                     <tr>
-                                        <td>{{ $m->date_sent?->format('Y-m-d H:i') }}</td>
-                                        <td>{{ $m->to }}</td>
-                                        <td>
-                                            <span class="badge
+                                        <th>Fecha</th>
+                                        <th>Para</th>
+                                        <th>Estado</th>
+                                        <th>Mensaje</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($messages as $m)
+                                        <tr>
+                                            <td>{{ $m->date_sent?->format('Y-m-d H:i') }}</td>
+                                            <td>{{ $m->to }}</td>
+                                            <td>
+                                                <span
+                                                    class="badge
                                                 @if ($m->status_label === 'Entregado') badge-success
                                                 @elseif($m->status_label === 'En cola') badge-warning
                                                 @elseif($m->status_label === 'No entregado' || $m->status_label === 'Fallido') badge-error
                                                 @else badge-default @endif">
-                                                {{ $m->status_label }}
-                                            </span>
-                                        </td>
-                                        <td class="message-body">{{ $m->body }}</td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="4" class="text-center">No hay mensajes enviados</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                                                    {{ $m->status_label }}
+                                                </span>
+                                            </td>
+                                            <td class="message-body">{{ $m->body }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center">No hay mensajes enviados</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <div class="mt-4">{{ $messages->links() }}</div>
+                        <div class="mt-4">{{ $messages->links() }}</div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
 
-<script src="{{ asset('js/dropdown.js') }}"></script>
-<script src="{{ asset('js/menu.js') }}"></script>
-<script src="{{ asset('js/table.js') }}"></script>
-<script src="{{ asset('js/settings.js') }}"></script>
-<script src="{{ asset('js/operations.js') }}"></script>
-<script src="{{ asset('js/sent.js') }}"></script>
+    <script src="{{ asset('js/dropdown.js') }}"></script>
+    <script src="{{ asset('js/menu.js') }}"></script>
+    <script src="{{ asset('js/table.js') }}"></script>
+    <script src="{{ asset('js/settings.js') }}"></script>
+    <script src="{{ asset('js/operations.js') }}"></script>
+    <script src="{{ asset('js/sent.js') }}"></script>
 </body>
+
 </html>

@@ -36,60 +36,66 @@
         <section id="dash">
             <div id="lower-table-clients" type="fullscreen">
                 <!-- <div class="inbox-container mt-10"> -->
-                    <div class="inbox-card">
-                        <!-- <h1>📥 SMS Inbox</h1> -->
-                        <div class="top-actions">
-                            <button id="btnSync" class="btn secondary"><i class='bx bx-sync'></i></button>
-                            <input id="search" placeholder="Buscar..."
-                                style="margin-left:10px;padding:8px;border-radius:6px;border:1px solid #ddd" />
-                            <button style="margin-left: auto;" id="newMessageBtn" class="btn secondary"><i class='bx bxs-comment-add'></i> &nbsp;NUEVO MENSAJE</button>
+                <div class="inbox-card">
+                    <!-- <h1>📥 SMS Inbox</h1> -->
+                    <div class="top-actions">
+                        <button id="btnSync" class="btn secondary"><i class='bx bx-sync'></i></button>
+                        <input id="search" placeholder="Buscar..."
+                            style="margin-left:10px;padding:8px;border-radius:6px;border:1px solid #ddd" />
+                        <button style="margin-left: auto;" id="newMessageBtn" class="btn secondary"><i
+                                class='bx bxs-comment-add'></i> &nbsp;NUEVO MENSAJE</button>
+                    </div>
+
+                    <div class="sms-app">
+                        <!-- Lista de contactos -->
+                        <div class="sms-list">
+                            <div class="top-actions" style="background-color:#ebeef5;">
+                                <label
+                                    style="margin-left:12px;margin-right:10px;display:flex;align-items:center;gap:6px;">
+                                    <input type="checkbox" id="checkAll">
+                                </label>
+                                <button id="btnDeleteSelected" class="btn danger" disabled><i
+                                        class='bx bxs-trash'></i></button>
+                            </div>
+                            <div id="contacts">
+                                @forelse ($contacts as $c)
+                                    <div class="sms-contact" data-contact="{{ $c['contact'] }}"
+                                        data-last-at="{{ $c['last_at'] }}">
+                                        <input type="checkbox" class="contact-check" value="{{ $c['contact'] }}"
+                                            style="margin-right:8px;">
+                                        <div class="meta" style="flex:1;">
+                                            <div style="font-weight:600;text-align:left;">
+                                                {{ preg_replace('/^1?(\d{3})(\d{3})(\d{4})$/', '+1 ($1) $2-$3', preg_replace('/\D+/', '', $c['contact'])) ?: $c['contact'] }}
+                                            </div>
+                                            <div class="last">{{ Str::limit($c['last_body'], 60) }}</div>
+                                        </div>
+                                        <div class="contact-date">
+                                            {{ $c['last_at'] ? \Carbon\Carbon::parse($c['last_at'])->format('d/m/Y H:i') : '' }}
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="empty">No hay conversaciones. Presiona
+                                        <strong>Actualizar</strong>
+                                        para leer mensajes desde Twilio.
+                                    </div>
+                                @endforelse
+                            </div>
                         </div>
 
-                        <div class="sms-app">
-                            <!-- Lista de contactos -->
-                            <div class="sms-list">
-                                <div class="top-actions" style="background-color:#ebeef5;">
-                                    <label style="margin-left:12px;margin-right:10px;display:flex;align-items:center;gap:6px;">
-                                        <input type="checkbox" id="checkAll">
-                                    </label>
-                                    <button id="btnDeleteSelected" class="btn danger" disabled><i class='bx bxs-trash' ></i></button>
-                                </div>
-                                <div id="contacts">
-                                    @forelse ($contacts as $c)
-                                        <div class="sms-contact" data-contact="{{ $c['contact'] }}"
-                                            data-last-at="{{ $c['last_at'] }}">
-                                            <input type="checkbox" class="contact-check" value="{{ $c['contact'] }}"
-                                                style="margin-right:8px;">
-                                            <div class="meta" style="flex:1;">
-                                                <div style="font-weight:600;text-align:left;">{{ preg_replace('/^1?(\d{3})(\d{3})(\d{4})$/', '+1 ($1) $2-$3', preg_replace('/\D+/', '', $c['contact'])) ?: $c['contact'] }}</div>
-                                                <div class="last">{{ Str::limit($c['last_body'], 60) }}</div>
-                                            </div>
-                                            <div class="contact-date">
-                                                {{ $c['last_at'] ? \Carbon\Carbon::parse($c['last_at'])->format('d/m/Y H:i') : '' }}
-                                            </div>
-                                        </div>
-                                    @empty
-                                        <div class="empty">No hay conversaciones. Presiona
-                                            <strong>Actualizar</strong>
-                                            para leer mensajes desde Twilio.
-                                        </div>
-                                    @endforelse
+                        <!-- Panel de chat -->
+                        <div class="sms-chat">
+                            <div
+                                style="height:33px;padding:12px;border-bottom:1px solid #eee; display:flex;align-items:center; gap:12px;">
+                                <div id="currentContact" style="font-weight:400"></div>
+                                <div style="margin-left:auto">
+                                    <button id="btnDeleteConversation" class="btn btn-danger" disabled><i
+                                            class='bx bx-trash-alt'></i> &nbsp;Delete this chat</button>
                                 </div>
                             </div>
 
-                            <!-- Panel de chat -->
-                            <div class="sms-chat">
-                                <div
-                                    style="height:33px;padding:12px;border-bottom:1px solid #eee; display:flex;align-items:center; gap:12px;">
-                                    <div id="currentContact" style="font-weight:400"></div>
-                                    <div style="margin-left:auto">
-                                        <button id="btnDeleteConversation" class="btn btn-danger" disabled><i class='bx bx-trash-alt' ></i> &nbsp;Delete this chat</button>
-                                    </div>
-                                </div>
-
-                                <div class="messages" id="messagesPane">
-                                    <div class="empty">Selecciona un contacto a la izquierda para ver su chat</div>
-                                    {{-- 
+                            <div class="messages" id="messagesPane">
+                                <div class="empty">Selecciona un contacto a la izquierda para ver su chat</div>
+                                {{-- 
                                     Ejemplo para cuando cargues los mensajes:
                                     @foreach ($messages as $message)
                                         <div class="message-wrapper {{ $message->from == $twilio ? 'sent' : 'received' }}">
@@ -102,37 +108,37 @@
                                         </div>
                                     @endforeach
                                     --}}
-                                </div>
+                            </div>
 
-                                <div class="composer" id="composer" style="display:none;">
-                                    <form id="sendForm" style="display:flex;width:100%;gap:8px;align-items:center;">
-                                        @csrf
-                                        <input type="hidden" name="to" id="toInput" />
-                                        <textarea name="body" id="bodyInput" placeholder="Escribe un mensaje..."></textarea>
-                                        <button type="submit" class="btn"><i class='bx bxs-send'></i></button>
-                                    </form>
-                                </div>
+                            <div class="composer" id="composer" style="display:none;">
+                                <form id="sendForm" style="display:flex;width:100%;gap:8px;align-items:center;">
+                                    @csrf
+                                    <input type="hidden" name="to" id="toInput" />
+                                    <textarea name="body" id="bodyInput" placeholder="Escribe un mensaje..."></textarea>
+                                    <button type="submit" class="btn"><i class='bx bxs-send'></i></button>
+                                </form>
                             </div>
                         </div>
-
-                        <!-- Variables JS globales -->
-                        <script>
-                            window.twilioFrom = "{{ $twilio }}";
-                            window.csrfToken = "{{ csrf_token() }}";
-                            window.routes = {
-                                sync: "{{ route('sms.sync') }}",
-                                send: "{{ route('sms.send') }}",
-                                deleteOne: "{{ route('sms.deleteOne', ':contact') }}",
-                                deleteMany: "{{ route('sms.deleteMany') }}"
-                            };
-                        </script>
-                        <script src="{{ asset('js/sms-inbox.js') }}"></script>
-                        <script src="{{ asset('js/settings.js') }}"></script>
-                        <script src="{{ asset('js/menu.js') }}"></script>
-                        
-
-
                     </div>
+
+                    <!-- Variables JS globales -->
+                    <script>
+                        window.twilioFrom = "{{ $twilio }}";
+                        window.csrfToken = "{{ csrf_token() }}";
+                        window.routes = {
+                            sync: "{{ route('sms.sync') }}",
+                            send: "{{ route('sms.send') }}",
+                            deleteOne: "{{ route('sms.deleteOne', ':contact') }}",
+                            deleteMany: "{{ route('sms.deleteMany') }}"
+                        };
+                    </script>
+                    <script src="{{ asset('js/sms-inbox.js') }}"></script>
+                    <script src="{{ asset('js/settings.js') }}"></script>
+                    <script src="{{ asset('js/menu.js') }}"></script>
+
+
+
+                </div>
                 <!-- </div> -->
             </div>
         </section>
@@ -273,49 +279,50 @@
 
     <div id="dim-screen"></div>
 
-<!-- Overlay oscuro -->
-<div id="overlay"></div>
+    <!-- Overlay oscuro -->
+    <div id="overlay"></div>
 
-<!-- Panel lateral para nuevo mensaje -->
-<div id="newMessagePanel">
-    <button id="closeNewMessage" title="Cerrar">&times;</button>
-    <h3>NEW MESSAGE</h3>
+    <!-- Panel lateral para nuevo mensaje -->
+    <div id="newMessagePanel">
+        <button id="closeNewMessage" title="Cerrar">&times;</button>
+        <h3>NEW MESSAGE</h3>
 
-    <form id="newMessageForm">
-        @csrf
-        <label for="newTo">To (+1):</label>
-        <input type="text" id="newTo" name="to" placeholder="+12144696789" required>
+        <form id="newMessageForm">
+            @csrf
+            <label for="newTo">To (+1):</label>
+            <input type="text" id="newTo" name="to" placeholder="+12144696789" required>
 
-        <label for="newBody">Message:</label>
-        <textarea id="newBody" name="body" placeholder="Type a message..." required></textarea>
+            <label for="newBody">Message:</label>
+            <textarea id="newBody" name="body" placeholder="Type a message..." required></textarea>
 
-        <button type="submit">SEND</button>
-    </form>
-</div>
+            <button type="submit">SEND</button>
+        </form>
+    </div>
 
-<!-- UI Elements -->
-<div class="window-confirm">
-    <div class="confirm-window-container">
-        <div class="confirm-window-content">
-            <div class="confirm-window-header">
-            <!-- <div class="confirm-window-icon"></div> -->
-            <!-- <div class="confirm-window-close-btn">
+    <!-- UI Elements -->
+    <div class="window-confirm">
+        <div class="confirm-window-container">
+            <div class="confirm-window-content">
+                <div class="confirm-window-header">
+                    <!-- <div class="confirm-window-icon"></div> -->
+                    <!-- <div class="confirm-window-close-btn">
                 <button>
                     <i class='bx bx-x'></i>
                 </button>
             </div> -->
+                </div>
+                <div class="confirm-window-text-content">
+                    <div class="confirm-window-title"></div>
+                    <div class="confirm-window-description"></div>
+                </div>
             </div>
-            <div class="confirm-window-text-content">
-                <div class="confirm-window-title"></div>
-                <div class="confirm-window-description"></div>
+            <div class="confirm-window-buttons">
+                <button class="confirm-window-confirm-btn">Confirm</button>
+                <button class="confirm-window-cancel-btn" onclick="confirmBoxOff()">Cancel</button>
             </div>
-        </div>
-        <div class="confirm-window-buttons">
-            <button class="confirm-window-confirm-btn">Confirm</button>
-            <button class="confirm-window-cancel-btn" onclick="confirmBoxOff()">Cancel</button>
         </div>
     </div>
-</div>
 
 </body>
+
 </html>
