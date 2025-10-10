@@ -35,9 +35,9 @@
                         <h1>📥 Inbox WhatsApp</h1>
 
                         <div class="inbox-actions">
-                            <a href="{{ route('sent') }}" class="btn btn-primary">📤 Ir a Enviar</a>
+                            <a href="{{ route('whatsapp.sent') }}" class="btn btn-primary">📤 Ir a Enviar</a>
 
-                            <form method="POST" action="{{ route('inbox.sync') }}">
+                            <form method="POST" action="{{ route('whatsapp.sync') }}">
                                 @csrf
                                 <button type="submit" class="btn btn-secondary">🔄 Sincronizar</button>
                             </form>
@@ -66,7 +66,7 @@
                         @endif
 
                         <!-- Form oculto para borrado múltiple -->
-                        <form id="bulkDeleteForm" method="POST" action="{{ route('inbox.deleteMultiple') }}"
+                        <form id="bulkDeleteForm" method="POST" action="{{ route('whatsapp.deleteMultiple') }}"
                             style="display:none;">
                             @csrf
                             @method('DELETE')
@@ -149,7 +149,7 @@
 
                                             <!-- ACCIONES -->
                                             <td>
-                                                <form method="POST" action="{{ route('inbox.delete', $m->id) }}"
+                                                <form method="POST" action="{{ route('whatsapp.delete', $m->id) }}"
                                                     onsubmit="return confirm('¿Seguro que quieres eliminar este mensaje?');">
                                                     @csrf
                                                     @method('DELETE')

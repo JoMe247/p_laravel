@@ -71,7 +71,7 @@
             <i class='bx bx-envelope'></i> SMS 
         </div>
         
-        <div class="lateral-row" data="option" onclick="window.location='./inbox'">
+        <div class="lateral-row" data="option" onclick="window.location='./whatsapp'">
             <i class='bx bxl-whatsapp'></i> WhatsApp 
         </div>
         

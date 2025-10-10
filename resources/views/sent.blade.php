@@ -31,7 +31,7 @@
                     <h1>📨 Mensajes Enviados</h1>
 
                     <div class="sent-actions">
-                        <a href="{{ route('inbox') }}" class="btn btn-secondary">📥 Volver al Inbox</a>
+                        <a href="{{ route('whatsapp.inbox') }}" class="btn btn-secondary">📥 Volver al Inbox</a>
                     </div>
 
                     <!-- 🔍 Cuadro de búsqueda -->

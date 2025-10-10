@@ -5,15 +5,15 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CustomersController;
-use Illuminate\Support\Facades\Route; //por defecto
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WhatsappController;
-use App\Http\Controllers\AuthController;
-use Twilio\TwiML\Voice\WhatsApp;
 
+// Página inicial
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('send.form');
 });
 
+// Autenticación
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -21,52 +21,24 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
-Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
-Route::get('/customers', [CustomersController::class, 'show'])->name('customers');
+// Dashboard y otros módulos
+Route::get('/dashboard', [DashboardController::class, 'show'])->middleware('auth')->name('dashboard');
+Route::get('/customers', [CustomersController::class, 'show'])->middleware('auth')->name('customers');
 
-
-Route::get('/', function () {
-    return redirect()->route('send.form');
-});
-
-//Route::get('/send', [WhatsappController::class, 'showSendForm'])->name('send.form');
+// WhatsApp
+Route::get('/whatsapp', [WhatsappController::class, 'showInbox'])->middleware('auth')->name('whatsapp.inbox');
+Route::post('/whatsapp/sync', [WhatsappController::class, 'syncFromTwilio'])->name('whatsapp.sync');
 Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('send.action');
 
-//Route::get('/inbox', [WhatsappController::class, 'showInbox'])->name('inbox');
+Route::delete('/whatsapp/delete/{id}', [WhatsappController::class, 'delete'])->name('whatsapp.delete');
+Route::delete('/whatsapp/delete-multiple', [WhatsappController::class, 'deleteMultiple'])->name('whatsapp.deleteMultiple');
+Route::get('/sent', [WhatsappController::class, 'showSent'])->middleware('auth')->name('whatsapp.sent');
 
-// Botón/manual: sincroniza desde Twilio y guarda en tu BD
-Route::post('/inbox/sync', [WhatsappController::class, 'syncFromTwilio'])->name('inbox.sync');
-
-// Botón/manual: eliminar mensajes
-
-Route::delete('/inbox/delete/{id}', [App\Http\Controllers\WhatsappController::class, 'delete'])->name('inbox.delete');
-Route::delete('/inbox/delete-multiple', [App\Http\Controllers\WhatsappController::class, 'deleteMultiple'])->name('inbox.deleteMultiple');
-
-Route::get('/sent', [WhatsappController::class, 'showSent'])->name('sent');
-
-// Rutas SMS
-
-//Route::get('/sms', [SmsController::class, 'index'])->name('sms.index');
+// SMS
+Route::get('/sms', [SmsController::class, 'index'])->middleware('auth')->name('sms');
 Route::get('/sms/messages/{contact}', [SmsController::class, 'messages'])->name('sms.messages');
-Route::post('/sms/sync', [SmsController::class, 'sync'])->name('sms.sync'); // botón para sincronizar
+Route::post('/sms/sync', [SmsController::class, 'sync'])->name('sms.sync');
 Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
-
-// Eliminar mensajes sms
 Route::delete('/sms/delete/{contact}', [SmsController::class, 'deleteOne'])->name('sms.deleteOne');
 Route::post('/sms/delete-multiple', [SmsController::class, 'deleteMany'])->name('sms.deleteMany');
-
-Route::get('/sms/search', [App\Http\Controllers\SmsController::class, 'search'])->name('sms.search');
-
-// Ejemplo de ruta protegida
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
-
-Route::get('/sms', [SmsController::class, 'index'], function () {
-    return view('sms');
-})->middleware('auth')->name('sms');
-
-Route::get('/inbox', [WhatsappController::class, 'showInbox'], function () {
-    return view('inbox');
-})->middleware('auth')->name('inbox');
-
+Route::get('/sms/search', [SmsController::class, 'search'])->name('sms.search');

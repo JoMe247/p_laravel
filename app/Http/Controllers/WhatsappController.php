@@ -123,7 +123,7 @@ class WhatsappController extends Controller
     public function delete($id)
     {
         Message::findOrFail($id)->delete();
-        return redirect()->route('inbox')->with('success', 'Mensaje eliminado');
+        return redirect()->route('whatsapp')->with('success', 'Mensaje eliminado');
     }
 
     public function deleteMultiple(Request $request)
@@ -131,7 +131,7 @@ class WhatsappController extends Controller
         if ($request->has('messages')) {
             Message::whereIn('id', $request->messages)->delete();
         }
-        return redirect()->route('inbox')->with('success', 'Mensajes eliminados');
+        return redirect()->route('whatsapp')->with('success', 'Mensajes eliminados');
     }
 
     //envio de mensaje
