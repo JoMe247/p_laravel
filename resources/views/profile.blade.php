@@ -2,13 +2,13 @@
 <html lang="es">
 
 <head>
-    <meta name="base-url" content="{{ url('/') }}">
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Customer Profile</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="base-url" content="{{ url('/') }}">
 
     <!-- Archivos CSS -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
@@ -68,7 +68,8 @@
                         <input type="text" name="ZIP_Code" value="{{ old('ZIP_Code', $customer->ZIP_Code) }}">
 
                         <label>Drivers_License</label>
-                        <input type="text" name="Drivers_License" value="{{ old('Drivers_License', $customer->Drivers_License) }}">
+                        <input type="text" name="Drivers_License"
+                            value="{{ old('Drivers_License', $customer->Drivers_License) }}">
 
                         <label>DL_State</label>
                         <input type="text" name="DL_State" value="{{ old('DL_State', $customer->DL_State) }}">
@@ -95,7 +96,8 @@
                         <input type="text" name="Added" value="{{ old('Added', $customer->Added) }}">
 
                         <label>Agent_of_Record</label>
-                        <input type="text" name="Agent_of_Record" value="{{ old('Agent_of_Record', $customer->Agent_of_Record) }}">
+                        <input type="text" name="Agent_of_Record"
+                            value="{{ old('Agent_of_Record', $customer->Agent_of_Record) }}">
 
                         <label>Alert</label>
                         <textarea name="Alert">{{ old('Alert', $customer->Alert) }}</textarea>
@@ -107,9 +109,12 @@
                         <input type="text" name="Agency" value="{{ old('Agency', $customer->Agency) }}">
 
                         <div style="margin-top:20px;display:flex;gap:12px;">
-                            <button type="submit" class="btn" style="background:#2ecc71;border:none;color:#fff;padding:8px 14px;border-radius:6px;">Save</button>
-                            <a href="{{ route('customers.index') }}" class="btn secondary" style="padding:8px 14px;border-radius:6px;">Back</a>
-                            <button type="button" id="delete-customer-btn" class="btn delete-btn" data-id="{{ $customer->ID }}">Delete</button>
+                            <button type="submit" class="btn"
+                                style="background:#2ecc71;border:none;color:#fff;padding:8px 14px;border-radius:6px;">Save</button>
+                            <a href="{{ route('customers.index') }}" class="btn secondary"
+                                style="padding:8px 14px;border-radius:6px;">Back</a>
+                            <button type="button" id="delete-customer-btn" class="btn delete-btn"
+                                data-id="{{ $customer->ID }}">Delete</button>
 
                         </div>
                     </form>
@@ -119,96 +124,86 @@
     </div>
 
     <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Selecciona todos los elementos con atributo data="option"
-    document.querySelectorAll('[data="option"]').forEach(option => {
-      option.addEventListener('click', function (e) {
-        const onclickAttr = this.getAttribute('onclick');
-        if (onclickAttr && onclickAttr.includes("window.location='./")) {
-          e.preventDefault();
-          // Extrae el destino del onclick actual
-          const dest = onclickAttr.match(/'\.\/(.*?)'/);
-          if (dest && dest[1]) {
-            // Redirige de forma absoluta
-            window.location = '/' + dest[1];
-          }
-        }
-      });
-    });
-  });
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const deleteBtn = document.getElementById('delete-customer-btn');
-    const baseUrl = document.querySelector('meta[name="base-url"]').content;
-
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', function () {
-            const customerId = this.getAttribute('data-id');
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "This action cannot be undone!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `${baseUrl}/customers/delete-multiple`,
-                        type: 'POST',
-                        data: {
-                            ids: [customerId],
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            Swal.fire(
-                                'Deleted!',
-                                'Customer has been deleted.',
-                                'success'
-                            ).then(() => {
-                                // Redirige a la lista de clientes
-                                window.location.href = `${baseUrl}/customers`;
-                            });
-                        },
-                        error: function(xhr, status, error) {
-                            Swal.fire(
-                                'Error!',
-                                'There was a problem deleting this customer.',
-                                'error'
-                            );
-                            console.error(error);
+        document.addEventListener("DOMContentLoaded", function() {
+            // Selecciona todos los elementos con atributo data="option"
+            document.querySelectorAll('[data="option"]').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    const onclickAttr = this.getAttribute('onclick');
+                    if (onclickAttr && onclickAttr.includes("window.location='./")) {
+                        e.preventDefault();
+                        // Extrae el destino del onclick actual
+                        const dest = onclickAttr.match(/'\.\/(.*?)'/);
+                        if (dest && dest[1]) {
+                            // Redirige de forma absoluta
+                            window.location = '/' + dest[1];
                         }
-                    });
-                }
+                    }
+                });
             });
         });
-    }
-});
-</script>
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const deleteBtn = document.getElementById('delete-customer-btn');
+            const baseUrl = document.querySelector('meta[name="base-url"]').content;
+
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    const customerId = this.getAttribute('data-id');
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "This action cannot be undone!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: `${baseUrl}/customers/delete-multiple`,
+                                type: 'POST',
+                                data: {
+                                    ids: [customerId],
+                                    _token: $('meta[name="csrf-token"]').attr('content')
+                                },
+                                success: function(response) {
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Customer has been deleted.',
+                                        'success'
+                                    ).then(() => {
+                                        // Redirige a la lista de clientes
+                                        window.location.href =
+                                            `${baseUrl}/customers`;
+                                    });
+                                },
+                                error: function(xhr, status, error) {
+                                    Swal.fire(
+                                        'Error!',
+                                        'There was a problem deleting this customer.',
+                                        'error'
+                                    );
+                                    console.error(error);
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 
 
-
-    <!-- Scripts globales -->
-    <script src="{{ asset('js/add-customer.js') }}"></script>
-    <script src="{{ asset('js/dropdown.js') }}"></script>
-    <script src="{{ asset('js/menu.js') }}"></script>
-    <script src="{{ asset('js/table.js') }}"></script>
-    <script src="{{ asset('js/settings.js') }}"></script>
-    <script src="{{ asset('js/operations.js') }}"></script>
-    <script src="{{ asset('js/inbox.js') }}"></script>
-
-
-        <!-- UI Elements -->
+    <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
             <div class="confirm-window-content">
                 <div class="confirm-window-header">
-                <!-- <div class="confirm-window-icon"></div> -->
-                <!-- <div class="confirm-window-close-btn">
+                    <!-- <div class="confirm-window-icon"></div> -->
+                    <!-- <div class="confirm-window-close-btn">
                     <button>
                         <i class='bx bx-x'></i>
                     </button>
@@ -230,9 +225,9 @@ document.addEventListener("DOMContentLoaded", function () {
         <div id="table-border">
             <i class='bx bx-x' id="close-settings" onclick="closeSettings();"></i>
             <h2>Settings</h2>
-    
+
             <div class="settings-sub-title">Language</div>
-    
+
             <div id="language-settings">
                 <p>
                     <input type="radio" id="test1" name="radio-group" checked>
@@ -243,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <label for="test2">Spanish</label>
                 </p>
             </div>
-            
+
             <!-- <div class='settings-sub-title'>Theme</div>
             
             <div id="dark-mode">
@@ -253,9 +248,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 </span>
                 <p>Dark Mode</p>
             </div> -->
-    
+
             <div class='settings-sub-title'>Action Color</div>
-    
+
             <div class="color-pick-container" id="action-color-container">
                 <div class="color-pick" color="default" onclick="selectActionColor(this)"></div>
                 <div class="color-pick" color="red" onclick="selectActionColor(this)"></div>
@@ -272,14 +267,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="color-pick" color="black" onclick="selectActionColor(this)"></div>
                 <div class="color-pick" color="white" onclick="selectActionColor(this)"></div>
             </div>
-    
+
             <div class="settings-sub-title" style="margin-top:50px;">Side Panel Background</div>
-            
+
             <div id="background-side-settings">
                 <div id="background-color-option-container">
 
                     <div class='settings-sub-title'>Select Color</div>
-        
+
                     <div class="color-pick-container">
                         <div class="color-pick" color="default" onclick="selectColor(this)"></div>
                         <div class="color-pick" color="red" onclick="selectColor(this)"></div>
@@ -297,26 +292,51 @@ document.addEventListener("DOMContentLoaded", function () {
                         <div class="color-pick" color="white" onclick="selectColor(this)"></div>
                     </div>
                 </div>
-    
+
                 <div id="background-image-option-container">
-                    
+
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg" alt="" ></label>
-                        <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(4)"><img src="img/menu/thumbs/4.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(5)"><img src="img/menu/thumbs/5.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(6)"><img src="img/menu/thumbs/6.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(7)"><img src="img/menu/thumbs/7.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(8)"><img src="img/menu/thumbs/8.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(9)"><img src="img/menu/thumbs/9.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(10)"><img src="img/menu/thumbs/10.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(11)"><img src="img/menu/thumbs/11.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(12)"><img src="img/menu/thumbs/12.jpg" alt=""></label>
-                        
-                      
+                        <label class="thumb-options" onclick="selectImage(1)">
+                            <img src="{{ asset('img/menu/thumbs/1.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(2)">
+                            <img src="{{ asset('img/menu/thumbs/2.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(3)">
+                            <img src="{{ asset('img/menu/thumbs/3.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(4)">
+                            <img src="{{ asset('img/menu/thumbs/4.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(5)">
+                            <img src="{{ asset('img/menu/thumbs/5.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(6)">
+                            <img src="{{ asset('img/menu/thumbs/6.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(7)">
+                            <img src="{{ asset('img/menu/thumbs/7.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(8)">
+                            <img src="{{ asset('img/menu/thumbs/8.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(9)">
+                            <img src="{{ asset('img/menu/thumbs/9.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(10)">
+                            <img src="{{ asset('img/menu/thumbs/10.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(11)">
+                            <img src="{{ asset('img/menu/thumbs/11.jpg') }}" alt="">
+                        </label>
+                        <label class="thumb-options" onclick="selectImage(12)">
+                            <img src="{{ asset('img/menu/thumbs/12.jpg') }}" alt="">
+                        </label>
+
+
+
                     </div>
                 </div>
 
@@ -324,29 +344,45 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="slider-wrap" id="side-image-slider">
                         <label for="frac" style="display:block;margin-bottom:8px;">Side Image Blur</label>
                         <div class="row">
-                        <input id="frac" type="range" min="0" max="1" step="0.01" value="0.00" />
-                        <div class="value">
-                            <span id="val-pct">0%</span>
-                        </div>
+                            <input id="frac" type="range" min="0" max="1" step="0.01"
+                                value="0.00" />
+                            <div class="value">
+                                <span id="val-pct">0%</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="slider-wrap" id="home-image-slider">
                         <label for="frac2" style="display:block;margin-bottom:8px;">Home Image Blur</label>
                         <div class="row">
-                        <input id="frac2" type="range" min="0" max="1" step="0.01" value="0.00" />
-                        <div class="value">
-                            <span id="val-pct2">0%</span>
-                        </div>
+                            <input id="frac2" type="range" min="0" max="1" step="0.01"
+                                value="0.00" />
+                            <div class="value">
+                                <span id="val-pct2">0%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
+
             </div>
-    
+
         </div>
     </div>
 
-    <div id="dim-screen-1"></div>
+    <div id="dim-screen"></div>
+
+
+    <!-- <script src="js/main.js"></script> -->
+    <script src="{{ asset('js/image.js') }}"></script>
+    <script src="{{ asset('js/weather.js') }}"></script>
+    <script src="{{ asset('js/dropdown.js') }}"></script>
+    <script src="{{ asset('js/menu.js') }}"></script>
+    <script src="{{ asset('js/table.js') }}"></script>
+    <script src="{{ asset('js/settings.js') }}"></script>
+    <script src="{{ asset('js/operations.js') }}"></script>
+
+
+
 </body>
+
 </html>

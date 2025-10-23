@@ -2,13 +2,12 @@
 <html lang="en">
 
 <head>
-    <meta name="base-url" content="{{ url('/') }}">
-
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Customers</title>
     <link rel="icon" href="img/favicon.png">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="base-url" content="{{ url('/') }}">
 
     <!-- Estilos globales -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
@@ -19,9 +18,14 @@
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}"> <!-- CSS aislado -->
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
 
+    <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
+    <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- Alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         /* Mantiene el overlay por encima de todo */
@@ -83,7 +87,7 @@
                                     <td><input type="checkbox" class="select-customer" data-id="{{ $c->ID }}">
                                     </td>
 
-                                    <td>{{ $c->ID }}</td>
+                                    <td onclick="window.location.href='profile/{{ $c->ID }}'">{{ $c->ID }}</td>
                                     <td>{{ $c->Name }}</td>
                                     <td>{{ $c->Address }}</td>
                                     <td>{{ $c->Phone }}</td>
@@ -103,18 +107,6 @@
             <!-- contenido inyectado por JS -->
         </div>
     </div>
-
-
-
-    <!-- Scripts -->
-    <script src="{{ asset('js/add-customer.js') }}"></script>
-    <script src="{{ asset('js/dropdown.js') }}"></script>
-    <script src="{{ asset('js/menu.js') }}"></script>
-    <script src="{{ asset('js/table.js') }}"></script>
-    <script src="{{ asset('js/settings.js') }}"></script>
-    <script src="{{ asset('js/operations.js') }}"></script>
-    <script src="{{ asset('js/inbox.js') }}"></script>
-
 
     <!-- UI Elements -->
     <div class="window-confirm">
@@ -217,8 +209,8 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img
-                                src="{{ asset('img/menu/thumbs/1.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
+                                alt=""></label>
                         <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
                                 alt=""></label>
                         <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg"
@@ -275,7 +267,16 @@
         </div>
     </div>
 
-    <div id="dim-screen-1"></div>
+    <div id="dim-screen"></div>
+
+
+    <script src="js/image.js"></script>
+    <script src="js/dropdown.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/table.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/operations.js"></script>
+    <script src="{{ asset('js/add-customer.js') }}"></script>
 
 </body>
 

@@ -2,8 +2,8 @@
 <html lang="es">
 
 <head>
-    <meta name="base-url" content="{{ url('/') }}">
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inbox WhatsApp</title>
     <link rel="icon" href="img/favicon.png">
@@ -23,6 +23,9 @@
 
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- Alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -174,13 +177,29 @@
         </section>
     </div>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/dropdown.js') }}"></script>
-    <script src="{{ asset('js/menu.js') }}"></script>
-    <script src="{{ asset('js/table.js') }}"></script>
-    <script src="{{ asset('js/settings.js') }}"></script>
-    <script src="{{ asset('js/operations.js') }}"></script>
-    <script src="{{ asset('js/inbox.js') }}"></script>
+    <!-- UI Elements -->
+    <div class="window-confirm">
+        <div class="confirm-window-container">
+            <div class="confirm-window-content">
+                <div class="confirm-window-header">
+                    <!-- <div class="confirm-window-icon"></div> -->
+                    <!-- <div class="confirm-window-close-btn">
+                    <button>
+                        <i class='bx bx-x'></i>
+                    </button>
+                </div> -->
+                </div>
+                <div class="confirm-window-text-content">
+                    <div class="confirm-window-title"></div>
+                    <div class="confirm-window-description"></div>
+                </div>
+            </div>
+            <div class="confirm-window-buttons">
+                <button class="confirm-window-confirm-btn">Confirm</button>
+                <button class="confirm-window-cancel-btn" onclick="confirmBoxOff()">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <div id="settings-menu">
         <div id="table-border">
@@ -212,20 +231,21 @@
 
             <div class='settings-sub-title'>Action Color</div>
 
-            <div class="color-pick-container">
-                <div class="color-pick" color="red"></div>
-                <div class="color-pick" color="reddish"></div>
-                <div class="color-pick" color="orange"></div>
-                <div class="color-pick" color="yellow"></div>
-                <div class="color-pick" color="green"></div>
-                <div class="color-pick" color="aquamarine"></div>
-                <div class="color-pick" color="dodgerblue"></div>
-                <div class="color-pick" color="royal"></div>
-                <div class="color-pick" color="purple"></div>
-                <div class="color-pick" color="pink"></div>
-                <div class="color-pick" color="gray"></div>
-                <div class="color-pick" color="black"></div>
-                <div class="color-pick" color="white"></div>
+            <div class="color-pick-container" id="action-color-container">
+                <div class="color-pick" color="default" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="red" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="reddish" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="orange" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="yellow" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="green" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="aquamarine" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="blue" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="royal" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="purple" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="pink" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="gray" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="black" onclick="selectActionColor(this)"></div>
+                <div class="color-pick" color="white" onclick="selectActionColor(this)"></div>
             </div>
 
             <div class="settings-sub-title" style="margin-top:50px;">Side Panel Background</div>
@@ -315,7 +335,19 @@
 
         </div>
     </div>
-    <div id="dim-screen-1"></div>
+
+    <div id="dim-screen"></div>
+
+
+    <script src="js/image.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/dropdown.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/table.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/operations.js"></script>
+    <script src="js/inbox.js"></script>
+
 </body>
 
 </html>
