@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WhatsappController;
 
+
 // Página inicial
 Route::get('/', function () {
     return redirect()->route('send.form');
@@ -23,7 +24,7 @@ Route::post('/register', [RegisterController::class, 'register']);
 
 // Dashboard y otros módulos
 Route::get('/dashboard', [DashboardController::class, 'show'])->middleware('auth')->name('dashboard');
-Route::get('/customers', [CustomersController::class, 'show'])->middleware('auth')->name('customers');
+//Route::get('/customer', [CustomerController::class, 'show'])->middleware('auth')->name('customer');
 
 // WhatsApp
 Route::get('/whatsapp', [WhatsappController::class, 'showInbox'])->middleware('auth')->name('whatsapp.inbox');
@@ -42,3 +43,13 @@ Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
 Route::delete('/sms/delete/{contact}', [SmsController::class, 'deleteOne'])->name('sms.deleteOne');
 Route::post('/sms/delete-multiple', [SmsController::class, 'deleteMany'])->name('sms.deleteMany');
 Route::get('/sms/search', [SmsController::class, 'search'])->name('sms.search');
+
+// Customers
+
+Route::get('/customers', [CustomersController::class, 'index'])->name('customers.index');
+Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store'); // guarda los 4 campos (AJAX)
+Route::get('/profile/{id}', [CustomersController::class, 'profile'])->name('profile');
+Route::put('/profile/{id}', [CustomersController::class, 'update'])->name('customers.update'); // guarda el resto del perfil
+Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMultiple']);
+
+

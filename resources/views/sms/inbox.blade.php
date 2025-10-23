@@ -2,6 +2,8 @@
 <html lang="es">
 
 <head>
+    <meta name="base-url" content="{{ url('/') }}">
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -133,9 +135,11 @@
                         };
                     </script>
                     <script src="{{ asset('js/sms-inbox.js') }}"></script>
-                    <script src="{{ asset('js/settings.js') }}"></script>
+                    <script src="{{ asset('js/dropdown.js') }}"></script>
                     <script src="{{ asset('js/menu.js') }}"></script>
-
+                    <script src="{{ asset('js/table.js') }}"></script>
+                    <script src="{{ asset('js/settings.js') }}"></script>
+                    <script src="{{ asset('js/operations.js') }}"></script>
 
 
                 </div>
@@ -277,7 +281,7 @@
         </div>
     </div>
 
-    <div id="dim-screen"></div>
+    <div id="dim-screen-1"></div>
 
     <!-- Overlay oscuro -->
     <div id="overlay"></div>

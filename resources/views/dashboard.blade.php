@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="base-url" content="{{ url('/') }}">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="icon" href="img/favicon.png">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/dash.css">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/dropdown.css">
-    <link rel="stylesheet" href="css/graph.css">
-    <link rel="stylesheet" href="css/editCustomer.css">
-    <link rel="stylesheet" href="css/ui_elements.css">
+    <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dropdown.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
+
     
 
     <!-- Icons -->
@@ -776,7 +779,7 @@
         </div>
     </div>
 
-    <div id="dim-screen"></div>
+    <div id="dim-screen-1"></div>
     
 
     <!-- <script src="js/main.js"></script> -->
