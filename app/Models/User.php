@@ -9,18 +9,21 @@ class User extends Authenticatable
 {
     use Notifiable;
 
+    public $timestamps = false;
+
     protected $table = 'users';
 
     protected $fillable = [
-        'username',
-        'email',
-        'password_hash',
-        'email_verified',
-        'verification_token',
-        'reset_token',
-        'reset_token_expires',
-        'role',
-    ];
+    'username',
+    'email',
+    'password_hash',
+    'current_session_token',
+    'email_verified',
+    'verification_token',
+    'reset_token',
+    'reset_token_expires',
+    'role',
+];
 
     protected $hidden = [
         'password_hash',

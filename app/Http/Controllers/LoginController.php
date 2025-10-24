@@ -46,6 +46,21 @@ class LoginController extends Controller
             return back()->withErrors(['email_verified' => 'Por favor verifica tu correo antes de iniciar sesión.']);
         }
 
+        // 💡 Comprobación de sesión duplicada
+        if ($user->current_session_token && session()->has('session_token') === false) {
+            return back()->withErrors(['duplicate' => 'Este usuario ya tiene una sesión activa.'])->withInput();
+        }
+
+        // Generar token único para esta sesión
+        $sessionToken = bin2hex(random_bytes(16));
+
+        // Guardar token de sesión en base de datos
+        $user->current_session_token = $sessionToken;
+        $user->save();
+
+        // Guardar token de sesión en la sesión de Laravel
+        session(['session_token' => $sessionToken]);
+
         // Iniciar sesión manualmente
         Auth::login($user, $rememberMe);
 
@@ -66,16 +81,24 @@ class LoginController extends Controller
         return redirect()->route('dashboard');
     }
 
-    public function logout(Request $request)
-    {
-        Auth::logout();
+public function logout(Request $request)
+{
+    $user = Auth::user();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        // Borrar cookie de remember me
-        Cookie::queue(Cookie::forget('rememberme_token'));
-
-        return redirect()->route('login');
+    if ($user) {
+        // Limpia el token de sesión activo en la base de datos
+        User::where('id', $user->id)->update(['current_session_token' => null]);
     }
+
+    // Cierra la sesión de Laravel
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    // Borra la cookie de "remember me"
+    Cookie::queue(Cookie::forget('rememberme_token'));
+
+    return redirect()->route('login');
+}
+
 }

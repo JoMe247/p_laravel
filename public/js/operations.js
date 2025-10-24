@@ -33,6 +33,15 @@ function confirmBoxOff(){
     document.getElementsByClassName("confirm-window-confirm-btn")[0].removeAttribute("onclick");
 }
 
-function logOut(){
-    window.location.href = 'operations/sess/logout.php';
+function logOut() {
+    // Cierra el modal de confirmación si lo tienes
+    if (typeof confirmBoxOff === 'function') confirmBoxOff();
+
+    // Enviar el formulario oculto de logout
+    const logoutForm = document.getElementById('logout-form');
+    if (logoutForm) {
+        logoutForm.submit();
+    } else {
+        console.error('Formulario de logout no encontrado.');
+    }
 }

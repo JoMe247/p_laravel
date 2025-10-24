@@ -60,7 +60,7 @@
         <div class="lateral-row" data="option" onclick="window.location='{{ url('/sms') }}'">
             <i class='bx bx-envelope'></i> SMS
         </div>
-        
+
         <div class="lateral-row" data="option" onclick="window.location='{{ url('/whatsapp') }}'">
             <i class='bx bxl-whatsapp'></i> WhatsApp
         </div>
@@ -95,10 +95,15 @@
             <i class='bx bx-cog'></i> Settings
         </div>
 
-        <div class="lateral-row" data="option" onclick="confirmBoxOn('Please Confirm', 'Are you sure you want to Logout?', 'logOut()')">
+        <div class="lateral-row" data="option"
+            onclick="confirmBoxOn('Please Confirm', 'Are you sure you want to Logout?', 'logOut()')">
             <i class='bx bx-log-out'></i> Log out
         </div>
     </div>
 
     <div id="lateral-blur"></div>
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+        @csrf
+    </form>
+
 </section>
