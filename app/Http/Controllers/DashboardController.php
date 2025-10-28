@@ -19,7 +19,7 @@ class DashboardController extends Controller
 
         // Pasamos el nombre de usuario a la vista
         return view('dashboard', [
-            'username' => $user->username,
+            'username' => $user->name ?? $user->username,
         ]);
     }
 }
