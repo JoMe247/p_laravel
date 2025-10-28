@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +15,7 @@
     <link rel="stylesheet" href="css/graph.css">
     <link rel="stylesheet" href="css/editCustomer.css">
     <link rel="stylesheet" href="css/ui_elements.css">
-    
+
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -26,9 +27,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
+
 <body>
     <div id="main-container">
-        
+
         <!-- Menu Include-->
         @include('menu')
 
@@ -39,7 +41,10 @@
                 <div id="home-image-content">
 
                     <div id="welcome">
-                        <div id="welcome-user">Welcome, &nbsp;<b id="username-welcome">Place Holder Name</b></div>
+                        <div id="welcome-user">
+                            Welcome, &nbsp;<b id="username-welcome">{{ $username ?? 'Guest' }}</b>
+                        </div>
+
                         <div id="welcome-date"></div>
                     </div>
 
@@ -47,11 +52,12 @@
                         <img src="" alt="" id="weather-img">
                         <span id="temperature"></span>
                         <span id="weather"></span>
-                        
+
                         <span id="city"></span>
                     </div>
 
-                    <label id="reset-picture" title="Change Home Picture" onclick="resetImage()"><i class='bx bx-reset'></i></label>
+                    <label id="reset-picture" title="Change Home Picture" onclick="resetImage()"><i
+                            class='bx bx-reset'></i></label>
                     <label id="view-full-picture" title="View Full Picture"><i class='bx bx-image'></i></label>
                 </div>
             </div>
@@ -82,7 +88,7 @@
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bx-list-check'></i><text>8</text>
                 </div>
-                    
+
                 <div class="quick-item">
                     <p>Today Messages</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
@@ -113,10 +119,10 @@
                         <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
                         <div class="select-menu" status="pending-drop">
                             <div class="select-btn" id="action-drop-button">
-                            <span class="sBtn-text">Quick Action</span>
-                            <i class="bx bx-chevron-down"></i>
+                                <span class="sBtn-text">Quick Action</span>
+                                <i class="bx bx-chevron-down"></i>
                             </div>
-                        
+
                             <ul id="table-drop" class="options" style="display: none;">
                                 <li class="option">
                                     <i class='bx bxs-message' style="color: rgb(80, 80, 80);"></i>
@@ -145,7 +151,8 @@
                             </ul>
                         </div>
 
-                        <div class="button" color="dodgerblue" size="xsmall" position="absolute" id="allAction-btn" status="pending" ><i class='bx bx-right-arrow-alt' ></i></div>
+                        <div class="button" color="dodgerblue" size="xsmall" position="absolute"
+                            id="allAction-btn" status="pending"><i class='bx bx-right-arrow-alt'></i></div>
                     </div>
 
                     <div id="search-container">
@@ -154,7 +161,7 @@
                     </div>
 
                     <div id="table-border">
-                    
+
                         <table class="base-table" id="customers-table">
                             <tr id="table-header">
                                 <th><input id="selectAll-chk" type="checkbox" onchange="checkAll(this)"></th>
@@ -170,14 +177,15 @@
                             <tbody id="clients-list">
 
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0001</td>
                                     <td class="table-name" id="customer-name">Diego Garay</td>
                                     <td class="customer-policy">1000000</td>
                                     <td class="customer-address">17490 Meandering Way</td>
                                     <td class="customer-phone">469-473-9488</td>
                                     <td class="customer-dob">08/31/1999</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded' ></i>
+                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
                                         <label class="table-panel-options">
                                             <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
                                             <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
@@ -189,7 +197,8 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0002</td>
                                     <td class="table-name" id="customer-name">Emily Johnson</td> <!-- Updated name -->
                                     <td class="customer-policy">2000000</td>
@@ -208,7 +217,8 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0003</td>
                                     <td class="table-name" id="customer-name">Michael Rodriguez</td>
                                     <td class="customer-policy">3000000</td>
@@ -227,7 +237,8 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0004</td>
                                     <td class="table-name" id="customer-name">Sarah Thompson</td>
                                     <td class="customer-policy">4000000</td>
@@ -246,7 +257,8 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0005</td>
                                     <td class="table-name" id="customer-name">Alexandra Davis</td>
                                     <td class="customer-policy">5000000</td>
@@ -265,7 +277,8 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0006</td>
                                     <td class="table-name" id="customer-name">Christopher Evans</td>
                                     <td class="customer-policy">6000000</td>
@@ -282,9 +295,10 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0007</td>
                                     <td class="table-name" id="customer-name">Alicia Martinez</td>
                                     <td class="customer-policy">7000000</td>
@@ -301,9 +315,10 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0008</td>
                                     <td class="table-name" id="customer-name">Daniel Kim</td>
                                     <td class="customer-policy">8000000</td>
@@ -320,9 +335,10 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0009</td>
                                     <td class="table-name" id="customer-name">Elena Rodriguez</td>
                                     <td class="customer-policy">9000000</td>
@@ -339,9 +355,10 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0010</td>
                                     <td class="table-name" id="customer-name">Carlos Hernandez</td>
                                     <td class="customer-policy">10000000</td>
@@ -360,7 +377,8 @@
                                 </tr>
 
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0011</td>
                                     <td class="table-name" id="customer-name">Jessica Lee</td>
                                     <td class="customer-policy">11000000</td>
@@ -377,9 +395,10 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0012</td>
                                     <td class="table-name" id="customer-name">Ryan Mitchell</td>
                                     <td class="customer-policy">12000000</td>
@@ -396,9 +415,10 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0013</td>
                                     <td class="table-name" id="customer-name">Olivia Turner</td>
                                     <td class="customer-policy">13000000</td>
@@ -415,9 +435,10 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0014</td>
                                     <td class="table-name" id="customer-name">Jordan Smith</td>
                                     <td class="customer-policy">14000000</td>
@@ -434,9 +455,10 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                                 <tr>
-                                    <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
+                                    <td><input type="checkbox" name="customer_select" id=""
+                                            onchange="checkboxActive()"></td>
                                     <td class="customer-id">0015</td>
                                     <td class="table-name" id="customer-name">Gabriel Rivera</td>
                                     <td class="customer-policy">15000000</td>
@@ -453,13 +475,13 @@
                                         </label>
                                     </td>
                                 </tr>
-                                
+
                             </tbody>
-                            
+
                         </table>
 
                     </div>
-                    
+
                 </div>
 
                 <div id="lower-table-container">
@@ -471,94 +493,124 @@
 
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Jose Perez</a><p>Exclusion</p></div>
+                                <div class="recent-pdf-title"><a>Jose Perez</a>
+                                    <p>Exclusion</p>
+                                </div>
                                 <div class="recent-pdf-date">12/22/2023</div>
                             </div>
 
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Juan Rodriguez</a><p>Cancellation</p></div>
+                                <div class="recent-pdf-title"><a>Juan Rodriguez</a>
+                                    <p>Cancellation</p>
+                                </div>
                                 <div class="recent-pdf-date">01/10/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Maria Garcia</a><p>Exclusion</p></div>
+                                <div class="recent-pdf-title"><a>Maria Garcia</a>
+                                    <p>Exclusion</p>
+                                </div>
                                 <div class="recent-pdf-date">02/15/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Carlos Sanchez</a><p>Endorsement</p></div>
+                                <div class="recent-pdf-title"><a>Carlos Sanchez</a>
+                                    <p>Endorsement</p>
+                                </div>
                                 <div class="recent-pdf-date">03/05/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Laura Gomez</a><p>Commercial</p></div>
+                                <div class="recent-pdf-title"><a>Laura Gomez</a>
+                                    <p>Commercial</p>
+                                </div>
                                 <div class="recent-pdf-date">04/20/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Pedro Martinez</a><p>Cancellation</p></div>
+                                <div class="recent-pdf-title"><a>Pedro Martinez</a>
+                                    <p>Cancellation</p>
+                                </div>
                                 <div class="recent-pdf-date">05/03/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Ana Rodriguez</a><p>Exclusion</p></div>
+                                <div class="recent-pdf-title"><a>Ana Rodriguez</a>
+                                    <p>Exclusion</p>
+                                </div>
                                 <div class="recent-pdf-date">06/12/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Jorge Lopez</a><p>Endorsement</p></div>
+                                <div class="recent-pdf-title"><a>Jorge Lopez</a>
+                                    <p>Endorsement</p>
+                                </div>
                                 <div class="recent-pdf-date">07/08/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Isabel Gonzalez</a><p>Commercial</p></div>
+                                <div class="recent-pdf-title"><a>Isabel Gonzalez</a>
+                                    <p>Commercial</p>
+                                </div>
                                 <div class="recent-pdf-date">08/25/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Miguel Ramos</a><p>Cancellation</p></div>
+                                <div class="recent-pdf-title"><a>Miguel Ramos</a>
+                                    <p>Cancellation</p>
+                                </div>
                                 <div class="recent-pdf-date">09/14/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Sofia Diaz</a><p>Exclusion</p></div>
+                                <div class="recent-pdf-title"><a>Sofia Diaz</a>
+                                    <p>Exclusion</p>
+                                </div>
                                 <div class="recent-pdf-date">10/30/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Ricardo Herrera</a><p>Endorsement</p></div>
+                                <div class="recent-pdf-title"><a>Ricardo Herrera</a>
+                                    <p>Endorsement</p>
+                                </div>
                                 <div class="recent-pdf-date">11/18/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Gabriela Castro</a><p>Commercial</p></div>
+                                <div class="recent-pdf-title"><a>Gabriela Castro</a>
+                                    <p>Commercial</p>
+                                </div>
                                 <div class="recent-pdf-date">12/05/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Hector Morales</a><p>Cancellation</p></div>
+                                <div class="recent-pdf-title"><a>Hector Morales</a>
+                                    <p>Cancellation</p>
+                                </div>
                                 <div class="recent-pdf-date">12/19/2023</div>
                             </div>
-                            
+
                             <div class="recent-pdf">
                                 <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Carmen Fernandez</a><p>Exclusion</p></div>
+                                <div class="recent-pdf-title"><a>Carmen Fernandez</a>
+                                    <p>Exclusion</p>
+                                </div>
                                 <div class="recent-pdf-date">12/31/2023</div>
                             </div>
-                            
+
                         </div>
                     </div>
 
@@ -576,51 +628,51 @@
                             </div>
 
                             <div class="graph-bars-containers">
-                                
+
                                 <label class="graph-bar-height" style="height: 100%;">
                                     <p class="graph-bar-text">Monday</p>
                                     <e class="graph-amount">$500</e>
                                 </label>
-                                
+
                                 <label class="graph-bar-height" style="height: 25%;">
                                     <p class="graph-bar-text">Thursday</p>
                                     <e class="graph-amount">$500</e>
                                 </label>
-                                
+
                                 <label class="graph-bar-height" style="height: 50%;">
                                     <p class="graph-bar-text">Wednesday</p>
                                     <e class="graph-amount">$500</e>
                                 </label>
-                                
+
                                 <label class="graph-bar-height" style="height: 90%;">
                                     <p class="graph-bar-text">Tuesday</p>
                                     <e class="graph-amount">$500</e>
                                 </label>
-                                
+
                                 <label class="graph-bar-height" style="height: 10%;">
                                     <p class="graph-bar-text">Friday</p>
                                     <e class="graph-amount">$500</e>
                                 </label>
-                                
+
                                 <label class="graph-bar-height" style="height: 62%;">
                                     <p class="graph-bar-text">Saturday</p>
                                     <e class="graph-amount">$500</e>
                                 </label>
-                                
+
                                 <label class="graph-bar-height" style="height: 100%;">
                                     <p class="graph-bar-text">Sunday</p>
                                     <e class="graph-amount">$500</e>
                                 </label>
-                                
-                                
+
+
                             </div>
                         </div>
-                        
+
                     </div>
 
                 </div>
             </div>
-            
+
         </section>
 
     </div>
@@ -636,8 +688,8 @@
         <div class="confirm-window-container">
             <div class="confirm-window-content">
                 <div class="confirm-window-header">
-                <!-- <div class="confirm-window-icon"></div> -->
-                <!-- <div class="confirm-window-close-btn">
+                    <!-- <div class="confirm-window-icon"></div> -->
+                    <!-- <div class="confirm-window-close-btn">
                     <button>
                         <i class='bx bx-x'></i>
                     </button>
@@ -659,9 +711,9 @@
         <div id="table-border">
             <i class='bx bx-x' id="close-settings" onclick="closeSettings();"></i>
             <h2>Settings</h2>
-    
+
             <div class="settings-sub-title">Language</div>
-    
+
             <div id="language-settings">
                 <p>
                     <input type="radio" id="test1" name="radio-group" checked>
@@ -672,7 +724,7 @@
                     <label for="test2">Spanish</label>
                 </p>
             </div>
-            
+
             <!-- <div class='settings-sub-title'>Theme</div>
             
             <div id="dark-mode">
@@ -682,9 +734,9 @@
                 </span>
                 <p>Dark Mode</p>
             </div> -->
-    
+
             <div class='settings-sub-title'>Action Color</div>
-    
+
             <div class="color-pick-container" id="action-color-container">
                 <div class="color-pick" color="default" onclick="selectActionColor(this)"></div>
                 <div class="color-pick" color="red" onclick="selectActionColor(this)"></div>
@@ -701,14 +753,14 @@
                 <div class="color-pick" color="black" onclick="selectActionColor(this)"></div>
                 <div class="color-pick" color="white" onclick="selectActionColor(this)"></div>
             </div>
-    
+
             <div class="settings-sub-title" style="margin-top:50px;">Side Panel Background</div>
-            
+
             <div id="background-side-settings">
                 <div id="background-color-option-container">
 
                     <div class='settings-sub-title'>Select Color</div>
-        
+
                     <div class="color-pick-container">
                         <div class="color-pick" color="default" onclick="selectColor(this)"></div>
                         <div class="color-pick" color="red" onclick="selectColor(this)"></div>
@@ -726,26 +778,38 @@
                         <div class="color-pick" color="white" onclick="selectColor(this)"></div>
                     </div>
                 </div>
-    
+
                 <div id="background-image-option-container">
-                    
+
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg" alt="" ></label>
-                        <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(4)"><img src="img/menu/thumbs/4.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(5)"><img src="img/menu/thumbs/5.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(6)"><img src="img/menu/thumbs/6.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(7)"><img src="img/menu/thumbs/7.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(8)"><img src="img/menu/thumbs/8.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(9)"><img src="img/menu/thumbs/9.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(10)"><img src="img/menu/thumbs/10.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(11)"><img src="img/menu/thumbs/11.jpg" alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(12)"><img src="img/menu/thumbs/12.jpg" alt=""></label>
-                        
-                      
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(4)"><img src="img/menu/thumbs/4.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(5)"><img src="img/menu/thumbs/5.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(6)"><img src="img/menu/thumbs/6.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(7)"><img src="img/menu/thumbs/7.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(8)"><img src="img/menu/thumbs/8.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(9)"><img src="img/menu/thumbs/9.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(10)"><img src="img/menu/thumbs/10.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(11)"><img src="img/menu/thumbs/11.jpg"
+                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(12)"><img src="img/menu/thumbs/12.jpg"
+                                alt=""></label>
+
+
                     </div>
                 </div>
 
@@ -753,31 +817,33 @@
                     <div class="slider-wrap" id="side-image-slider">
                         <label for="frac" style="display:block;margin-bottom:8px;">Side Image Blur</label>
                         <div class="row">
-                        <input id="frac" type="range" min="0" max="1" step="0.01" value="0.00" />
-                        <div class="value">
-                            <span id="val-pct">0%</span>
-                        </div>
+                            <input id="frac" type="range" min="0" max="1" step="0.01"
+                                value="0.00" />
+                            <div class="value">
+                                <span id="val-pct">0%</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="slider-wrap" id="home-image-slider">
                         <label for="frac2" style="display:block;margin-bottom:8px;">Home Image Blur</label>
                         <div class="row">
-                        <input id="frac2" type="range" min="0" max="1" step="0.01" value="0.00" />
-                        <div class="value">
-                            <span id="val-pct2">0%</span>
-                        </div>
+                            <input id="frac2" type="range" min="0" max="1" step="0.01"
+                                value="0.00" />
+                            <div class="value">
+                                <span id="val-pct2">0%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
+
             </div>
-    
+
         </div>
     </div>
 
     <div id="dim-screen"></div>
-    
+
 
     <!-- <script src="js/main.js"></script> -->
     <script src="js/image.js"></script>
@@ -789,4 +855,5 @@
     <script src="js/operations.js"></script>
 
 </body>
+
 </html>

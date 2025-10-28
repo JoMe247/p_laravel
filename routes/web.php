@@ -52,4 +52,9 @@ Route::get('/profile/{id}', [CustomersController::class, 'profile'])->name('prof
 Route::put('/profile/{id}', [CustomersController::class, 'update'])->name('customers.update'); // guarda el resto del perfil
 Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMultiple']);
 
+Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(function () {
+    Route::get('/login', [LoginController::class, 'show'])->name('login');
+});
+
+
 

@@ -23,6 +23,8 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
+        DB::table('user_tokens')->where('expires_at', '<', now())->delete();
+
         $usernameOrEmail = trim($request->input('username_or_email'));
         $password = $request->input('password');
         $rememberMe = $request->has('remember_me');

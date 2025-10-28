@@ -3,11 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function show()
     {
-        return view('dashboard');
+        // Obtener usuario autenticado (funciona también con remember me)
+        $user = Auth::user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Pasamos el nombre de usuario a la vista
+        return view('dashboard', [
+            'username' => $user->username,
+        ]);
     }
 }
