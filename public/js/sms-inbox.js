@@ -65,13 +65,13 @@ btnDeleteSelected?.addEventListener('click', async function () {
 
 // Eliminar una sola desde la lista (O detectar Click en Cada Elemento)
 el('#contacts')?.addEventListener('click', async function (e) {
-    
+
     $(".sms-contact").removeAttr("selected");
-    
+
     const row = e.target.closest('.sms-contact');
-    
+
     row.setAttribute("selected", "true");
- 
+
     if (!row) return;
 
     if (e.target.classList.contains('btnDeleteOne')) {
@@ -100,7 +100,7 @@ el('#contacts')?.addEventListener('click', async function (e) {
         loadConversation(contact);
 
         const url = new URL(window.location.href);
-        url.searchParams.set('contact', contact.replace("+",""));
+        url.searchParams.set('contact', contact.replace("+", ""));
         // url.searchParams.delete('param2');
         window.history.replaceState(null, null, url); // or pushState
     }
@@ -108,8 +108,8 @@ el('#contacts')?.addEventListener('click', async function (e) {
 
 // ------------------ Eliminar conversación actual ------------------
 btnDeleteConversation?.addEventListener('click', async function () {
-    const unformatUS = s => '+1' + s.replace(/\D+/g, '').replace(/^1?/, '').slice(0,10);
-    const formatUS = s => (m => m ? `+1 (${m[1]}) ${m[2]}-${m[3]}` : s)(s.replace(/\D+/g,'').match(/^1?(\d{3})(\d{3})(\d{4})$/));
+    const unformatUS = s => '+1' + s.replace(/\D+/g, '').replace(/^1?/, '').slice(0, 10);
+    const formatUS = s => (m => m ? `+1 (${m[1]}) ${m[2]}-${m[3]}` : s)(s.replace(/\D+/g, '').match(/^1?(\d{3})(\d{3})(\d{4})$/));
     const contact = unformatUS(el('#currentContact')?.innerText.trim());
     if (!contact) return;
 
@@ -120,58 +120,58 @@ btnDeleteConversation?.addEventListener('click', async function () {
         html: `You won't be able to recover chat with: <br><br><b>${formatUS(contact)}</b>`,
         icon: "warning",
         iconColor: 'var(--red1)',
-        width:"420px",
+        width: "420px",
         showCancelButton: true,
         confirmButtonColor: "var(--red1)",
         cancelButtonColor: "#ddd",
         confirmButtonText: "Delete"
     }).then(async (result) => {            // <-- async aquí
-    if (!result.isConfirmed) return;
+        if (!result.isConfirmed) return;
 
-    try {
-        btnDeleteConversation.disabled = true;
+        try {
+            btnDeleteConversation.disabled = true;
 
-        const res = await fetch(
-        window.routes.deleteOne.replace(':contact', encodeURIComponent(contact)),
-        { method: 'DELETE', headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' } }
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+            const res = await fetch(
+                window.routes.deleteOne.replace(':contact', encodeURIComponent(contact)),
+                { method: 'DELETE', headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' } }
+            );
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
 
-        // alert(data.message || 'Conversación eliminada');
+            // alert(data.message || 'Conversación eliminada');
 
-        Swal.fire({
-            title: "Conversación eliminada",
-            icon: "success",
-            iconColor: 'var(--red1)'
-        });
+            Swal.fire({
+                title: "Conversación eliminada",
+                icon: "success",
+                iconColor: 'var(--red1)'
+            });
 
-        // Limpia la UI
-        el('#messagesPane').innerHTML = '<div class="empty">Selecciona un contacto a la izquierda para ver su chat</div>';
-        el('#currentContact').innerText = '';
-        el('#composer').style.display = 'none';
+            // Limpia la UI
+            el('#messagesPane').innerHTML = '<div class="empty">Selecciona un contacto a la izquierda para ver su chat</div>';
+            el('#currentContact').innerText = '';
+            el('#composer').style.display = 'none';
 
-        // Quita de la lista
-        const row = el(`.sms-contact[data-contact="${CSS.escape(contact)}"]`);
-        if (row) row.remove();
+            // Quita de la lista
+            const row = el(`.sms-contact[data-contact="${CSS.escape(contact)}"]`);
+            if (row) row.remove();
 
-        // Limpia el query param
-        const url = new URL(window.location.href);
-        if (url.searchParams.has('contact')) {
-        url.searchParams.delete('contact');
-        window.history.replaceState(null, '', url);
+            // Limpia el query param
+            const url = new URL(window.location.href);
+            if (url.searchParams.has('contact')) {
+                url.searchParams.delete('contact');
+                window.history.replaceState(null, '', url);
+            }
+
+            btnDeleteConversation.disabled = true; // queda deshabilitado tras borrar
+        } catch (err) {
+            console.error(err);
+            alert('Error eliminando conversación');
+            btnDeleteConversation.disabled = false;
         }
-
-        btnDeleteConversation.disabled = true; // queda deshabilitado tras borrar
-    } catch (err) {
-        console.error(err);
-        alert('Error eliminando conversación');
-        btnDeleteConversation.disabled = false;
-    }
     });
 
 
-    
+
 });
 
 // ------------------ BÚSQUEDA (REEMPLAZAR BLOQUE) ------------------
@@ -307,60 +307,60 @@ el('#search')?.addEventListener('input', function (e) {
 
 // ------------------ Sincronización ------------------
 el('#btnSync')?.addEventListener('click', async function () {
-  this.disabled = true;
-  this.setAttribute("syncAnimation", "true");
-  this.innerHTML = `<i class='bx bx-sync'></i></button>`;
+    this.disabled = true;
+    this.setAttribute("syncAnimation", "true");
+    this.innerHTML = `<i class='bx bx-sync'></i></button>`;
 
-  try {
-    const res = await fetch(window.routes.sync, {
-      method: 'POST',
-      headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' }
-    });
+    try {
+        const res = await fetch(window.routes.sync, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' }
+        });
 
-    // Manejo de error de servidor (por si devuelve HTML por error)
-    if (!res.headers.get('content-type')?.includes('application/json')) {
-      const text = await res.text();
-      console.error('Respuesta no-JSON:', text);
-      throw new Error('La respuesta no es JSON');
+        // Manejo de error de servidor (por si devuelve HTML por error)
+        if (!res.headers.get('content-type')?.includes('application/json')) {
+            const text = await res.text();
+            console.error('Respuesta no-JSON:', text);
+            throw new Error('La respuesta no es JSON');
+        }
+
+        const data = await res.json();
+        // console.log('Sincronizados:', data.synced);
+        // console.log('Inbox (últimos mensajes por contacto):', data.contacts);
+
+        // Ejemplo: solo los cuerpos de los últimos mensajes
+        // console.log('Bodies:', data.contacts.map(c => c.last_body));
+        renderContacts(data.contacts);
+        updateContactsPanel();
+        this.disabled = false;
+        this.removeAttribute("syncAnimation", "false");
+
+        url = new URL(window.location.href);
+        if (url.searchParams.has('contact')) {
+            // console.log("existe contact");
+            // console.log(url.searchParams.get("contact"));
+            let contactURL = url.searchParams.get("contact");
+            loadConversation(`+${contactURL}`);
+        } else {
+
+        }
+        // Si quisieras refrescar:
+        // location.reload();
+
+    } catch (err) {
+        console.error(err);
+        this.disabled = false;
+        this.removeAttribute("syncAnimation");
+        this.innerHTML = `<i class='bx bx-error' ></i>`;
     }
-
-    const data = await res.json();
-    // console.log('Sincronizados:', data.synced);
-    // console.log('Inbox (últimos mensajes por contacto):', data.contacts);
-
-    // Ejemplo: solo los cuerpos de los últimos mensajes
-    // console.log('Bodies:', data.contacts.map(c => c.last_body));
-    renderContacts(data.contacts);
-    updateContactsPanel();
-    this.disabled = false;
-    this.removeAttribute("syncAnimation", "false");
-
-    url = new URL(window.location.href);
-    if (url.searchParams.has('contact')) {
-        // console.log("existe contact");
-        // console.log(url.searchParams.get("contact"));
-        let contactURL = url.searchParams.get("contact");
-        loadConversation(`+${contactURL}`);
-    }else{
-        
-    }
-    // Si quisieras refrescar:
-    // location.reload();
-
-  } catch (err) {
-    console.error(err);
-    this.disabled = false;
-    this.removeAttribute("syncAnimation");
-    this.innerHTML = `<i class='bx bx-error' ></i>`;
-  }
 });
 
 
 // ------------------ Cargar conversación ------------------
 async function loadConversation(contact) {
 
-    const formatUS = s => (m => m ? `+1 (${m[1]}) ${m[2]}-${m[3]}` : s)(s.replace(/\D+/g,'').match(/^1?(\d{3})(\d{3})(\d{4})$/));
-    el('#currentContact').innerText =  formatUS(contact);
+    const formatUS = s => (m => m ? `+1 (${m[1]}) ${m[2]}-${m[3]}` : s)(s.replace(/\D+/g, '').match(/^1?(\d{3})(\d{3})(\d{4})$/));
+    el('#currentContact').innerText = formatUS(contact);
     el('#composer').style.display = '';
     el('#toInput').value = contact;
 
@@ -387,7 +387,7 @@ async function loadConversation(contact) {
 
             const box = document.createElement('div');
             box.className = 'message-box';
-            box.innerHTML = m.body ? m.body.replace(/\n/g,'<br>') : '';
+            box.innerHTML = m.body ? m.body.replace(/\n/g, '<br>') : '';
 
             const when = m.date_sent || m.date_created || m.created_at
                 ? new Date(m.date_sent || m.date_created || m.created_at).toLocaleString()
@@ -395,7 +395,8 @@ async function loadConversation(contact) {
 
             const date = document.createElement('div');
             date.className = 'message-date';
-            date.innerText = when;
+            date.innerText = `${when}${m.sender_name ? ' · ' + m.sender_name : ''}`;
+
 
             wrapper.appendChild(box);
             wrapper.appendChild(date);
@@ -443,7 +444,7 @@ el('#sendForm')?.addEventListener('submit', async function (e) {
 
             const box = document.createElement('div');
             box.className = 'message-box';
-            box.innerHTML = body.replace(/\n/g,'<br>');
+            box.innerHTML = body.replace(/\n/g, '<br>');
 
             const now = new Date().toLocaleString();
             const date = document.createElement('div');
@@ -495,9 +496,9 @@ function updateContactsPanel() {
         // console.log(url.searchParams.get("contact"));
         let contactURL = url.searchParams.get("contact");
         loadConversation(`+${contactURL}`);
-        
-    }else{
-        
+
+    } else {
+
     }
 }
 
@@ -569,148 +570,148 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // --- Helpers ---
 const formatUS = s => (m => m ? `+1 (${m[1]}) ${m[2]}-${m[3]}` : s)(
-  String(s).replace(/\D+/g,'').match(/^1?(\d{3})(\d{3})(\d{4})$/)
+    String(s).replace(/\D+/g, '').match(/^1?(\d{3})(\d{3})(\d{4})$/)
 );
 
 const truncate = (str, n = 60) => {
-  const s = String(str || '');
-  return s.length > n ? s.slice(0, n - 1) + '…' : s;
+    const s = String(str || '');
+    return s.length > n ? s.slice(0, n - 1) + '…' : s;
 };
 
 const formatDateMX = iso => {
-  if (!iso) return '';
-  try {
-    const dt = new Date(iso);
-    // Fuerza zona MX para consistencia con Carbon
-    const fmt = new Intl.DateTimeFormat('es-MX', {
-      timeZone: 'America/Mexico_City',
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: false
-    });
-    // Intl en es-MX da "dd/mm/aaaa, HH:MM"; quitamos la coma si aparece
-    return fmt.format(dt).replace(',', '');
-  } catch { return ''; }
+    if (!iso) return '';
+    try {
+        const dt = new Date(iso);
+        // Fuerza zona MX para consistencia con Carbon
+        const fmt = new Intl.DateTimeFormat('es-MX', {
+            timeZone: 'America/Mexico_City',
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: false
+        });
+        // Intl en es-MX da "dd/mm/aaaa, HH:MM"; quitamos la coma si aparece
+        return fmt.format(dt).replace(',', '');
+    } catch { return ''; }
 };
 
 // --- Render principal ---
 function renderContacts(list = []) {
-  const container = document.querySelector('#contacts');
-  if (!container) return;
+    const container = document.querySelector('#contacts');
+    if (!container) return;
 
-  // Guarda checks seleccionados para restaurar
-  const prevChecked = new Set(
-    Array.from(container.querySelectorAll('.contact-check:checked')).map(i => i.value)
-  );
+    // Guarda checks seleccionados para restaurar
+    const prevChecked = new Set(
+        Array.from(container.querySelectorAll('.contact-check:checked')).map(i => i.value)
+    );
 
-  container.innerHTML = '';
+    container.innerHTML = '';
 
-  if (!list.length) {
-    container.innerHTML = `
+    if (!list.length) {
+        container.innerHTML = `
       <div class="empty">No hay conversaciones. Presiona
         <strong>Actualizar</strong> para leer mensajes desde Twilio.
       </div>`;
-    return;
-  }
+        return;
+    }
 
-  for (const c of list) {
-    const wrap = document.createElement('div');
-    wrap.className = 'sms-contact';
-    wrap.dataset.contact = c.contact || '';
-    wrap.dataset.lastAt  = c.last_at  || '';
+    for (const c of list) {
+        const wrap = document.createElement('div');
+        wrap.className = 'sms-contact';
+        wrap.dataset.contact = c.contact || '';
+        wrap.dataset.lastAt = c.last_at || '';
 
-    const chk = document.createElement('input');
-    chk.type = 'checkbox';
-    chk.className = 'contact-check';
-    chk.value = c.contact || '';
-    chk.style.marginRight = '8px';
-    if (prevChecked.has(chk.value)) chk.checked = true;
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.className = 'contact-check';
+        chk.value = c.contact || '';
+        chk.style.marginRight = '8px';
+        if (prevChecked.has(chk.value)) chk.checked = true;
 
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    meta.style.flex = '1';
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.style.flex = '1';
 
-    const nameDiv = document.createElement('div');
-    nameDiv.style.fontWeight = '600';
-    nameDiv.style.textAlign = 'left';
-    nameDiv.textContent = formatUS(c.contact || '');
+        const nameDiv = document.createElement('div');
+        nameDiv.style.fontWeight = '600';
+        nameDiv.style.textAlign = 'left';
+        nameDiv.textContent = formatUS(c.contact || '');
 
-    const lastDiv = document.createElement('div');
-    lastDiv.className = 'last';
-    lastDiv.textContent = truncate(c.last_body, 60);
+        const lastDiv = document.createElement('div');
+        lastDiv.className = 'last';
+        lastDiv.textContent = truncate(c.last_body, 60);
 
-    const dateDiv = document.createElement('div');
-    dateDiv.className = 'contact-date';
-    dateDiv.textContent = formatDateMX(c.last_at);
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'contact-date';
+        dateDiv.textContent = formatDateMX(c.last_at);
 
-    meta.appendChild(nameDiv);
-    meta.appendChild(lastDiv);
-    wrap.appendChild(chk);
-    wrap.appendChild(meta);
-    wrap.appendChild(dateDiv);
-    container.appendChild(wrap);
-  }
+        meta.appendChild(nameDiv);
+        meta.appendChild(lastDiv);
+        wrap.appendChild(chk);
+        wrap.appendChild(meta);
+        wrap.appendChild(dateDiv);
+        container.appendChild(wrap);
+    }
 }
 
 
 (() => {
-  const SYNC_MS = 60_000; // 60s
+    const SYNC_MS = 60_000; // 60s
 
-  const forceSyncClick = () => {
-    const btn = document.querySelector('#btnSync');
-    if (btn && !btn.disabled) btn.click();
-  };
+    const forceSyncClick = () => {
+        const btn = document.querySelector('#btnSync');
+        if (btn && !btn.disabled) btn.click();
+    };
 
-  // ---- Interval solo cuando la página está visible ----
-  let visIntervalId = null;
-  const startVisibleInterval = () => {
-    if (visIntervalId) return;
-    visIntervalId = setInterval(() => {
-      if (document.visibilityState === 'visible') forceSyncClick();
-    }, SYNC_MS);
-  };
-  const stopVisibleInterval = () => {
-    if (visIntervalId) {
-      clearInterval(visIntervalId);
-      visIntervalId = null;
-    }
-  };
+    // ---- Interval solo cuando la página está visible ----
+    let visIntervalId = null;
+    const startVisibleInterval = () => {
+        if (visIntervalId) return;
+        visIntervalId = setInterval(() => {
+            if (document.visibilityState === 'visible') forceSyncClick();
+        }, SYNC_MS);
+    };
+    const stopVisibleInterval = () => {
+        if (visIntervalId) {
+            clearInterval(visIntervalId);
+            visIntervalId = null;
+        }
+    };
 
-  // ---- Inactividad 60s (solo si visible) ----
-  let idleTimeoutId = null;
-  const clearIdleTimer = () => {
-    if (idleTimeoutId) {
-      clearTimeout(idleTimeoutId);
-      idleTimeoutId = null;
-    }
-  };
-  const resetIdleTimer = () => {
-    clearIdleTimer();
-    if (document.visibilityState !== 'visible') return;
-    idleTimeoutId = setTimeout(() => {
-      forceSyncClick();
-      resetIdleTimer(); // sigue vigilando
-    }, SYNC_MS);
-  };
+    // ---- Inactividad 60s (solo si visible) ----
+    let idleTimeoutId = null;
+    const clearIdleTimer = () => {
+        if (idleTimeoutId) {
+            clearTimeout(idleTimeoutId);
+            idleTimeoutId = null;
+        }
+    };
+    const resetIdleTimer = () => {
+        clearIdleTimer();
+        if (document.visibilityState !== 'visible') return;
+        idleTimeoutId = setTimeout(() => {
+            forceSyncClick();
+            resetIdleTimer(); // sigue vigilando
+        }, SYNC_MS);
+    };
 
-  const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
-  activityEvents.forEach(ev =>
-    window.addEventListener(ev, resetIdleTimer, { passive: true })
-  );
+    const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
+    activityEvents.forEach(ev =>
+        window.addEventListener(ev, resetIdleTimer, { passive: true })
+    );
 
-  // ---- Reacciona a cambios de visibilidad ----
-  document.addEventListener('visibilitychange', () => {
+    // ---- Reacciona a cambios de visibilidad ----
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            startVisibleInterval();
+            resetIdleTimer();
+        } else {
+            stopVisibleInterval();
+            clearIdleTimer();
+        }
+    });
+
+    // ---- Inicio ----
     if (document.visibilityState === 'visible') {
-      startVisibleInterval();
-      resetIdleTimer();
-    } else {
-      stopVisibleInterval();
-      clearIdleTimer();
+        startVisibleInterval();
+        resetIdleTimer();
     }
-  });
-
-  // ---- Inicio ----
-  if (document.visibilityState === 'visible') {
-    startVisibleInterval();
-    resetIdleTimer();
-  }
 })();

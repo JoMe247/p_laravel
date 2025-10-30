@@ -21,6 +21,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
+Route::get('/verify-email/{token}', [RegisterController::class, 'verifyEmail'])->name('verify.email');
 
 // Dashboard y otros módulos
 Route::get('/dashboard', [DashboardController::class, 'show'])->middleware('auth')->name('dashboard');

@@ -7,6 +7,9 @@ use App\Models\SmsMessage;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class SmsController extends Controller
 {
@@ -84,9 +87,9 @@ class SmsController extends Controller
             ->orderByRaw('COALESCE(date_sent, date_created, created_at)')
             ->get();
 
-        // Filtrar mensajes eliminados
         $filtered = [];
         $latest = null;
+
         foreach ($msgs as $m) {
             if ($m->deleted !== 'YES') {
                 $filtered[] = $m;
@@ -96,13 +99,31 @@ class SmsController extends Controller
             }
         }
 
-        // Si el último mensaje fue eliminado, mostrar solo ese
         if ($latest && $latest->deleted === 'YES' && !in_array($latest, $filtered)) {
             $filtered[] = $latest;
         }
 
+        // ✅ Buscar el 'name' en la tabla users según el username (contacto)
+        // 🔹 Agregar el name del usuario autenticado a los mensajes enviados
+        $userName = Auth::check() ? Auth::user()->name : '';
+
+
+        // Solo asignamos el name al mensaje enviado por el usuario (Twilio)
+        foreach ($filtered as $msg) {
+            if ($msg->from === $twilio) {
+                // Mensaje enviado desde el sistema (usuario logueado)
+                $msg->sender_name = $userName;
+            } else {
+                // Mensaje recibido (cliente)
+                $msg->sender_name = '';
+            }
+        }
+
+
         return response()->json($filtered);
     }
+
+
 
     // 🔄 Sincronización con Twilio
     public function sync(Request $request)
@@ -143,10 +164,8 @@ class SmsController extends Controller
             );
 
             $count++;
-
-           
         }
-         // Reusa la misma lista que ve index()
+        // Reusa la misma lista que ve index()
         $list = $this->buildInboxList($twilio);
 
         return response()->json([
@@ -239,64 +258,61 @@ class SmsController extends Controller
         ]);
     }
 
-// 🔍 Búsqueda global en mensajes
-// ------------------ Método search para SmsController ------------------
-public function search(Request $request)
-{
-    $q = trim((string) $request->query('q', ''));
+    // 🔍 Búsqueda global en mensajes
+    // ------------------ Método search para SmsController ------------------
+    public function search(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
 
-    if ($q === '') {
-        return response()->json([]);
+        if ($q === '') {
+            return response()->json([]);
+        }
+
+        // Buscar mensajes no eliminados que contengan la palabra en body/from/to
+        $results = SmsMessage::whereNull('deleted')
+            ->where(function ($qBuilder) use ($q) {
+                $qBuilder->where('body', 'LIKE', "%{$q}%")
+                    ->orWhere('from', 'LIKE', "%{$q}%")
+                    ->orWhere('to', 'LIKE', "%{$q}%");
+            })
+            ->orderByRaw('COALESCE(date_sent, date_created, created_at) DESC')
+            ->limit(200)
+            ->get(['id', 'from', 'to', 'body', 'date_sent', 'date_created', 'created_at']);
+
+        return response()->json($results);
     }
 
-    // Buscar mensajes no eliminados que contengan la palabra en body/from/to
-    $results = SmsMessage::whereNull('deleted')
-        ->where(function($qBuilder) use ($q) {
-            $qBuilder->where('body', 'LIKE', "%{$q}%")
-                     ->orWhere('from', 'LIKE', "%{$q}%")
-                     ->orWhere('to', 'LIKE', "%{$q}%");
-        })
-        ->orderByRaw('COALESCE(date_sent, date_created, created_at) DESC')
-        ->limit(200)
-        ->get(['id','from','to','body','date_sent','date_created','created_at']);
 
-    return response()->json($results);
-}
+    // Dentro del mismo controlador
+    private function buildInboxList(string $twilio): array
+    {
+        $froms = SmsMessage::where('from', '!=', $twilio)->whereNull('deleted')->pluck('from')->toArray();
+        $tos   = SmsMessage::where('to', '!=', $twilio)->whereNull('deleted')->pluck('to')->toArray();
+        $contacts = array_values(array_unique(array_merge($froms, $tos)));
 
-
-// Dentro del mismo controlador
-private function buildInboxList(string $twilio): array
-{
-    $froms = SmsMessage::where('from', '!=', $twilio)->whereNull('deleted')->pluck('from')->toArray();
-    $tos   = SmsMessage::where('to', '!=', $twilio)->whereNull('deleted')->pluck('to')->toArray();
-    $contacts = array_values(array_unique(array_merge($froms, $tos)));
-
-    $list = [];
-    foreach ($contacts as $c) {
-        $last = SmsMessage::where(function ($q) use ($c, $twilio) {
+        $list = [];
+        foreach ($contacts as $c) {
+            $last = SmsMessage::where(function ($q) use ($c, $twilio) {
                 $q->where('from', $c)->where('to', $twilio);
             })->orWhere(function ($q) use ($c, $twilio) {
                 $q->where('from', $twilio)->where('to', $c);
             })
-            ->whereNull('deleted')
-            ->orderBy('date_sent', 'desc')
-            ->first();
+                ->whereNull('deleted')
+                ->orderBy('date_sent', 'desc')
+                ->first();
 
-        if ($last) {
-            $list[] = [
-                'contact'   => $c,
-                'last_body' => $last->body,
-                'last_at'   => $last->date_sent,
-            ];
+            if ($last) {
+                $list[] = [
+                    'contact'   => $c,
+                    'last_body' => $last->body,
+                    'last_at'   => $last->date_sent,
+                ];
+            }
         }
+
+        // Ordena por último mensaje
+        usort($list, fn($a, $b) => strtotime($b['last_at']) <=> strtotime($a['last_at']));
+
+        return $list;
     }
-
-    // Ordena por último mensaje
-    usort($list, fn($a, $b) => strtotime($b['last_at']) <=> strtotime($a['last_at']));
-
-    return $list;
-}
-
-
-
 }
