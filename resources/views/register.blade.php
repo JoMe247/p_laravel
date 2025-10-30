@@ -52,7 +52,8 @@
                 const response = await fetch("{{ route('register') }}", {
                     method: "POST",
                     headers: {
-                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
+                        "Accept": "application/json"
                     },
                     body: formData
                 });

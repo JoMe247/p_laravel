@@ -21,6 +21,19 @@
 <body>
 
     <div class="wrapper">
+
+        {{-- Mensajes de verificación de correo --}}
+        @if(session('status'))
+            <div class="alert success" style="color: green; text-align:center;">
+                {{ session('status') }}
+            </div>
+        @endif
+        @if(session('status_error'))
+            <div class="alert error" style="color: red; text-align:center;">
+                {{ session('status_error') }}
+            </div>
+        @endif
+
         <form action="{{ url('/login') }}" method="POST">
             @csrf
             
