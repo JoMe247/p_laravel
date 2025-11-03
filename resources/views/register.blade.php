@@ -1,6 +1,7 @@
 <!-- resources/views/register.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
     <meta name="theme-color" content="#a60853">
@@ -14,6 +15,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
+
 <body>
 
     <div class="wrapper">
@@ -23,6 +25,10 @@
             <div class="input-box">
                 <input type="text" name="username" placeholder="Username" required autocomplete="off">
                 <i class='bx bxs-user'></i>
+            </div>
+            <div class="input-box">
+                <input type="text" name="name" placeholder="Full Name" required autocomplete="off">
+                <i class='bx bxs-id-card'></i>
             </div>
             <div class="input-box">
                 <input type="email" name="email" placeholder="Email" required autocomplete="off">
@@ -66,7 +72,7 @@
                 } else {
                     responseMessage.style.color = "white";
                     responseMessage.textContent = data.message || "Error al registrar";
-                    responseMessage.setAttribute("shake","on");
+                    responseMessage.setAttribute("shake", "on");
                     setTimeout(() => responseMessage.removeAttribute("shake"), 800);
                 }
 
@@ -78,4 +84,5 @@
     </script>
 
 </body>
+
 </html>
