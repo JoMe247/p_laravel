@@ -24,6 +24,7 @@ class User extends Authenticatable
     'reset_token',
     'reset_token_expires',
     'role',
+    'agency',
 ];
 
     protected $hidden = [
