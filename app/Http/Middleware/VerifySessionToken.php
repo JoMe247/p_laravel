@@ -11,15 +11,21 @@ class VerifySessionToken
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check()) {
-            $user = Auth::user();
+        // Determinar qué tipo de usuario está autenticado
+        $guard = Auth::guard('web')->check() ? 'web' : (Auth::guard('sub')->check() ? 'sub' : null);
+        $user  = Auth::guard($guard)->user();
 
-            // Verifica si el token de sesión en la DB sigue siendo el mismo
+        // Si no hay usuario autenticado, continuar
+        if (!$user) {
+            return $next($request);
+        }
+
+        // Solo aplicar verificación estricta de token a usuarios "web"
+        if ($guard === 'web') {
             $sessionToken = session('session_token');
 
             if (!$user->current_session_token || $user->current_session_token !== $sessionToken) {
-                // Token inválido: cerramos sesión y redirigimos
-                Auth::logout();
+                Auth::guard('web')->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
@@ -29,6 +35,7 @@ class VerifySessionToken
             }
         }
 
+        // Si es sub_user, no aplicar verificación de token (evita bucle)
         return $next($request);
     }
 }

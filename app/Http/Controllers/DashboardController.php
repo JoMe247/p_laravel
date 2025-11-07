@@ -10,7 +10,7 @@ class DashboardController extends Controller
     public function show()
     {
         // Obtener usuario autenticado (funciona también con remember me)
-        $user = Auth::user();
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
         // En caso de no estar autenticado, redirige al login
         if (!$user) {

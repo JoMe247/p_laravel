@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use App\Models\SubUser;
 use Illuminate\Support\Facades\Cookie;
 
 class RememberMeMiddleware
@@ -14,7 +15,7 @@ class RememberMeMiddleware
     public function handle(Request $request, Closure $next)
     {
         // Si ya está autenticado, continuar
-        if (Auth::check()) {
+        if (Auth::guard('web')->check() || Auth::guard('sub')->check()) {
             return $next($request);
         }
 
@@ -32,7 +33,7 @@ class RememberMeMiddleware
 
                 if ($user) {
                     // Iniciar sesión automáticamente
-                    Auth::login($user, true);
+                    Auth::guard('web')->login($user, true);
 
                     // Regenerar la sesión para seguridad
                     $request->session()->regenerate();

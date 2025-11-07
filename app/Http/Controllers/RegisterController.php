@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Twilio\Rest\Client;
+
 
 class RegisterController extends Controller
 {
@@ -18,7 +20,7 @@ class RegisterController extends Controller
     }
 
     // Procesar registro
-    public function register(Request $request)
+public function register(Request $request)
 {
     try {
         // Validación
@@ -29,26 +31,59 @@ class RegisterController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        // 🔢 Obtener el último código agency
+        // 🔢 Generar o recuperar código de agencia
         $lastAgency = User::orderBy('id', 'desc')->value('agency');
 
         if ($lastAgency) {
-            // Extraer el número (ejemplo: DOC-00012 → 12)
             $num = (int) str_replace('DOC-', '', $lastAgency);
             $nextNumber = $num + 1;
         } else {
             $nextNumber = 1;
         }
 
-        // Formatear el nuevo código
         $agencyCode = 'DOC-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
-        // Generar token
+        // Token de verificación
         $verificationToken = Str::random(32);
 
-        // Crear usuario
+        // ⚙️ Conectar con Twilio
+        $sid    = env('TWILIO_ACCOUNT_SID');
+        $token  = env('TWILIO_AUTH_TOKEN');
+        $client = new Client($sid, $token);
+
+        // 📋 Buscar si ya hay usuarios en la misma agency
+        $existingAgency = User::where('agency', $agencyCode)->first();
+
+        if (!$existingAgency) {
+            // 🔍 Es una nueva agency → asignar número Twilio libre
+            $numbers = $client->incomingPhoneNumbers->read([], 20);
+            $assigned = User::pluck('twilio_number')->toArray();
+            $availableNumber = null;
+
+            foreach ($numbers as $num) {
+                $phone = $num->phoneNumber;
+                if (!in_array($phone, $assigned)) {
+                    $availableNumber = $phone;
+                    break;
+                }
+            }
+
+            if (!$availableNumber) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay números de Twilio disponibles para asignar.',
+                ], 400);
+            }
+
+            $twilioNumber = $availableNumber;
+        } else {
+            // 🔁 La agency ya existe → heredar número Twilio
+            $twilioNumber = $existingAgency->twilio_number;
+        }
+
+        // 🧠 Crear el nuevo usuario
         $user = User::create([
-            'agency'             => $agencyCode, // 👈 Código generado
+            'agency'             => $agencyCode,
             'username'           => $request->username,
             'name'               => $request->name,
             'email'              => $request->email,
@@ -56,12 +91,11 @@ class RegisterController extends Controller
             'verification_token' => $verificationToken,
             'email_verified'     => 0,
             'role'               => 'user',
+            'twilio_number'      => $twilioNumber,
         ]);
 
-        // URL de verificación
+        // 📧 Enviar correo de verificación
         $verificationUrl = url("/verify-email?token={$verificationToken}");
-
-        // Enviar correo HTML
         Mail::send('emails.verify', [
             'user' => $user,
             'verificationUrl' => $verificationUrl
@@ -72,8 +106,11 @@ class RegisterController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Registration successful! Check your email for the verification link.',
+            'message' => 'Usuario registrado correctamente. Verifica tu correo.',
+            'agency'  => $agencyCode,
+            'twilio_number' => $twilioNumber,
         ]);
+
     } catch (\Illuminate\Validation\ValidationException $e) {
         return response()->json([
             'success' => false,
@@ -83,7 +120,7 @@ class RegisterController extends Controller
         Log::error('Error en registro: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => 'Internal server error: ' . $e->getMessage(),
+            'message' => 'Error interno: ' . $e->getMessage(),
         ], 500);
     }
 }

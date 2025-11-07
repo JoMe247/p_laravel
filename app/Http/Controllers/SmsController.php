@@ -4,38 +4,35 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SmsMessage;
+use App\Models\User;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-
-
 class SmsController extends Controller
 {
     protected $twilioSid;
     protected $twilioToken;
-    protected $twilioFrom;
 
     public function __construct()
     {
         $this->twilioSid = config('services.twilio.sid') ?: env('TWILIO_ACCOUNT_SID');
         $this->twilioToken = config('services.twilio.token') ?: env('TWILIO_AUTH_TOKEN');
-        $this->twilioFrom = config('services.twilio.from') ?: env('TWILIO_SMS_FROM');
     }
 
     // 📩 Vista principal (inbox)
     public function index(Request $request)
     {
-        $twilio = $this->twilioFrom;
+        $twilio = $this->getAgencyTwilioNumber(); // 🔹 NUEVO
+
         $list = $this->buildInboxList($twilio);
-        // Números de contactos con mensajes no eliminados
+
         $froms = SmsMessage::where('from', '!=', $twilio)->whereNull('deleted')->pluck('from')->toArray();
         $tos   = SmsMessage::where('to', '!=', $twilio)->whereNull('deleted')->pluck('to')->toArray();
 
         $contacts = array_values(array_unique(array_merge($froms, $tos)));
 
-        // Lista con último mensaje por contacto
         $list = [];
         foreach ($contacts as $c) {
             $last = SmsMessage::where(function ($q) use ($c, $twilio) {
@@ -56,7 +53,6 @@ class SmsController extends Controller
             }
         }
 
-        // Ordenar por último mensaje (descendente)
         usort($list, fn($a, $b) => strtotime($b['last_at']) <=> strtotime($a['last_at']));
 
         if ($request->wantsJson()) {
@@ -65,7 +61,6 @@ class SmsController extends Controller
                 'twilio'   => $twilio,
             ]);
         }
-
 
         return view('sms.inbox', [
             'contacts' => $list,
@@ -76,7 +71,7 @@ class SmsController extends Controller
     // 📜 Devuelve mensajes de una conversación
     public function messages($contact)
     {
-        $twilio = $this->twilioFrom;
+        $twilio = $this->getAgencyTwilioNumber();
 
         $msgs = SmsMessage::where(function ($q) use ($contact, $twilio) {
             $q->where('from', $contact)->where('to', $twilio);
@@ -103,19 +98,16 @@ class SmsController extends Controller
             $filtered[] = $latest;
         }
 
-        // ✅ Buscar el 'name' en la tabla users según el username (contacto)
-        // 🔹 Agregar el name del usuario autenticado a los mensajes enviados
-        $userName = Auth::check() ? Auth::user()->name : '';
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        $userName = $user ? $user->name : '';
 
 
-        // Solo asignamos el name al mensaje enviado por el usuario (Twilio)
         foreach ($filtered as $msg) {
+            // Si el mensaje fue enviado desde el Twilio de la agencia
             if ($msg->from === $twilio) {
-                // Mensaje enviado desde el sistema (usuario logueado)
-                $msg->sender_name = $userName;
+                $msg->sender_name = $msg->sent_by_name ?? 'Agente';
             } else {
-                // Mensaje recibido (cliente)
-                $msg->sender_name = '';
+                $msg->sender_name = 'Cliente';
             }
         }
 
@@ -123,13 +115,11 @@ class SmsController extends Controller
         return response()->json($filtered);
     }
 
-
-
     // 🔄 Sincronización con Twilio
     public function sync(Request $request)
     {
+        $twilio = $this->getAgencyTwilioNumber(); // 🔹 NUEVO
         $client = new Client($this->twilioSid, $this->twilioToken);
-        $twilio = $this->twilioFrom;
 
         $inbound = $client->messages->read(['to' => $twilio], 200);
         $outbound = $client->messages->read(['from' => $twilio], 200);
@@ -165,14 +155,13 @@ class SmsController extends Controller
 
             $count++;
         }
-        // Reusa la misma lista que ve index()
+
         $list = $this->buildInboxList($twilio);
 
         return response()->json([
             'synced'   => $count,
             'contacts' => $list,
         ]);
-        // return response()->json(['synced' => $count]);
     }
 
     // 📤 Enviar SMS
@@ -183,38 +172,51 @@ class SmsController extends Controller
             'body' => 'required|string'
         ]);
 
-        $to = $request->input('to');
-        $body = $request->input('body');
-
+        $twilio = $this->getAgencyTwilioNumber();
         $client = new Client($this->twilioSid, $this->twilioToken);
-        $message = $client->messages->create($to, [
-            'from' => $this->twilioFrom,
-            'body' => $body,
+
+        // Enviar mensaje mediante Twilio
+        $message = $client->messages->create($request->to, [
+            'from' => $twilio,
+            'body' => $request->body,
         ]);
 
-        SmsMessage::updateOrCreate(
+        // Obtener el usuario autenticado (ya sea user o sub_user)
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // Guardar mensaje en la tabla 'sms'
+        DB::table('sms')->updateOrInsert(
             ['sid' => $message->sid],
             [
-                'from' => $message->from ?? $this->twilioFrom,
-                'to' => $message->to ?? $to,
-                'body' => $message->body ?? $body,
+                'from' => $message->from ?? $twilio,
+                'to' => $message->to ?? $request->to,
+                'body' => $message->body ?? $request->body,
+                'sent_by_id' => $user->id ?? null,
+                'sent_by_name' => $user->name ?? $user->username ?? 'Usuario',
                 'direction' => $message->direction ?? 'outbound-api',
                 'status' => $message->status ?? null,
                 'num_media' => intval($message->numMedia ?? 0),
-                'media_urls' => [],
-                'date_sent' => isset($message->dateSent) ? Carbon::parse($message->dateSent)->setTimezone('America/Mexico_City') : now(),
+                'media_urls' => json_encode([]),
+                'date_sent' => isset($message->dateSent)
+                    ? Carbon::parse($message->dateSent)->setTimezone('America/Mexico_City')
+                    : now(),
                 'date_created' => now(),
-                'deleted' => null
+                'deleted' => null,
+                
             ]
         );
 
-        return response()->json(['ok' => true, 'sid' => $message->sid]);
+        return response()->json([
+            'ok' => true,
+            'sid' => $message->sid,
+        ]);
     }
 
-    // 🗑️ Eliminar conversación (marcar deleted=YES)
+
+    // 🗑️ Eliminar conversación
     public function deleteOne($contact)
     {
-        $twilio = $this->twilioFrom;
+        $twilio = $this->getAgencyTwilioNumber(); // 🔹 NUEVO
 
         $updated = SmsMessage::where(function ($q) use ($contact, $twilio) {
             $q->where('from', $contact)->where('to', $twilio);
@@ -234,7 +236,7 @@ class SmsController extends Controller
     public function deleteMany(Request $request)
     {
         $contacts = $request->contacts ?? [];
-        $twilio = $this->twilioFrom;
+        $twilio = $this->getAgencyTwilioNumber(); // 🔹 NUEVO
 
         if (empty($contacts)) {
             return response()->json([
@@ -258,8 +260,7 @@ class SmsController extends Controller
         ]);
     }
 
-    // 🔍 Búsqueda global en mensajes
-    // ------------------ Método search para SmsController ------------------
+    // 🔍 Búsqueda global (sin cambios)
     public function search(Request $request)
     {
         $q = trim((string) $request->query('q', ''));
@@ -268,7 +269,6 @@ class SmsController extends Controller
             return response()->json([]);
         }
 
-        // Buscar mensajes no eliminados que contengan la palabra en body/from/to
         $results = SmsMessage::whereNull('deleted')
             ->where(function ($qBuilder) use ($q) {
                 $qBuilder->where('body', 'LIKE', "%{$q}%")
@@ -282,8 +282,31 @@ class SmsController extends Controller
         return response()->json($results);
     }
 
+    // 🔹 NUEVO método para obtener número Twilio según agency
+    private function getAgencyTwilioNumber()
+    {
+        // Buscar usuario autenticado en cualquier guard
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
-    // Dentro del mismo controlador
+        if (!$user) {
+            throw new \Exception('Usuario no autenticado');
+        }
+
+        // Si el usuario es sub_user, su agency es la misma del usuario principal
+        $agency = $user->agency ?? null;
+
+        // Buscar al usuario principal (de la tabla users) con la misma agencia
+        $agencyUser = User::where('agency', $agency)->first();
+
+        if (!$agencyUser || !$agencyUser->twilio_number) {
+            throw new \Exception('No se encontró número Twilio asignado para esta agencia');
+        }
+
+        return $agencyUser->twilio_number;
+    }
+
+
+    // Método auxiliar (sin cambios)
     private function buildInboxList(string $twilio): array
     {
         $froms = SmsMessage::where('from', '!=', $twilio)->whereNull('deleted')->pluck('from')->toArray();
@@ -310,9 +333,7 @@ class SmsController extends Controller
             }
         }
 
-        // Ordena por último mensaje
         usort($list, fn($a, $b) => strtotime($b['last_at']) <=> strtotime($a['last_at']));
-
         return $list;
     }
 }

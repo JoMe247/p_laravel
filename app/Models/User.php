@@ -25,6 +25,7 @@ class User extends Authenticatable
     'reset_token_expires',
     'role',
     'agency',
+    'twilio_number',
 ];
 
     protected $hidden = [

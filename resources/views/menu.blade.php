@@ -35,7 +35,7 @@
             <i class='bx bx-devices'></i> Account
         </div>
 
-        <div class="lateral-row" data="option">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/office') }}'">
             <i class='bx bx-sitemap'></i> Office
         </div>
 

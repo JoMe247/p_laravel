@@ -4,18 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use App\Services\TwilioService;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Auth;
+
 
 class WhatsappController extends Controller
 {
     public function __construct(private TwilioService $twilio) {}
-
-
-    /*public function showSendForm()
-    {
-        return view('send');
-    }*/
 
     // Acción: enviar mensaje
     public function sendMessage(Request $request)
@@ -25,18 +23,22 @@ class WhatsappController extends Controller
             'body' => ['required', 'string', 'max:1000'],
         ]);
 
-        $client = $this->twilio->client();
-        $from   = $this->twilio->fromNumber();
+        // 🔹 Obtener número dinámico por agencia
+        $from = $this->getAgencyWhatsappNumber();
 
-        // Importante: destino con prefijo whatsapp:
+        // Prefijo correcto para destino
         $to = str_starts_with($data['to'], 'whatsapp:') ? $data['to'] : 'whatsapp:' . $data['to'];
 
+        // Crear cliente Twilio directamente con SID y TOKEN del .env
+        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+        // Enviar mensaje
         $twMsg = $client->messages->create($to, [
             'from' => $from,
             'body' => $data['body'],
         ]);
 
-        // Guardamos el outbound para tener historial local también
+        // Guardar historial
         Message::updateOrCreate(
             ['sid' => $twMsg->sid],
             [
@@ -52,10 +54,10 @@ class WhatsappController extends Controller
             ]
         );
 
-        return back()->with('ok', 'Mensaje enviado. SID: ' . $twMsg->sid);
+        return back()->with('ok', 'Mensaje enviado desde ' . $from . ' (SID: ' . $twMsg->sid . ')');
     }
 
-    // VISTA: Inbox (lee de tu BD local y permite sincronizar)
+    // VISTA: Inbox (lee de BD local)
     public function showInbox(Request $request)
     {
         $messages = Message::where('direction', 'inbound')
@@ -66,28 +68,23 @@ class WhatsappController extends Controller
         return view('inbox', compact('messages'));
     }
 
-    // Acción: sincronizar DESDE la API de Twilio (sin webhook)
+    // Sincronizar mensajes desde Twilio según agency
     public function syncFromTwilio(Request $request)
     {
-        $client = $this->twilio->client();
-        $toNumber = $this->twilio->fromNumber(); // Tus entrantes llegan a TU número
-
+        $fromNumber = $this->getAgencyWhatsappNumber();
+        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
         $after = now()->subDays(7);
 
-        // Twilio PHP: read permite filtros; aquí pedimos muchos (p.ej. 500)
         $twilioMessages = $client->messages->read([
-            'to' => $toNumber,
-            // Nota: algunos SDKs aceptan 'dateSentAfter'. Si no, filtramos luego en PHP.
+            'to' => $fromNumber,
         ], 500);
 
         $countNew = 0;
 
         foreach ($twilioMessages as $m) {
-            // Consideramos "inbound" (mensajes que te escriben)
-            $isInbound = ($m->direction === 'inbound') || ($m->from && $m->to === $toNumber);
+            $isInbound = ($m->direction === 'inbound') || ($m->to === $fromNumber);
 
-            // Filtrar por fecha local si se requiere
             $dateSent = $m->dateSent ? Carbon::parse($m->dateSent) : null;
             if ($dateSent && $dateSent->lt($after)) {
                 continue;
@@ -115,11 +112,10 @@ class WhatsappController extends Controller
             }
         }
 
-        return back()->with('ok', "Sincronización completa. Nuevos mensajes: $countNew");
+        return back()->with('ok', "Sincronización completa para {$fromNumber}. Nuevos mensajes: $countNew");
     }
 
     // Acción: eliminar un mensaje del historial
-
     public function delete($id)
     {
         Message::findOrFail($id)->delete();
@@ -134,23 +130,40 @@ class WhatsappController extends Controller
         return redirect()->route('whatsapp')->with('success', 'Mensajes eliminados');
     }
 
-    //envio de mensaje
-
     public function showSend(Request $request)
     {
-        $to = $request->query('to'); // capturar número del inbox
+        $to = $request->query('to');
         return view('send', compact('to'));
     }
 
-    // VISTA: Enviados
     public function showSent(Request $request)
     {
-        // Solo mensajes outbound
         $messages = Message::where('direction', 'outbound-api')
             ->orderByDesc('date_sent')
             ->orderByDesc('id')
             ->paginate(20);
 
         return view('sent', compact('messages'));
+    }
+
+    // 🔹 NUEVO: obtener número Twilio de la agencia
+    private function getAgencyWhatsappNumber(): string
+    {
+        $user = Auth::user();
+
+
+        if (!$user) {
+            throw new \Exception('Usuario no autenticado.');
+        }
+
+        $agencyUser = User::where('agency', $user->agency)->first();
+
+        if (!$agencyUser || !$agencyUser->twilio_number) {
+            throw new \Exception('No se encontró número de WhatsApp asignado para esta agencia.');
+        }
+
+        // Asegurar formato "whatsapp:+123..."
+        $number = $agencyUser->twilio_number;
+        return str_starts_with($number, 'whatsapp:') ? $number : 'whatsapp:' . $number;
     }
 }

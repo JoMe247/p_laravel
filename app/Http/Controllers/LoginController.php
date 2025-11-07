@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\SubUser;
+
 
 class LoginController extends Controller
 {
@@ -30,15 +32,27 @@ class LoginController extends Controller
         $rememberMe = $request->has('remember_me');
 
         // Buscar usuario por username o email
+        // Buscar primero en users
         $user = User::where('username', $usernameOrEmail)
             ->orWhere('email', $usernameOrEmail)
             ->first();
 
+        $isSubUser = false;
+
+        // Si no existe, buscar en sub_users
         if (!$user) {
-            return back()->withErrors(['username_or_email' => 'Usuario o correo no encontrado.'])->withInput();
+            $user = SubUser::where('username', $usernameOrEmail)
+                ->orWhere('email', $usernameOrEmail)
+                ->first();
+
+            if ($user) {
+                $isSubUser = true;
+            } else {
+                return back()->withErrors(['username_or_email' => 'Usuario o correo no encontrado.'])->withInput();
+            }
         }
 
-        // Verificar contraseña (usa password_hash de tu tabla)
+        // Verificar contraseña
         if (!Hash::check($password, $user->password_hash)) {
             return back()->withErrors(['password' => 'Contraseña incorrecta.'])->withInput();
         }
@@ -48,39 +62,41 @@ class LoginController extends Controller
             return back()->withErrors(['email_verified' => 'Por favor verifica tu correo antes de iniciar sesión.']);
         }
 
-
-        // 💡 Si el usuario ya tiene una sesión activa, la cerramos automáticamente
+        // 🔐 Cerrar sesión anterior si existía
         if ($user->current_session_token) {
-            // Borramos el token anterior para permitir la nueva sesión
-            User::where('id', $user->id)->update(['current_session_token' => null]);
+            if ($isSubUser) {
+                SubUser::where('id', $user->id)->update(['current_session_token' => null]);
+            } else {
+                User::where('id', $user->id)->update(['current_session_token' => null]);
+            }
         }
 
-
-        // Generar token único para esta sesión
+        // Generar nuevo token de sesión
         $sessionToken = bin2hex(random_bytes(16));
-
-        // Guardar token de sesión en base de datos
         $user->current_session_token = $sessionToken;
         $user->save();
 
-        // Guardar token de sesión en la sesión de Laravel
+        // Guardar token en sesión
         session(['session_token' => $sessionToken]);
 
-        // Iniciar sesión manualmente
-        Auth::login($user, $rememberMe);
+        // Iniciar sesión
+        if ($isSubUser) {
+            Auth::guard('sub')->login($user, $rememberMe);
+            session(['auth_guard' => 'sub']);
+        } else {
+            Auth::guard('web')->login($user, $rememberMe);
+            session(['auth_guard' => 'web']);
+        }
 
-        // Si el usuario marcó "Recordarme", guardar token adicional
-        if ($rememberMe) {
+        // Si el usuario marcó "Recordarme"
+        if ($rememberMe && !$isSubUser) {
             $token = bin2hex(random_bytes(16));
-
             DB::table('user_tokens')->insert([
                 'user_id' => $user->id,
                 'token' => $token,
                 'expires_at' => now()->addDays(30),
             ]);
-
-            // Crear cookie segura
-            Cookie::queue('rememberme_token', $token, 60 * 24 * 30); // 30 días
+            Cookie::queue('rememberme_token', $token, 60 * 24 * 30);
         }
 
         return redirect()->route('dashboard');
@@ -88,25 +104,46 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        $user = Auth::user();
+        // Detectar guard activo
+        $guard = session('auth_guard') ?? null;
 
-        if ($user) {
-            // 🧹 Eliminar tokens remember_me asociados a este usuario
-            DB::table('user_tokens')->where('user_id', $user->id)->delete();
-
-            // 🧹 Limpiar token de sesión activa
-            User::where('id', $user->id)->update(['current_session_token' => null]);
+        // Determinar el usuario actual según el guard
+        $user = null;
+        if ($guard === 'sub') {
+            $user = Auth::guard('sub')->user();
+        } else {
+            $user = Auth::guard('web')->user();
         }
 
-        // Cerrar sesión en Laravel
-        Auth::logout();
+        if ($user) {
+            if ($guard === 'sub') {
+                // 🧹 Limpiar token de sesión para sub_users
+                \App\Models\SubUser::where('id', $user->id)->update(['current_session_token' => null]);
+            } else {
+                // 🧹 Limpiar token de sesión para users
+                DB::table('user_tokens')->where('user_id', $user->id)->delete();
+                \App\Models\User::where('id', $user->id)->update(['current_session_token' => null]);
+            }
+        }
+
+        // Cerrar sesión del guard correcto
+        if ($guard === 'sub') {
+            Auth::guard('sub')->logout();
+        } else {
+            Auth::guard('web')->logout();
+        }
 
         // Invalidar sesión y regenerar token CSRF
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // 🧹 Borrar cookie "rememberme_token" si existe
-        Cookie::queue(Cookie::forget('rememberme_token'));
+        // 🧹 Borrar cookie remember_me solo si era user normal
+        if ($guard !== 'sub') {
+            Cookie::queue(Cookie::forget('rememberme_token'));
+        }
+
+        // Limpiar el valor del guard activo en la sesión
+        session()->forget('auth_guard');
 
         // Redirigir al login
         return redirect()->route('login');

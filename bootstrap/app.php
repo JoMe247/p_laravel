@@ -11,6 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'auth.multi' => \App\Http\Middleware\VerifySessionToken::class,
+        ]);
         $middleware->web([
             \App\Http\Middleware\RememberMeMiddleware::class,
             \App\Http\Middleware\VerifySessionToken::class,

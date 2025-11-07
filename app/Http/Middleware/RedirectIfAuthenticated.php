@@ -13,15 +13,14 @@ class RedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next)
     {
-        // Si el usuario ya está autenticado...
-        if (Auth::check()) {
-            // Y está intentando acceder al login o register
+        // Si está autenticado en cualquiera de los dos guards
+        if (Auth::guard('web')->check() || Auth::guard('sub')->check()) {
+            // Si intenta acceder a login o register, lo mandamos al dashboard
             if ($request->is('login') || $request->is('register')) {
-                // Redirigirlo al dashboard
                 return redirect('/dashboard');
             }
         } else {
-            // Si NO está autenticado y trata de acceder a dashboard
+            // Si NO está autenticado y trata de acceder al dashboard
             if ($request->is('dashboard')) {
                 return redirect('/login');
             }
