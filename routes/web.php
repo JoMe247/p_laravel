@@ -42,6 +42,7 @@ Route::middleware('auth.multi')->group(function () {
     // Office (registro de sub-users)
     Route::get('/office', [SubUserController::class, 'create'])->name('office.create');
     Route::post('/office', [SubUserController::class, 'store'])->name('office.store');
+    Route::get('/verify-subuser-email', [SubUserController::class, 'verifyEmail'])->name('subuser.verify');
 });
 
 // =======================
