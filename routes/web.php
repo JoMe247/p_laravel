@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\SubUserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ForgotPasswordController;
 
 // Página inicial
 Route::get('/', function () {
@@ -73,3 +74,12 @@ Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMu
 Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
 });
+
+
+// Recuperar contraseña (simulado)
+Route::get('/reset', [ForgotPasswordController::class, 'showResetForm'])->name('password.request');
+Route::post('/reset', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
+
+// Nueva contraseña
+Route::get('/new-password/{token}', [ForgotPasswordController::class, 'showNewPassForm'])->name('password.reset');
+Route::post('/new-password', [ForgotPasswordController::class, 'updatePassword'])->name('password.update');
