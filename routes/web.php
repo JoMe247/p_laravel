@@ -9,6 +9,7 @@ use App\Http\Controllers\WhatsappController;
 use App\Http\Controllers\SubUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\OfficeController;
 
 // Página inicial
 Route::get('/', function () {
@@ -83,3 +84,12 @@ Route::post('/reset', [ForgotPasswordController::class, 'sendResetLink'])->name(
 // Nueva contraseña
 Route::get('/new-password/{token}', [ForgotPasswordController::class, 'showNewPassForm'])->name('password.reset');
 Route::post('/new-password', [ForgotPasswordController::class, 'updatePassword'])->name('password.update');
+
+
+
+
+Route::get('/office', [OfficeController::class, 'index'])->name('office.index');
+
+// ✅ Ruta de eliminación con model binding
+Route::delete('/office/subusers/{id}', [OfficeController::class, 'destroy'])
+    ->name('office.delete');
