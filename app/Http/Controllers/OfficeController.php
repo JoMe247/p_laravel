@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\SubUser;
+use App\Models\Agency;
 
 
 class OfficeController extends Controller
@@ -17,6 +18,11 @@ class OfficeController extends Controller
         if (!$authUser) return redirect()->route('login');
 
         $agency = $authUser->agency;
+
+        // Buscar información de la agencia por agency_code
+        $agencyData = Agency::where('agency_code', $agency)->first() ?? new Agency();
+
+        $twilioNumber = $authUser->twilio_number ?? '';
 
         $users = User::where('agency', $agency)
             ->select('id', 'username', 'name', 'email')
@@ -36,8 +42,43 @@ class OfficeController extends Controller
 
         $members = $users->concat($subs);
 
-        return view('office', compact('members', 'agency'));
+        return view('office', compact('members', 'agency', 'agencyData', 'twilioNumber'));
     }
+
+    /**
+     * Guardar / actualizar datos de agency usando agency_code
+     */
+    public function saveAgency(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) return redirect()->route('login');
+
+        $request->validate([
+            'agency_code'    => 'required|string',
+            'agency_name'    => 'required|string|max:100',
+            'agency_email'   => 'required|email|max:100',
+            'office_phone'   => 'nullable|string|max:12',
+            'agency_address' => 'nullable|string|max:260',
+        ]);
+
+        // 👉 Buscar registro por agency_code o crearlo si no existe
+        $agency = Agency::firstOrNew([
+            'agency_code' => $request->agency_code
+        ]);
+
+        // 👉 Asignar valores
+        $agency->agency_code    = $request->agency_code;
+        $agency->agency_name    = $request->agency_name;
+        $agency->agency_email   = $request->agency_email;
+        $agency->office_phone   = $request->office_phone;
+        $agency->agency_address = $request->agency_address;
+
+        // 👉 Guardar o actualizar
+        $agency->save();
+
+        return back()->with('success', 'Datos de agencia guardados correctamente.');
+    }
+
 
     /**
      * Eliminar un subuser (Route Model Binding).
@@ -50,9 +91,14 @@ class OfficeController extends Controller
             return redirect()->route('login');
         }
 
+        // Sub users NO pueden eliminar
+        if (auth('sub')->check()) {
+            return back()->withErrors(['error' => 'Los sub users no pueden eliminar usuarios.']);
+        }
+
         $agency = $authUser->agency;
 
-        // ✅ Buscar manualmente el sub-user usando el id
+        // Verificar que el sub user pertenece a la misma agencia
         $subuser = \App\Models\SubUser::where('agency', $agency)
             ->where('id', $id)
             ->first();
@@ -74,5 +120,33 @@ class OfficeController extends Controller
             Log::error('Error al eliminar subuser: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Error al eliminar el sub-user.']);
         }
+    }
+
+    public function uploadLogo(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) return redirect()->route('login');
+
+        $request->validate([
+            'agency_logo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
+        ]);
+
+        $agencyCode = $authUser->agency;
+
+        $agency = Agency::where('agency_code', $agencyCode)->first();
+        if (!$agency) {
+            return back()->withErrors(['error' => 'Agencia no encontrada.']);
+        }
+
+        // Guardar archivo
+        $file = $request->file('agency_logo');
+        $name = 'agency_logo_' . $agencyCode . '.' . $file->extension();
+        $path = $file->storeAs('agency_logos', $name, 'public');
+
+        // Guardar ruta en base de datos
+        $agency->agency_logo = $path;
+        $agency->save();
+
+        return back()->with('success', 'Logo actualizado correctamente.');
     }
 }

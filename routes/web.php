@@ -93,3 +93,10 @@ Route::get('/office', [OfficeController::class, 'index'])->name('office.index');
 // ✅ Ruta de eliminación con model binding
 Route::delete('/office/subusers/{id}', [OfficeController::class, 'destroy'])
     ->name('office.delete');
+
+Route::post('/office/agency/save', [OfficeController::class, 'saveAgency'])
+    ->name('agency.save');
+
+// Logo upload
+
+Route::post('/office/upload-logo', [OfficeController::class, 'uploadLogo'])->name('office.uploadLogo');

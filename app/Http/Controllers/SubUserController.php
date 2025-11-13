@@ -15,11 +15,8 @@ class SubUserController extends Controller
      */
     public function create()
     {
-        $creator = auth('web')->user(); // usuario principal
-        $agency  = $creator->agency ?? null;
-        $twilio  = $creator->twilio_number ?? null;
+        return redirect()->route('office.index');
 
-        return view('office', compact('agency', 'twilio'));
     }
 
     /**
@@ -28,6 +25,12 @@ class SubUserController extends Controller
     public function store(Request $request)
     {
         try {
+
+            // Impedir creación desde sub users
+            if (auth('sub')->check()) {
+                return back()->withErrors(['error' => 'Los sub users no pueden registrar nuevos sub users.']);
+            }
+
             // ✅ Validación de campos
             $request->validate([
                 'username' => 'required|string|max:50|unique:sub_users,username',
