@@ -57,7 +57,7 @@ class OfficeController extends Controller
             'agency_code'    => 'required|string',
             'agency_name'    => 'required|string|max:100',
             'agency_email'   => 'required|email|max:100',
-            'office_phone'   => 'nullable|string|max:12',
+            'office_phone'   => 'nullable|string|max:13',
             'agency_address' => 'nullable|string|max:260',
         ]);
 

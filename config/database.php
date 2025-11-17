@@ -62,6 +62,20 @@ return [
             ]) : [],
         ],
 
+        'doc_config' => [
+            'driver' => 'mysql',
+            'host' => env('DOC_CONFIG_DB_HOST', '127.0.0.1'),
+            'port' => env('DOC_CONFIG_DB_PORT', '3306'),
+            'database' => env('DOC_CONFIG_DB_DATABASE', 'doc_config'),
+            'username' => env('DOC_CONFIG_DB_USERNAME', 'root'),
+            'password' => env('DOC_CONFIG_DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
@@ -147,7 +161,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 
