@@ -1,0 +1,76 @@
+/* =========================================
+   ACCOUNT VIEW - CUSTOM LAYOUT
+   ========================================= */
+
+/* --- Contenedor general del contenido --- */
+#account-content {
+    width: calc(100% - 320px); /* deja espacio para el menú lateral */
+    margin-left: 320px;        /* mismo ancho del menú */
+    padding: 40px;
+    padding-top: 60px;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow: visible !important;
+    position: relative;
+}
+
+/* Fondo blanco para que el contenido destaque */
+#account-content-inner {
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 16px;
+    padding: 30px 40px;
+    box-shadow: 0px 6px 25px rgba(0,0,0,0.12);
+}
+
+/* --- Títulos --- */
+#account-content h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+#account-content h2 {
+    font-size: 22px;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+#account-content h3 {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #333;
+}
+
+#account-content p {
+    font-size: 15px;
+    margin: 3px 0;
+}
+
+/* --- Tarjetas --- */
+.account-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px 25px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    border-left: 4px solid #4b91ff;
+}
+
+.account-card.alert {
+    border-left-color: #e53935;
+}
+
+.account-card p {
+    margin: 5px 0;
+}
+
+/* --- Alertas --- */
+.account-alert {
+    background: #ffe2e2;
+    color: #c62828;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 12px;
+    font-weight: bold;
+}

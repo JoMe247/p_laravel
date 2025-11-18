@@ -5,66 +5,93 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
-use App\Models\Limit;
-use App\Models\Agency;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 class AccountController extends Controller
 {
     public function show()
     {
-        $authUser = auth()->user();
+        // 1) Obtener usuario autenticado (user o sub_user)
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        if (!$authUser) {
+            abort(403, 'Usuario no autenticado');
+        }
+
         $agencyCode = $authUser->agency;
 
-        // Agency
-        $agency = Agency::where('agency_code', $agencyCode)->firstOrFail();
+        if (!$agencyCode) {
+            abort(403, 'El usuario no tiene agencia vinculada.');
+        }
 
-        // Obtener numero Twilio del usuario dueño de la agency
+        // 2) Obtener registro de agency
+        $agency = DB::table('agency')
+            ->where('agency_code', $agencyCode)
+            ->first();
+
+        if (!$agency) {
+            abort(403, 'No se encontró la agency para este usuario.');
+        }
+
+        // 3) Obtener el usuario dueño de la agency (tabla users) para sacar el twilio_number
         $ownerUser = User::where('agency', $agencyCode)->first();
+
+        if (!$ownerUser || !$ownerUser->twilio_number) {
+            abort(403, 'No se encontró número Twilio asignado para esta agency.');
+        }
+
         $twilioNumber = $ownerUser->twilio_number;
 
-        // Obtener plan en doc_config.limits
-        $plan = Limit::on('doc_config')
+        // 4) Obtener plan desde BD doc_config.limits
+        $plan = DB::connection('doc_config')
+            ->table('limits')
             ->where('account_type', $agency->account_type)
             ->first();
 
         if (!$plan) {
-            $plan = Limit::on('doc_config')->where('account_type', 'P1')->first();
+            // fallback a un plan por defecto
+            $plan = DB::connection('doc_config')
+                ->table('limits')
+                ->where('account_type', 'P1')
+                ->first();
         }
 
-        // Fechas
-        $today = Carbon::today();
+        $smsLimit  = (int) $plan->msg_limit;
+        $docLimit  = (int) $plan->doc_limit;
+        $userLimit = (int) $plan->user_limit;
+
+        // 5) Fechas
+        $today      = Carbon::today();
         $startMonth = Carbon::now()->startOfMonth();
         $endMonth   = Carbon::now()->endOfMonth();
 
         // ============================
-        //      CONTADOR SMS
+        //      CONTADOR DE SMS
         // ============================
 
-        // SMS enviados hoy
+        // Diario (hoy)
         $dailySmsCount = DB::table('sms')
             ->where('from', $twilioNumber)
             ->where('direction', 'outbound-api')
             ->whereDate('created_at', $today)
             ->count();
 
-        // SMS enviados en el mes
+        // Mensual
         $monthlySmsCount = DB::table('sms')
             ->where('from', $twilioNumber)
             ->where('direction', 'outbound-api')
             ->whereBetween('created_at', [$startMonth, $endMonth])
             ->count();
 
-        $smsLimit = (int) $plan->msg_limit;
         $isSmsOverLimit = $monthlySmsCount >= $smsLimit;
 
         // ============================
         //      CONTADOR DOCS
         // ============================
 
-        // Aún no tienes tabla de documentos
+        // Aún no tienes tabla de documentos, lo dejamos en 0 por ahora
         $monthlyDocCount = 0;
-        $docLimit = (int) $plan->doc_limit;
         $isDocsOverLimit = false;
 
         // ============================
@@ -75,14 +102,17 @@ class AccountController extends Controller
             DB::table('users')->where('agency', $agencyCode)->count() +
             DB::table('sub_users')->where('agency', $agencyCode)->count();
 
-        $userLimit = (int) $plan->user_limit;
         $isUserOverLimit = $totalUsers >= $userLimit;
 
-        // Guardar counters
-        $agency->message_counter = $dailySmsCount;
-        $agency->doc_counter = $monthlyDocCount;
-        $agency->save();
+        // 6) Actualizar contadores en agency (opcional)
+        DB::table('agency')
+            ->where('agency_code', $agencyCode)
+            ->update([
+                'message_counter' => $dailySmsCount,
+                'doc_counter'     => $monthlyDocCount,
+            ]);
 
+        // 7) Enviar datos a la vista
         return view('account', [
             'agency'           => $agency,
 
@@ -102,6 +132,7 @@ class AccountController extends Controller
             'userLimit'        => $userLimit,
             'isUserOverLimit'  => $isUserOverLimit,
 
+            // Info extra
             'plan'             => $plan,
             'twilioNumber'     => $twilioNumber,
         ]);

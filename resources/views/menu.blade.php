@@ -31,7 +31,7 @@
             <i class='bx bxs-dashboard'></i> Dashboard
         </div>
 
-        <div class="lateral-row" data="option">
+        <div class="lateral-row" data="option" onclick="window.location='{{url('/account')}}'">
             <i class='bx bx-devices'></i> Account
         </div>
 

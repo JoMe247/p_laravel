@@ -10,6 +10,7 @@ use App\Http\Controllers\SubUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\OfficeController;
+use App\Http\Controllers\AccountController;
 
 // Página inicial
 Route::get('/', function () {
@@ -100,3 +101,10 @@ Route::post('/office/agency/save', [OfficeController::class, 'saveAgency'])
 // Logo upload
 
 Route::post('/office/upload-logo', [OfficeController::class, 'uploadLogo'])->name('office.uploadLogo');
+
+
+Route::middleware(['auth:web,sub'])->group(function () {
+    Route::get('/account', [AccountController::class, 'show'])
+        ->name('account.show');
+});
+

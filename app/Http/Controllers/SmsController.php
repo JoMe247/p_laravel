@@ -172,6 +172,66 @@ class SmsController extends Controller
             'body' => 'required|string'
         ]);
 
+        // ===============================
+// 1. Datos de usuario y agencia
+// ===============================
+$user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+$agencyCode = $user->agency;
+
+// Obtener agency
+$agency = DB::table('agency')->where('agency_code', $agencyCode)->first();
+
+if (!$agency) {
+    return response()->json([
+        'ok' => false,
+        'error' => 'No se encontró la agencia vinculada al usuario.'
+    ], 400);
+}
+
+// Obtener número Twilio real de la agency
+$twilioNumber = $this->getAgencyTwilioNumber(); // ya existente en tu controlador
+
+// ===============================
+// 2. Obtener plan desde BD doc_config
+// ===============================
+$plan = DB::connection('doc_config')
+    ->table('limits')
+    ->where('account_type', $agency->account_type)
+    ->first();
+
+if (!$plan) {
+    return response()->json([
+        'ok' => false,
+        'error' => 'No se encontró el plan asignado a la agency.'
+    ], 400);
+}
+
+$smsLimit = (int) $plan->msg_limit;
+
+// ===============================
+// 3. Contar mensajes enviados en el mes
+// ===============================
+$startMonth = Carbon::now()->startOfMonth();
+$endMonth   = Carbon::now()->endOfMonth();
+
+$monthlySmsCount = DB::table('sms')
+    ->where('from', $twilioNumber)
+    ->where('direction', 'outbound-api')
+    ->whereBetween('created_at', [$startMonth, $endMonth])
+    ->count();
+
+// ===============================
+// 4. Validar límite
+// ===============================
+if ($monthlySmsCount >= $smsLimit) {
+    return response()->json([
+        'ok' => false,
+        'limit_error' => true,
+        'message' => 'Has alcanzado tu límite mensual de mensajes. Cambia a un plan mayor.'
+    ], 403);
+}
+
+
         $twilio = $this->getAgencyTwilioNumber();
         $client = new Client($this->twilioSid, $this->twilioToken);
 
