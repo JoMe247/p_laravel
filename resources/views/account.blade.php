@@ -8,8 +8,6 @@
     <title>Account · Plan</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
-
-
     <link rel="icon" href="img/favicon.png">
 
     <!-- Styles -->
