@@ -104,9 +104,12 @@
 
             <div class="office-topbar">
                 <button id="btn-open-overlay" class="btn primary"
-                    @if (auth('sub')->check()) disabled title="Los sub users no pueden agregar sub users" @endif>
+                    @if (auth('sub')->check()) disabled title="Los sub users no pueden agregar sub users"
+                    @elseif ($isUserLimitReached)
+        disabled title="Límite de usuarios alcanzado para este plan" @endif>
                     <i class='bx bx-user-plus'></i> Agregar Sub-User
                 </button>
+
             </div>
 
             <div class="office-table-wrapper">

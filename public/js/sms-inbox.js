@@ -715,3 +715,8 @@ function renderContacts(list = []) {
         resetIdleTimer();
     }
 })();
+
+if (window.smsLimitReached) {
+    const btn = document.querySelector(".sms-form button[type='submit']");
+    if (btn) btn.disabled = true;
+}

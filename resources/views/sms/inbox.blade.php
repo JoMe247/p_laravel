@@ -116,7 +116,10 @@
                                     @csrf
                                     <input type="hidden" name="to" id="toInput" />
                                     <textarea name="body" id="bodyInput" placeholder="Escribe un mensaje..."></textarea>
-                                    <button type="submit" class="btn"><i class='bx bxs-send'></i></button>
+                                    <button type="submit" class="btn"
+                                        @if ($isSmsOverLimit) disabled title="Has alcanzado tu límite mensual de mensajes" @endif>
+                                        <i class='bx bxs-send'></i>
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -331,6 +334,11 @@
     <script src="js/settings.js"></script>
     <script src="js/operations.js"></script>
     <script src="js/inbox.js"></script>
+
+    <script>
+        window.smsLimitReached = {{ $isSmsOverLimit ? 'true' : 'false' }};
+    </script>
+
 
 
 </body>

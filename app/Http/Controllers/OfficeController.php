@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\SubUser;
 use App\Models\Agency;
+use Illuminate\Support\Facades\DB;
 
 
 class OfficeController extends Controller
@@ -41,6 +42,44 @@ class OfficeController extends Controller
             });
 
         $members = $users->concat($subs);
+
+        // ================================
+        //   PLAN - LIMITES DE USUARIOS
+        // ================================
+        // 1. Obtener el tipo de plan
+        $plan = DB::connection('doc_config')
+            ->table('limits')
+            ->where('account_type', $agencyData->account_type)
+            ->first();
+
+        // Plan de fallback
+        if (!$plan) {
+            $plan = DB::connection('doc_config')
+                ->table('limits')
+                ->where('account_type', 'P1')
+                ->first();
+        }
+
+        // 2. Calcular total de usuarios actuales
+        $totalUsers =
+            User::where('agency', $agency)->count() +
+            SubUser::where('agency', $agency)->count();
+
+        $userLimit = (int) $plan->user_limit;
+
+        // 3. Verificar si alcanzó el límite
+        $isUserLimitReached = $totalUsers >= $userLimit;
+
+        return view('office', compact(
+            'members',
+            'agency',
+            'agencyData',
+            'twilioNumber',
+            'plan',
+            'totalUsers',
+            'userLimit',
+            'isUserLimitReached'
+        ));
 
         return view('office', compact('members', 'agency', 'agencyData', 'twilioNumber'));
     }

@@ -62,9 +62,44 @@ class SmsController extends Controller
             ]);
         }
 
+        // ==============================================
+        // 🔥 OBTENER LÍMITE DE SMS PARA LA AGENCY
+        // ==============================================
+
+        // Usuario autenticado
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        $agencyCode = $authUser->agency;
+
+        // Obtener información de la agency
+        $agencyData = DB::table('agency')
+            ->where('agency_code', $agencyCode)
+            ->first();
+
+        // Obtener plan desde BD doc_config
+        $plan = DB::connection('doc_config')
+            ->table('limits')
+            ->where('account_type', $agencyData->account_type)
+            ->first();
+
+        // Fechas del mes
+        $startMonth = Carbon::now()->startOfMonth();
+        $endMonth   = Carbon::now()->endOfMonth();
+
+        // Total mensajes enviados este mes
+        $monthlySmsCount = DB::table('sms')
+            ->where('from', $twilio)
+            ->where('direction', 'outbound-api')
+            ->whereBetween('date_sent', [$startMonth, $endMonth])
+            ->count();
+
+        // Límite
+        $isSmsOverLimit = $monthlySmsCount >= (int)$plan->msg_limit;
+
+
         return view('sms.inbox', [
             'contacts' => $list,
-            'twilio' => $twilio
+            'twilio' => $twilio,
+            'isSmsOverLimit' => $isSmsOverLimit
         ]);
     }
 

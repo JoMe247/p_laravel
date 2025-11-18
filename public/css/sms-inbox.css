@@ -532,3 +532,9 @@
   -o-animation: rotating 1s linear infinite;
   animation: rotating 1s linear infinite;
 }
+
+button[disabled] {
+    background: #b4b4b4 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}
