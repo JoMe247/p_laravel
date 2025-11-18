@@ -74,14 +74,14 @@ class AccountController extends Controller
         $dailySmsCount = DB::table('sms')
             ->where('from', $twilioNumber)
             ->where('direction', 'outbound-api')
-            ->whereDate('created_at', $today)
+            ->whereDate('date_created', $today)
             ->count();
 
         // Mensual
         $monthlySmsCount = DB::table('sms')
             ->where('from', $twilioNumber)
             ->where('direction', 'outbound-api')
-            ->whereBetween('created_at', [$startMonth, $endMonth])
+            ->whereBetween('date_sent', [$startMonth, $endMonth])
             ->count();
 
         $isSmsOverLimit = $monthlySmsCount >= $smsLimit;
