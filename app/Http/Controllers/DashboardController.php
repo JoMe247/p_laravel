@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Customer;
 
 class DashboardController extends Controller
 {
@@ -17,9 +18,15 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
-        // Pasamos el nombre de usuario a la vista
+        // 🔹 Obtener los últimos 50 customers (sin tocar tu lógica actual)
+        $customers = Customer::orderBy('ID', 'desc')
+            ->take(50)
+            ->get();
+
+        // Pasamos el nombre de usuario a la vista + customers
         return view('dashboard', [
             'username' => $user->name ?? $user->username,
+            'customers' => $customers,   // ⬅️ agregado
         ]);
     }
 }

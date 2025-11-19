@@ -175,308 +175,49 @@
                             </tr>
 
                             <tbody id="clients-list">
+                                @foreach ($customers as $c)
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="customer_select"
+                                                onchange="checkboxActive()">
+                                        </td>
 
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0001</td>
-                                    <td class="table-name" id="customer-name">Diego Garay</td>
-                                    <td class="customer-policy">1000000</td>
-                                    <td class="customer-address">17490 Meandering Way</td>
-                                    <td class="customer-phone">469-473-9488</td>
-                                    <td class="customer-dob">08/31/1999</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
+                                        <td class="customer-id">{{ $c->ID }}</td>
+                                        <td class="table-name">{{ $c->Name }}</td>
+                                        <td class="customer-policy">{{ $c->Policy ?? '—' }}</td>
+                                        <td class="customer-address">{{ $c->Address }}</td>
+                                        <td class="customer-phone">{{ $c->Phone }}</td>
+                                        <td class="customer-dob">{{ $c->DOB }}</td>
 
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0002</td>
-                                    <td class="table-name" id="customer-name">Emily Johnson</td> <!-- Updated name -->
-                                    <td class="customer-policy">2000000</td>
-                                    <td class="customer-address">456 Oak Street</td>
-                                    <td class="customer-phone">555-123-4567</td>
-                                    <td class="customer-dob">05/15/1985</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
+                                        <td class="customer-drop">
+                                            <i class='bx bx-dots-horizontal-rounded'></i>
 
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0003</td>
-                                    <td class="table-name" id="customer-name">Michael Rodriguez</td>
-                                    <td class="customer-policy">3000000</td>
-                                    <td class="customer-address">789 Elm Avenue</td>
-                                    <td class="customer-phone">555-456-7890</td>
-                                    <td class="customer-dob">10/22/1990</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
+                                            <label class="table-panel-options">
+                                                <p><i class='bx bx-id-card'></i>
+                                                    <a href="{{ url('profile/' . $c->ID) }}">Open</a>
+                                                </p>
 
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0004</td>
-                                    <td class="table-name" id="customer-name">Sarah Thompson</td>
-                                    <td class="customer-policy">4000000</td>
-                                    <td class="customer-address">101 Pine Street</td>
-                                    <td class="customer-phone">555-987-6543</td>
-                                    <td class="customer-dob">03/12/1982</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
+                                                <p><i class='bx bx-edit'></i>
+                                                    <a href="{{ url('profile/' . $c->ID) }}">Edit</a>
+                                                </p>
 
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0005</td>
-                                    <td class="table-name" id="customer-name">Alexandra Davis</td>
-                                    <td class="customer-policy">5000000</td>
-                                    <td class="customer-address">222 Maple Lane</td>
-                                    <td class="customer-phone">555-555-1234</td>
-                                    <td class="customer-dob">07/08/1975</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
+                                                <p><i class='bx bx-trash'></i>
+                                                    <a href="{{ url('delete-customer/' . $c->ID) }}">Delete</a>
+                                                </p>
 
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0006</td>
-                                    <td class="table-name" id="customer-name">Christopher Evans</td>
-                                    <td class="customer-policy">6000000</td>
-                                    <td class="customer-address">333 Cedar Road</td>
-                                    <td class="customer-phone">555-789-0123</td>
-                                    <td class="customer-dob">12/05/1988</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
+                                                <p><i class='bx bxs-message'></i>
+                                                    <a href="{{ url('sms/' . $c->Phone) }}">SMS</a>
+                                                </p>
 
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0007</td>
-                                    <td class="table-name" id="customer-name">Alicia Martinez</td>
-                                    <td class="customer-policy">7000000</td>
-                                    <td class="customer-address">456 Pine Avenue</td>
-                                    <td class="customer-phone">555-234-5678</td>
-                                    <td class="customer-dob">09/18/1995</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0008</td>
-                                    <td class="table-name" id="customer-name">Daniel Kim</td>
-                                    <td class="customer-policy">8000000</td>
-                                    <td class="customer-address">789 Birch Street</td>
-                                    <td class="customer-phone">555-345-6789</td>
-                                    <td class="customer-dob">04/30/1980</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0009</td>
-                                    <td class="table-name" id="customer-name">Elena Rodriguez</td>
-                                    <td class="customer-policy">9000000</td>
-                                    <td class="customer-address">101 Oak Lane</td>
-                                    <td class="customer-phone">555-456-7890</td>
-                                    <td class="customer-dob">11/15/1983</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0010</td>
-                                    <td class="table-name" id="customer-name">Carlos Hernandez</td>
-                                    <td class="customer-policy">10000000</td>
-                                    <td class="customer-address">222 Maple Road</td>
-                                    <td class="customer-phone">555-567-8901</td>
-                                    <td class="customer-dob">06/25/1978</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0011</td>
-                                    <td class="table-name" id="customer-name">Jessica Lee</td>
-                                    <td class="customer-policy">11000000</td>
-                                    <td class="customer-address">777 Pine Street</td>
-                                    <td class="customer-phone">555-123-4567</td>
-                                    <td class="customer-dob">09/08/1987</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0012</td>
-                                    <td class="table-name" id="customer-name">Ryan Mitchell</td>
-                                    <td class="customer-policy">12000000</td>
-                                    <td class="customer-address">888 Oak Avenue</td>
-                                    <td class="customer-phone">555-234-5678</td>
-                                    <td class="customer-dob">03/24/1992</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0013</td>
-                                    <td class="table-name" id="customer-name">Olivia Turner</td>
-                                    <td class="customer-policy">13000000</td>
-                                    <td class="customer-address">999 Elm Lane</td>
-                                    <td class="customer-phone">555-345-6789</td>
-                                    <td class="customer-dob">07/12/1980</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0014</td>
-                                    <td class="table-name" id="customer-name">Jordan Smith</td>
-                                    <td class="customer-policy">14000000</td>
-                                    <td class="customer-address">111 Maple Road</td>
-                                    <td class="customer-phone">555-456-7890</td>
-                                    <td class="customer-dob">11/05/1985</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td><input type="checkbox" name="customer_select" id=""
-                                            onchange="checkboxActive()"></td>
-                                    <td class="customer-id">0015</td>
-                                    <td class="table-name" id="customer-name">Gabriel Rivera</td>
-                                    <td class="customer-policy">15000000</td>
-                                    <td class="customer-address">222 Cedar Lane</td>
-                                    <td class="customer-phone">555-567-8901</td>
-                                    <td class="customer-dob">06/18/1979</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-
+                                                <p><i class='bx bx-file'></i>
+                                                    <a href="#">Invoice</a>
+                                                </p>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
+
 
                         </table>
 
@@ -521,78 +262,6 @@
                                     <p>Endorsement</p>
                                 </div>
                                 <div class="recent-pdf-date">03/05/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Laura Gomez</a>
-                                    <p>Commercial</p>
-                                </div>
-                                <div class="recent-pdf-date">04/20/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Pedro Martinez</a>
-                                    <p>Cancellation</p>
-                                </div>
-                                <div class="recent-pdf-date">05/03/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Ana Rodriguez</a>
-                                    <p>Exclusion</p>
-                                </div>
-                                <div class="recent-pdf-date">06/12/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Jorge Lopez</a>
-                                    <p>Endorsement</p>
-                                </div>
-                                <div class="recent-pdf-date">07/08/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Isabel Gonzalez</a>
-                                    <p>Commercial</p>
-                                </div>
-                                <div class="recent-pdf-date">08/25/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Miguel Ramos</a>
-                                    <p>Cancellation</p>
-                                </div>
-                                <div class="recent-pdf-date">09/14/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Sofia Diaz</a>
-                                    <p>Exclusion</p>
-                                </div>
-                                <div class="recent-pdf-date">10/30/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Ricardo Herrera</a>
-                                    <p>Endorsement</p>
-                                </div>
-                                <div class="recent-pdf-date">11/18/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Gabriela Castro</a>
-                                    <p>Commercial</p>
-                                </div>
-                                <div class="recent-pdf-date">12/05/2023</div>
                             </div>
 
                             <div class="recent-pdf">
