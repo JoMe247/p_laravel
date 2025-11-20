@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account · Plan</title>
+    <title>Companies</title>
+    <link rel="icon" href="img/favicon.png">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
-    <link rel="icon" href="img/favicon.png">
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/account.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/company.css') }}">
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -27,80 +28,147 @@
 
     <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </head>
 
 <body>
-
-    {{-- Menú lateral --}}
     <div id="main-container">
         @include('menu')
 
-        <section id="dash">>
+        <section id="dash">
 
             <div id="dash-content">
 
-                <div id="account-content-inner">
+                <div class="main-container">
 
-                    <h1>Agency {{ $agency->agency_code }}</h1>
-                    <h2>Plan actual: {{ $plan->account_type }}</h2>
+                    {{-- ✔ Botón Add Company --}}
+                    <button id="btn-add-company" class="btn-add-company">
+                        <i class='bx bx-plus'></i> Add Company
+                    </button>
 
-                    {{-- ===================
-                     SMS
-                ==================== --}}
-                    <div class="account-card">
-                        <h3>Mensajes SMS</h3>
+                    <div class="company-filters">
 
-                        <p><b>Twilio Number:</b> {{ $twilioNumber }}</p>
-                        <p><b>Enviados HOY:</b> {{ $dailySmsCount }}</p>
-                        <p><b>Enviados este mes:</b> {{ $monthlySmsCount }} / {{ $smsLimit }}</p>
+                        <button class="filter-btn" data-filter="all">
+                            All
+                        </button>
 
-                        @if ($isSmsOverLimit)
-                            <div class="account-alert">
-                                ⚠ Has excedido tu límite mensual de mensajes.
-                            </div>
-                        @endif
+                        <button class="filter-btn" data-filter="Personal">
+                            Personal
+                        </button>
+
+                        <button class="filter-btn" data-filter="Commercial">
+                            Commercial
+                        </button>
+
                     </div>
 
-                    {{-- ===================
-                     DOCUMENTOS
-                ==================== --}}
-                    <div class="account-card">
-                        <h3>Documentos</h3>
+                    <h1 class="page-title">Companies</h1>
 
-                        <p><b>Subidos este mes:</b> {{ $monthlyDocCount }} / {{ $docLimit }}</p>
+                    {{-- ✔ Grid de tarjetas --}}
+                    <div class="company-grid">
 
-                        @if ($isDocsOverLimit)
-                            <div class="account-alert">
-                                ⚠ Has excedido el límite mensual de documentos.
+                        @foreach ($companies as $c)
+                            <div class="company-card" data-id="{{ $c->id }}" data-type="{{ $c->type }}">
+
+                                <h3 class="company-title">{{ $c->company_name }}</h3>
+
+                                <div class="company-field field-user">
+                                    <b>User:</b> <span>{{ $c->user_name }}</span>
+                                </div>
+
+                                <div class="company-field field-password">
+                                    <b>Password:</b> <span>{{ $c->password }}</span>
+                                </div>
+
+                                <div class="company-field field-type">
+                                    <b>Type:</b> <span>{{ $c->type }}</span>
+                                </div>
+
+                                <div class="company-field field-desc">
+                                    <b>Description:</b> <span>{{ $c->description }}</span>
+                                </div>
+
+                                <div class="company-field field-url">
+                                    <b>URL:</b>
+                                    <a href="{{ $c->url }}" target="_blank">{{ $c->url }}</a>
+                                </div>
+
+                                {{-- Imagen al final --}}
+                                @if ($c->picture)
+                                    <img class="company-img" src="{{ asset('uploads/company/' . $c->picture) }}">
+                                @else
+                                    <img class="company-img" src="{{ asset('img/no-img.png') }}">
+                                @endif
+
+                                {{-- Botones --}}
+                                <div class="company-card-buttons">
+                                    <button class="btn-edit" onclick="editCompany({{ $c->id }})">
+                                        <i class="bx bx-edit"></i> Edit
+                                    </button>
+
+                                    <button class="btn-delete" onclick="deleteCompany({{ $c->id }})">
+                                        <i class="bx bx-trash"></i> Delete
+                                    </button>
+                                </div>
+
                             </div>
-                        @endif
-                    </div>
+                        @endforeach
 
-                    {{-- ===================
-                     USUARIOS
-                ==================== --}}
-                    <div class="account-card">
-                        <h3>Usuarios</h3>
-
-                        <p><b>Usuarios creados:</b> {{ $totalUsers }} / {{ $userLimit }}</p>
-
-                        @if ($isUserOverLimit)
-                            <div class="account-alert">
-                                ⚠ Límite de usuarios alcanzado.
-                            </div>
-                        @endif
                     </div>
 
                 </div>
 
+                {{-- ✔ Overlay --}}
+                <div id="company-overlay">
+                    <div id="company-modal">
+
+                        <h2>Add / Edit Company</h2>
+
+                        <form id="company-form" enctype="multipart/form-data">
+
+                            @csrf
+
+                            <label>Company Name</label>
+                            <input type="text" name="company_name" required>
+
+                            <label>User</label>
+                            <input type="text" name="user_name" required>
+
+                            <label>Password</label>
+                            <input type="password" name="password" required>
+
+                            <label>Type</label>
+                            <select name="type" required>
+                                <option value="">Select...</option>
+                                <option value="Personal">Personal</option>
+                                <option value="Commercial">Commercial</option>
+                            </select>
+
+                            <label>Description</label>
+                            <textarea name="description"></textarea>
+
+                            <label>URL</label>
+                            <input type="text" name="url" required>
+
+                            <label>Company Picture</label>
+                            <input type="file" name="picture" accept="image/*">
+                            <img id="preview-current-picture"
+                                style="width:100%; height:150px; object-fit:contain; border-radius:10px; margin-top:10px; display:none;">
+
+
+                            <button type="submit" class="btn-save-company">Save</button>
+                            <button type="button" class="btn-close-company"
+                                onclick="closeCompanyModal()">Cancel</button>
+
+                        </form>
+
+                    </div>
+                </div>
             </div>
 
         </section>
-
     </div>
 
-    <!-- UI Elements -->
+        <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
             <div class="confirm-window-content">
@@ -269,6 +337,9 @@
     <script src="{{ asset('js/table.js') }}"></script>
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
+
+    {{-- Company Script --}}
+    <script src="{{ asset('js/company.js') }}"></script>
 
 </body>
 

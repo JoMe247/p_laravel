@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account · Plan</title>
+    <title>Help · Support Tickets</title>
+    <link rel="icon" href="img/favicon.png">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
-    <link rel="icon" href="img/favicon.png">
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/account.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/company.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/help.css') }}">
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -27,78 +29,79 @@
 
     <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </head>
 
 <body>
 
-    {{-- Menú lateral --}}
     <div id="main-container">
         @include('menu')
 
-        <section id="dash">>
+        <section id="dash">
 
             <div id="dash-content">
 
-                <div id="account-content-inner">
+                <div class="main-container">
 
-                    <h1>Agency {{ $agency->agency_code }}</h1>
-                    <h2>Plan actual: {{ $plan->account_type }}</h2>
+                    <!-- 🔹 BOTÓN NEW TICKET -->
+                    <button id="newTicketBtn" class="btn-new-ticket"> <i class='bx bx-plus'></i>New Ticket</button>
+                    
+                    <!-- ======================= OVERLAY ====================== -->
+                    <div id="ticket-overlay">
+                        <div class="ticket-modal">
 
-                    {{-- ===================
-                     SMS
-                ==================== --}}
-                    <div class="account-card">
-                        <h3>Mensajes SMS</h3>
+                            <h2>Create Ticket</h2>
 
-                        <p><b>Twilio Number:</b> {{ $twilioNumber }}</p>
-                        <p><b>Enviados HOY:</b> {{ $dailySmsCount }}</p>
-                        <p><b>Enviados este mes:</b> {{ $monthlySmsCount }} / {{ $smsLimit }}</p>
+                            <form id="ticketForm">
+                                @csrf
 
-                        @if ($isSmsOverLimit)
-                            <div class="account-alert">
-                                ⚠ Has excedido tu límite mensual de mensajes.
-                            </div>
-                        @endif
-                    </div>
+                                <label>Subject</label>
+                                <input type="text" name="subject" required>
 
-                    {{-- ===================
-                     DOCUMENTOS
-                ==================== --}}
-                    <div class="account-card">
-                        <h3>Documentos</h3>
+                                <label>Assign (user / sub-user)</label>
+                                <select name="assigned_to" required>
+                                    <option value="">-- Select User --</option>
 
-                        <p><b>Subidos este mes:</b> {{ $monthlyDocCount }} / {{ $docLimit }}</p>
+                                    {{-- USERS --}}
+                                    @foreach ($users as $u)
+                                        <option value="user-{{ $u->id }}">{{ $u->name }} (User)</option>
+                                    @endforeach
 
-                        @if ($isDocsOverLimit)
-                            <div class="account-alert">
-                                ⚠ Has excedido el límite mensual de documentos.
-                            </div>
-                        @endif
-                    </div>
+                                    {{-- SUB USERS --}}
+                                    @foreach ($subusers as $s)
+                                        <option value="sub-{{ $s->id }}">{{ $s->name }} (Sub-user)
+                                        </option>
+                                    @endforeach
+                                </select>
 
-                    {{-- ===================
-                     USUARIOS
-                ==================== --}}
-                    <div class="account-card">
-                        <h3>Usuarios</h3>
+                                <label>Priority</label>
+                                <select name="priority" required>
+                                    <option>Low</option>
+                                    <option>Medium</option>
+                                    <option>High</option>
+                                    <option>Urgent</option>
+                                </select>
 
-                        <p><b>Usuarios creados:</b> {{ $totalUsers }} / {{ $userLimit }}</p>
+                                <label>Date</label>
+                                <input type="date" name="date" required>
 
-                        @if ($isUserOverLimit)
-                            <div class="account-alert">
-                                ⚠ Límite de usuarios alcanzado.
-                            </div>
-                        @endif
+                                <label>Status</label>
+                                <select name="status" required>
+                                    <option>Open</option>
+                                    <option>In Progress</option>
+                                    <option>Closed</option>
+                                </select>
+
+                                <button type="submit" class="btn-save">Create Ticket</button>
+                                <button type="button" id="closeTicketOverlay" class="btn-cancel">Cancel</button>
+                            </form>
+
+                        </div>
                     </div>
 
                 </div>
-
             </div>
-
-        </section>
-
     </div>
+    </section>
 
     <!-- UI Elements -->
     <div class="window-confirm">
@@ -261,14 +264,25 @@
 
     <div id="dim-screen"></div>
 
-    {{-- Scripts --}}
-    <script src="{{ asset('js/image.js') }}"></script>
-    <script src="{{ asset('js/weather.js') }}"></script>
-    <script src="{{ asset('js/dropdown.js') }}"></script>
-    <script src="{{ asset('js/menu.js') }}"></script>
-    <script src="{{ asset('js/table.js') }}"></script>
-    <script src="{{ asset('js/settings.js') }}"></script>
-    <script src="{{ asset('js/operations.js') }}"></script>
+
+    <script src="js/image.js"></script>
+    <script src="js/dropdown.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/table.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/operations.js"></script>
+
+    <script>
+        // ---- Mostrar Overlay ----
+        document.getElementById('newTicketBtn').onclick = function() {
+            document.getElementById('ticket-overlay').style.display = 'flex';
+        };
+
+        // ---- Cerrar Overlay ----
+        document.getElementById('closeTicketOverlay').onclick = function() {
+            document.getElementById('ticket-overlay').style.display = 'none';
+        };
+    </script>
 
 </body>
 

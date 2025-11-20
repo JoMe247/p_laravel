@@ -49,7 +49,7 @@
             <i class='bx bx-user'></i> Customers
         </div>
 
-        <div class="lateral-row" data="option">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/company') }}'">
             <i class='bx bxs-buildings'></i> Companies
         </div>
 
@@ -87,7 +87,7 @@
             <i class='bx bx-category'></i> Tools
         </div>
 
-        <div class="lateral-row" data="option">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/help') }}'">
             <i class='bx bx-help-circle'></i> Help
         </div>
 

@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\HelpController;
+
 
 // Página inicial
 Route::get('/', function () {
@@ -107,4 +110,14 @@ Route::middleware(['auth:web,sub'])->group(function () {
     Route::get('/account', [AccountController::class, 'show'])
         ->name('account.show');
 });
+
+// Company Routes
+Route::get('/company', [CompanyController::class, 'index'])->name('company');
+Route::post('/company/store', [CompanyController::class, 'store']);
+Route::get('/company/edit/{id}', [CompanyController::class, 'edit']);
+Route::post('/company/update/{id}', [CompanyController::class, 'update']);
+Route::post('/company/delete/{id}', [CompanyController::class, 'delete'])->name('company.delete');
+
+// Help Routes
+Route::get('/help', [App\Http\Controllers\HelpController::class, 'index'])->name('help');
 
