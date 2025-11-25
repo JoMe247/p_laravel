@@ -1,16 +1,14 @@
 .btn-new-ticket {
-    position: absolute;
-    top: 20px;
-    left: 280px; /* 🟦 Ajustado para aparecer a la derecha del sidebar */
+    margin-left: 20px;
     background: #008cff;
-    padding: 10px 16px;
+    padding: 10px 20px;
     border-radius: 8px;
     color: #fff;
     border: none;
     cursor: pointer;
-    font-weight: bold;
-    z-index: 5000; /* para que quede arriba de la sidebar */
+    font-weight: 600;
 }
+
 
 
 #ticket-overlay {
@@ -68,3 +66,98 @@
     cursor: pointer;
     border-radius: 8px;
 }
+
+/* TOP BAR */
+.ticket-top-bar {
+    margin-top: 25px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.ticket-status-counters .st {
+    background: #f1f1f1;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #666;
+    border: 1px solid #e0e0e0;
+}
+
+.ticket-search {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+}
+
+.ticket-search input {
+    border: none;
+    outline: none;
+    margin-left: 8px;
+}
+
+/* BOTÓN DE FILTROS */
+.btn-filters {
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+/* TABLA */
+.ticket-table-wrapper {
+    margin-top: 20px;
+    margin-left: 20px;
+    width: calc(100% - 40px);
+}
+
+.ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.ticket-table thead {
+    background: #f8f8f8;
+}
+
+.ticket-table th {
+    padding: 14px 18px;    /* igual en th y td */
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    text-align: left;
+}
+
+.ticket-table td {
+    padding: 14px 18px;    /* igual al th */
+    font-size: 14px;
+    color: #333;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.ticket-table tr:last-child td {
+    border-bottom: none;
+}
+
+.ticket-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.empty-msg {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+}
+

@@ -44,14 +44,65 @@
 
                     <!-- 🔹 BOTÓN NEW TICKET -->
                     <button id="newTicketBtn" class="btn-new-ticket"> <i class='bx bx-plus'></i>New Ticket</button>
-                    
+
+                    <!-- ======== HEADER DE ESTADÍSTICAS Y BUSCADOR ======== -->
+                    <div class="ticket-top-bar">
+
+                        <div class="ticket-status-counters">
+                            <span class="st st-open">0 Open</span>
+                            <span class="st st-progress">0 In Progress</span>
+                            <span class="st st-answered">0 Answered</span>
+                            <span class="st st-hold">0 On Hold</span>
+                            <span class="st st-closed">0 Closed</span>
+                        </div>
+
+                        <div class="ticket-search">
+                            <i class='bx bx-search'></i>
+                            <input type="text" placeholder="Search...">
+                        </div>
+
+                        <button class="btn-filters"><i class='bx bx-filter'></i> Filters</button>
+                    </div>
+
+
+                    <!-- ================= TABLA LISTADO ================= -->
+                    <div class="ticket-table-wrapper">
+                        <table class="ticket-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Subject</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @forelse ($tickets as $t)
+                                    <tr>
+                                        <td>{{ $t->id }}</td>
+                                        <td>{{ $t->subject }}</td>
+                                        <td>{{ $t->status }}</td>
+                                        <td>{{ $t->priority }}</td>
+                                        <td>{{ $t->created_at->format('Y-m-d') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="empty-msg">No entries found</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
                     <!-- ======================= OVERLAY ====================== -->
                     <div id="ticket-overlay">
                         <div class="ticket-modal">
 
                             <h2>Create Ticket</h2>
 
-                            <form id="ticketForm">
+                            <form id="ticketForm" method="POST" action="{{ route('help.store') }}">
                                 @csrf
 
                                 <label>Subject</label>
@@ -264,13 +315,14 @@
 
     <div id="dim-screen"></div>
 
-
-    <script src="js/image.js"></script>
-    <script src="js/dropdown.js"></script>
-    <script src="js/menu.js"></script>
-    <script src="js/table.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/operations.js"></script>
+    {{-- Scripts --}}
+    <script src="{{ asset('js/image.js') }}"></script>
+    <script src="{{ asset('js/weather.js') }}"></script>
+    <script src="{{ asset('js/dropdown.js') }}"></script>
+    <script src="{{ asset('js/menu.js') }}"></script>
+    <script src="{{ asset('js/table.js') }}"></script>
+    <script src="{{ asset('js/settings.js') }}"></script>
+    <script src="{{ asset('js/operations.js') }}"></script>
 
     <script>
         // ---- Mostrar Overlay ----

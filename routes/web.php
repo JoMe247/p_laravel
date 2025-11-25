@@ -120,4 +120,7 @@ Route::post('/company/delete/{id}', [CompanyController::class, 'delete'])->name(
 
 // Help Routes
 Route::get('/help', [App\Http\Controllers\HelpController::class, 'index'])->name('help');
+Route::post('/help/store', [App\Http\Controllers\HelpController::class, 'store'])
+    ->name('help.store');
+
 
