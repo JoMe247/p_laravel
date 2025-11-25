@@ -19,6 +19,7 @@ class Ticket extends Model
 
         'priority',
         'status',
+        'description',
         'date',
     ];
 

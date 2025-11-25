@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Help · Support Tickets</title>
+    <title>Tasks · CRM</title>
     <link rel="icon" href="img/favicon.png">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="{{ asset('css/account.css') }}">
     <link rel="stylesheet" href="{{ asset('css/company.css') }}">
     <link rel="stylesheet" href="{{ asset('css/help.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tasks.css') }}">
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -42,172 +44,90 @@
 
                 <div class="main-container">
 
-                    <!-- BOTÓN NEW TICKET -->
-                    <button id="newTicketBtn" class="btn-new-ticket">
-                        <i class='bx bx-plus'></i> New Ticket
-                    </button>
 
-                    <!-- ENCABEZADO DE FILTROS -->
-                    <div class="ticket-top-bar">
+                    <div class="top-bar">
+                        <h1 class="title">Tasks</h1>
 
-                        <div class="ticket-status-counters">
-                            <span class="st st-all">All</span>
-                            <span class="st st-open">Open</span>
-                            <span class="st st-progress">In Progress</span>
-                            <span class="st st-answered">Answered</span>
-                            <span class="st st-hold">On Hold</span>
-                            <span class="st st-closed">Closed</span>
-                        </div>
-
-                        <div class="ticket-search">
-                            <i class='bx bx-search'></i>
-                            <input type="text" id="ticket-search-input" placeholder="Search...">
-                        </div>
-
-                        <button class="btn-filters"><i class='bx bx-filter'></i> Filters</button>
+                        <button id="btn-new-task" class="btn-add">+ New Task</button>
                     </div>
 
-                    <!-- TABLA DE TICKETS -->
-                    <div class="ticket-table-wrapper">
-                        <table class="ticket-table">
+                    <!-- Tabla de tareas -->
+                    <div class="tasks-table-container">
+                        <table class="tasks-table">
                             <thead>
                                 <tr>
-                                    <th>#</th>
                                     <th>Subject</th>
-                                    <th>Status</th>
+                                    <th>Start Date</th>
+                                    <th>Due Date</th>
                                     <th>Priority</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
+                                    <th>Assignees</th>
                                 </tr>
                             </thead>
-
-                            <tbody id="ticket-table-body">
-
-                                @forelse ($tickets as $t)
+                            <tbody>
+                                @foreach ($tasks as $t)
                                     <tr>
-
-                                        <td>{{ $t->id }}</td>
-
-                                        <td class="subject-cell">{{ $t->subject }}</td>
-
-                                        <td>
-                                            <select class="edit-status" data-id="{{ $t->id }}">
-                                                <option {{ $t->status == 'Open' ? 'selected' : '' }}>Open</option>
-                                                <option {{ $t->status == 'In Progress' ? 'selected' : '' }}>In Progress
-                                                </option>
-                                                <option {{ $t->status == 'Answered' ? 'selected' : '' }}>Answered
-                                                </option>
-                                                <option {{ $t->status == 'On Hold' ? 'selected' : '' }}>On Hold
-                                                </option>
-                                                <option {{ $t->status == 'Closed' ? 'selected' : '' }}>Closed</option>
-                                            </select>
-                                        </td>
-
-                                        <td>
-                                            <select class="edit-priority" data-id="{{ $t->id }}">
-                                                <option {{ $t->priority == 'Low' ? 'selected' : '' }}>Low</option>
-                                                <option {{ $t->priority == 'Medium' ? 'selected' : '' }}>Medium
-                                                </option>
-                                                <option {{ $t->priority == 'High' ? 'selected' : '' }}>High</option>
-                                                <option {{ $t->priority == 'Urgent' ? 'selected' : '' }}>Urgent
-                                                </option>
-                                            </select>
-                                        </td>
-
-                                        <td>{{ $t->created_at->format('Y-m-d') }}</td>
-
-                                        <td class="actions-cell">
-                                            <i class='bx bx-info-circle action-info'
-                                                data-description="{{ $t->description }}"></i>
-                                            <i class='bx bx-trash action-delete' data-id="{{ $t->id }}"></i>
-                                        </td>
-
-
+                                        <td>{{ $t->subject }}</td>
+                                        <td>{{ $t->start_date }}</td>
+                                        <td>{{ $t->due_date }}</td>
+                                        <td class="priority {{ $t->priority }}">{{ ucfirst($t->priority) }}</td>
+                                        <td>{{ $t->assigned_name }}</td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="empty-msg">No entries found</td>
-                                    </tr>
-                                @endforelse
-
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- OVERLAY -->
-                    <div id="ticket-overlay">
-                        <div class="ticket-modal">
 
-                            <h2>Create Ticket</h2>
+                    <!-- Overlay -->
+                    <div id="overlay-task" class="overlay">
+                        <div class="overlay-content">
+                            <h2>Create New Task</h2>
 
-                            <form id="ticketForm" method="POST" action="{{ route('help.store') }}">
+                            <form id="task-form" method="POST" action="{{ route('tasks.store') }}">
                                 @csrf
 
                                 <label>Subject</label>
                                 <input type="text" name="subject" required>
 
-                                <label>Assign</label>
-                                <select name="assigned_to" required>
-                                    <option value="">-- Select User --</option>
+                                <label>Start Date</label>
+                                <input type="date" name="start_date" required>
 
-                                    @foreach ($users as $u)
-                                        <option value="user-{{ $u->id }}">{{ $u->name }} (User)</option>
-                                    @endforeach
-
-                                    @foreach ($subusers as $s)
-                                        <option value="sub_user-{{ $s->id }}">{{ $s->name }} (Sub-user)
-                                        </option>
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <label>Due Date</label>
+                                <input type="date" name="due_date" required>
 
                                 <label>Priority</label>
                                 <select name="priority" required>
-                                    <option>Low</option>
-                                    <option>Medium</option>
-                                    <option>High</option>
-                                    <option>Urgent</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
                                 </select>
 
-                                <label>Date</label>
-                                <input type="date" name="date" required>
-
-                                <label>Status</label>
-                                <select name="status" required>
-                                    <option>Open</option>
-                                    <option>In Progress</option>
-                                    <option>Closed</option>
+                                <label>Assignees</label>
+                                <select name="assigned" required>
+                                    @foreach ($assignees as $a)
+                                        <option value="{{ $a['type'] }}|{{ $a['id'] }}">
+                                            {{ ucfirst($a['type']) }} — {{ $a['name'] }}
+                                        </option>
+                                    @endforeach
                                 </select>
 
                                 <label>Description</label>
-                                <textarea name="description" rows="4" required></textarea>
+                                <textarea name="description" rows="4"></textarea>
 
-
-                                <button type="submit" class="btn-save">Create Ticket</button>
-                                <button type="button" id="closeTicketOverlay" class="btn-cancel">Cancel</button>
+                                <div class="btns">
+                                    <button type="button" id="btn-cancel-task" class="btn-cancel">Cancel</button>
+                                    <button type="submit" class="btn-save">Save Task</button>
+                                </div>
                             </form>
-
                         </div>
                     </div>
-
-                    <!-- OVERLAY DESCRIPTION -->
-                    <div id="description-overlay">
-                        <div class="description-modal">
-                            <h3>Ticket Description</h3>
-                            <p id="description-text"></p>
-
-                            <button id="closeDescription" class="btn-cancel">Close</button>
-                        </div>
-                    </div>
-
-
-
                 </div>
             </div>
     </div>
     </section>
 
-    <!-- UI Elements -->
+        <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
             <div class="confirm-window-content">
@@ -376,7 +296,16 @@
     <script src="{{ asset('js/table.js') }}"></script>
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
-    <script src="{{ asset('js/help.js') }}"></script>
+
+
+    <script>
+        const overlay = document.getElementById('overlay-task');
+        const btnOpen = document.getElementById('btn-new-task');
+        const btnCancel = document.getElementById('btn-cancel-task');
+
+        btnOpen.onclick = () => overlay.style.display = 'flex';
+        btnCancel.onclick = () => overlay.style.display = 'none';
+    </script>
 
 </body>
 

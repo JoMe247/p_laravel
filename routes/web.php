@@ -13,6 +13,7 @@ use App\Http\Controllers\OfficeController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\HelpController;
+use App\Http\Controllers\TaskController;
 
 
 // Página inicial
@@ -119,8 +120,18 @@ Route::post('/company/update/{id}', [CompanyController::class, 'update']);
 Route::post('/company/delete/{id}', [CompanyController::class, 'delete'])->name('company.delete');
 
 // Help Routes
-Route::get('/help', [App\Http\Controllers\HelpController::class, 'index'])->name('help');
-Route::post('/help/store', [App\Http\Controllers\HelpController::class, 'store'])
+Route::get('/help', [HelpController::class, 'index'])->name('help');
+Route::post('/help/store', [HelpController::class, 'store'])
     ->name('help.store');
+Route::post('/help/update-status', [HelpController::class, 'updateStatus']);
+Route::post('/help/update-priority', [HelpController::class, 'updatePriority']);
+Route::post('/help/delete', [HelpController::class, 'delete'])->name('help.delete');
 
 
+
+// Tasks Routes
+Route::get('/tasks', [TaskController::class, 'index'])
+    ->name('tasks.index');
+
+Route::post('/tasks/store', [TaskController::class, 'store'])
+    ->name('tasks.store');

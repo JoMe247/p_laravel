@@ -73,8 +73,8 @@
             <i class='bx bx-bar-chart-alt'></i> Reports
         </div>
 
-        <div class="lateral-row" data="option">
-            <i class='bx bx-file-blank'></i> Invoice
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/tasks') }}'">
+            <i class='bx bx-file-blank'></i> Tasks
         </div>
 
         <!-- Categoría -->

@@ -10,19 +10,19 @@ use App\Models\Ticket;
 class HelpController extends Controller
 {
     public function index()
-{
-    $auth = auth('web')->user() ?? auth('sub')->user();
-    $agency = $auth->agency;
+    {
+        $auth = auth('web')->user() ?? auth('sub')->user();
+        $agency = $auth->agency;
 
-    $users = User::where('agency', $agency)->get();
-    $subusers = SubUser::where('agency', $agency)->get();
+        $users = User::where('agency', $agency)->get();
+        $subusers = SubUser::where('agency', $agency)->get();
 
-    $tickets = Ticket::where('agency', $agency)
-        ->orderBy('id', 'desc')
-        ->get();
+        $tickets = Ticket::where('agency', $agency)
+            ->orderBy('id', 'desc')
+            ->get();
 
-    return view('help', compact('users', 'subusers', 'tickets'));
-}
+        return view('help', compact('users', 'subusers', 'tickets'));
+    }
 
 
     public function store(Request $request)
@@ -34,7 +34,8 @@ class HelpController extends Controller
             'assigned_to' => 'nullable|string',
             'priority' => 'required|string',
             'date' => 'required|date',
-            'status' => 'required|string'
+            'status' => 'required|string',
+            'description' => 'required|string'
         ]);
 
         // Parse assigned user
@@ -53,6 +54,7 @@ class HelpController extends Controller
             'subject' => $request->subject,
             'priority' => $request->priority,
             'status' => $request->status,
+            'description' => $request->description,
             'date' => $request->date,
 
             'assigned_type' => $assigned_type,
@@ -60,5 +62,36 @@ class HelpController extends Controller
         ]);
 
         return back()->with('success', 'Ticket created!');
+    }
+
+    public function updateStatus(Request $request)
+    {
+        Ticket::where('id', $request->id)->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json(['updated' => true]);
+    }
+
+    public function updatePriority(Request $request)
+    {
+        Ticket::where('id', $request->id)->update([
+            'priority' => $request->priority
+        ]);
+
+        return response()->json(['updated' => true]);
+    }
+
+    public function delete(Request $request)
+    {
+        $ticket = Ticket::find($request->id);
+
+        if (!$ticket) {
+            return response()->json(['error' => 'Ticket not found'], 404);
+        }
+
+        $ticket->delete();
+
+        return response()->json(['deleted' => true]);
     }
 }
