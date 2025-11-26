@@ -135,3 +135,6 @@ Route::get('/tasks', [TaskController::class, 'index'])
 
 Route::post('/tasks/store', [TaskController::class, 'store'])
     ->name('tasks.store');
+Route::post('/tasks/update-priority', [TaskController::class, 'updatePriority']);
+Route::post('/tasks/update-status', [TaskController::class, 'updateStatus']);
+Route::post('/tasks/delete', [TaskController::class, 'delete']);

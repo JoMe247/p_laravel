@@ -11,63 +11,79 @@ use Illuminate\Support\Facades\DB;
 class TaskController extends Controller
 {
     public function index()
-    {
-        $auth = auth('web')->user() ?? auth('sub')->user();
-        $agency = $auth->agency;
+{
+    $auth = auth('web')->user() ?? auth('sub')->user();
+    $agency = $auth->agency;
 
-        // Obtener tasks
-        $tasks = DB::table('tasks')
-            ->where('agency', $agency)
-            ->orderBy('id', 'desc')
-            ->get();
+    $tasks = DB::table('tasks')
+        ->where('agency', $agency)
+        ->orderBy('id', 'desc')
+        ->get();
 
-        // Obtener nombres del assigned
-        foreach ($tasks as $t) {
-            if ($t->assigned_user_type === 'user') {
-                $u = User::find($t->assigned_user_id);
-            } else {
-                $u = SubUser::find($t->assigned_user_id);
-            }
-
-            $t->assigned_name = $u ? $u->name : 'Unknown';
+    foreach ($tasks as $t) {
+        if ($t->assigned_user_type === 'user') {
+            $u = User::find($t->assigned_user_id);
+        } else {
+            $u = SubUser::find($t->assigned_user_id);
         }
 
-        // Obtener users y sub users como assignees
-        $assignees = [];
-
-        $users = User::where('agency', $agency)->get();
-        foreach ($users as $u) {
-            $assignees[] = ['type' => 'user', 'id' => $u->id, 'name' => $u->name];
-        }
-
-        $subs = SubUser::where('agency', $agency)->get();
-        foreach ($subs as $s) {
-            $assignees[] = ['type' => 'sub_user', 'id' => $s->id, 'name' => $s->name];
-        }
-
-        return view('tasks', compact('tasks', 'assignees'));
+        $t->assigned_name = $u ? $u->name : 'Unknown';
     }
 
-    public function store(Request $request)
-    {
-        $auth = auth('web')->user() ?? auth('sub')->user();
-        $agency = $auth->agency;
+    $assignees = collect(User::where('agency',$agency)->get()
+        ->map(fn($u)=>['type'=>'user','id'=>$u->id,'name'=>$u->name])
+        ->merge(
+            SubUser::where('agency',$agency)->get()
+                ->map(fn($s)=>['type'=>'sub_user','id'=>$s->id,'name'=>$s->name])
+        ));
 
-        [$type, $assignedId] = explode('|', $request->assigned);
+    return view('tasks', compact('tasks','assignees'));
+}
 
-        DB::table('tasks')->insert([
-            'agency' => $agency,
-            'subject' => $request->subject,
-            'start_date' => $request->start_date,
-            'due_date' => $request->due_date,
-            'priority' => $request->priority,
-            'assigned_user_id' => $assignedId,
-            'assigned_user_type' => $type,
-            'description' => $request->description,
-            'created_by' => $auth->id,
-            'created_by_type' => $auth instanceof User ? 'user' : 'sub_user'
-        ]);
+public function store(Request $r)
+{
+    $auth = auth('web')->user() ?? auth('sub')->user();
+    [$type, $assigned] = explode('|', $r->assigned);
 
-        return redirect()->route('tasks.index');
-    }
+    DB::table('tasks')->insert([
+        'agency' => $auth->agency,
+        'subject' => $r->subject,
+        'start_date' => $r->start_date,
+        'due_date' => $r->due_date,
+        'priority' => $r->priority,
+        'status' => 'Open',
+        'assigned_user_type' => $type,
+        'assigned_user_id' => $assigned,
+        'description' => $r->description,
+        'created_at' => now(),
+        'updated_at' => now()
+    ]);
+
+    return redirect()->route('tasks.index');
+}
+
+public function updateStatus(Request $r)
+{
+    DB::table('tasks')->where('id',$r->id)->update([
+        'status'=>$r->status
+    ]);
+    return response()->json(['ok'=>true]);
+}
+
+public function updatePriority(Request $r)
+{
+    DB::table('tasks')->where('id',$r->id)->update([
+        'priority'=>$r->priority
+    ]);
+    return response()->json(['ok'=>true]);
+}
+
+public function delete(Request $r)
+{
+    DB::table('tasks')->where('id',$r->id)->delete();
+    return response()->json(['ok'=>true]);
+}
+
+
+
 }

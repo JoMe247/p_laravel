@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Tasks · CRM</title>
-    <link rel="icon" href="img/favicon.png">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
@@ -20,7 +19,6 @@
     <link rel="stylesheet" href="{{ asset('css/account.css') }}">
     <link rel="stylesheet" href="{{ asset('css/company.css') }}">
     <link rel="stylesheet" href="{{ asset('css/help.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/settings.css') }}">
     <link rel="stylesheet" href="{{ asset('css/tasks.css') }}">
 
     <!-- Icons -->
@@ -31,6 +29,7 @@
 
     <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body>
@@ -44,46 +43,100 @@
 
                 <div class="main-container">
 
+                    <div class="tasks-container">
 
-                    <div class="top-bar">
-                        <h1 class="title">Tasks</h1>
+                        <!-- TOP BAR -->
+                        <div class="task-header">
+                            <h1>Tasks</h1>
 
-                        <button id="btn-new-task" class="btn-add">+ New Task</button>
-                    </div>
+                            <div class="task-filters">
+                                <button class="filter-btn active" data-filter="all">All <span
+                                        class="count">(0)</span></button>
+                                <button class="filter-btn" data-filter="Open">Open <span
+                                        class="count">(0)</span></button>
+                                <button class="filter-btn" data-filter="In Progress">In Progress <span
+                                        class="count">(0)</span></button>
+                                <button class="filter-btn" data-filter="Closed">Closed <span
+                                        class="count">(0)</span></button>
+                            </div>
 
-                    <!-- Tabla de tareas -->
-                    <div class="tasks-table-container">
-                        <table class="tasks-table">
+                            <button id="btn-new-task" class="btn-primary">
+                                <i class='bx bx-plus'></i> New Task
+                            </button>
+                        </div>
+
+                        <!-- TABLE -->
+                        <table class="task-table">
                             <thead>
                                 <tr>
+                                    <th>#</th>
                                     <th>Subject</th>
-                                    <th>Start Date</th>
-                                    <th>Due Date</th>
+                                    <th>Status</th>
                                     <th>Priority</th>
-                                    <th>Assignees</th>
+                                    <th>Assigned</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+
+                            <tbody id="task-body">
                                 @foreach ($tasks as $t)
-                                    <tr>
+                                    <tr data-status="{{ $t->status }}">
+                                        <td>{{ $t->id }}</td>
                                         <td>{{ $t->subject }}</td>
-                                        <td>{{ $t->start_date }}</td>
-                                        <td>{{ $t->due_date }}</td>
-                                        <td class="priority {{ $t->priority }}">{{ ucfirst($t->priority) }}</td>
+
+                                        <td>
+                                            <select class="edit-status" data-id="{{ $t->id }}">
+                                                <option {{ $t->status == 'Open' ? 'selected' : '' }}>Open</option>
+                                                <option {{ $t->status == 'In Progress' ? 'selected' : '' }}>In Progress
+                                                </option>
+                                                <option {{ $t->status == 'Closed' ? 'selected' : '' }}>Closed</option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <select class="edit-priority" data-id="{{ $t->id }}">
+                                                <option {{ $t->priority == 'Low' ? 'selected' : '' }}>Low</option>
+                                                <option {{ $t->priority == 'Medium' ? 'selected' : '' }}>Medium
+                                                </option>
+                                                <option {{ $t->priority == 'High' ? 'selected' : '' }}>High</option>
+                                                <option {{ $t->priority == 'Urgent' ? 'selected' : '' }}>Urgent
+                                                </option>
+                                            </select>
+                                        </td>
+
                                         <td>{{ $t->assigned_name }}</td>
+
+                                        <td>{{ \Carbon\Carbon::parse($t->created_at)->format('Y-m-d') }}</td>
+
+                                        <td>
+                                            <i class='bx bx-info-circle info-btn'
+                                                data-desc="{{ $t->description }}"></i>
+                                            <i class='bx bx-trash delete-btn' data-id="{{ $t->id }}"></i>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
+
                     </div>
 
+                    <!-- DESCRIPTION OVERLAY -->
+                    <div id="desc-overlay" class="overlay">
+                        <div class="overlay-box">
+                            <h2>Description</h2>
+                            <p id="desc-text"></p>
+                            <button id="close-desc" class="btn-secondary">Close</button>
+                        </div>
+                    </div>
 
-                    <!-- Overlay -->
-                    <div id="overlay-task" class="overlay">
-                        <div class="overlay-content">
-                            <h2>Create New Task</h2>
+                    <!-- CREATE TASK OVERLAY -->
+                    <div id="task-overlay" class="overlay">
+                        <div class="overlay-box">
 
-                            <form id="task-form" method="POST" action="{{ route('tasks.store') }}">
+                            <h2>Create Task</h2>
+
+                            <form method="POST" action="{{ route('tasks.store') }}">
                                 @csrf
 
                                 <label>Subject</label>
@@ -97,13 +150,13 @@
 
                                 <label>Priority</label>
                                 <select name="priority" required>
-                                    <option value="low">Low</option>
-                                    <option value="medium" selected>Medium</option>
-                                    <option value="high">High</option>
-                                    <option value="urgent">Urgent</option>
+                                    <option>Low</option>
+                                    <option selected>Medium</option>
+                                    <option>High</option>
+                                    <option>Urgent</option>
                                 </select>
 
-                                <label>Assignees</label>
+                                <label>Assign To</label>
                                 <select name="assigned" required>
                                     @foreach ($assignees as $a)
                                         <option value="{{ $a['type'] }}|{{ $a['id'] }}">
@@ -113,13 +166,12 @@
                                 </select>
 
                                 <label>Description</label>
-                                <textarea name="description" rows="4"></textarea>
+                                <textarea name="description" rows="3" required></textarea>
 
-                                <div class="btns">
-                                    <button type="button" id="btn-cancel-task" class="btn-cancel">Cancel</button>
-                                    <button type="submit" class="btn-save">Save Task</button>
-                                </div>
+                                <button class="btn-primary" type="submit">Save</button>
+                                <button type="button" id="cancel-task" class="btn-secondary">Cancel</button>
                             </form>
+
                         </div>
                     </div>
                 </div>
@@ -127,7 +179,7 @@
     </div>
     </section>
 
-        <!-- UI Elements -->
+    <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
             <div class="confirm-window-content">
@@ -296,16 +348,8 @@
     <script src="{{ asset('js/table.js') }}"></script>
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
-
-
-    <script>
-        const overlay = document.getElementById('overlay-task');
-        const btnOpen = document.getElementById('btn-new-task');
-        const btnCancel = document.getElementById('btn-cancel-task');
-
-        btnOpen.onclick = () => overlay.style.display = 'flex';
-        btnCancel.onclick = () => overlay.style.display = 'none';
-    </script>
+    <script src="{{ asset('js/help.js') }}"></script>
+    <script src="{{ asset('js/tasks.js') }}"></script>
 
 </body>
 

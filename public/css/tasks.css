@@ -1,89 +1,140 @@
-/* Tabla */
-.tasks-table-container {
-    margin-top: 25px;
-}
-
-.tasks-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #2c2c2c;
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.tasks-table th, .tasks-table td {
-    padding: 14px;
+/* MAIN CONTAINER */
+.tasks-container {
+    padding: 30px;
     color: #fff;
-    border-bottom: 1px solid #3d3d3d;
+    font-family: Arial, sans-serif;
 }
 
-.tasks-table th {
-    background: #1e1e1e;
+/* HEADER */
+.task-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.task-header h1 {
+    font-size: 28px;
     font-weight: bold;
 }
 
-.priority.low { color: #7fbf7f }
-.priority.medium { color: #e0d97a }
-.priority.high { color: #e39b42 }
-.priority.urgent { color: #ff5555 }
-
-/* Overlay */
-.overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+/* FILTER BUTTONS */
+.task-filters {
+    display: flex;
+    gap: 10px;
 }
 
-.overlay-content {
-    width: 450px;
-    background: gray;
-    padding: 30px;
+.filter-btn {
+    padding: 6px 14px;
+    background: #2d2d2d;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+}
+
+.filter-btn:hover {
+    background: #3a3a3a;
+}
+
+.filter-btn.active {
+    background: #4a72ff;
+}
+
+/* ADD BUTTON */
+.btn-primary {
+    margin-left: auto;
+    background: #4a72ff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #6a89ff;
+}
+
+.btn-secondary {
+    background: #555;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #777;
+}
+
+/* TABLE */
+.task-table {
+    width: 100%;
+    background: #2d2d2d;
+    border-radius: 12px;
+    overflow: hidden;
+    border-collapse: collapse;
+}
+
+.task-table thead {
+    background: #1f1f1f;
+}
+
+.task-table th, .task-table td {
+    padding: 14px;
+    border-bottom: 1px solid #444;
+}
+
+/* ACTION ICONS */
+.info-btn {
+    color: #4da6ff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.delete-btn {
+    color: #ff4d4d;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* OVERLAYS */
+.overlay {
+    display: none !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-box {
+    background: #1f1f1f;
+    width: 420px;
+    padding: 25px;
     border-radius: 12px;
 }
 
-.overlay-content h2 {
-    margin-bottom: 15px;
-    color: #fff;
+/* ============================================================
+   FIX GLOBAL DOCIENT OVERLAY — SOLO PARA TASKS
+   ============================================================ */
+
+#task-overlay,
+#desc-overlay {
+    display: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
 }
 
-.overlay-content label {
-    display: block;
-    margin-top: 12px;
-}
-
-.overlay-content input,
-.overlay-content select,
-.overlay-content textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 8px;
-    border: none;
-    background: #222;
-    color: #fff;
-}
-
-.btns {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.btn-save {
-    background: #4caf50;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 8px;
-}
-
-.btn-cancel {
-    background: #d9534f;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 8px;
+#task-overlay.show,
+#desc-overlay.show {
+    display: flex !important;
 }
