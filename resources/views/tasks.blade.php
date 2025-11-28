@@ -131,7 +131,7 @@
 
                                         <td>{{ \Carbon\Carbon::parse($t->created_at)->format('Y-m-d') }}</td>
 
-                                        <td >
+                                        <td class="actions-cell">
                                             <!-- MUST MATCH .info-btn -->
                                             <i class='bx bx-info-circle info-btn'
                                                 data-desc="{{ $t->description }}"></i>
