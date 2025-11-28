@@ -74,11 +74,11 @@
         </div>
 
         <div class="lateral-row" data="option" onclick="window.location='{{ url('/tasks') }}'">
-            <i class='bx bx-file-blank'></i> Tasks
+            <i class='bx bx-check-circle'></i> Tasks
         </div>
 
         <div class="lateral-row" data="option" onclick="window.location='{{ url('/calendar') }}'">
-            <i class='bx bx-file-blank'></i> Calendar
+            <i class='bx bxs-calendar'></i> Calendar
         </div>
 
         <!-- Categoría -->

@@ -1,0 +1,76 @@
+/* Layout general del profile */
+#profile-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 20px 30px;
+    box-sizing: border-box;
+}
+
+/* --------------------------- */
+/*      MENU LATERAL CLARO     */
+/* --------------------------- */
+
+.profile-side-menu {
+    width: 240px;
+    background: #ffffff; /* Fondo blanco sólido para claridad */
+    border-radius: 18px;
+    padding: 18px 16px 22px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Texto del header */
+.profile-side-header i {
+    font-size: 32px;
+    color: #444; /* <--- oscuro, visible */
+}
+
+.profile-side-title span {
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    color: #444; /* <--- oscuro */
+}
+
+.profile-side-title strong {
+    display: block;
+    font-size: 15px;
+    color: #222; /* <--- más oscuro */
+}
+
+/* Botones del menú */
+.profile-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: none;
+    background: #f1f1f1;
+    color: #333; /* <--- texto visible */
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.18s ease;
+}
+
+.profile-menu-item i {
+    font-size: 20px;
+    color: #333; /* <--- icono visible */
+}
+
+/* Hover */
+.profile-menu-item:hover {
+    background: #e6e6e6;
+}
+
+/* Activo */
+.profile-menu-item.active {
+    background: var(--action-color, #3498db);
+    color: #fff;
+}
+
+.profile-menu-item.active i {
+    color: #fff;
+}
