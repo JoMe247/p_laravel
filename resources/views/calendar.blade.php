@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Tasks · CRM</title>
+    <title>Calendar · CRM</title>
+    <link rel="icon" href="img/favicon.png">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
@@ -19,7 +20,7 @@
     <link rel="stylesheet" href="{{ asset('css/account.css') }}">
     <link rel="stylesheet" href="{{ asset('css/company.css') }}">
     <link rel="stylesheet" href="{{ asset('css/help.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/tasks.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/calendar.css') }}">
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -29,6 +30,10 @@
 
     <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 
 </head>
 
@@ -43,181 +48,74 @@
 
                 <div class="main-container">
 
-                    <!-- ===========================
-                         TOP BAR (MATCH WITH tasks.js)
-                    ============================ -->
-                    <div class="task-top-bar">
+                    <div id='calendar'></div>
 
-                        <h1 class="title">Tasks</h1>
+                    <!-- Overlay -->
+                    <div id="event-overlay">
+                        <div class="overlay-box">
 
-                        <div class="task-status-counters">
-                            <button class="filter-btn active" data-filter="all">
-                                All <span class="count">(0)</span>
-                            </button>
+                            <h3 id="overlay-title">Add new event</h3>
 
-                            <button class="filter-btn" data-filter="Open">
-                                Open <span class="count">(0)</span>
-                            </button>
+                            <label>Event title *</label>
+                            <input type="text" id="event-title">
 
-                            <button class="filter-btn" data-filter="In Progress">
-                                In Progress <span class="count">(0)</span>
-                            </button>
+                            <label>Description</label>
+                            <textarea id="event-description"></textarea>
 
-                            <button class="filter-btn" data-filter="Closed">
-                                Closed <span class="count">(0)</span>
-                            </button>
-                        </div>
+                            <label>Start Date *</label>
+                            <input type="datetime-local" id="event-start">
 
-                        <div class="task-search">
-                            <i class='bx bx-search'></i>
-                            <input type="text" id="task-search-input" placeholder="Search...">
-                        </div>
+                            <label>End Date</label>
+                            <input type="datetime-local" id="event-end">
 
-                        <button id="btn-new-task" class="btn-add">+ New Task</button>
-                    </div>
-
-
-
-                    <!-- ===========================
-                         TASK TABLE (MATCH WITH tasks.js)
-                    ============================ -->
-                    <div class="task-table-wrapper">
-
-                        <table class="task-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Subject</th>
-                                    <th>Status</th>
-                                    <th>Priority</th>
-                                    <th>Assignees</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="task-body">
-
-                                @forelse ($tasks as $t)
-                                    <tr>
-
-                                        <td>{{ $t->id }}</td>
-
-                                        <td>{{ $t->subject }}</td>
-
-                                        <!-- MUST MATCH .edit-status -->
-                                        <td>
-                                            <select class="edit-status" data-id="{{ $t->id }}">
-                                                <option {{ $t->status == 'Open' ? 'selected' : '' }}>Open</option>
-                                                <option {{ $t->status == 'In Progress' ? 'selected' : '' }}>In Progress
-                                                </option>
-                                                <option {{ $t->status == 'Closed' ? 'selected' : '' }}>Closed</option>
-                                            </select>
-                                        </td>
-
-                                        <!-- MUST MATCH .edit-priority -->
-                                        <td>
-                                            <select class="edit-priority" data-id="{{ $t->id }}">
-                                                <option {{ $t->priority == 'Low' ? 'selected' : '' }}>Low</option>
-                                                <option {{ $t->priority == 'Medium' ? 'selected' : '' }}>Medium
-                                                </option>
-                                                <option {{ $t->priority == 'High' ? 'selected' : '' }}>High</option>
-                                                <option {{ $t->priority == 'Urgent' ? 'selected' : '' }}>Urgent
-                                                </option>
-                                            </select>
-                                        </td>
-
-                                        <td>{{ $t->assigned_name }}</td>
-
-                                        <td>{{ \Carbon\Carbon::parse($t->created_at)->format('Y-m-d') }}</td>
-
-                                        <td class="actions-cell">
-                                            <!-- MUST MATCH .info-btn -->
-                                            <i class='bx bx-info-circle info-btn'
-                                                data-desc="{{ $t->description }}"></i>
-
-                                            <!-- MUST MATCH .delete-btn -->
-                                            <i class='bx bx-trash delete-btn' data-id="{{ $t->id }}"></i>
-                                        </td>
-
-                                    </tr>
-                                @empty
-
-                                    <tr>
-                                        <td colspan="7" class="empty-msg">No entries found</td>
-                                    </tr>
-                                @endforelse
-
-                            </tbody>
-                        </table>
-
-                    </div>
-
-
-
-                    <!-- ===========================
-                         DESCRIPTION OVERLAY (MATCH)
-                    ============================ -->
-                    <div id="desc-overlay">
-                        <div class="description-modal">
-                            <h3>Description</h3>
-                            <p id="desc-text"></p>
-                            <button id="close-desc" class="btn-cancel">Close</button>
-                        </div>
-                    </div>
-
-
-
-                    <!-- ===========================
-                         CREATE TASK OVERLAY (MATCH)
-                    ============================ -->
-                    <div id="task-overlay">
-                        <div class="overlay-content">
-
-                            <h2>Create New Task</h2>
-
-                            <form id="task-form" method="POST" action="{{ route('tasks.store') }}">
-                                @csrf
-
-                                <label>Subject</label>
-                                <input type="text" name="subject" required>
-
-                                <label>Start Date</label>
-                                <input type="date" name="start_date" required>
-
-                                <label>Due Date</label>
-                                <input type="date" name="due_date" required>
-
-                                <label>Priority</label>
-                                <select name="priority" required>
-                                    <option value="Low">Low</option>
-                                    <option value="Medium" selected>Medium</option>
-                                    <option value="High">High</option>
-                                    <option value="Urgent">Urgent</option>
+                            <label>Notification</label>
+                            <div class="notif-row">
+                                <input type="number" id="notif-value" value="30" min="0">
+                                <select id="notif-unit">
+                                    <option value="minutes">Minutes</option>
+                                    <option value="hours">Hours</option>
                                 </select>
+                            </div>
 
-                                <label>Assignees</label>
-                                <select name="assigned" required>
-                                    @foreach ($assignees as $a)
-                                        <option value="{{ $a['type'] }}|{{ $a['id'] }}">
-                                            {{ ucfirst($a['type']) }} — {{ $a['name'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                            <label>Event Color</label>
+                            <div class="color-row">
+                                @php
+                                    $colors = [
+                                        '#3B82F6',
+                                        '#06B6D4',
+                                        '#0EA5E9',
+                                        '#F97316',
+                                        '#EF4444',
+                                        '#22C55E',
+                                        '#A855F7',
+                                        '#EAB308',
+                                        '#14B8A6',
+                                        '#475569',
+                                        '#F43F5E',
+                                    ];
+                                @endphp
 
-                                <label>Description</label>
-                                <textarea name="description" rows="4" required></textarea>
+                                @foreach ($colors as $c)
+                                    <div class="color-box" data-color="{{ $c }}"
+                                        style="background: {{ $c }}"></div>
+                                @endforeach
+                            </div>
 
-                                <button type="submit" class="btn-save">Save Task</button>
-                                <button type="button" id="cancel-task" class="btn-cancel">Cancel</button>
-                            </form>
+                            <div class="public-box">
+                                <input type="checkbox" id="is-public">
+                                <label for="is-public">Public Event</label>
+                            </div>
 
+                            <div class="buttons">
+                                <button id="close-overlay">Close</button>
+                                <button id="save-event" class="save-btn">Save</button>
+                                <button id="delete-event" class="delete-btn" style="display:none;">Delete</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-    </div>
-    </section>
+        </section>
     </div>
 
     <!-- UI Elements -->
@@ -390,7 +288,7 @@
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/help.js') }}"></script>
-    <script src="{{ asset('js/tasks.js') }}"></script>
+    <script src="{{ asset('js/calendar.js') }}"></script>
 
 </body>
 

@@ -77,6 +77,10 @@
             <i class='bx bx-file-blank'></i> Tasks
         </div>
 
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/calendar') }}'">
+            <i class='bx bx-file-blank'></i> Calendar
+        </div>
+
         <!-- Categoría -->
         <div class="lateral-row" data="sub-option">
             System

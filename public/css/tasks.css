@@ -1,107 +1,297 @@
-/* MAIN CONTAINER */
-.tasks-container {
-    padding: 30px;
-    color: #fff;
-    font-family: Arial, sans-serif;
-}
+/* =======================================================
+   TASKS — ESTILO IGUAL A HELP
+   ======================================================= */
 
-/* HEADER */
-.task-header {
+/* -----------------------------
+   TOP BAR (similar a Help)
+----------------------------- */
+
+.task-top-bar {
+    margin-top: 25px;
+    margin-left: 20px;
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
     gap: 20px;
 }
 
-.task-header h1 {
-    font-size: 28px;
-    font-weight: bold;
-}
-
-/* FILTER BUTTONS */
-.task-filters {
-    display: flex;
-    gap: 10px;
-}
-
-.filter-btn {
-    padding: 6px 14px;
-    background: #2d2d2d;
-    border-radius: 6px;
-    cursor: pointer;
-    border: none;
+.task-top-bar .title {
+    font-size: 26px;
+    font-weight: 700;
     color: #fff;
 }
 
-.filter-btn:hover {
-    background: #3a3a3a;
+/* -----------------------------
+   FILTER BADGES
+----------------------------- */
+
+.task-status-counters .tsk {
+    background: #f1f1f1;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #666;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    user-select: none;
+    transition: 0.2s;
 }
 
-.filter-btn.active {
-    background: #4a72ff;
+.task-status-counters .tsk:hover {
+    background: #e7e7e7;
 }
 
-/* ADD BUTTON */
-.btn-primary {
+.task-status-counters .tsk-active {
+    background: #008cff;
+    color: #fff !important;
+    border-color: #008cff;
+}
+
+/* -----------------------------
+   SEARCH BAR
+----------------------------- */
+
+.task-search {
     margin-left: auto;
-    background: #4a72ff;
-    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    background: #fff;
     border-radius: 8px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+}
+
+.task-search input {
     border: none;
-    color: #fff;
-    cursor: pointer;
+    outline: none;
+    margin-left: 8px;
+    color: #333;
+    width: 180px;
 }
 
-.btn-primary:hover {
-    background: #6a89ff;
-}
+/* -----------------------------
+   ADD BUTTON (Igual a New Ticket)
+----------------------------- */
 
-.btn-secondary {
-    background: #555;
-    padding: 8px 16px;
+.btn-add {
+    margin-left: 20px;
+    background: #008cff;
+    padding: 10px 20px;
     border-radius: 8px;
-    border: none;
     color: #fff;
+    border: none;
     cursor: pointer;
+    font-weight: 600;
 }
 
-.btn-secondary:hover {
-    background: #777;
+.btn-add:hover {
+    background: #0a7ed8;
 }
 
-/* TABLE */
+/* -----------------------------
+   TABLE WRAPPER
+----------------------------- */
+
+.task-table-wrapper {
+    margin-top: 20px;
+    margin-left: 20px;
+    width: calc(100% - 40px);
+}
+
+/* -----------------------------
+   TABLE (igual a Help)
+----------------------------- */
+
 .task-table {
     width: 100%;
-    background: #2d2d2d;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid #eee;
     border-radius: 12px;
     overflow: hidden;
-    border-collapse: collapse;
 }
 
 .task-table thead {
-    background: #1f1f1f;
+    background: #f8f8f8;
 }
 
-.task-table th, .task-table td {
-    padding: 14px;
-    border-bottom: 1px solid #444;
+.task-table th {
+    padding: 14px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    text-align: left;
 }
 
-/* ACTION ICONS */
-.info-btn {
-    color: #4da6ff;
-    font-size: 20px;
+.task-table td {
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #333;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+}
+
+.task-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.empty-msg {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+}
+
+/* -----------------------------
+   STATUS BADGES (igual estilo Help)
+----------------------------- */
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* -----------------------------
+   STATUS SELECT COLORS
+----------------------------- */
+
+.edit-task-status {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #fff;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.st-open {
+    background: #ffd6d6 !important;
+    color: #d10000 !important;
+    border-color: #ffb3b3 !important;
+}
+
+.st-progress {
+    background: #fff3cd !important;
+    color: #b68900 !important;
+    border-color: #ffe8a1 !important;
+}
+
+.st-closed {
+    background: #d4edda !important;
+    color: #1e7e34 !important;
+    border-color: #c3e6cb !important;
+}
+
+/* -----------------------------
+   PRIORITY SELECT COLORS
+----------------------------- */
+
+.edit-task-priority {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #fff;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.pr-low {
+    background: #d8f3dc;
+    color: #1a7f37;
+    font-weight: 600;
+}
+
+.pr-medium {
+    background: #fff4cc;
+    color: #996c00;
+    font-weight: 600;
+}
+
+.pr-high {
+    background: #ffd6d6;
+    color: #b30000;
+    font-weight: 600;
+}
+
+.pr-urgent {
+    background: #e60000;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* -----------------------------
+   ACTION ICONS
+----------------------------- */
+
+.actions-cell i {
+    font-size: 22px;
+    margin-right: 10px;
     cursor: pointer;
+    transition: 0.2s;
 }
 
-.delete-btn {
-    color: #ff4d4d;
-    font-size: 20px;
+.actions-cell i:hover {
+    transform: scale(1.2);
+}
+
+.bx-info-circle {
+    color: #008cff;
+}
+
+.bx-trash {
+    color: #ff3a3a;
+}
+
+/* -----------------------------
+   DESCRIPTION OVERLAY (Igual a Help)
+----------------------------- */
+
+#task-description-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.55);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.task-description-modal {
+    background: #ffffff;
+    padding: 25px;
+    width: 420px;
+    border-radius: 12px;
+}
+
+.task-description-modal h3 {
+    margin-bottom: 12px;
+}
+
+#task-description-text {
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+    color: #333;
+}
+
+#closeTaskDescription {
+    width: 100%;
+    background: #e63939;
+    padding: 12px;
+    border: none;
+    color: #fff;
+    border-radius: 8px;
     cursor: pointer;
+    margin-top: 10px;
 }
 
-/* OVERLAYS */
-.overlay {
+/* -----------------------------
+   NEW TASK OVERLAY (Igual Ticket Modal)
+----------------------------- */
+
+#overlay-task {
     display: none !important;
     position: fixed;
     top: 0;
@@ -110,31 +300,259 @@
     height: 100%;
     backdrop-filter: blur(4px);
     background: rgba(0,0,0,0.55);
-    z-index: 9999;
     justify-content: center;
     align-items: center;
+    z-index: 9999;
 }
 
-.overlay-box {
-    background: #1f1f1f;
+#overlay-task.show {
+    display: flex !important;
+}
+
+.overlay-content {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 14px;
     width: 420px;
-    padding: 25px;
-    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
 }
 
-/* ============================================================
-   FIX GLOBAL DOCIENT OVERLAY — SOLO PARA TASKS
-   ============================================================ */
+.overlay-content h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* FORM INPUTS */
+.overlay-content input,
+.overlay-content select,
+.overlay-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    color: #333;
+}
+
+.overlay-content textarea {
+    height: 110px;
+    resize: none;
+    border-radius: 10px;
+}
+
+/* BUTTONS */
+.btn-save {
+    width: 100%;
+    background: #00a62a;
+    color: white;
+    padding: 12px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.btn-cancel {
+    width: 100%;
+    background: #e63939;
+    color: white;
+    padding: 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+/* ==========================================
+   FIX — OVERLAYS CERRADOS POR DEFECTO
+   ========================================== */
 
 #task-overlay,
 #desc-overlay {
     display: none !important;
     opacity: 1 !important;
-    pointer-events: auto !important;
     visibility: visible !important;
+    pointer-events: auto !important;
 }
 
+/* Cuando JS agregue .show → se muestran */
 #task-overlay.show,
 #desc-overlay.show {
     display: flex !important;
+}
+
+/* ==========================================================
+   OVERLAY GLOBAL (Fondo Oscuro + Center)
+   ========================================================== */
+
+#task-overlay,
+#desc-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none !important;
+    justify-content: center;
+    align-items: center;
+
+    /* Fondo opaco */
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.55);
+
+    z-index: 9999;
+}
+
+/* MOSTRAR CUANDO TIENE .show */
+#task-overlay.show,
+#desc-overlay.show {
+    display: flex !important;
+}
+
+
+/* ==========================================================
+   MODAL BOX — CENTRADO Y ESTILO CLEAN
+   ========================================================== */
+
+.overlay-content,
+.description-modal {
+    background: #ffffff;
+    padding: 30px;
+    width: 420px;
+    border-radius: 14px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
+    animation: fadeInScale .25s ease-out;
+}
+
+/* ANIMACIÓN SUAVE */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* TITULOS */
+.overlay-content h2,
+.description-modal h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* CAMPOS DEL FORM */
+.overlay-content input,
+.overlay-content select,
+.overlay-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+}
+
+/* DESCRIPTION FIELD */
+.description-modal p {
+    color: #333;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+/* BOTONES */
+.btn-save {
+    background: #00a62a;
+    color: #fff;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.btn-cancel {
+    background: #e63939;
+    color: #fff;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+/* =======================================================
+   FILTER BUTTONS — ESTILO IGUAL A HELP (4 BOTONES)
+======================================================= */
+
+.task-status-counters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 20px 0 15px 20px;
+}
+
+.filter-btn {
+    padding: 7px 16px;
+    background: #f3f3f3;
+    border-radius: 20px;
+    border: 1px solid #e1e1e1;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #555;
+    font-weight: 600;
+}
+
+/* Hover general */
+.filter-btn:hover {
+    background: #eaeaea;
+}
+
+/* Estado activo */
+.filter-btn.active {
+    background: #e8e8e8;
+}
+
+/* ===========================
+   ESTILOS POR BOTÓN
+=========================== */
+
+/* ALL */
+.filter-btn[data-filter="all"] {
+    border-color: #d0d0d0;
+}
+
+/* OPEN */
+.filter-btn[data-filter="Open"] {
+    border-color: #ffb3b3;
+    color: #d10000;
+}
+.filter-btn[data-filter="Open"].active {
+    background: #ffe5e5;
+}
+
+/* IN PROGRESS */
+.filter-btn[data-filter="In Progress"] {
+    border-color: #ffe8a1;
+    color: #b68900;
+}
+.filter-btn[data-filter="In Progress"].active {
+    background: #fff4cc;
+}
+
+/* CLOSED */
+.filter-btn[data-filter="Closed"] {
+    border-color: #c3e6cb;
+    color: #1e7e34;
+}
+.filter-btn[data-filter="Closed"].active {
+    background: #d4edda;
 }

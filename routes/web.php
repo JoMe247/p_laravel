@@ -14,6 +14,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\CalendarController;
 
 
 // Página inicial
@@ -138,3 +139,22 @@ Route::post('/tasks/store', [TaskController::class, 'store'])
 Route::post('/tasks/update-priority', [TaskController::class, 'updatePriority']);
 Route::post('/tasks/update-status', [TaskController::class, 'updateStatus']);
 Route::post('/tasks/delete', [TaskController::class, 'delete']);
+
+
+// Calendar Routes
+// Calendar view
+Route::get('/calendar', [CalendarController::class, 'index'])
+    ->name('calendar');
+
+// Save event
+Route::post('/calendar/save', [CalendarController::class, 'store'])
+    ->name('calendar.save');
+    
+Route::get('/calendar/events', [\App\Http\Controllers\CalendarController::class, 'load'])
+    ->name('calendar.load');
+
+Route::post('/calendar/update', [\App\Http\Controllers\CalendarController::class, 'update'])
+    ->name('calendar.update');
+
+Route::delete('/calendar/delete/{id}', [\App\Http\Controllers\CalendarController::class, 'delete'])
+    ->name('calendar.delete');

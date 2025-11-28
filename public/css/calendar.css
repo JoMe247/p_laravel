@@ -1,0 +1,98 @@
+#calendar {
+    max-width: 1100px;
+    margin: 40px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* Overlay */
+#event-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.overlay-box {
+    width: 550px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.overlay-box input,
+.overlay-box textarea,
+.overlay-box select {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.color-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.color-box {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.color-box.selected {
+    border-color: black;
+}
+
+.public-box {
+    margin-top: 10px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.save-btn {
+    background: #2563EB;
+    color: white;
+    padding: 7px 15px;
+    border-radius: 6px;
+}
+
+.delete-btn {
+    background: #dc2626;
+    color:white;
+    padding:7px 15px;
+    border-radius:6px;
+}
+
+#calendar {
+    width: calc(100% - 260px) !important;
+    margin-left: 260px;
+    margin-top: 20px;
+    padding: 25px;
+}
+
+.fc .fc-daygrid-day-frame {
+    min-height: 110px !important;
+}
+
+.fc .fc-scrollgrid {
+    border-radius: 14px;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 28px;
+    font-weight: 600;
+}
