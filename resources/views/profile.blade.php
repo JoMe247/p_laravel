@@ -52,12 +52,14 @@
                         </div>
 
                         <nav class="profile-side-nav">
-                            <button type="button" class="profile-menu-item active">
+                            <button type="button" class="profile-menu-item active"
+                                onclick="window.location.href='{{ route('customers.profile', $customer->ID) }}'">
                                 <i class='bx bx-id-card'></i>
                                 <span>Profile</span>
                             </button>
 
-                            <button type="button" class="profile-menu-item">
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
                                 <i class='bx bx-shield-quarter'></i>
                                 <span>Policies</span>
                             </button>
@@ -115,14 +117,16 @@
                                 <input type="text" name="State" value="{{ old('State', $customer->State) }}">
 
                                 <label>ZIP_Code</label>
-                                <input type="text" name="ZIP_Code" value="{{ old('ZIP_Code', $customer->ZIP_Code) }}">
+                                <input type="text" name="ZIP_Code"
+                                    value="{{ old('ZIP_Code', $customer->ZIP_Code) }}">
 
                                 <label>Drivers_License</label>
                                 <input type="text" name="Drivers_License"
                                     value="{{ old('Drivers_License', $customer->Drivers_License) }}">
 
                                 <label>DL_State</label>
-                                <input type="text" name="DL_State" value="{{ old('DL_State', $customer->DL_State) }}">
+                                <input type="text" name="DL_State"
+                                    value="{{ old('DL_State', $customer->DL_State) }}">
 
                                 <label>DOB</label>
                                 <input type="date" name="DOB" value="{{ old('DOB', $customer->DOB) }}">
@@ -134,7 +138,8 @@
                                 <input type="text" name="Office" value="{{ old('Office', $customer->Office) }}">
 
                                 <label>Marital</label>
-                                <input type="text" name="Marital" value="{{ old('Marital', $customer->Marital) }}">
+                                <input type="text" name="Marital"
+                                    value="{{ old('Marital', $customer->Marital) }}">
 
                                 <label>Gender</label>
                                 <input type="text" name="Gender" value="{{ old('Gender', $customer->Gender) }}">
@@ -153,7 +158,8 @@
                                 <textarea name="Alert">{{ old('Alert', $customer->Alert) }}</textarea>
 
                                 <label>Picture (URL)</label>
-                                <input type="text" name="Picture" value="{{ old('Picture', $customer->Picture) }}">
+                                <input type="text" name="Picture"
+                                    value="{{ old('Picture', $customer->Picture) }}">
 
                                 <label>Agency</label>
                                 <input type="text" name="Agency" value="{{ old('Agency', $customer->Agency) }}">
@@ -166,8 +172,7 @@
                                         Back
                                     </a>
                                     <button type="button" id="delete-customer-btn"
-                                        class="btn delete-btn profile-btn-delete"
-                                        data-id="{{ $customer->ID }}">
+                                        class="btn delete-btn profile-btn-delete" data-id="{{ $customer->ID }}">
                                         Delete
                                     </button>
                                 </div>
@@ -240,7 +245,8 @@
                                         'Customer has been deleted.',
                                         'success'
                                     ).then(() => {
-                                        window.location.href = `${baseUrl}/customers`;
+                                        window.location.href =
+                                            `${baseUrl}/customers`;
                                     });
                                 },
                                 error: function(xhr, status, error) {

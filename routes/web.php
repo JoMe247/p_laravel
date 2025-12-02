@@ -15,6 +15,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\PoliciesController;
 
 
 // Página inicial
@@ -142,19 +143,31 @@ Route::post('/tasks/delete', [TaskController::class, 'delete']);
 
 
 // Calendar Routes
-// Calendar view
 Route::get('/calendar', [CalendarController::class, 'index'])
     ->name('calendar');
-
-// Save event
 Route::post('/calendar/save', [CalendarController::class, 'store'])
     ->name('calendar.save');
     
-Route::get('/calendar/events', [\App\Http\Controllers\CalendarController::class, 'load'])
+Route::get('/calendar/events', [CalendarController::class, 'load'])
     ->name('calendar.load');
 
-Route::post('/calendar/update', [\App\Http\Controllers\CalendarController::class, 'update'])
+Route::post('/calendar/update', [CalendarController::class, 'update'])
     ->name('calendar.update');
 
-Route::delete('/calendar/delete/{id}', [\App\Http\Controllers\CalendarController::class, 'delete'])
+Route::delete('/calendar/delete/{id}', [CalendarController::class, 'delete'])
     ->name('calendar.delete');
+
+// Policies
+Route::get('/customers/{id}/policies', [PoliciesController::class, 'index'])->name('policies.index');
+Route::post('/customers/{id}/policies/store', [PoliciesController::class, 'store'])->name('policies.store');
+Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])->name('policies.destroy');
+Route::get('/customers/{id}/profile', [CustomersController::class, 'profile'])
+    ->name('customers.profile');
+Route::get('/customers/{id}/policies', [PoliciesController::class, 'index'])
+    ->name('policies.index');
+
+Route::post('/customers/{id}/policies', [PoliciesController::class, 'store'])
+    ->name('policies.store');
+
+Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])
+    ->name('policies.destroy');
