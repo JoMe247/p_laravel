@@ -53,7 +53,7 @@
 
                         <nav class="profile-side-nav">
                             <button type="button" class="profile-menu-item active"
-                                onclick="window.location.href='{{ route('customers.profile', $customer->ID) }}'">
+                                onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
                                 <i class='bx bx-id-card'></i>
                                 <span>Profile</span>
                             </button>
@@ -63,6 +63,7 @@
                                 <i class='bx bx-shield-quarter'></i>
                                 <span>Policies</span>
                             </button>
+
 
                             <button type="button" class="profile-menu-item">
                                 <i class='bx bx-credit-card'></i>

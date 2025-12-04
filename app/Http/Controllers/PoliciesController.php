@@ -28,13 +28,14 @@ class PoliciesController extends Controller
             'pol_due_day' => 'nullable|string',
             'pol_status' => 'nullable|string',
             'pol_agent_record' => 'nullable|string',
-            'vin' => 'nullable|string',
-            'year' => 'nullable|integer',
-            'make' => 'nullable|string',
-            'model' => 'nullable|string',
+            'vehicules'        => 'nullable|string',
         ]);
 
         $data['customer_id'] = $customer_id;
+
+        if (!empty($data['vehicules'])) {
+            $data['vehicules'] = json_decode($data['vehicules'], true);
+        }
 
         Policy::create($data);
 

@@ -19,9 +19,10 @@ class Policy extends Model
         'pol_due_day',
         'pol_status',
         'pol_agent_record',
-        'vin',
-        'year',
-        'make',
-        'model'
+        'vehicules', 
+    ];
+
+    protected $casts = [
+        'vehicules' => 'array', // Laravel lo convierte automáticamente a array/JSON
     ];
 }

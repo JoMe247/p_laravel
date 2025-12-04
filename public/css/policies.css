@@ -103,3 +103,93 @@
         padding: 18px 16px;
     }
 }
+
+/* === NEW LAYOUT FOR POLICY OVERLAY === */
+
+.policy-flex {
+    width: 95%;
+    max-width: 1200px;      /* ancho grande */
+}
+
+.policy-columns {
+    display: grid;
+    grid-template-columns: 320px auto;
+    gap: 25px;
+}
+
+/* LEFT PANEL */
+.policy-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.policy-left input {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 8px;
+}
+
+/* RIGHT PANEL */
+.add-vehicle-btn {
+    background: #3498db;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 15px;
+}
+
+.vehicle-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* VEHICLE CARD */
+.vehicle-card {
+    background: #f7f7f7;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+.vehicle-thumb {
+    width: 100%;
+    height: 150px;
+    background: #ddd;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 10px;
+}
+
+.vehicle-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+}
+
+.vehicle-field select,
+.vehicle-field input {
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+/* DELETE BUTTON */
+.vehicle-delete-btn {
+    background: #e74c3c;
+    color: #fff;
+    text-align: center;
+    padding: 6px;
+    margin-top: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .policy-columns {
+        grid-template-columns: 1fr;
+    }
+}
