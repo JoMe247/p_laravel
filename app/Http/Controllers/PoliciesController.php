@@ -47,4 +47,40 @@ class PoliciesController extends Controller
         Policy::where('id', $id)->delete();
         return response()->json(['success' => true]);
     }
+
+    public function show($id)
+    {
+        $p = Policy::findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'policy'  => $p,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $policy = Policy::findOrFail($id);
+
+        $data = $request->validate([
+            'pol_carrier'      => 'nullable|string',
+            'pol_number'       => 'nullable|string',
+            'pol_url'          => 'nullable|string',
+            'pol_expiration'   => 'nullable|string',
+            'pol_eff_date'     => 'nullable|string',
+            'pol_added_date'   => 'nullable|string',
+            'pol_due_day'      => 'nullable|string',
+            'pol_status'       => 'nullable|string',
+            'pol_agent_record' => 'nullable|string',
+            'vehicules'        => 'nullable|string', // viene como JSON
+        ]);
+
+        if (!empty($data['vehicules'])) {
+            $data['vehicules'] = json_decode($data['vehicules'], true);
+        }
+
+        $policy->update($data);
+
+        return response()->json(['success' => true]);
+    }
 }

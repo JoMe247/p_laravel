@@ -193,3 +193,49 @@
         grid-template-columns: 1fr;
     }
 }
+
+.policy-edit-overlay {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(3px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.policy-edit-box {
+    background:white;
+    padding:25px;
+    border-radius:16px;
+    width:600px;
+    max-height:90vh;
+    overflow-y:auto;
+}
+
+.vehicle-edit-card {
+    background:#f1f1f1;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+
+.vehicle-edit-card {
+    background: #f1f1f1;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.vehicle-edit-thumb {
+    width: 100%;
+    height: 140px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}

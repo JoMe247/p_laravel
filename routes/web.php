@@ -161,20 +161,23 @@ Route::delete('/calendar/delete/{id}', [CalendarController::class, 'delete'])
 // 📄 Policies
 // =======================
 
-Route::get('/customers/{id}/policies', [PoliciesController::class, 'index'])->name('policies.index');
-Route::post('/customers/{id}/policies/store', [PoliciesController::class, 'store'])->name('policies.store');
-Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])->name('policies.destroy');
-Route::get('/customers/{id}/profile', [CustomersController::class, 'profile'])
-    ->name('customers.profile');
-
-// Ver todas las policies del customer
-Route::get('/policies/{customer_id}', [PoliciesController::class, 'index'])
+// Listar policies por customer
+Route::get('/customers/{customer_id}/policies', [PoliciesController::class, 'index'])
     ->name('policies.index');
 
-// Guardar nueva policy
-Route::post('/policies/{customer_id}', [PoliciesController::class, 'store'])
+// Crear nueva policy
+Route::post('/customers/{customer_id}/policies/store', [PoliciesController::class, 'store'])
     ->name('policies.store');
 
-// Eliminar una policy individual
-Route::delete('/policy/delete/{id}', [PoliciesController::class, 'destroy'])
+// Mostrar policy para edición (AJAX)
+Route::get('/policies/{id}/show', [PoliciesController::class, 'show'])
+    ->name('policies.show');
+
+// Actualizar policy
+Route::post('/policies/{id}/update', [PoliciesController::class, 'update'])
+    ->name('policies.update');
+
+// Eliminar policy
+Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])
     ->name('policies.destroy');
+

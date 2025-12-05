@@ -117,6 +117,7 @@
                                         <th>Carrier</th>
                                         <th>Number</th>
                                         <th>Expiration</th>
+                                        <th>Status</th>
                                         <th>Vehicle</th>
                                         <th>Actions</th>
                                     </tr>
@@ -124,13 +125,14 @@
                                 <tbody>
                                     @forelse($policies as $p)
                                         @php
+                                            // Convertir JSON a arreglo
                                             $veh = $p->vehicules;
 
                                             if (is_string($veh)) {
                                                 $veh = json_decode($veh, true);
                                             }
 
-                                            $first = $veh[0] ?? null;
+                                            $vehicleCount = is_array($veh) ? count($veh) : 0;
                                         @endphp
 
                                         <tr>
@@ -138,39 +140,52 @@
                                             <td>{{ $p->pol_number }}</td>
                                             <td>{{ $p->pol_expiration }}</td>
 
+                                            {{--  Pol Status --}}
+                                            <td>{{ $p->pol_status ?? '-' }}</td>
+
+                                            {{--  Número de vehículos --}}
                                             <td>
-                                                @if ($first)
-                                                    {{ $first['year'] ?? '' }}
-                                                    {{ $first['make'] ?? '' }}
-                                                    {{ $first['model'] ?? '' }}
+                                                @if ($vehicleCount === 0)
+                                                    0
+                                                @elseif($vehicleCount === 1)
+                                                    1
                                                 @else
-                                                    -
+                                                    {{ $vehicleCount }}
                                                 @endif
                                             </td>
 
                                             <td>
+
+                                                {{-- Botón INFO (i en un círculo) --}}
+                                                <button class="btn policy-info-btn" title="View / Edit"
+                                                    data-id="{{ $p->id }}"
+                                                    data-url="{{ route('policies.show', $p->id) }}"
+                                                    data-update-url="{{ route('policies.update', $p->id) }}">
+                                                    <i class='bx bx-info-circle'></i>
+                                                </button>
+
+
                                                 <button class="btn delete-btn policy-delete-btn"
                                                     data-url="{{ route('policies.destroy', $p->id) }}">
                                                     Delete
                                                 </button>
                                             </td>
                                         </tr>
+
                                     @empty
                                         <tr>
-                                            <td colspan="5" style="text-align:center;opacity:0.6;">
+                                            <td colspan="6" style="text-align:center;opacity:0.6;">
                                                 No policies yet.
                                             </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
 
+
                             </table>
 
                         </div>
                     </div>
-
-
-
 
 
                     <div id="policy-overlay">
@@ -229,6 +244,26 @@
                                     </div>
 
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+                    <div id="policy-edit-overlay" class="policy-edit-overlay" style="display:none;">
+                        <div class="policy-edit-box">
+
+                            <h3>Policy</h3>
+
+                            <div id="policy-edit-content">
+                                <!-- Aquí JS insertará todos los campos -->
+                            </div>
+
+                            <div class="policy-edit-actions">
+                                <button id="policy-edit-save" class="btn">Save Changes</button>
+                                <button id="policy-edit-cancel" class="btn secondary">Close</button>
                             </div>
                         </div>
                     </div>
@@ -339,7 +374,7 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="../../img/menu/thumbs/1.jpg"
                                 alt=""></label>
                         <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
                                 alt=""></label>
