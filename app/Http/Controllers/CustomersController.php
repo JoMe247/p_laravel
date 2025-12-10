@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use App\Models\CustomerNote;
+use Illuminate\Support\Facades\Auth;
+
 
 class CustomersController extends Controller
 {
@@ -26,6 +29,8 @@ class CustomersController extends Controller
             'DOB' => 'nullable|date',
         ]);
 
+        $validated['Added'] = now()->format('Y-m-d');
+
         $customer = Customer::create($validated);
 
         return response()->json(['id' => $customer->ID], 201);
@@ -46,7 +51,8 @@ class CustomersController extends Controller
         // Validaciones básicas — ajusta según necesites
         $validated = $request->validate([
             'Name' => 'nullable|string|max:120',
-            'Phone' => 'nullable|string|max:20',
+            'Phone' => 'nullable|string|max:12',
+            'Phone2' => 'nullable|string|max:12',
             'Email1' => 'nullable|email|max:120',
             'Email2' => 'nullable|email|max:120',
             'Address' => 'nullable|string|max:240',
@@ -61,10 +67,10 @@ class CustomersController extends Controller
             'Marital' => 'nullable|string|max:30',
             'Gender' => 'nullable|string|max:30',
             'CID' => 'nullable|string|max:60',
-            'Added' => 'nullable|string|max:12',
+            //'Added' => 'nullable|date',
             'Agent_of_Record' => 'nullable|string|max:30',
+            //'Picture' => 'nullable|string|max:255',
             'Alert' => 'nullable|string|max:300',
-            'Picture' => 'nullable|string|max:100',
             'Agency' => 'nullable|string|max:30',
         ]);
 
@@ -81,6 +87,96 @@ class CustomersController extends Controller
         }
 
         \App\Models\Customer::whereIn('ID', $ids)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function uploadPhoto(Request $request, $id)
+    {
+        $request->validate([
+            'Picture' => 'nullable|string|max:255'
+        ]);
+
+        $customer = Customer::findOrFail($id);
+
+        // Eliminar foto anterior
+        if ($customer->Picture && file_exists(public_path($customer->Picture))) {
+            @unlink(public_path($customer->Picture));
+        }
+
+        // Guardar nueva foto
+        $file = $request->file('photo');
+        $newName = uniqid('cust_') . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('uploads/customers'), $newName);
+
+        $path = 'uploads/customers/' . $newName;
+
+        // Guardar ruta en DB
+        $customer->Picture = $path;
+        $customer->save();
+
+        return response()->json([
+            'success' => true,
+            'path' => asset($path)
+        ]);
+    }
+
+    public function saveAlert(Request $request, $id)
+    {
+        $request->validate([
+            'Alert' => 'required|string|max:300',
+        ]);
+
+        $customer = Customer::findOrFail($id);
+        $customer->Alert = $request->Alert;
+        $customer->save();
+
+        return response()->json([
+            'success' => true,
+            'alert' => $customer->Alert
+        ]);
+    }
+
+    public function removeAlert($id)
+    {
+        $customer = Customer::findOrFail($id);
+        $customer->Alert = null;
+        $customer->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function saveNote(Request $request, $id)
+    {
+        $request->validate([
+            'policy'  => 'nullable|string|max:120',
+            'subject' => 'required|string|max:200',
+            'note'    => 'required|string|max:2000',
+        ]);
+
+        // Detectar quién está logueado (user o sub user)
+        $user =
+            Auth::guard('web')->user() ??
+            Auth::guard('sub')->user();
+
+        $note = CustomerNote::create([
+            'customer_id' => $id,
+            'policy'      => $request->policy,
+            'subject'     => $request->subject,
+            'note'        => $request->note,
+            'created_by'  => $user->name ?? $user->username,
+            'created_at'  => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'note' => $note
+        ]);
+    }
+
+    public function deleteNote($noteId)
+    {
+        CustomerNote::where('id', $noteId)->delete();
+
         return response()->json(['success' => true]);
     }
 }

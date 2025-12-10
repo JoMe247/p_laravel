@@ -270,12 +270,11 @@
     <div id="dim-screen"></div>
 
 
-    <script src="js/image.js"></script>
-    <script src="js/dropdown.js"></script>
-    <script src="js/menu.js"></script>
-    <script src="js/table.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/operations.js"></script>
+    <script src=" {{ asset('js/dropdown.js') }}"></script>
+    <script src=" {{ asset('js/menu.js') }}"></script>
+    <script src=" {{ asset('js/table.js') }}"></script>
+    <script src=" {{ asset('js/settings.js') }}"></script>
+    <script src=" {{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/add-customer.js') }}"></script>
 
 </body>

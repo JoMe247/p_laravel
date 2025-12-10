@@ -51,13 +51,8 @@
 
                         {{-- MENU LATERAL --}}
                         <aside class="profile-side-menu">
-                            <div class="profile-side-header">
-                                <i class='bx bx-user-circle'></i>
-                                <div class="profile-side-title">
-                                    <span>Customer</span>
-                                    <strong>{{ $customer->Name }}</strong>
-                                </div>
-                            </div>
+                            <div class="profile-side-header" style="display:none;"></div>
+
 
                             <nav class="profile-side-nav">
                                 <button type="button" class="profile-menu-item"
@@ -374,7 +369,7 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="../../img/menu/thumbs/1.jpg"
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
                                 alt=""></label>
                         <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
                                 alt=""></label>

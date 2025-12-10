@@ -5,12 +5,12 @@ $(document).ready(function () {
     // =========================================================================
     const csrf = $('meta[name="csrf-token"]').attr('content');
 
-    const $overlayNew  = $('#policy-overlay');
-    const $newBtn      = $('#new-policy-btn');
-    const $cancelNew   = $('#policy-cancel-btn');
-    const $saveNew     = $('#policy-save-btn');
+    const $overlayNew = $('#policy-overlay');
+    const $newBtn = $('#new-policy-btn');
+    const $cancelNew = $('#policy-cancel-btn');
+    const $saveNew = $('#policy-save-btn');
 
-    const config   = $('#policy-config');
+    const config = $('#policy-config');
     const storeUrl = config.data('store-url'); // ruta policies.store
 
 
@@ -56,7 +56,6 @@ $(document).ready(function () {
                 model = ($card.find('.model-other').val() || '').trim();
             }
 
-            // Si tarjeta está vacía, no la guardamos
             if (!vin && !year && !make && !model) return;
 
             vehicules.push({ vin, year, make, model });
@@ -64,20 +63,20 @@ $(document).ready(function () {
 
         let formData = {
             _token: csrf,
-            pol_carrier:      $('#pol_carrier').val(),
-            pol_number:       $('#pol_number').val(),
-            pol_url:          $('#pol_url').val(),
-            pol_expiration:   $('#pol_expiration').val(),
-            pol_eff_date:     $('#pol_eff_date').val(),
-            pol_added_date:   $('#pol_added_date').val(),
-            pol_due_day:      $('#pol_due_day').val(),
-            pol_status:       $('#pol_status').val(),
+            pol_carrier: $('#pol_carrier').val(),
+            pol_number: $('#pol_number').val(),
+            pol_url: $('#pol_url').val(),
+            pol_expiration: $('#pol_expiration').val(),
+            pol_eff_date: $('#pol_eff_date').val(),
+            pol_added_date: $('#pol_added_date').val(),
+            pol_due_day: $('#pol_due_day').val(),
+            pol_status: $('#pol_status').val(),
             pol_agent_record: $('#pol_agent_record').val(),
             vehicules: JSON.stringify(vehicules)
         };
 
         $.ajax({
-            url:  storeUrl,
+            url: storeUrl,
             type: 'POST',
             data: formData,
             success: function (response) {
@@ -128,7 +127,7 @@ $(document).ready(function () {
     // =========================================================================
     //   SISTEMA DE VEHÍCULOS (CREACIÓN)
     // =========================================================================
-    const MAX_VEHICLES = 6; // aquí cambias el límite
+    const MAX_VEHICLES = 6;
 
     $('#add-vehicle-btn').on('click', function () {
 
@@ -196,7 +195,7 @@ $(document).ready(function () {
     });
 
 
-    // --- VIN → autocompletar ---
+    // --- VIN Autocompletar ---
     $(document).on('blur', '.vin-input', function () {
         const vin = $(this).val();
         const $card = $(this).closest('.vehicle-card');
@@ -210,12 +209,12 @@ $(document).ready(function () {
                 if (!res?.Results?.[0]) return;
                 const v = res.Results[0];
 
-                const year  = v.ModelYear;
-                const make  = v.Make;
+                const year = v.ModelYear;
+                const make = v.Make;
                 const model = v.Model;
 
-                const $yearSel  = $card.find('.year-select');
-                const $makeSel  = $card.find('.make-select');
+                const $yearSel = $card.find('.year-select');
+                const $makeSel = $card.find('.make-select');
                 const $modelSel = $card.find('.model-select');
 
                 if (year) {
@@ -238,11 +237,11 @@ $(document).ready(function () {
         );
     });
 
-    // --- Año → cargar marcas ---
+    // Año → marcas
     $(document).on('change', '.year-select', function () {
-        const $card     = $(this).closest('.vehicle-card');
-        const year      = $(this).val();
-        const $makeSel  = $card.find('.make-select');
+        const $card = $(this).closest('.vehicle-card');
+        const year = $(this).val();
+        const $makeSel = $card.find('.make-select');
         const $modelSel = $card.find('.model-select');
 
         $makeSel.empty().append('<option value="">Cargando marcas...</option>');
@@ -267,10 +266,10 @@ $(document).ready(function () {
         );
     });
 
-    // --- Marca → cargar modelos ---
+    // Marca → modelos
     $(document).on('change', '.make-select', function () {
-        const make      = $(this).val();
-        const $card     = $(this).closest('.vehicle-card');
+        const make = $(this).val();
+        const $card = $(this).closest('.vehicle-card');
         const $modelSel = $card.find('.model-select');
 
         $modelSel.empty().append('<option value="">Cargando modelos...</option>');
@@ -303,11 +302,11 @@ $(document).ready(function () {
         );
     });
 
-    // --- Modelo → actualizar imagen ---
+    // Modelo → imagen
     $(document).on('change', '.model-select', function () {
         const $card = $(this).closest('.vehicle-card');
-        const year  = $card.find('.year-select').val();
-        const make  = $card.find('.make-select').val();
+        const year = $card.find('.year-select').val();
+        const make = $card.find('.make-select').val();
         const model = $(this).val();
 
         if (!year || !make || !model) return;
@@ -332,17 +331,17 @@ $(document).ready(function () {
     //   OVERLAY VER / EDITAR POLICY (BOTÓN i)
     // =========================================================================
 
-    const $overlayEdit   = $('#policy-edit-overlay');
+    const $overlayEdit = $('#policy-edit-overlay');
     const $overlayContent = $('#policy-edit-content');
-    const $overlaySave   = $('#policy-edit-save');
+    const $overlaySave = $('#policy-edit-save');
     const $overlayCancel = $('#policy-edit-cancel');
 
     // Abrir overlay al dar click en el botón i
     $(document).on('click', '.policy-info-btn', function () {
 
-        const id         = $(this).data('id');
-        const showUrl    = $(this).data('url');
-        const updateUrl  = $(this).data('update-url');
+        const id = $(this).data('id');
+        const showUrl = $(this).data('url');
+        const updateUrl = $(this).data('update-url');
 
         $.get(showUrl, function (res) {
 
@@ -363,45 +362,61 @@ $(document).ready(function () {
             }
             if (!Array.isArray(veh)) veh = [];
 
-            // Construimos el HTML dentro del overlay
+
+            // =========================================================================
+            //   NUEVO LAYOUT EDIT GRID
+            // =========================================================================
+
             let html = `
-                <div class="edit-section">
-                    <label>Carrier</label>
-                    <input type="text" id="edit_pol_carrier" value="${p.pol_carrier ?? ''}">
+<div class="edit-grid">   
+      
+    <div class="edit-left">
+        <label>Carrier</label>
+        <input type="text" id="edit_pol_carrier" value="${p.pol_carrier ?? ''}">
 
-                    <label>Number</label>
-                    <input type="text" id="edit_pol_number" value="${p.pol_number ?? ''}">
+        <label>Number</label>
+        <input type="text" id="edit_pol_number" value="${p.pol_number ?? ''}">
 
-                    <label>URL</label>
-                    <input type="text" id="edit_pol_url" value="${p.pol_url ?? ''}">
+        <label>URL</label>
+        <input type="text" id="edit_pol_url" value="${p.pol_url ?? ''}">
 
-                    <label>Expiration</label>
-                    <input type="date" id="edit_pol_expiration" value="${p.pol_expiration ?? ''}">
+        <label>Expiration</label>
+        <input type="date" id="edit_pol_expiration" value="${p.pol_expiration ?? ''}">
 
-                    <label>Eff Date</label>
-                    <input type="date" id="edit_pol_eff_date" value="${p.pol_eff_date ?? ''}">
+        <label>Eff Date</label>
+        <input type="date" id="edit_pol_eff_date" value="${p.pol_eff_date ?? ''}">
 
-                    <label>Added Date</label>
-                    <input type="date" id="edit_pol_added_date" value="${p.pol_added_date ?? ''}">
+        <label>Added Date</label>
+        <input type="date" id="edit_pol_added_date" value="${p.pol_added_date ?? ''}">
 
-                    <label>Due Day</label>
-                    <input type="text" id="edit_pol_due_day" value="${p.pol_due_day ?? ''}">
+        <label>Due Day</label>
+        <input type="text" id="edit_pol_due_day" value="${p.pol_due_day ?? ''}">
 
-                    <label>Status</label>
-                    <input type="text" id="edit_pol_status" value="${p.pol_status ?? ''}">
+        <label>Status</label>
+        <input type="text" id="edit_pol_status" value="${p.pol_status ?? ''}">
 
-                    <label>Agent Record</label>
-                    <input type="text" id="edit_pol_agent_record" value="${p.pol_agent_record ?? ''}">
-                </div>
+        <label>Agent Record</label>
+        <input type="text" id="edit_pol_agent_record" value="${p.pol_agent_record ?? ''}">
+    </div>
 
-                <h4>Vehicles</h4>
-            `;
+
+    <div class="edit-right">
+        <h4>Vehicles</h4>
+
+        <div class="edit-vehicles-grid">
+`;
+
+
+
+            // =========================================================================
+            //   VEHICULOS (tarjetas)
+            // =========================================================================
 
             veh.forEach((v, index) => {
 
-                const make  = v.make || '';
+                const make = v.make || '';
                 const model = v.model || '';
-                const year  = v.year || '';
+                const year = v.year || '';
 
                 let imgUrl = '';
                 if (make && model && year) {
@@ -412,59 +427,74 @@ $(document).ready(function () {
                 }
 
                 html += `
-                    <div class="vehicle-edit-card" data-index="${index}">
-                        <div class="vehicle-edit-thumb"
-                             id="vehicle_edit_thumb_${index}"
-                             style="background-image:url('${imgUrl}');">
-                        </div>
+            <div class="vehicle-edit-card" data-index="${index}">
+                <div class="vehicle-edit-thumb"
+                     id="vehicle_edit_thumb_${index}"
+                     style="background-image:url('${imgUrl}');"></div>
 
-                        <label>VIN</label>
-                        <input type="text" class="edit_vin" value="${v.vin || ''}">
+                <label>VIN</label>
+                <input type="text" class="edit_vin" value="${v.vin || ''}">
 
-                        <label>Year</label>
-                        <input type="text" class="edit_year" value="${year}">
+                <label>Year</label>
+                <input type="text" class="edit_year" value="${year}">
 
-                        <label>Make</label>
-                        <input type="text" class="edit_make" value="${make}">
+                <label>Make</label>
+                <input type="text" class="edit_make" value="${make}">
 
-                        <label>Model</label>
-                        <input type="text" class="edit_model" value="${model}">
-                    </div>
-                `;
+                <label>Model</label>
+                <input type="text" class="edit_model" value="${model}">
+            </div>
+        `;
             });
+
+
+            // =========================================================================
+            //   CIERRE DEL LAYOUT
+            // =========================================================================
+
+            html += `
+        </div>
+    </div>
+
+</div>
+`;
 
             $overlayContent.html(html);
             $overlayEdit.fadeIn(150);
 
-            // Handler de guardado (lo re-bindeamos cada vez)
+
+            // =========================================================================
+            //   GUARDAR CAMBIOS
+            // =========================================================================
             $overlaySave.off().on('click', function () {
 
                 let updatedVeh = [];
 
                 $('.vehicle-edit-card').each(function () {
                     updatedVeh.push({
-                        vin:   $(this).find('.edit_vin').val(),
-                        year:  $(this).find('.edit_year').val(),
-                        make:  $(this).find('.edit_make').val(),
+                        vin: $(this).find('.edit_vin').val(),
+                        year: $(this).find('.edit_year').val(),
+                        make: $(this).find('.edit_make').val(),
                         model: $(this).find('.edit_model').val()
                     });
                 });
 
                 $.ajax({
-                    url:  updateUrl,
+                    url: updateUrl,
                     type: 'POST',
                     data: {
                         _token: csrf,
 
-                        pol_carrier:      $('#edit_pol_carrier').val(),
-                        pol_number:       $('#edit_pol_number').val(),
-                        pol_url:          $('#edit_pol_url').val(),
-                        pol_expiration:   $('#edit_pol_expiration').val(),
-                        pol_eff_date:     $('#edit_pol_eff_date').val(),
-                        pol_added_date:   $('#edit_pol_added_date').val(),
-                        pol_due_day:      $('#edit_pol_due_day').val(),
-                        pol_status:       $('#edit_pol_status').val(),
+                        pol_carrier: $('#edit_pol_carrier').val(),
+                        pol_number: $('#edit_pol_number').val(),
+                        pol_url: $('#edit_pol_url').val(),
+                        pol_expiration: $('#edit_pol_expiration').val(),
+                        pol_eff_date: $('#edit_pol_eff_date').val(),
+                        pol_added_date: $('#edit_pol_added_date').val(),
+                        pol_due_day: $('#edit_pol_due_day').val(),
+                        pol_status: $('#edit_pol_status').val(),
                         pol_agent_record: $('#edit_pol_agent_record').val(),
+
                         vehicules: JSON.stringify(updatedVeh)
                     },
                     success: function (r) {
@@ -484,19 +514,19 @@ $(document).ready(function () {
         });
     });
 
-    // Cerrar overlay de edición
+    // Cerrar overlay edición
     $overlayCancel.on('click', function () {
         $overlayEdit.fadeOut(150);
     });
 
 
     // =========================================================================
-    //   ACTUALIZAR IMAGENES EN MODO EDICIÓN POR CAMBIOS MANUALES
+    //   ACTUALIZAR IMAGENES EN EDICIÓN
     // =========================================================================
     function updateEditImage(index) {
         const $card = $(`.vehicle-edit-card[data-index="${index}"]`);
-        const year  = $card.find('.edit_year').val();
-        const make  = $card.find('.edit_make').val();
+        const year = $card.find('.edit_year').val();
+        const make = $card.find('.edit_make').val();
         const model = $card.find('.edit_model').val();
 
         if (!year || !make || !model) return;
@@ -509,9 +539,8 @@ $(document).ready(function () {
         $(`#vehicle_edit_thumb_${index}`).css('background-image', `url('${imgUrl}')`);
     }
 
-    // VIN en modo edición
     $(document).on('blur', '.edit_vin', function () {
-        const vin   = $(this).val();
+        const vin = $(this).val();
         const index = $(this).closest('.vehicle-edit-card').data('index');
 
         if (!vin) return;
@@ -525,15 +554,14 @@ $(document).ready(function () {
                 const $card = $(`.vehicle-edit-card[data-index="${index}"]`);
 
                 if (v.ModelYear) $card.find('.edit_year').val(v.ModelYear);
-                if (v.Make)      $card.find('.edit_make').val(v.Make);
-                if (v.Model)     $card.find('.edit_model').val(v.Model);
+                if (v.Make) $card.find('.edit_make').val(v.Make);
+                if (v.Model) $card.find('.edit_model').val(v.Model);
 
                 updateEditImage(index);
             }
         );
     });
 
-    // Cambios manuales en year/make/model en edición
     $(document).on('change keyup', '.edit_year, .edit_make, .edit_model', function () {
         const index = $(this).closest('.vehicle-edit-card').data('index');
         updateEditImage(index);

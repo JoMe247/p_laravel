@@ -16,6 +16,7 @@ use App\Http\Controllers\HelpController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PoliciesController;
+use App\Http\Controllers\CustomerNotesController;
 
 
 // Página inicial
@@ -75,6 +76,16 @@ Route::post('/customers', [CustomersController::class, 'store'])->name('customer
 Route::get('/profile/{id}', [CustomersController::class, 'profile'])->name('profile');
 Route::put('/profile/{id}', [CustomersController::class, 'update'])->name('customers.update'); // guarda el resto del perfil
 Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMultiple']);
+Route::post('/customers/{id}/upload-photo', [CustomersController::class, 'uploadPhoto'])
+     ->name('customers.uploadPhoto');
+Route::post('/customers/{id}/alert', [CustomersController::class, 'saveAlert']);
+Route::post('/customers/{id}/alert/remove', [CustomersController::class, 'removeAlert']);
+Route::get('/customers/{id}/notes', [CustomerNotesController::class, 'index']);
+Route::post('/customers/{id}/notes', [CustomerNotesController::class, 'store']);
+Route::delete('/notes/{id}', [CustomerNotesController::class, 'destroy']);
+
+
+
 
 // =======================
 // 🍪 Middleware RememberMe
@@ -180,4 +191,5 @@ Route::post('/policies/{id}/update', [PoliciesController::class, 'update'])
 // Eliminar policy
 Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])
     ->name('policies.destroy');
+
 

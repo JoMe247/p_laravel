@@ -1,4 +1,7 @@
-/* Layout general del profile */
+/* =========================== */
+/*     LAYOUT GENERAL          */
+/* =========================== */
+
 #profile-wrapper {
     display: flex;
     align-items: flex-start;
@@ -7,65 +10,44 @@
     box-sizing: border-box;
 }
 
-/* --------------------------- */
-/*      MENU LATERAL CLARO     */
-/* --------------------------- */
+/* =========================== */
+/*     SIDE MENU (CLEAN)       */
+/* =========================== */
 
 .profile-side-menu {
     width: 240px;
-    background: #ffffff; /* Fondo blanco sólido para claridad */
+    background: #ffffff;
     border-radius: 18px;
-    padding: 18px 16px 22px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 20px 16px 26px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,0.08);
 }
 
-/* Texto del header */
-.profile-side-header i {
-    font-size: 32px;
-    color: #444; /* <--- oscuro, visible */
+/* Remove old header */
+.profile-side-header {
+    display: none !important;
 }
 
-.profile-side-title span {
-    font-size: 11px;
-    text-transform: uppercase;
-    opacity: 0.7;
-    color: #444; /* <--- oscuro */
-}
-
-.profile-side-title strong {
-    display: block;
-    font-size: 15px;
-    color: #222; /* <--- más oscuro */
-}
-
-/* Botones del menú */
+/* Menu items */
 .profile-menu-item {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
+    background: #f4f4f4;
     border-radius: 14px;
     border: none;
-    background: #f1f1f1;
-    color: #333; /* <--- texto visible */
     cursor: pointer;
     font-size: 14px;
-    transition: all 0.18s ease;
+    color: #333;
+    transition: 0.18s ease;
 }
 
-.profile-menu-item i {
-    font-size: 20px;
-    color: #333; /* <--- icono visible */
-}
-
-/* Hover */
 .profile-menu-item:hover {
-    background: #e6e6e6;
+    background: #e8e8e8;
 }
 
-/* Activo */
 .profile-menu-item.active {
     background: var(--action-color, #3498db);
     color: #fff;
@@ -73,4 +55,376 @@
 
 .profile-menu-item.active i {
     color: #fff;
+}
+
+/* =========================== */
+/*     PROFILE PHOTO           */
+/* =========================== */
+
+.profile-photo-section {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.profile-photo-frame {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 14px;
+    border: 4px solid #3498db;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+}
+
+.profile-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#upload-photo-btn {
+    background: #3498db;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+
+#upload-photo-btn:hover {
+    background: #2d89c4;
+}
+
+/* === MAIN PROFILE CARD === */
+.profile-card-container {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 25px 35px;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+/* Centered Name */
+.profile-name {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* Top small info row */
+.profile-info-grid {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+}
+
+.info-row {
+    text-align: center;
+}
+
+.info-row .label {
+    font-size: 12px;
+    opacity: 0.7;
+    display: block;
+}
+
+.info-row .value {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Section boxes */
+.profile-section-box {
+    margin-top: 25px;
+    background: #f5f5f5;
+    padding: 15px 18px;
+    border-radius: 12px;
+}
+
+.profile-section-box h3 {
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+/* Grids */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.form-grid-2 input,
+.form-grid-3 input {
+    padding: 7px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* Photo section */
+.profile-photo-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-photo-frame {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: auto;
+    border: 4px solid #3498db;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+.upload-photo-btn {
+    margin-top: 10px;
+    background: #3498db;
+    color: white;
+    border-radius: 10px;
+    padding: 6px 15px;
+}
+
+/* Actions */
+.profile-actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.profile-actions .btn {
+    margin: 0 8px;
+}
+/* TOP ROW EDITABLE (DOB, GENDER, MARITAL) */
+.profile-info-grid.editable-top {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.editable-top .info-row {
+    text-align: center;
+}
+
+.editable-top .info-row label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: .7;
+    margin-bottom: 4px;
+}
+
+.editable-top .info-row input {
+    padding: 6px 10px;
+    width: 150px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* GRID DE CONTACTO (4 columnas iguales) */
+.profile-contact-grid {
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px 30px;
+    width: 100%;
+}
+
+/* Cada celda (label + input) */
+.profile-contact-grid .info-row {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo uniforme para inputs */
+.profile-contact-grid input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* GRID PARA DETAILS Y OFFICE */
+.details-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px 30px;
+    width: 100%;
+}
+
+.details-grid .info-row {
+    display: flex;
+    flex-direction: column;
+}
+
+.details-grid input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.age-box {
+    display: block;
+    background: #f7f7f7;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    min-height: 40px;
+    line-height: 22px;
+}
+
+.added-display {
+    display: block;
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    padding: 10px 12px;
+    border-radius: 10px;
+    min-height: 40px;
+    line-height: 20px;
+    font-size: 14px;
+    color: #333;
+}
+
+#profile-alert-container {
+    margin-bottom: 15px;
+    width: fit-content;
+}
+
+.alert-box {
+    background: rgb(255, 225, 155);
+    border-left: 4px solid #e69500;
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #5a3c00;
+}
+
+.alert-box i {
+    font-size: 20px;
+    color: #e69500;
+}
+
+.alert-box {
+    position: relative;
+    background: rgb(255, 232, 170);
+    border-left: 6px solid #e2a200;
+    padding: 12px 45px 12px 18px; /* MÁS ESPACIO A LA DERECHA */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #5a3c00;
+    width: fit-content;
+    max-width: 350px;
+    box-sizing: border-box;
+}
+
+/* Icono de alerta */
+.alert-box i.bx-error {
+    font-size: 22px;
+    color: #e2a200;
+}
+
+.alert-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #a66a00;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 3px;
+    border-radius: 6px;
+    z-index: 10;
+    transition: 0.25s;
+}
+
+.alert-delete:hover {
+    background: #ffdddd;
+    color: red;
+    transform: scale(1.15);
+}
+
+/* NOTES SECTION */
+
+.notes-container {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 16px 20px;
+    width: 100%;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,0.08);
+    box-sizing: border-box;
+}
+
+/* Sticky notes */
+.sticky-notes {
+    position: sticky;
+    top: 20px;
+}
+
+.notes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notes-scroll {
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.note-item {
+    background: #f7f7f7;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Note overlay */
+.note-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.note-window {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    width: 450px;
+}
+
+.note-window input,
+.note-window textarea {
+    width: 100%;
+    margin-bottom: 12px;
 }

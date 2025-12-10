@@ -200,7 +200,7 @@
     left:0;
     width:100%;
     height:100%;
-    background: rgba(0,0,0,.55);
+    background: rgba(0,0,0,0.55);
     backdrop-filter: blur(3px);
     display:flex;
     justify-content:center;
@@ -209,12 +209,15 @@
 }
 
 .policy-edit-box {
-    background:white;
-    padding:25px;
-    border-radius:16px;
-    width:600px;
-    max-height:90vh;
-    overflow-y:auto;
+    background: #ffffff;
+    width: 90%;
+    max-width: 1400px;      /* <-- ANCHO GRANDE */
+    padding: 28px;
+    border-radius: 18px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+    max-height: 90vh;
+    overflow-y: auto;        /* <-- SOLO VERTICAL */
+    overflow-x: hidden !important; /* <-- PROHIBIMOS SCROLL HORIZONTAL */
 }
 
 .vehicle-edit-card {
@@ -239,3 +242,76 @@
     border-radius: 8px;
     margin-bottom: 10px;
 }
+
+/* MAIN GRID FOR OVERLAY */
+.edit-grid {
+    display: grid;
+    grid-template-columns: 380px auto; /* <-- más espacio para vehículos */
+    gap: 32px;
+}
+
+/* Left Panel */
+.edit-left label {
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.edit-left input {
+    width: 100%;
+    padding: 9px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+
+/* Right Panel */
+.edit-right h4 {
+    margin-bottom: 12px;
+    font-size: 17px;
+}
+
+.edit-vehicles-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* <-- Dos columnas */
+    gap: 18px;
+}
+
+
+.vehicle-edit-card {
+    background: #fafafa;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.16);
+    transition: 0.2s ease;
+}
+
+.vehicle-edit-card:hover {
+    transform: translateY(-3px);
+}
+
+
+.vehicle-edit-thumb {
+    width: 100%;
+    height: 140px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.vehicle-edit-card input {
+    width: 100%;
+    padding: 7px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+}
+
+
+/* =============================== */
+/*    POLICY EDIT OVERLAY         */
+/* =============================== */
+
+
