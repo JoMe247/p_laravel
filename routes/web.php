@@ -80,9 +80,10 @@ Route::post('/customers/{id}/upload-photo', [CustomersController::class, 'upload
      ->name('customers.uploadPhoto');
 Route::post('/customers/{id}/alert', [CustomersController::class, 'saveAlert']);
 Route::post('/customers/{id}/alert/remove', [CustomersController::class, 'removeAlert']);
+// Listar notas
 Route::get('/customers/{id}/notes', [CustomerNotesController::class, 'index']);
 Route::post('/customers/{id}/notes', [CustomerNotesController::class, 'store']);
-Route::delete('/notes/{id}', [CustomerNotesController::class, 'destroy']);
+Route::delete('/customers/notes/{id}', [CustomerNotesController::class, 'destroy']);
 
 
 

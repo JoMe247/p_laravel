@@ -19,7 +19,7 @@ $('#photo-input').on('change', function () {
                 $('#customer-photo').attr('src', res.path + '?v=' + Date.now());
             }
         },
-        error: function(xhr) {
+        error: function (xhr) {
             console.error("UPLOAD ERROR:", xhr.responseText);
         }
     });
@@ -66,24 +66,24 @@ function enableAlertDelete() {
                     "X-CSRF-TOKEN": csrf
                 }
             })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) return;
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) return;
 
-                // Borrar alerta visualmente
-                document.getElementById("customer-alert-box").remove();
+                    // Borrar alerta visualmente
+                    document.getElementById("customer-alert-box").remove();
 
-                // Volver a mostrar botón Add Alert
-                const container = document.getElementById("profile-alert-container");
-                const btn = document.createElement("button");
-                btn.id = "add-alert-btn";
-                btn.classList.add("button");
-                btn.innerHTML = `<i class='bx bx-error-circle'></i> Add Alert`;
-                container.appendChild(btn);
+                    // Volver a mostrar botón Add Alert
+                    const container = document.getElementById("profile-alert-container");
+                    const btn = document.createElement("button");
+                    btn.id = "add-alert-btn";
+                    btn.classList.add("button");
+                    btn.innerHTML = `<i class='bx bx-error-circle'></i> Add Alert`;
+                    container.appendChild(btn);
 
-                // Reactivar la función de agregar alerta
-                activateAddAlert();
-            });
+                    // Reactivar la función de agregar alerta
+                    activateAddAlert();
+                });
         });
     });
 }
@@ -121,31 +121,31 @@ function activateAddAlert() {
                 },
                 body: JSON.stringify({ Alert: alertText })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) return;
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) return;
 
-                // Ocultar botón add alert
-                addAlertBtn.style.display = "none";
+                    // Ocultar botón add alert
+                    addAlertBtn.style.display = "none";
 
-                // Crear el recuadro de alerta
-                const alertBox = document.createElement("div");
-                alertBox.id = "customer-alert-box";
-                alertBox.classList.add("alert-box");
-                alertBox.innerHTML = `
+                    // Crear el recuadro de alerta
+                    const alertBox = document.createElement("div");
+                    alertBox.id = "customer-alert-box";
+                    alertBox.classList.add("alert-box");
+                    alertBox.innerHTML = `
                     <i class='bx bx-x alert-delete'></i>
                     <i class='bx bx-error bx-tada'></i>
                     <span>${data.alert}</span>
                 `;
 
-                // Insertar recuadro
-                document.getElementById("profile-alert-container").appendChild(alertBox);
+                    // Insertar recuadro
+                    document.getElementById("profile-alert-container").appendChild(alertBox);
 
-                // Activar botón borrar alerta
-                enableAlertDelete();
+                    // Activar botón borrar alerta
+                    enableAlertDelete();
 
-                Swal.fire("Alert Saved!", "", "success");
-            });
+                    Swal.fire("Alert Saved!", "", "success");
+                });
         });
     });
 }
@@ -176,70 +176,91 @@ document.addEventListener("DOMContentLoaded", function () {
 
 $(document).ready(function () {
 
-    const customerId = $("#profile-wrapper").data("id");
-
-    function loadNotes() {
-        $.get(`/customers/${customerId}/notes`, function (notes) {
-
-            $("#notes-list").html("");
-
-            notes.forEach(n => {
-                $("#notes-list").append(`
-                    <div class="note-item">
-                        <div class="note-meta">
-                            <b>Policy:</b> ${n.policy ?? ''} |
-                            <b>Subject:</b> ${n.subject ?? ''}<br>
-                            <b>By:</b> ${n.created_by} |
-                            <b>Date:</b> ${n.created_at}
-                        </div>
-
-                        <p>${n.note}</p>
-
-                        <div class="note-delete" data-id="${n.id}">🗑</div>
-                    </div>
-                `);
-            });
-        });
-    }
-
+    const customerId = $("meta[name='customer-id']").attr("content");
     loadNotes();
 
-    $("#add-note-btn").click(() => {
-        $("#note-overlay").fadeIn();
+    $("#add-note-btn").on("click", function () {
+        $("#note-overlay").css("display", "flex");
     });
 
-    $("#note-cancel").click(() => {
-        $("#note-overlay").fadeOut();
+    $("#note-cancel").on("click", function () {
+        $("#note-overlay").hide();
     });
 
-    $("#note-save").click(() => {
+    $("#note-save").on("click", function () {
 
         $.post(`/customers/${customerId}/notes`, {
+            _token: $("meta[name='csrf-token']").attr("content"),
             policy: $("#note-policy").val(),
             subject: $("#note-subject").val(),
             note: $("#note-text").val(),
-            _token: $('meta[name="csrf-token"]').attr("content")
-        }, function () {
-            $("#note-overlay").fadeOut();
-            $("#note-policy").val("");
-            $("#note-subject").val("");
-            $("#note-text").val("");
-            loadNotes();
-        });
-
-    });
-
-    $(document).on("click", ".note-delete", function () {
-        let id = $(this).data("id");
-
-        $.ajax({
-            url: `/notes/${id}`,
-            type: "DELETE",
-            data: { _token: $('meta[name="csrf-token"]').attr("content") },
-            success: function () {
+        })
+            .done(function () {
+                $("#note-overlay").hide();
+                $("#note-policy").val("");
+                $("#note-subject").val("");
+                $("#note-text").val("");
                 loadNotes();
-            }
-        });
+            });
     });
 
 });
+
+
+// 📌 Función para cargar notas
+function loadNotes() {
+
+    const customerId = $("meta[name='customer-id']").attr("content");
+
+    $.get(`/customers/${customerId}/notes`, function (notes) {
+
+        let html = "";
+
+        notes.forEach(note => {
+
+            let formattedDate = note.created_at
+                ? new Date(note.created_at).toLocaleString()
+                : "";
+
+            html += `
+                <div class="note-item">
+
+                    <small>${formattedDate}</small>
+
+                    <b>Policy:</b> ${note.policy ?? '—'}<br>
+                    <b>Subject:</b> ${note.subject}<br>
+                    <b>By:</b> ${note.created_by}<br><br>
+
+                    <div style="white-space:pre-line;">
+                        ${note.note}
+                    </div>
+
+                    <button class="note-delete-btn" onclick="deleteNote(${note.id})">
+                        <i class='bx bx-trash'></i>
+                    </button>
+
+                </div>`;
+        });
+
+        $("#notes-list").html(html);
+    });
+}
+
+
+// 📌 Eliminar nota
+function deleteNote(noteId) {
+
+    $.ajax({
+        url: `/customers/notes/${noteId}`,
+        method: "DELETE",
+        data: {
+            _token: $("meta[name='csrf-token']").attr("content")
+        },
+        success: function () {
+            loadNotes();
+        }
+    });
+
+}
+
+

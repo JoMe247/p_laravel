@@ -40,7 +40,13 @@ class CustomersController extends Controller
     public function profile($id)
     {
         $customer = Customer::findOrFail($id);
-        return view('profile', compact('customer'));
+
+        // Cargar notas
+        $notes = CustomerNote::where('customer_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('profile', compact('customer', 'notes'));
     }
 
     // guarda todos los campos desde profile form (POST)
