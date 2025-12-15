@@ -71,9 +71,14 @@
                                     <span>Reminders</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item">
+                                <button type="button" class="profile-menu-item" onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
                                     <i class='bx bx-folder'></i>
                                     <span>Files</span>
+                                </button>
+
+                                <button type="button" class="profile-menu-item">
+                                    <i class='bx bx-file'></i>
+                                    <span>Documents</span>
                                 </button>
 
                                 <button type="button" class="profile-menu-item">

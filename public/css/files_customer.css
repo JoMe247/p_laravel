@@ -1,0 +1,170 @@
+/* =========================
+   FILES LAYOUT (AISLADO)
+========================= */
+
+.files-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    width: 100%;
+}
+
+/* Columna derecha */
+.files-layout .files-container {
+    flex: 1;
+    min-width: 0;
+}
+
+
+.files-container {
+    flex: 1;
+    min-width: 0;
+    padding: 24px 32px;
+    box-sizing: border-box;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.files-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.files-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.files-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef2ff;
+    color: #4f46e5;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.files-table-wrapper {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+.files-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.files-table thead th {
+    padding: 14px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.files-table tbody tr {
+    background: #fff;
+}
+
+.files-table tbody td {
+    padding: 14px 16px;
+    vertical-align: middle;
+}
+
+/* =========================
+   FILE INFO
+========================= */
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.file-icon {
+    font-size: 26px;
+    flex-shrink: 0;
+}
+
+.file-meta strong {
+    display: block;
+    max-width: 340px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-meta small {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.files-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.files-actions input[type="file"] {
+    display: none;
+}
+
+.files-actions button {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
+    background: #eef2ff;
+    color: #1e40af;
+    cursor: pointer;
+}
+
+.files-actions button:hover {
+    background: #e0e7ff;
+}
+
+.files-actions .danger {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.files-actions .danger:hover {
+    background: #fecaca;
+}
+
+#upload-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 99999; /* por si algo lo tapa */
+}
+
+#upload-overlay .upload-modal {
+    background: #fff;
+    width: 380px;
+    max-width: calc(100% - 24px);
+    border-radius: 16px;
+    padding: 22px;
+}
