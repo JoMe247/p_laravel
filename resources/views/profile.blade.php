@@ -38,6 +38,7 @@
         @include('menu')
 
         <section id="dash">
+            
             <div id="lower-table-clients" type="fullscreen">
 
                 {{-- CONTENEDOR GENERAL DEL PROFILE --}}
@@ -70,7 +71,8 @@
                                     <span>Reminders</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item" onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
+                                <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
                                     <i class='bx bx-folder'></i>
                                     <span>Files</span>
                                 </button>

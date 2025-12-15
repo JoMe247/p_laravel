@@ -11,51 +11,77 @@
 }
 
 /* =========================== */
-/*     SIDE MENU (CLEAN)       */
+/*   MENU LATERAL PROFILE     */
 /* =========================== */
 
 .profile-side-menu {
     width: 240px;
     background: #ffffff;
-    border-radius: 18px;
-    padding: 20px 16px 26px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 20px;
+    padding: 18px 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,0.06);
 }
 
-/* Remove old header */
-.profile-side-header {
-    display: none !important;
+/* Navegación */
+.profile-side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* Menu items */
+/* Botón base */
 .profile-menu-item {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 12px;
-    background: #f4f4f4;
-    border-radius: 14px;
+
+    padding: 12px 14px;
+    border-radius: 16px;
     border: none;
-    cursor: pointer;
-    font-size: 14px;
+
+    background: #f3f3f3;
     color: #333;
-    transition: 0.18s ease;
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.profile-menu-item:hover {
-    background: #e8e8e8;
+/* Íconos */
+.profile-menu-item i {
+    font-size: 18px;
+    color: #555;
+    transition: color 0.2s ease;
 }
+
+/* Hover */
+.profile-menu-item:hover {
+    background: #e9e9e9;
+}
+
+/* =========================== */
+/*        ACTIVO (AZUL)        */
+/* =========================== */
 
 .profile-menu-item.active {
-    background: var(--action-color, #3498db);
-    color: #fff;
+    background: #3498db; /* AZUL PRINCIPAL */
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.45);
 }
 
+/* Ícono activo */
 .profile-menu-item.active i {
-    color: #fff;
+    color: #ffffff;
 }
+
+/* Texto activo */
+.profile-menu-item.active span {
+    color: #ffffff;
+}
+
 
 /* =========================== */
 /*     PROFILE PHOTO           */

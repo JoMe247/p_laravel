@@ -10,16 +10,16 @@ use Illuminate\Support\Facades\Storage;
 
 class CustomerFilesController extends Controller
 {
-public function index($id)
-{
-    $customer = Customer::findOrFail($id);
+    public function index($id)
+    {
+        $customer = Customer::findOrFail($id);
 
-    $files = FileCustomer::where('customer_id', $id)
-        ->orderBy('updated_at', 'desc')
-        ->get();
+        $files = FileCustomer::where('customer_id', $id)
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
-    return view('files_customer', compact('customer', 'files'));
-}
+        return view('files_customer', compact('customer', 'files'));
+    }
 
 
 
@@ -82,9 +82,14 @@ public function index($id)
     public function destroy($id)
     {
         $file = FileCustomer::findOrFail($id);
-        Storage::disk('public')->delete($file->file_path);
+
+        // 🔒 Seguridad: verificar que exista
+        if ($file->file_path && Storage::disk('public')->exists($file->file_path)) {
+            Storage::disk('public')->delete($file->file_path);
+        }
+
         $file->delete();
 
-        return back();
+        return back()->with('success', 'File deleted successfully');
     }
 }

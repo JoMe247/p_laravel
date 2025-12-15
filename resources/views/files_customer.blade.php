@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}">
-    <link rel="stylesheet" href="{{ asset('/css/profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
     <link rel="stylesheet" href="{{ asset('css/files_customer.css') }}">
 
     <!-- Icons -->
@@ -38,7 +38,9 @@
 
         <section id="dash">
 
-            <div id="lower-table-clients" type="fullscreen">
+            
+
+            <div id="profile-wrapper" data-id="{{ $customer->ID }}">
 
                 <div class="files-layout">
 
@@ -49,7 +51,7 @@
                         {{-- MENU LATERAL --}}
                         <aside class="profile-side-menu">
                             <nav class="profile-side-nav">
-                                <button type="button" class="profile-menu-item active"
+                                <button type="button" class="profile-menu-item"
                                     onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
                                     <i class='bx bx-id-card'></i>
                                     <span>Profile</span>
@@ -71,7 +73,7 @@
                                     <span>Reminders</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item"
+                                <button type="button" class="profile-menu-item active"
                                     onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
                                     <i class='bx bx-folder'></i>
                                     <span>Files</span>
@@ -128,7 +130,6 @@
                     {{-- /.left-column --}}
 
 
-                    <!-- 🔸 COLUMNA DERECHA (FILES) -->
 
 
                     <!-- COLUMNA DERECHA (FILES) -->
@@ -148,11 +149,17 @@
                                 </button>
 
                                 <select id="files-filter">
-                                    <option value="all">Filter</option>
+                                    <option value="all">All files</option>
                                     <option value="name">File name</option>
                                     <option value="date">Date</option>
                                     <option value="user">Uploaded by</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="doc">DOC</option>
+                                    <option value="docx">DOCX</option>
+                                    <option value="png">PNG</option>
+                                    <option value="jpg">JPG</option>
                                 </select>
+
                             </div>
                         </div>
 
@@ -180,7 +187,7 @@
                                             };
                                         @endphp
 
-                                        <tr>
+                                        <tr data-type="{{ $ext }}">
                                             <td>
                                                 <div class="file-info">
                                                     <i
@@ -227,7 +234,8 @@
                     </div>
                 </div>
             </div>
-        </section>
+    </div>
+    </section>
     </div>
 
 

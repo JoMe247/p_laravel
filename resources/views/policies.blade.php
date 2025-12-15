@@ -48,13 +48,13 @@
                         {{-- MENU LATERAL --}}
                         <aside class="profile-side-menu">
                             <nav class="profile-side-nav">
-                                <button type="button" class="profile-menu-item active"
+                                <button type="button" class="profile-menu-item"
                                     onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
                                     <i class='bx bx-id-card'></i>
                                     <span>Profile</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item"
+                                <button type="button" class="profile-menu-item active"
                                     onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
                                     <i class='bx bx-shield-quarter'></i>
                                     <span>Policies</span>
@@ -70,9 +70,15 @@
                                     <span>Reminders</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item">
+                                <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
                                     <i class='bx bx-folder'></i>
                                     <span>Files</span>
+                                </button>
+
+                                <button type="button" class="profile-menu-item">
+                                    <i class='bx bx-file'></i>
+                                    <span>Documents</span>
                                 </button>
 
                                 <button type="button" class="profile-menu-item">
@@ -96,7 +102,6 @@
 
                         </div>
 
-                        <!-- /.left-column -->
 
 
                         {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
