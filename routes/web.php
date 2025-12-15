@@ -17,6 +17,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PoliciesController;
 use App\Http\Controllers\CustomerNotesController;
+use App\Http\Controllers\CustomerFilesController;
 
 
 // Página inicial
@@ -193,4 +194,18 @@ Route::post('/policies/{id}/update', [PoliciesController::class, 'update'])
 Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])
     ->name('policies.destroy');
 
+// =======================
+// 📁 Customer Files
+// =======================
 
+// Vista files por customer
+Route::get('/files/{id}', [CustomerFilesController::class, 'index'])
+    ->name('files.customer');
+
+// Subir archivo
+Route::post('/files/{id}', [CustomerFilesController::class, 'store'])
+    ->name('files.store');
+
+// Eliminar archivo
+Route::delete('/files/delete/{fileId}', [CustomerFilesController::class, 'destroy'])
+    ->name('files.delete');

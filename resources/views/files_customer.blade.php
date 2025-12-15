@@ -1,16 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Customer Profile</title>
+    <meta charset="UTF-8">
+    <title>Files Customer</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
     <meta name="customer-id" content="{{ $customer->ID }}">
-
 
     <!-- Archivos CSS -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
@@ -21,10 +18,11 @@
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/files_customer.css') }}">
 
     <!-- Icons -->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
     <!-- JQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -34,15 +32,18 @@
 </head>
 
 <body>
+
     <div id="main-container">
         @include('menu')
 
         <section id="dash">
+
             <div id="lower-table-clients" type="fullscreen">
 
-                {{-- CONTENEDOR GENERAL DEL PROFILE --}}
-                <div id="profile-wrapper" data-id="{{ $customer->ID }}">
+                <div class="files-layout">
 
+
+                    <!-- 🔸 COLUMNA IZQUIERDA -->
                     <div class="left-column">
 
                         {{-- MENU LATERAL --}}
@@ -70,7 +71,8 @@
                                     <span>Reminders</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item" onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
+                                <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
                                     <i class='bx bx-folder'></i>
                                     <span>Files</span>
                                 </button>
@@ -103,7 +105,6 @@
 
                     </div> <!-- /.left-column -->
 
-
                     {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
                     <div id="note-overlay">
                         <div class="note-window">
@@ -127,212 +128,125 @@
                     {{-- /.left-column --}}
 
 
-
-                    {{-- CONTENIDO PRINCIPAL --}}
-                    <div class="profile-main">
-
-                        <div class="profile-card-container">
-
-                            <div id="profile-alert-container">
-                                @if (!$customer->Alert)
-                                    <button id="add-alert-btn" class="button" style="margin-bottom: 15px;">
-                                        <i class='bx bx-error-circle'></i> Add Alert
-                                    </button>
-                                @else
-                                    <div id="customer-alert-box" class="alert-box">
-                                        <i class='bx bx-x alert-delete'></i>
-                                        <i class='bx bx-error bx-tada'></i>
-                                        <span>{{ $customer->Alert }}</span>
-                                    </div>
-                                @endif
-                            </div>
+                    <!-- 🔸 COLUMNA DERECHA (FILES) -->
 
 
-                            <div class="profile-photo-section">
-                                <div class="profile-photo-frame">
-                                    <img id="customer-photo"
-                                        src="{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}"
-                                        alt="Profile Photo">
-                                </div>
+                    <!-- COLUMNA DERECHA (FILES) -->
+                    <div class="files-container">
 
-                                <button id="upload-photo-btn" class="btn upload-photo-btn">
-                                    Upload Photo
+                        <div class="files-header">
+                            <h2>
+                                {{ $customer->name }}
+                                <span class="files-count">
+                                    <i class="bx bx-folder"></i>{{ $files->count() }}
+                                </span>
+                            </h2>
+
+                            <div class="files-header-actions">
+                                <button id="open-upload" class="btn-primary">
+                                    <i class="bx bx-plus"></i>
                                 </button>
 
-                                <form id="photo-upload-form" enctype="multipart/form-data" style="display:none;">
-                                    @csrf
-                                    <input type="file" name="photo" id="photo-input" accept="image/*">
-                                </form>
+                                <select id="files-filter">
+                                    <option value="all">Filter</option>
+                                    <option value="name">File name</option>
+                                    <option value="date">Date</option>
+                                    <option value="user">Uploaded by</option>
+                                </select>
                             </div>
-
-                            <h2 class="profile-name">{{ $customer->Name }}</h2>
-
-                            {{-- *** FORMULARIO ABIERTO AQUÍ *** --}}
-                            <form id="profile-form" method="POST"
-                                action="{{ route('customers.update', $customer->ID) }}">
-                                @csrf
-                                @method('PUT')
-
-                                @php
-                                    function calculateAge($dob)
-                                    {
-                                        if (!$dob) {
-                                            return null;
-                                        }
-                                        return \Carbon\Carbon::parse($dob)->age;
-                                    }
-                                    $age = calculateAge($customer->DOB);
-                                @endphp
-
-                                <div class="profile-info-grid editable-top">
-
-                                    <div class="info-row">
-                                        <label>DOB</label>
-                                        <input type="date" name="DOB" value="{{ $customer->DOB }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Age</label>
-                                        <span class="value age-box">{{ $age !== null ? $age : '—' }}</span>
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Gender</label>
-                                        <input type="text" name="Gender" value="{{ $customer->Gender }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Marital</label>
-                                        <input type="text" name="Marital" value="{{ $customer->Marital }}">
-                                    </div>
-
-                                </div>
-
-                                {{-- CONTACT INFO --}}
-                                <div class="profile-info-grid profile-contact-grid">
-
-                                    <div class="info-row">
-                                        <label>Phone 1</label>
-                                        <input type="text" name="Phone" value="{{ $customer->Phone }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Phone 2</label>
-                                        <input type="text" name="Phone2" value="{{ $customer->Phone2 }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Email 1</label>
-                                        <input type="email" name="Email1" value="{{ $customer->Email1 }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Email 2</label>
-                                        <input type="email" name="Email2" value="{{ $customer->Email2 }}">
-                                    </div>
-
-                                </div>
-
-                                {{-- DETAILS --}}
-                                <div class="profile-section-box">
-                                    <h3>Details</h3>
-
-                                    <div class="details-grid">
-
-                                        <div class="info-row">
-                                            <label>Address</label>
-                                            <input type="text" name="Address" value="{{ $customer->Address }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>City</label>
-                                            <input type="text" name="City" value="{{ $customer->City }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>State</label>
-                                            <input type="text" name="State" value="{{ $customer->State }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Zip Code</label>
-                                            <input type="text" name="ZIP_Code" value="{{ $customer->ZIP_Code }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Drivers License</label>
-                                            <input type="text" name="Drivers_License"
-                                                value="{{ $customer->Drivers_License }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>DL State</label>
-                                            <input type="text" name="DL_State" value="{{ $customer->DL_State }}">
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                {{-- OFFICE INFO --}}
-                                <div class="profile-section-box">
-                                    <h3>Office Information</h3>
-
-                                    <div class="details-grid">
-
-                                        <div class="info-row">
-                                            <label>Office</label>
-                                            <input type="text" name="Office" value="{{ $customer->Office }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>CID</label>
-                                            <input type="text" name="CID" value="{{ $customer->CID }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Agent of Record</label>
-                                            <input type="text" name="Agent_of_Record"
-                                                value="{{ $customer->Agent_of_Record }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Agency</label>
-                                            <input type="text" name="Agency" value="{{ $customer->Agency }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Source</label>
-                                            <input type="text" name="Source" value="{{ $customer->Source }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Added</label>
-                                            <span class="added-display">
-                                                {{ $customer->Added ? \Carbon\Carbon::parse($customer->Added)->format('Y-m-d') : '—' }}
-                                            </span>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <div class="profile-actions">
-                                    <button type="submit" class="btn profile-btn-save">Save</button>
-                                    <a href="{{ route('customers.index') }}" class="btn secondary">Back</a>
-                                    <button type="button" id="delete-customer-btn"
-                                        class="btn delete-btn">Delete</button>
-                                </div>
-                            </form>
-
                         </div>
 
+                        <div class="files-table-wrapper">
+                            <table class="files-table">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Last Modified</th>
+                                        <th>Uploaded By</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach ($files as $file)
+                                        @php
+                                            $ext = strtolower(pathinfo($file->file_name, PATHINFO_EXTENSION));
+                                            $icon = match ($ext) {
+                                                'pdf' => 'bxs-file-pdf',
+                                                'doc', 'docx' => 'bxs-file-doc',
+                                                'xls', 'xlsx' => 'bxs-spreadsheet',
+                                                'png', 'jpg', 'jpeg', 'gif', 'webp' => 'bxs-image',
+                                                default => 'bxs-file',
+                                            };
+                                        @endphp
+
+                                        <tr>
+                                            <td>
+                                                <div class="file-info">
+                                                    <i
+                                                        class="bx {{ $icon }} file-icon {{ $ext }}"></i>
+                                                    <div class="file-meta">
+                                                        <strong>{{ $file->file_name }}</strong>
+                                                        <small>{{ number_format($file->file_size / 1024, 2) }}
+                                                            KB</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td>{{ ($file->updated_at ?? $file->created_at)->format('Y-m-d H:i') }}
+                                            </td>
+
+                                            <td>
+                                                {{ $file->uploaded_by_type === 'user'
+                                                    ? \App\Models\User::find($file->uploaded_by_id)->name
+                                                    : \App\Models\SubUser::find($file->uploaded_by_id)->name }}
+                                            </td>
+
+                                            <td class="files-actions">
+                                                <form method="POST"
+                                                    action="{{ route('files.store', $customer->ID) }}"
+                                                    enctype="multipart/form-data">
+                                                    @csrf
+                                                    <input type="file" name="file" required>
+                                                    <button type="submit">Upload</button>
+                                                </form>
+
+                                                <form method="POST" action="{{ route('files.delete', $file->id) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="icon-btn danger">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-
-                </div> {{-- /#profile-wrapper --}}
-
+                </div>
             </div>
         </section>
     </div>
 
+
+    <!-- Upload Overlay -->
+    <div id="upload-overlay">
+        <div class="upload-modal">
+            <h3>Upload file</h3>
+
+            <form method="POST" action="{{ route('files.store', $customer->ID) }}" enctype="multipart/form-data">
+                @csrf
+                <input type="file" name="file" required>
+
+                <div class="modal-actions">
+                    <button type="button" id="close-upload">Cancel</button>
+                    <button type="submit" class="btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- UI Elements -->
     <div class="window-confirm">
@@ -506,7 +420,7 @@
     <script src="{{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/help.js') }}"></script>
     <script src="{{ asset('js/profile.js') }}"></script>
-
+    <script src="{{ asset('js/files_customer.js') }}"></script>
 </body>
 
 </html>
