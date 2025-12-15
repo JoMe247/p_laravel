@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Policies · CRM</title>
+    <title>Policies</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
-
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
+    <meta name="customer-id" content="{{ $customer->ID }}">
+
 
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
@@ -17,10 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/account.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/company.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/help.css') }}">
-
+    <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}">
     <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
     <link rel="stylesheet" href="{{ asset('css/policies.css') }}">
 
@@ -41,27 +39,23 @@
 
         <section id="dash">
 
-            <div id="dash-content">
+            <div id="lower-table-clients" type="fullscreen">
 
-                <div class="main-container">
+                <div id="profile-wrapper" data-id="{{ $customer->ID }}">
 
-
-
-                    <div id="profile-wrapper">
+                    <div class="left-column">
 
                         {{-- MENU LATERAL --}}
                         <aside class="profile-side-menu">
-                            <div class="profile-side-header" style="display:none;"></div>
-
-
                             <nav class="profile-side-nav">
-                                <button type="button" class="profile-menu-item"
+                                <button type="button" class="profile-menu-item active"
                                     onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
                                     <i class='bx bx-id-card'></i>
                                     <span>Profile</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item active">
+                                <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
                                     <i class='bx bx-shield-quarter'></i>
                                     <span>Policies</span>
                                 </button>
@@ -73,7 +67,7 @@
 
                                 <button type="button" class="profile-menu-item">
                                     <i class='bx bx-task'></i>
-                                    <span>Reminders/Tasks</span>
+                                    <span>Reminders</span>
                                 </button>
 
                                 <button type="button" class="profile-menu-item">
@@ -85,189 +79,231 @@
                                     <i class='bx bx-map'></i>
                                     <span>Map</span>
                                 </button>
-
                             </nav>
                         </aside>
 
-                        {{-- CONTENIDO PRINCIPAL --}}
-                        <div class="profile-main">
+                        {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
+                        <div class="profile-notes sticky-notes">
 
-                            <div class="policies-header">
-                                <h2>Policies</h2>
-
-                                <button id="new-policy-btn" class="btn policies-new-btn">
-                                    <i class='bx bx-plus'></i> New Policy
-                                </button>
+                            <div class="notes-header">
+                                <h3>Notes</h3>
+                                <button id="add-note-btn" class="btn small">+ Add Note</button>
                             </div>
 
-                            {{-- CONFIG PARA JS --}}
-                            <div id="policy-config" data-store-url="{{ route('policies.store', $customer->ID) }}"
-                                data-csrf="{{ csrf_token() }}">
+                            <div class="notes-scroll">
+                                <div id="notes-list"></div>
                             </div>
 
-                            {{-- TABLA --}}
-                            <table class="table policies-table">
-                                <thead>
+                        </div>
+
+                        <!-- /.left-column -->
+
+
+                        {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
+                        <div id="note-overlay">
+                            <div class="note-window">
+                                <h2 style="margin-bottom:15px;">Add Note</h2>
+
+                                <label>Policy</label>
+                                <input type="text" id="note-policy">
+
+                                <label>Subject</label>
+                                <input type="text" id="note-subject">
+
+                                <label>Note</label>
+                                <textarea id="note-text" rows="5"></textarea>
+
+                                <div class="overlay-actions">
+                                    <button class="btn secondary" id="note-cancel">Cancel</button>
+                                    <button class="btn" id="note-save">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- CONTENIDO PRINCIPAL --}}
+                    <div class="profile-main">
+
+                        <div class="policies-header">
+                            <h2>Policies</h2>
+
+                            <button id="new-policy-btn" class="btn policies-new-btn">
+                                <i class='bx bx-plus'></i> New Policy
+                            </button>
+                        </div>
+
+                        {{-- CONFIG PARA JS --}}
+                        <div id="policy-config" data-store-url="{{ route('policies.store', $customer->ID) }}"
+                            data-csrf="{{ csrf_token() }}">
+                        </div>
+
+                        {{-- TABLA --}}
+                        <table class="table policies-table">
+                            <thead>
+                                <tr>
+                                    <th>Carrier</th>
+                                    <th>Number</th>
+                                    <th>Expiration</th>
+                                    <th>Status</th>
+                                    <th>Vehicle</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($policies as $p)
+                                    @php
+                                        // Convertir JSON a arreglo
+                                        $veh = $p->vehicules;
+
+                                        if (is_string($veh)) {
+                                            $veh = json_decode($veh, true);
+                                        }
+
+                                        $vehicleCount = is_array($veh) ? count($veh) : 0;
+                                    @endphp
+
                                     <tr>
-                                        <th>Carrier</th>
-                                        <th>Number</th>
-                                        <th>Expiration</th>
-                                        <th>Status</th>
-                                        <th>Vehicle</th>
-                                        <th>Actions</th>
+                                        <td>{{ $p->pol_carrier }}</td>
+                                        <td>{{ $p->pol_number }}</td>
+                                        <td>{{ $p->pol_expiration }}</td>
+
+                                        {{--  Pol Status --}}
+                                        <td>{{ $p->pol_status ?? '-' }}</td>
+
+                                        {{--  Número de vehículos --}}
+                                        <td>
+                                            @if ($vehicleCount === 0)
+                                                0
+                                            @elseif($vehicleCount === 1)
+                                                1
+                                            @else
+                                                {{ $vehicleCount }}
+                                            @endif
+                                        </td>
+
+                                        <td>
+
+                                            {{-- Botón INFO (i en un círculo) --}}
+                                            <button class="btn policy-info-btn" title="View / Edit"
+                                                data-id="{{ $p->id }}"
+                                                data-url="{{ route('policies.show', $p->id) }}"
+                                                data-update-url="{{ route('policies.update', $p->id) }}">
+                                                <i class='bx bx-info-circle'></i>
+                                            </button>
+
+
+                                            <button class="btn delete-btn policy-delete-btn"
+                                                data-url="{{ route('policies.destroy', $p->id) }}">
+                                                Delete
+                                            </button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($policies as $p)
-                                        @php
-                                            // Convertir JSON a arreglo
-                                            $veh = $p->vehicules;
 
-                                            if (is_string($veh)) {
-                                                $veh = json_decode($veh, true);
-                                            }
-
-                                            $vehicleCount = is_array($veh) ? count($veh) : 0;
-                                        @endphp
-
-                                        <tr>
-                                            <td>{{ $p->pol_carrier }}</td>
-                                            <td>{{ $p->pol_number }}</td>
-                                            <td>{{ $p->pol_expiration }}</td>
-
-                                            {{--  Pol Status --}}
-                                            <td>{{ $p->pol_status ?? '-' }}</td>
-
-                                            {{--  Número de vehículos --}}
-                                            <td>
-                                                @if ($vehicleCount === 0)
-                                                    0
-                                                @elseif($vehicleCount === 1)
-                                                    1
-                                                @else
-                                                    {{ $vehicleCount }}
-                                                @endif
-                                            </td>
-
-                                            <td>
-
-                                                {{-- Botón INFO (i en un círculo) --}}
-                                                <button class="btn policy-info-btn" title="View / Edit"
-                                                    data-id="{{ $p->id }}"
-                                                    data-url="{{ route('policies.show', $p->id) }}"
-                                                    data-update-url="{{ route('policies.update', $p->id) }}">
-                                                    <i class='bx bx-info-circle'></i>
-                                                </button>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" style="text-align:center;opacity:0.6;">
+                                            No policies yet.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
 
 
-                                                <button class="btn delete-btn policy-delete-btn"
-                                                    data-url="{{ route('policies.destroy', $p->id) }}">
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        </tr>
+                        </table>
 
-                                    @empty
-                                        <tr>
-                                            <td colspan="6" style="text-align:center;opacity:0.6;">
-                                                No policies yet.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-
-
-                            </table>
-
-                        </div>
                     </div>
-
-
-                    <div id="policy-overlay">
-                        <div class="policy-overlay-box policy-flex">
-
-                            <h3>New Policy</h3>
-
-                            <div class="policy-columns">
-
-                                {{-- LEFT PANEL (POLICY FIELDS) --}}
-                                <div class="policy-left">
-
-                                    <label>Pol Carrier</label>
-                                    <input type="text" id="pol_carrier">
-
-                                    <label>Pol Number</label>
-                                    <input type="text" id="pol_number">
-
-                                    <label>Pol URL (company website)</label>
-                                    <input type="text" id="pol_url">
-
-                                    <label>Pol Expiration</label>
-                                    <input type="date" id="pol_expiration">
-
-                                    <label>Pol Eff Date</label>
-                                    <input type="date" id="pol_eff_date">
-
-                                    <label>Pol Added Date</label>
-                                    <input type="date" id="pol_added_date">
-
-                                    <label>Pol Due Day</label>
-                                    <input type="text" id="pol_due_day">
-
-                                    <label>Pol Status</label>
-                                    <input type="text" id="pol_status">
-
-                                    <label>Pol Agent Record</label>
-                                    <input type="text" id="pol_agent_record">
-
-                                    <div class="policy-overlay-actions">
-                                        <button id="policy-save-btn" class="btn policy-save-btn">Save</button>
-                                        <button id="policy-cancel-btn" class="btn secondary">Cancel</button>
-                                    </div>
-
-                                </div>
-
-                                {{-- RIGHT PANEL (VEHICLES) --}}
-                                <div class="policy-right">
-
-                                    <button id="add-vehicle-btn" class="btn add-vehicle-btn">
-                                        + Añadir Vehículo
-                                    </button>
-
-                                    <div id="vehicle-container" class="vehicle-container">
-                                        {{-- Vehicle cards generated by JS --}}
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-
-
-                    <div id="policy-edit-overlay" class="policy-edit-overlay" style="display:none;">
-                        <div class="policy-edit-box">
-
-                            <h3>Policy</h3>
-
-                            <div id="policy-edit-content">
-                                <!-- Aquí JS insertará todos los campos -->
-                            </div>
-
-                            <div class="policy-edit-actions">
-                                <button id="policy-edit-save" class="btn">Save Changes</button>
-                                <button id="policy-edit-cancel" class="btn secondary">Close</button>
-                            </div>
-                        </div>
-                    </div>
-
-
                 </div>
+
+
+                <div id="policy-overlay">
+                    <div class="policy-overlay-box policy-flex">
+
+                        <h3>New Policy</h3>
+
+                        <div class="policy-columns">
+
+                            {{-- LEFT PANEL (POLICY FIELDS) --}}
+                            <div class="policy-left">
+
+                                <label>Pol Carrier</label>
+                                <input type="text" id="pol_carrier">
+
+                                <label>Pol Number</label>
+                                <input type="text" id="pol_number">
+
+                                <label>Pol URL (company website)</label>
+                                <input type="text" id="pol_url">
+
+                                <label>Pol Expiration</label>
+                                <input type="date" id="pol_expiration">
+
+                                <label>Pol Eff Date</label>
+                                <input type="date" id="pol_eff_date">
+
+                                <label>Pol Added Date</label>
+                                <input type="date" id="pol_added_date">
+
+                                <label>Pol Due Day</label>
+                                <input type="text" id="pol_due_day">
+
+                                <label>Pol Status</label>
+                                <input type="text" id="pol_status">
+
+                                <label>Pol Agent Record</label>
+                                <input type="text" id="pol_agent_record">
+
+                                <div class="policy-overlay-actions">
+                                    <button id="policy-save-btn" class="btn policy-save-btn">Save</button>
+                                    <button id="policy-cancel-btn" class="btn secondary">Cancel</button>
+                                </div>
+
+                            </div>
+
+                            {{-- RIGHT PANEL (VEHICLES) --}}
+                            <div class="policy-right">
+
+                                <button id="add-vehicle-btn" class="btn add-vehicle-btn">
+                                    + Añadir Vehículo
+                                </button>
+
+                                <div id="vehicle-container" class="vehicle-container">
+                                    {{-- Vehicle cards generated by JS --}}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                <div id="policy-edit-overlay" class="policy-edit-overlay" style="display:none;">
+                    <div class="policy-edit-box">
+
+                        <h3>Policy</h3>
+
+                        <div id="policy-edit-content">
+                            <!-- Aquí JS insertará todos los campos -->
+                        </div>
+
+                        <div class="policy-edit-actions">
+                            <button id="policy-edit-save" class="btn">Save Changes</button>
+                            <button id="policy-edit-cancel" class="btn secondary">Close</button>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
     </div>
+    </div>
     </section>
+    </div>
+
+
+
     <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
@@ -438,7 +474,7 @@
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/help.js') }}"></script>
-
+    <script src="{{ asset('js/profile.js') }}"></script>
     <script src="{{ asset('js/policies.js') }}"></script>
 </body>
 

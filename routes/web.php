@@ -174,7 +174,7 @@ Route::delete('/calendar/delete/{id}', [CalendarController::class, 'delete'])
 // =======================
 
 // Listar policies por customer
-Route::get('/customers/{customer_id}/policies', [PoliciesController::class, 'index'])
+Route::get('/policies/{customer_id}', [PoliciesController::class, 'index'])
     ->name('policies.index');
 
 // Crear nueva policy

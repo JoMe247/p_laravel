@@ -21,7 +21,6 @@
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}">
-    {{-- NUEVO CSS SOLO PARA PROFILE --}}
     <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 
     <!-- Icons -->
