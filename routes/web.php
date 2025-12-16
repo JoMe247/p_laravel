@@ -18,6 +18,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PoliciesController;
 use App\Http\Controllers\CustomerNotesController;
 use App\Http\Controllers\CustomerFilesController;
+use App\Http\Controllers\RemindersController;
 
 
 // Página inicial
@@ -209,3 +210,9 @@ Route::post('/files/{id}', [CustomerFilesController::class, 'store'])
 // Eliminar archivo
 Route::delete('/files/delete/{fileId}', [CustomerFilesController::class, 'destroy'])
     ->name('files.delete');
+
+// Reminders
+
+
+Route::get('/reminders/{id}', [RemindersController::class, 'index'])->name('reminders.index');
+Route::post('/reminders/{id}', [RemindersController::class, 'store'])->name('reminders.store');

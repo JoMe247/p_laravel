@@ -38,7 +38,7 @@
 
         <section id="dash">
 
-            
+
 
             <div id="profile-wrapper" data-id="{{ $customer->ID }}">
 
@@ -138,10 +138,21 @@
                         <div class="files-header">
                             <h2>
                                 {{ $customer->name }}
+
                                 <span class="files-count">
                                     <i class="bx bx-folder"></i>{{ $files->count() }}
                                 </span>
+
+                                <!-- 🔹 FILE TYPE FILTER BUTTONS -->
+                                <div class="files-type-filters">
+                                    <button class="file-type-btn active" data-type="all">All</button>
+                                    <button class="file-type-btn pdf" data-type="pdf">PDF</button>
+                                    <button class="file-type-btn doc" data-type="doc">DOC</button>
+                                    <button class="file-type-btn image" data-type="image">IMG</button>
+                                    <button class="file-type-btn zip" data-type="zip">ZIP</button>
+                                </div>
                             </h2>
+
 
                             <div class="files-header-actions">
                                 <button id="open-upload" class="btn-primary">

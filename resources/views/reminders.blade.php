@@ -1,16 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Customer Profile</title>
+    <meta charset="UTF-8">
+    <title>Reminders</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
     <meta name="customer-id" content="{{ $customer->ID }}">
-
 
     <!-- Archivos CSS -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
@@ -23,6 +20,9 @@
     <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}">
     <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 
+    <!-- Estilos de esta vista -->
+    <link rel="stylesheet" href="{{ asset('css/reminders.css') }}">
+
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
@@ -31,14 +31,17 @@
 
     <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 </head>
 
 <body>
+
     <div id="main-container">
         @include('menu')
 
         <section id="dash">
-            
+
             <div id="lower-table-clients" type="fullscreen">
 
                 {{-- CONTENEDOR GENERAL DEL PROFILE --}}
@@ -49,7 +52,7 @@
                         {{-- MENU LATERAL --}}
                         <aside class="profile-side-menu">
                             <nav class="profile-side-nav">
-                                <button type="button" class="profile-menu-item active"
+                                <button type="button" class="profile-menu-item"
                                     onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
                                     <i class='bx bx-id-card'></i>
                                     <span>Profile</span>
@@ -66,7 +69,7 @@
                                     <span>Invoices (Payments)</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item"
+                                <button type="button" class="profile-menu-item active"
                                     onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
                                     <i class='bx bx-task'></i>
                                     <span>Reminders</span>
@@ -127,215 +130,174 @@
                             </div>
                         </div>
                     </div>
-                    {{-- /.left-column --}}
 
+                    <div class="reminders-page">
 
+                        <div class="reminders-header">
+                            <div class="left">
+                                <h1 class="title">Reminders</h1>
 
-                    {{-- CONTENIDO PRINCIPAL --}}
-                    <div class="profile-main">
-
-                        <div class="profile-card-container">
-
-                            <div id="profile-alert-container">
-                                @if (!$customer->Alert)
-                                    <button id="add-alert-btn" class="button" style="margin-bottom: 15px;">
-                                        <i class='bx bx-error-circle'></i> Add Alert
-                                    </button>
-                                @else
-                                    <div id="customer-alert-box" class="alert-box">
-                                        <i class='bx bx-x alert-delete'></i>
-                                        <i class='bx bx-error bx-tada'></i>
-                                        <span>{{ $customer->Alert }}</span>
-                                    </div>
+                                @if (session('success'))
+                                    <div class="flash-success">{{ session('success') }}</div>
                                 @endif
                             </div>
 
-
-                            <div class="profile-photo-section">
-                                <div class="profile-photo-frame">
-                                    <img id="customer-photo"
-                                        src="{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}"
-                                        alt="Profile Photo">
-                                </div>
-
-                                <button id="upload-photo-btn" class="btn upload-photo-btn">
-                                    Upload Photo
+                            <div class="right">
+                                <button id="openReminderOverlay" class="btn-primary">
+                                    Set Reminder
                                 </button>
 
-                                <form id="photo-upload-form" enctype="multipart/form-data" style="display:none;">
-                                    @csrf
-                                    <input type="file" name="photo" id="photo-input" accept="image/*">
-                                </form>
+                                <div class="perpage-wrap">
+                                    <label class="perpage-label" for="perPageSelect">Show</label>
+                                    <select id="perPageSelect" class="perpage-select">
+                                        <option value="10" {{ (int) $perPage === 10 ? 'selected' : '' }}>10
+                                        </option>
+                                        <option value="20" {{ (int) $perPage === 20 ? 'selected' : '' }}>20
+                                        </option>
+                                        <option value="40" {{ (int) $perPage === 40 ? 'selected' : '' }}>40
+                                        </option>
+                                        <option value="50" {{ (int) $perPage === 50 ? 'selected' : '' }}>50
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
-
-                            <h2 class="profile-name">{{ $customer->Name }}</h2>
-
-                            {{-- *** FORMULARIO ABIERTO AQUÍ *** --}}
-                            <form id="profile-form" method="POST"
-                                action="{{ route('customers.update', $customer->ID) }}">
-                                @csrf
-                                @method('PUT')
-
-                                @php
-                                    function calculateAge($dob)
-                                    {
-                                        if (!$dob) {
-                                            return null;
-                                        }
-                                        return \Carbon\Carbon::parse($dob)->age;
-                                    }
-                                    $age = calculateAge($customer->DOB);
-                                @endphp
-
-                                <div class="profile-info-grid editable-top">
-
-                                    <div class="info-row">
-                                        <label>DOB</label>
-                                        <input type="date" name="DOB" value="{{ $customer->DOB }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Age</label>
-                                        <span class="value age-box">{{ $age !== null ? $age : '—' }}</span>
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Gender</label>
-                                        <input type="text" name="Gender" value="{{ $customer->Gender }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Marital</label>
-                                        <input type="text" name="Marital" value="{{ $customer->Marital }}">
-                                    </div>
-
-                                </div>
-
-                                {{-- CONTACT INFO --}}
-                                <div class="profile-info-grid profile-contact-grid">
-
-                                    <div class="info-row">
-                                        <label>Phone 1</label>
-                                        <input type="text" name="Phone" value="{{ $customer->Phone }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Phone 2</label>
-                                        <input type="text" name="Phone2" value="{{ $customer->Phone2 }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Email 1</label>
-                                        <input type="email" name="Email1" value="{{ $customer->Email1 }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Email 2</label>
-                                        <input type="email" name="Email2" value="{{ $customer->Email2 }}">
-                                    </div>
-
-                                </div>
-
-                                {{-- DETAILS --}}
-                                <div class="profile-section-box">
-                                    <h3>Details</h3>
-
-                                    <div class="details-grid">
-
-                                        <div class="info-row">
-                                            <label>Address</label>
-                                            <input type="text" name="Address" value="{{ $customer->Address }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>City</label>
-                                            <input type="text" name="City" value="{{ $customer->City }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>State</label>
-                                            <input type="text" name="State" value="{{ $customer->State }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Zip Code</label>
-                                            <input type="text" name="ZIP_Code" value="{{ $customer->ZIP_Code }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Drivers License</label>
-                                            <input type="text" name="Drivers_License"
-                                                value="{{ $customer->Drivers_License }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>DL State</label>
-                                            <input type="text" name="DL_State" value="{{ $customer->DL_State }}">
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                {{-- OFFICE INFO --}}
-                                <div class="profile-section-box">
-                                    <h3>Office Information</h3>
-
-                                    <div class="details-grid">
-
-                                        <div class="info-row">
-                                            <label>Office</label>
-                                            <input type="text" name="Office" value="{{ $customer->Office }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>CID</label>
-                                            <input type="text" name="CID" value="{{ $customer->CID }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Agent of Record</label>
-                                            <input type="text" name="Agent_of_Record"
-                                                value="{{ $customer->Agent_of_Record }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Agency</label>
-                                            <input type="text" name="Agency" value="{{ $customer->Agency }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Source</label>
-                                            <input type="text" name="Source" value="{{ $customer->Source }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Added</label>
-                                            <span class="added-display">
-                                                {{ $customer->Added ? \Carbon\Carbon::parse($customer->Added)->format('Y-m-d') : '—' }}
-                                            </span>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <div class="profile-actions">
-                                    <button type="submit" class="btn profile-btn-save">Save</button>
-                                    <a href="{{ route('customers.index') }}" class="btn secondary">Back</a>
-                                    <button type="button" id="delete-customer-btn"
-                                        class="btn delete-btn">Delete</button>
-                                </div>
-                            </form>
-
                         </div>
 
+                        <div class="reminders-card">
+                            <div class="table-topbar">
+                                <div class="search-wrap">
+                                    <form method="GET" action="{{ route('reminders.index',  $customer->ID) }}"
+                                        class="search-form">
+                                        <input type="text" name="q" value="{{ $q }}"
+                                            class="search-input" placeholder="Search in reminders..."
+                                            autocomplete="off">
+                                        <input type="hidden" name="perPage" value="{{ (int) $perPage }}">
+                                        <button class="search-btn" type="submit">Search</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="table-wrap">
+                                <table class="reminders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Description</th>
+                                            <th class="col-date">Date</th>
+                                            <th class="col-remind">Remind</th>
+                                            <th class="col-notified">Is notified?</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($reminders as $r)
+                                            <tr>
+                                                <td class="td-desc">{{ $r->description }}</td>
+                                                <td class="td-date">
+                                                    {{ optional($r->remind_at)->format('Y-m-d H:i') }}
+                                                </td>
+                                                <td class="td-remind">{{ $r->remind_name ?? '—' }}</td>
+                                                <td class="td-notified">
+                                                    <span class="pill {{ $r->send_email ? 'yes' : 'no' }}">
+                                                        {{ $r->send_email ? 'Si' : 'No' }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="empty-row">No reminders found.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="table-footer">
+                                <div class="footer-left">
+                                    <div class="footer-meta">
+                                        Showing {{ $reminders->firstItem() ?? 0 }} - {{ $reminders->lastItem() ?? 0 }}
+                                        of {{ $reminders->total() }} reminders
+                                    </div>
+                                </div>
+
+                                <div class="footer-right">
+                                    <div class="pagination-wrap">
+                                        {{-- Mantiene tu estilo "Previous 1,2,3 Next" usando el paginator default --}}
+                                        {{ $reminders->links() }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                </div> {{-- /#profile-wrapper --}}
+                    <!-- OVERLAY -->
+                    <div id="reminderOverlay" class="overlay">
+                        <div class="overlay-box">
+                            <div class="overlay-head">
+                                <h2>Set Reminder</h2>
+                                <button type="button" class="overlay-x" id="closeReminderOverlay"
+                                    aria-label="Close">×</button>
+                            </div>
 
+                            <form method="POST" action="{{ route('reminders.store',  $customer->ID) }}" id="reminderForm"
+                                class="overlay-body">
+                                @csrf
+
+                                <div class="field">
+                                    <label>Date to be notified <span class="req">*</span></label>
+                                    <input type="datetime-local" name="remind_at" required>
+                                    <small class="hint">Select date and time (hh:mm).</small>
+                                </div>
+
+                                <div class="field">
+                                    <label>Set Reminder to <span class="req">*</span></label>
+                                    <select name="remind_to" required>
+                                        <option value="" disabled selected>Select a user...</option>
+
+                                        <optgroup label="Users">
+                                            @foreach ($users as $u)
+                                                <option value="user:{{ $u->id }}">{{ $u->name }}</option>
+                                            @endforeach
+                                        </optgroup>
+
+                                        <optgroup label="Sub Users">
+                                            @foreach ($subs as $s)
+                                                <option value="sub:{{ $s->id }}">{{ $s->name }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <label>Description <span class="req">*</span></label>
+                                    <textarea name="description" rows="5" required placeholder="Write the reminder details..."></textarea>
+                                </div>
+
+                                <label class="checkline">
+                                    <input type="checkbox" name="send_email">
+                                    <span>Send also an email for this reminder</span>
+                                </label>
+
+                                <div class="overlay-actions">
+                                    <button type="button" class="btn-ghost" id="cancelReminderBtn">Cancel</button>
+                                    <button type="submit" class="btn-primary">Save</button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <script>
+                        // Para mantener perPage al cambiarlo sin perder q
+                        window.__REMINDERS__ = {
+                            perPage: {{ (int) $perPage }},
+                            q: @json($q),
+                            indexUrl: @json(route('reminders.index',  $customer->ID)),
+                        };
+                    </script>
+                    <script src="{{ asset('js/reminders.js') }}"></script>
+                </div> <!-- /#profile-wrapper -->
             </div>
         </section>
     </div>
-
 
     <!-- UI Elements -->
     <div class="window-confirm">
@@ -500,6 +462,7 @@
 
 
     <!-- Archivos JS -->
+    <script src="{{ asset('js/reminders.js') }}"></script>
     <script src="{{ asset('js/image.js') }}"></script>
     <script src="{{ asset('js/weather.js') }}"></script>
     <script src="{{ asset('js/dropdown.js') }}"></script>
@@ -509,7 +472,6 @@
     <script src="{{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/help.js') }}"></script>
     <script src="{{ asset('js/profile.js') }}"></script>
-
 </body>
 
 </html>

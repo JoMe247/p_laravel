@@ -43,44 +43,45 @@
     });
 })();
 
-filter.addEventListener('change', () => {
-    const value = filter.value;
-    const rows = Array.from(tbody.querySelectorAll('tr'));
+document.addEventListener('DOMContentLoaded', () => {
+    const rows = document.querySelectorAll('.files-table tbody tr');
+    const typeButtons = document.querySelectorAll('.file-type-btn');
 
-    // Mostrar todos
-    if (value === 'all') {
-        rows.forEach(row => row.style.display = '');
-        return;
-    }
+    if (!rows.length || !typeButtons.length) return;
 
-    // 🔹 ORDENAR
-    if (value === 'name') {
-        rows.sort((a, b) =>
-            a.children[0].innerText.localeCompare(b.children[0].innerText)
-        );
-    }
+    typeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
 
-    if (value === 'date') {
-        rows.sort((a, b) =>
-            new Date(b.children[1].innerText) - new Date(a.children[1].innerText)
-        );
-    }
+            // Estado activo
+            typeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
-    if (value === 'user') {
-        rows.sort((a, b) =>
-            a.children[2].innerText.localeCompare(b.children[2].innerText)
-        );
-    }
+            const type = btn.dataset.type;
 
-    if (['name', 'date', 'user'].includes(value)) {
-        tbody.innerHTML = '';
-        rows.forEach(r => tbody.appendChild(r));
-        return;
-    }
+            rows.forEach(row => {
+                const rowType = row.dataset.type;
 
-    // 🔹 FILTRAR POR TIPO DE ARCHIVO
-    rows.forEach(row => {
-        row.style.display = (row.dataset.type === value) ? '' : 'none';
+                if (type === 'all') {
+                    row.style.display = '';
+                } else if (type === 'image') {
+                    row.style.display = ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(rowType)
+                        ? ''
+                        : 'none';
+                } else if (type === 'doc') {
+                    row.style.display = ['doc', 'docx', 'xls', 'xlsx'].includes(rowType)
+                        ? ''
+                        : 'none';
+                } else if (type === 'zip') {
+                    row.style.display = ['zip', 'rar'].includes(rowType)
+                        ? ''
+                        : 'none';
+                } else {
+                    row.style.display = (rowType === type) ? '' : 'none';
+                }
+
+
+            });
+        });
     });
 });
 

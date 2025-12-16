@@ -14,19 +14,20 @@ class CustomerNotesController extends Controller
      */
     public function index($customerId)
     {
+        // User o SubUser autenticado
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
         $notes = CustomerNote::where('customer_id', $customerId)
+            ->where('agency', $user->agency) // 🔐 FILTRO POR AGENCY
             ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($note) {
-                return [
-                    'id'          => $note->id,
-                    'policy'      => $note->policy,
-                    'subject'     => $note->subject,
-                    'note'        => $note->note,
-                    'created_by'  => $note->created_by,
-                    'created_at'  => $note->created_at ? $note->created_at : null
-                ];
-            });
+            ->get([
+                'id',
+                'policy',
+                'subject',
+                'note',
+                'created_by',
+                'created_at'
+            ]);
 
         return response()->json($notes);
     }
@@ -35,34 +36,35 @@ class CustomerNotesController extends Controller
     /**
      * Guardar una nueva nota
      */
-   public function store(Request $request, $customerId)
-{
-    $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+    public function store(Request $request, $customerId)
+    {
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
-    // DEBUG — para saber qué está recibiendo Laravel
-    Log::info("USER DEBUG", [
-        'id' => $user->id ?? null,
-        'name' => $user->name ?? null,
-        'username' => $user->username ?? null,
-        'type' => get_class($user)
-    ]);
+        // DEBUG — para saber qué está recibiendo Laravel
+        Log::info("USER DEBUG", [
+            'id' => $user->id ?? null,
+            'name' => $user->name ?? null,
+            'username' => $user->username ?? null,
+            'type' => get_class($user)
+        ]);
 
-    $creatorName = $user->name ?? $user->username;
+        $creatorName = $user->name ?? $user->username;
 
-    $note = CustomerNote::create([
-        'customer_id' => $customerId,
-        'policy'      => $request->policy,
-        'subject'     => $request->subject,
-        'note'        => $request->note,
-        'created_by'  => $creatorName,
-        'created_at'  => now()
-    ]);
+        $note = CustomerNote::create([
+            'customer_id' => $customerId,
+            'agency'      => $user->agency,
+            'policy'      => $request->policy,
+            'subject'     => $request->subject,
+            'note'        => $request->note,
+            'created_by'  => $creatorName,
+            'created_at'  => now()
+        ]);
 
-    return response()->json([
-        'success' => true,
-        'note' => $note
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'note' => $note
+        ]);
+    }
 
     /**
      * Eliminar nota

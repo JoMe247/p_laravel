@@ -168,3 +168,56 @@
     border-radius: 16px;
     padding: 22px;
 }
+
+/* =========================
+   FILE TYPE FILTER BUTTONS
+========================= */
+
+.files-type-filters {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+}
+
+.file-type-btn {
+    border: none;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    background: #f1f5f9;
+    color: #334155;
+    transition: all .2s ease;
+}
+
+/* Active */
+.file-type-btn.active {
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+/* Colors */
+.file-type-btn.pdf {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.file-type-btn.doc {
+    background: #e0e7ff;
+    color: #1e40af;
+}
+
+.file-type-btn.image {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.file-type-btn:hover {
+    filter: brightness(0.95);
+}
+
+.file-type-btn.zip {
+    background: #fff7ed;
+    color: #c2410c;
+}

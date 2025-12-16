@@ -20,7 +20,8 @@ class CustomerNote extends Model
         'subject',
         'note',
         'created_by',
-        'creator_type'
+        'creator_type',
+        'agency'
     ];
 
 
