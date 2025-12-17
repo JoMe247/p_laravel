@@ -32,7 +32,7 @@ class RemindersController extends Controller
 
         $agency = $actor['model']->agency;
         $q = trim($request->q ?? '');
-        $perPage = in_array($request->perPage, [10,20,40,50]) ? $request->perPage : 10;
+        $perPage = in_array($request->perPage, [10, 20, 40, 50]) ? $request->perPage : 10;
 
         /** 🔹 USERS & SUB USERS DE LA MISMA AGENCY */
         $users = User::where('agency', $agency)->get();
@@ -99,15 +99,81 @@ class RemindersController extends Controller
         ]);
 
         /** 🔹 SIMULACIÓN EMAIL */
-        if ($sendEmail) {
+        /* if ($sendEmail) {
             Log::info('REMINDER EMAIL SIMULATED', [
                 'customer_id' => $customer->ID,
                 'reminder_id' => $reminder->id,
             ]);
-        }
+        }*/
 
         return redirect()
             ->route('reminders.index', $customer->ID)
             ->with('success', 'Reminder saved successfully.');
+    }
+
+
+    public function processPendingReminders()
+    {
+        $now = now();
+
+        $pending = \App\Models\Reminder::where('send_email', 1)
+            ->where('remind_at', '<=', $now)
+            ->whereNull('notified_at') // 👈 ver nota abajo
+            ->get();
+
+        foreach ($pending as $r) {
+            Log::info('REMINDER EMAIL SENT (SIMULATED)', [
+                'reminder_id' => $r->id,
+                'customer_id' => $r->customer_id,
+                'remind_at' => $r->remind_at,
+            ]);
+
+            // Marcamos como notificado
+            $r->update([
+                'notified_at' => now()
+            ]);
+        }
+    }
+
+    public function simulateReminderEmails()
+    {
+        $now = now();
+
+        $reminders = Reminder::where('send_email', 1)
+            ->whereNull('notified_at')
+            ->where('remind_at', '<=', $now)
+            ->get();
+
+        foreach ($reminders as $r) {
+
+            Log::info('REMINDER EMAIL SENT (SIMULATED)', [
+                'reminder_id' => $r->id,
+                'customer_id' => $r->customer_id,
+                'remind_at'   => $r->remind_at,
+                'sent_at'     => $now->toDateTimeString(),
+            ]);
+
+            // Marcamos como ya notificado
+            $r->update([
+                'notified_at' => $now
+            ]);
+        }
+    }
+
+    public function destroy($customerId, $reminderId)
+    {
+        $actor = $this->currentActor();
+        if (!$actor) return response()->json(['error' => 'Unauthorized'], 401);
+
+        $customer = Customer::findOrFail($customerId);
+
+        $reminder = Reminder::where('id', $reminderId)
+            ->where('customer_id', $customer->ID)
+            ->where('agency', $actor['model']->agency)
+            ->firstOrFail();
+
+        $reminder->delete();
+
+        return response()->json(['success' => true]);
     }
 }

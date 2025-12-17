@@ -166,7 +166,7 @@
                         <div class="reminders-card">
                             <div class="table-topbar">
                                 <div class="search-wrap">
-                                    <form method="GET" action="{{ route('reminders.index',  $customer->ID) }}"
+                                    <form method="GET" action="{{ route('reminders.index', $customer->ID) }}"
                                         class="search-form">
                                         <input type="text" name="q" value="{{ $q }}"
                                             class="search-input" placeholder="Search in reminders..."
@@ -185,6 +185,7 @@
                                             <th class="col-date">Date</th>
                                             <th class="col-remind">Remind</th>
                                             <th class="col-notified">Is notified?</th>
+                                            <th class="col-actions">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -200,6 +201,14 @@
                                                         {{ $r->send_email ? 'Si' : 'No' }}
                                                     </span>
                                                 </td>
+
+                                                <td class="td-actions">
+                                                    <button class="btn-delete-reminder" data-id="{{ $r->id }}"
+                                                        title="Delete reminder">
+                                                        <i class='bx bx-trash'></i>
+                                                    </button>
+                                                </td>
+
                                             </tr>
                                         @empty
                                             <tr>
@@ -237,8 +246,8 @@
                                     aria-label="Close">×</button>
                             </div>
 
-                            <form method="POST" action="{{ route('reminders.store',  $customer->ID) }}" id="reminderForm"
-                                class="overlay-body">
+                            <form method="POST" action="{{ route('reminders.store', $customer->ID) }}"
+                                id="reminderForm" class="overlay-body">
                                 @csrf
 
                                 <div class="field">
@@ -290,7 +299,7 @@
                         window.__REMINDERS__ = {
                             perPage: {{ (int) $perPage }},
                             q: @json($q),
-                            indexUrl: @json(route('reminders.index',  $customer->ID)),
+                            indexUrl: @json(route('reminders.index', $customer->ID)),
                         };
                     </script>
                     <script src="{{ asset('js/reminders.js') }}"></script>

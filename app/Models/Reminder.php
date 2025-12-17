@@ -18,10 +18,12 @@ class Reminder extends Model
         'send_email',
         'created_by_type',
         'created_by_id',
+        'notified_at'
     ];
 
     protected $casts = [
         'remind_at' => 'datetime',
         'send_email' => 'boolean',
+        'notified_at' => 'datetime'
     ];
 }

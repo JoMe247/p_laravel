@@ -212,7 +212,9 @@ Route::delete('/files/delete/{fileId}', [CustomerFilesController::class, 'destro
     ->name('files.delete');
 
 // Reminders
-
-
 Route::get('/reminders/{id}', [RemindersController::class, 'index'])->name('reminders.index');
 Route::post('/reminders/{id}', [RemindersController::class, 'store'])->name('reminders.store');
+Route::delete('/reminders/{id}/{reminder}', 
+    [App\Http\Controllers\RemindersController::class, 'destroy']
+)->name('reminders.destroy');
+
