@@ -84,7 +84,7 @@ class RemindersController extends Controller
 
         [$type, $id] = explode(':', $request->remind_to);
 
-        $sendEmail = $request->has('send_email');
+        $sendEmail = true;
 
         $reminder = Reminder::create([
             'agency' => $actor['model']->agency,

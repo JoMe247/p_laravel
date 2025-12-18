@@ -280,11 +280,6 @@
                                     <textarea name="description" rows="5" required placeholder="Write the reminder details..."></textarea>
                                 </div>
 
-                                <label class="checkline">
-                                    <input type="checkbox" name="send_email">
-                                    <span>Send also an email for this reminder</span>
-                                </label>
-
                                 <div class="overlay-actions">
                                     <button type="button" class="btn-ghost" id="cancelReminderBtn">Cancel</button>
                                     <button type="submit" class="btn-primary">Save</button>

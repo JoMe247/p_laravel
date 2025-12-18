@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="icon" href="img/favicon.png">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/variables.css">
@@ -95,10 +96,10 @@
                     <i class='bx bx-mail-send'></i><text>12</text>
                 </div>
 
-                <div class="quick-item">
-                    <p>Announcements</p>
+                <div class="quick-item" id="open-reminders">
+                    <p>Reminders</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bxs-megaphone'></i><text>5</text>
+                    <i class='bx bxs-megaphone'></i><text>{{ $remindersCount }}</text>
                 </div>
 
                 <div class="quick-item" data="last-quick-item">
@@ -352,6 +353,11 @@
         </div>
     </div>
 
+
+
+
+
+
     <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
@@ -515,13 +521,45 @@
 
 
     <!-- <script src="js/main.js"></script> -->
-    <script src="js/image.js"></script>
-    <script src="js/weather.js"></script>
-    <script src="js/dropdown.js"></script>
-    <script src="js/menu.js"></script>
-    <script src="js/table.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/operations.js"></script>
+    <script src="{{ asset('js/image.js') }}"></script>
+    <script src="{{ asset('js/weather.js') }}"></script>
+    <script src="{{ asset('js/dropdown.js') }}"></script>
+    <script src="{{ asset('js/menu.js') }}"></script>
+    <script src="{{ asset('js/table.js') }}"></script>
+    <script src="{{ asset('js/settings.js') }}"></script>
+    <script src="{{ asset('js/operations.js') }}"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
+
+
+    {{-- 🔔 REMINDERS OVERLAY --}}
+    <div id="reminders-overlay" class="overlay">
+        <div class="overlay-box" style="max-width:520px;">
+            <div class="overlay-head">
+                <h2>My Reminders</h2>
+                <button class="overlay-x" id="close-reminders-overlay">×</button>
+            </div>
+
+            <div class="overlay-body">
+                @if ($reminders->isEmpty())
+                    <p style="opacity:.8;">You have no reminders.</p>
+                @else
+                    <ul class="reminder-list">
+                        @foreach ($reminders as $r)
+                            <li class="reminder-item">
+                                <div class="reminder-date">
+                                    {{ $r->remind_at->format('Y-m-d H:i') }}
+                                </div>
+                                <div class="reminder-desc">
+                                    {{ $r->description }}
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        </div>
+    </div>
+
 
 </body>
 
