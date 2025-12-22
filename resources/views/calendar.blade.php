@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Calendar · CRM</title>
+    <title>Calendar</title>
     <link rel="icon" href="img/favicon.png">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -46,9 +46,9 @@
 
             <div id="dash-content">
 
-                <div class="main-container">
+                <div class="main-container calendar-layout">
 
-                    <div id='calendar'></div>
+                    <div id='calendar'>
 
                     <!-- Overlay -->
                     <div id="event-overlay">

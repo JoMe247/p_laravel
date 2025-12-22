@@ -65,7 +65,8 @@
                                     <span>Invoices (Payments)</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item">
+                                <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
                                     <i class='bx bx-task'></i>
                                     <span>Reminders</span>
                                 </button>
