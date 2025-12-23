@@ -107,14 +107,15 @@ table.sched-table tbody td {
 /* ===================================================== */
 
 .day-cell {
-    height: 46px;
-    border-radius: 10px;
-    border: 1px dashed #d1d5db;
-    background: #fafafa;
-    position: relative;
-    cursor: pointer;
-    transition: all .15s ease;
+  position: relative;
+  min-height: 86px;
+  border-radius: 14px;
+  background: #f9fafb;
+  padding: 10px;
+  cursor: pointer;
+  transition: background .2s ease, box-shadow .2s ease;
 }
+
 
 .day-cell:hover {
     background: #eef2ff;
@@ -122,18 +123,14 @@ table.sched-table tbody td {
 }
 
 .hover-add {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #4f46e5;
-    opacity: 0;
-    transition: opacity .15s ease;
+  font-size: 13px;
+  color: #3b82f6;
+  border: 1px dashed #c7d2fe;
+  border-radius: 12px;
+  padding: 8px;
+  text-align: center;
 }
+
 
 .day-cell:hover .hover-add {
     opacity: 1;
@@ -144,15 +141,19 @@ table.sched-table tbody td {
 /* ===================================================== */
 
 .shift-chip {
-    position: absolute;
-    inset: 0;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  padding: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
 }
+
 
 /* colores */
 .shift-gray   { background: #e5e7eb; color: #374151; }
@@ -166,26 +167,31 @@ table.sched-table tbody td {
 /*                  OVERLAY (USA TUS CLASES)             */
 /* ===================================================== */
 
+/* Overlay base */
 .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
 
 .overlay.show {
-    display: flex;
+  display: flex;
 }
 
+/* Card */
 .overlay-card {
-    width: 520px;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 30px 70px rgba(0,0,0,0.35);
-    overflow: hidden;
+  background: #ffffff;
+  width: 520px;
+  max-height: 80vh;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* ===================================================== */
@@ -193,13 +199,32 @@ table.sched-table tbody td {
 /* ===================================================== */
 
 .overlay-head {
-    padding: 16px 18px;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
+/* Body */
+.overlay-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+/* 🔥 FOOTER SIEMPRE VISIBLE */
+.overlay-foot {
+  padding: 14px 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  background: #ffffff;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
 .overlay-head h3 {
     margin: 0;
     font-size: 16px;
@@ -545,4 +570,135 @@ table.sched-table {
     text-align: center;
     font-weight: 600;
     padding: 8px;
+}
+
+/* ================================================= */
+/*  DAY CELL – NO ADD WHEN SHIFT EXISTS              */
+/* ================================================= */
+
+/* por defecto el add existe */
+.day-cell .hover-add {
+    pointer-events: none;
+}
+
+/* si hay un shift dentro, ocultar el add */
+.day-cell:has(.shift-chip) .hover-add {
+    display: none;
+}
+
+/* asegurar que el shift tenga prioridad visual */
+.day-cell .shift-chip {
+    position: relative;
+    z-index: 2;
+}
+
+.shift-chip.gray {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.shift-chip.blue {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.shift-chip.green {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.shift-chip.orange {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.shift-chip.purple {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+.shift-chip.red {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.shift-ribbon {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.shift-ribbon.blue    { background:#dbeafe; color:#1e40af; }
+.shift-ribbon.green   { background:#dcfce7; color:#166534; }
+.shift-ribbon.orange  { background:#ffedd5; color:#9a3412; }
+.shift-ribbon.purple  { background:#f3e8ff; color:#6b21a8; }
+.shift-ribbon.red     { background:#fee2e2; color:#991b1b; }
+.shift-ribbon.gray    { background:#e5e7eb; color:#374151; }
+
+/* ---------- Shift colors ---------- */
+.shift-chip.fill {
+  border: none;
+  color: #111;
+  font-weight: 600;
+}
+
+.shift-chip.blue    { background: #dbeafe; color:#1e3a8a; }
+.shift-chip.green   { background: #dcfce7; color:#166534; }
+.shift-chip.orange  { background: #ffedd5; color:#9a3412; }
+.shift-chip.red     { background: #fee2e2; color:#991b1b; }
+.shift-chip.purple  { background: #f3e8ff; color:#6b21a8; }
+.shift-chip.gray    { background: #e5e7eb; color:#111827; }
+
+/* ============================= */
+/*  Day cell base                */
+/* ============================= */
+.day-cell {
+  position: relative;
+  min-height: 56px;
+  padding: 6px;
+  cursor: pointer;
+}
+
+/* ============================= */
+/*  Add shift (hidden by default)*/
+/* ============================= */
+.day-cell .hover-add {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  font-size: 13px;
+  font-weight: 500;
+  color: #3b82f6;
+
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 8px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* ============================= */
+/*  Show ONLY on hover           */
+/* ============================= */
+.day-cell:hover .hover-add {
+  opacity: 1;
+}
+
+/* ============================= */
+/*  Hide if already has a shift  */
+/* ============================= */
+.day-cell.has-shift .hover-add {
+  display: none;
+}
+
+.swal2-container {
+  z-index: 100000 !important;
 }

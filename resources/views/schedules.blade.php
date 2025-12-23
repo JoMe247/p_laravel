@@ -169,7 +169,7 @@
 
                             <div class="overlay-foot">
                                 <button class="btn ghost" id="backToPicker">Back</button>
-                                <button class="btn danger" id="deleteShiftBtn" style="display:none;">Delete</button>
+                                
                                 <button class="btn primary" id="saveShiftBtn">Save</button>
                             </div>
                         </div>
