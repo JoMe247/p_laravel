@@ -19,6 +19,7 @@ use App\Http\Controllers\PoliciesController;
 use App\Http\Controllers\CustomerNotesController;
 use App\Http\Controllers\CustomerFilesController;
 use App\Http\Controllers\RemindersController;
+use App\Http\Controllers\SchedulesController;
 
 
 // Página inicial
@@ -217,4 +218,24 @@ Route::post('/reminders/{id}', [RemindersController::class, 'store'])->name('rem
 Route::delete('/reminders/{id}/{reminder}', 
     [App\Http\Controllers\RemindersController::class, 'destroy']
 )->name('reminders.destroy');
+
+
+// Schedules
+
+
+Route::middleware(['auth.multi'])->group(function () {
+    Route::get('/schedules', [SchedulesController::class, 'index'])->name('schedules.index');
+
+    // API (puede ir en web para que use sesión/csrf)
+    Route::get('/schedules/week', [SchedulesController::class, 'weekData'])->name('schedules.week');
+
+    Route::get('/schedules/shifts', [SchedulesController::class, 'getShifts'])->name('schedules.shifts.get');
+
+    Route::post('/schedules/shifts', [SchedulesController::class, 'storeShift'])->name('schedules.shifts.store');
+    Route::put('/schedules/shifts/{id}', [SchedulesController::class, 'updateShift'])->name('schedules.shifts.update');
+    Route::delete('/schedules/shifts/{id}', [SchedulesController::class, 'deleteShift'])->name('schedules.shifts.delete');
+
+    Route::post('/schedules/assign', [SchedulesController::class, 'assignShift'])->name('schedules.assign');
+    Route::delete('/schedules/assign', [SchedulesController::class, 'removeAssignment'])->name('schedules.assign.delete');
+});
 

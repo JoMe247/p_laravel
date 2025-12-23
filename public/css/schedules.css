@@ -1,0 +1,548 @@
+/* ===================================================== */
+/*                  SCHEDULES LAYOUT                    */
+/* ===================================================== */
+
+.sched-wrapper {
+    padding: 24px;
+}
+
+/* ===================================================== */
+/*                  HEADER                               */
+/* ===================================================== */
+
+.sched-header {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.sched-header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.sched-status {
+    display: inline-block;
+    margin-top: 6px;
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #86efac;
+}
+
+/* ===================================================== */
+/*                  TABLE CARD                           */
+/* ===================================================== */
+
+.sched-table-container {
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    overflow: hidden;
+    max-width: 1200px;
+}
+
+/* ===================================================== */
+/*                  TABLE                                */
+/* ===================================================== */
+
+table.sched-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+table.sched-table thead th {
+    background: #2f2f2f;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 14px 12px;
+    text-align: left;
+}
+
+table.sched-table tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* ===================================================== */
+/*                  ASSIGN COLUMN                        */
+/* ===================================================== */
+
+.sched-person {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sched-person-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+}
+
+.sched-person-name {
+    font-weight: 600;
+    color: #111827;
+}
+
+.sched-person-role {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* ===================================================== */
+/*                  DAY CELL                             */
+/* ===================================================== */
+
+.day-cell {
+    height: 46px;
+    border-radius: 10px;
+    border: 1px dashed #d1d5db;
+    background: #fafafa;
+    position: relative;
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+.day-cell:hover {
+    background: #eef2ff;
+    border-color: #6366f1;
+}
+
+.hover-add {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4f46e5;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+.day-cell:hover .hover-add {
+    opacity: 1;
+}
+
+/* ===================================================== */
+/*                  SHIFT CHIP                           */
+/* ===================================================== */
+
+.shift-chip {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* colores */
+.shift-gray   { background: #e5e7eb; color: #374151; }
+.shift-blue   { background: #dbeafe; color: #1e3a8a; }
+.shift-green  { background: #dcfce7; color: #14532d; }
+.shift-orange { background: #ffedd5; color: #7c2d12; }
+.shift-purple { background: #ede9fe; color: #4c1d95; }
+.shift-red    { background: #fee2e2; color: #7f1d1d; }
+
+/* ===================================================== */
+/*                  OVERLAY (USA TUS CLASES)             */
+/* ===================================================== */
+
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay.show {
+    display: flex;
+}
+
+.overlay-card {
+    width: 520px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.35);
+    overflow: hidden;
+}
+
+/* ===================================================== */
+/*                  OVERLAY HEADER                       */
+/* ===================================================== */
+
+.overlay-head {
+    padding: 16px 18px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.overlay-head h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+/* ===================================================== */
+/*                  SHIFT LIST                           */
+/* ===================================================== */
+
+.shift-list {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.shift-ribbon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.shift-ribbon:hover {
+    background: #eef2ff;
+    border-color: #6366f1;
+}
+
+/* ===================================================== */
+/*                  FOOTER                               */
+/* ===================================================== */
+
+.overlay-foot {
+    padding: 14px 18px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn.primary {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+}
+
+/* ================================================= */
+/*  FIX – MATCH BLADE STRUCTURE                      */
+/* ================================================= */
+
+.page-wrap {
+    padding: 24px;
+}
+
+.schedules-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.sched-title h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.week-nav {
+    margin-top: 6px;
+    display: flex;
+    gap: 8px;
+}
+
+.week-btn {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.week-btn.ghost {
+    background: #f3f4f6;
+}
+
+.sched-badges .badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.badge.ok {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+.badge.view {
+    background: #e0e7ff;
+    color: #3730a3;
+    border: 1px solid #a5b4fc;
+}
+
+/* Card */
+.schedules-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    overflow: hidden;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+/* ================= HEADER FIX ================= */
+
+.schedules-topbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: 12px;
+    margin-bottom: 24px;
+}
+
+.sched-title {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.week-nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.sched-badges {
+    align-self: flex-start;
+}
+
+/* ================= TABLE WIDTH ================= */
+
+.schedules-card {
+    width: 100%;
+    max-width: 100%;
+}
+
+.table-wrap {
+    width: 100%;
+}
+
+table.sched-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* ================= COLUMN SIZES ================= */
+
+.sched-table th.col-assign,
+.sched-table td.col-assign {
+    width: 180px;
+    min-width: 180px;
+}
+
+.sched-table th:not(.col-assign),
+.sched-table td:not(.col-assign) {
+    width: calc((100% - 180px) / 7);
+}
+
+/* ================= DAY CELLS ================= */
+
+.day-cell {
+    height: 72px;
+    border-radius: 14px;
+    border: 1px dashed #cbd5f5;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+}
+
+/* ================= SHIFT TEXT ================= */
+
+.shift-chip {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: center;
+    padding: 6px;
+    white-space: normal;
+}
+
+
+/* ================= EMPTY STATE ================= */
+
+.day-cell.empty {
+    background: #ffffff;
+    border-style: dashed;
+}
+
+.day-cell.empty:hover {
+    background: #eef2ff;
+}
+
+/* ================= FORM GRID FIX ================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 22px;
+}
+
+.form-grid .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-grid .field.checkline {
+    grid-column: span 2;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-grid .field.checkline label {
+    margin: 0;
+    font-weight: 600;
+}
+
+/* ================= INPUT STYLE ================= */
+
+.form-grid input,
+.form-grid select {
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    padding: 0 12px;
+    font-size: 14px;
+    background: #ffffff;
+}
+
+.form-grid input:focus,
+.form-grid select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+/* ================= COLOR SELECT ================= */
+
+#colorSelect option[value=""] {
+    background: #e5e7eb;
+}
+
+#colorSelect option[value="blue"] {
+    background: #dbeafe;
+}
+
+#colorSelect option[value="green"] {
+    background: #dcfce7;
+}
+
+#colorSelect option[value="orange"] {
+    background: #ffedd5;
+}
+
+#colorSelect option[value="purple"] {
+    background: #ede9fe;
+}
+
+#colorSelect option[value="red"] {
+    background: #fee2e2;
+}
+
+/* ================= OVERLAY FORM VISUAL ================= */
+
+#shiftFormOverlay .overlay-card {
+    max-width: 620px;
+}
+
+#shiftFormOverlay .overlay-head h3 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+#shiftFormOverlay .overlay-head .muted {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* ================= FORM FOOTER ================= */
+
+#shiftFormOverlay .overlay-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+#shiftFormOverlay .btn {
+    min-width: 110px;
+}
+
+/* ================= SHIFT CELL POLISH ================= */
+
+.shift-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 600;
+    padding: 8px;
+}
