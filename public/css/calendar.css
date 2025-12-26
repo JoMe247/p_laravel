@@ -147,3 +147,33 @@
     background: rgba(37,99,235,0.28);
     transform: translateY(-1px);
 }
+
+.today-shift-card {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border-left: 6px solid #94a3b8;
+}
+
+.today-shift-card.blue   { border-color: #3b82f6; }
+.today-shift-card.green  { border-color: #22c55e; }
+.today-shift-card.orange { border-color: #f97316; }
+.today-shift-card.purple { border-color: #a855f7; }
+.today-shift-card.red    { border-color: #ef4444; }
+
+.today-shift-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.today-shift-time {
+    margin-top: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}

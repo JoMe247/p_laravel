@@ -45,6 +45,10 @@
                             <div class="sched-title">
                                 <h2 id="weekTitle">Week</h2>
                                 <div class="week-nav">
+                                    <button class="week-btn ghost back-calendar" id="backCalendar">
+                                        <i class='bx bx-calendar'></i>
+                                        <span>Calendar</span>
+                                    </button>
                                     <button class="week-btn" id="prevWeek"><i class='bx bx-chevron-left'></i></button>
                                     <button class="week-btn" id="nextWeek"><i class='bx bx-chevron-right'></i></button>
                                     <button class="week-btn ghost" id="goToday">Today</button>
@@ -123,10 +127,9 @@
                                 <div class="form-grid">
                                     <div class="field">
                                         <label>Assign to</label>
-                                        <select id="assignToSelect"></select>
-                                        <small class="hint">Opcional: puedes dejarlo “Any” (plantilla
-                                            general).</small>
+                                        <input type="text" id="assignToInput" readonly>
                                     </div>
+
 
                                     <div class="field">
                                         <label>Shift color</label>
@@ -169,7 +172,7 @@
 
                             <div class="overlay-foot">
                                 <button class="btn ghost" id="backToPicker">Back</button>
-                                
+
                                 <button class="btn primary" id="saveShiftBtn">Save</button>
                             </div>
                         </div>

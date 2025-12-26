@@ -42,7 +42,7 @@ class SchedulesController extends Controller
 
         $start = $base->copy()->startOfWeek(Carbon::MONDAY);
         $end   = $base->copy()->endOfWeek(Carbon::SUNDAY);
-
+    
         return view('schedules', [
             'isOwner' => $isOwner,
             'agency' => $agency,
@@ -145,7 +145,7 @@ class SchedulesController extends Controller
             'assign_id' => 'nullable|integer',
             'color' => 'nullable|string|max:30',
             'is_time_off' => 'required|boolean',
-            'time_off_type' => 'nullable|in:Holiday,Personal,Sick',
+            'time_off_type' => 'nullable|string|max:50',
             'time_text' => 'nullable|string|max:40',
         ]);
 
@@ -277,4 +277,11 @@ class SchedulesController extends Controller
 
         return response()->json(['ok'=>true]);
     }
+
+
+
+
+
+
+
 }

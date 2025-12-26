@@ -15,7 +15,9 @@
   const pickerSub = document.getElementById('pickerSub');
   const shiftList = document.getElementById('shiftList');
 
-  const assignToSelect = document.getElementById('assignToSelect');
+
+
+  const assignToInput = document.getElementById('assignToInput');
   const colorSelect = document.getElementById('colorSelect');
   const timeInput = document.getElementById('timeInput');
   const timeSuggest = document.getElementById('timeSuggest');
@@ -142,6 +144,8 @@
     const target_name = cell.dataset.targetName;
 
     state.selectedCell = { date, target_type, target_id, target_name };
+    state.shiftContext = { target_type, target_id, target_name };
+
 
     pickerTitle.textContent = `${target_name} · ${prettyDate(date)}`;
     pickerSub.textContent = state.canEdit ? 'Select a shift to assign' : 'View shifts (read only)';
@@ -250,6 +254,11 @@
     state.editingShiftId = shift.id;
     formTitle.textContent = 'Edit Shift';
 
+    // 👉 asignar nombre automáticamente
+    assignToInput.value = state.selectedCell
+      ? state.selectedCell.target_name
+      : '';
+
 
     // form values
     colorSelect.value = shift.color || '';
@@ -257,9 +266,7 @@
     timeOffType.value = shift.time_off_type || '';
     timeInput.value = shift.time_text || '';
 
-    // assignTo (solo informativo aquí; plantilla “any”)
-    assignToSelect.innerHTML = `<option value="any">Any</option>`;
-    assignToSelect.value = 'any';
+
 
     toggleTimeOffUI();
     closeOverlay(pickerOverlay);
@@ -270,11 +277,13 @@
     state.editingShiftId = null;
     formTitle.textContent = 'New Shift';
 
+    // 👉 asignar nombre automáticamente
+    assignToInput.value = state.selectedCell
+      ? state.selectedCell.target_name
+      : '';
 
-    assignToSelect.innerHTML = `<option value="any">Any</option>`; // por ahora “plantillas generales”
-    // si luego quieres amarrar a persona, aquí llenamos con people:
-    // state.people.forEach(p => { ... })
 
+    // reset form
     colorSelect.value = '';
     timeOffCheck.checked = false;
     timeOffType.value = '';
@@ -284,6 +293,7 @@
     closeOverlay(pickerOverlay);
     openOverlay(formOverlay);
   }
+
 
   function toggleTimeOffUI() {
     const off = timeOffCheck.checked;
@@ -345,14 +355,17 @@
       assign_id: null,
       color: colorSelect.value || null,
       is_time_off: isOff,
-      time_off_type: isOff ? (timeOffType.value || null) : null,
+      time_off_type: isOff
+        ? `OFF - ${timeOffType.value}`
+        : null,
       time_text: !isOff ? (timeInput.value || '').trim() : null
     };
 
-    if (isOff && !payload.time_off_type) {
+    if (isOff && !timeOffType.value) {
       alert('Time off type is required.');
       return;
     }
+
     if (!isOff && !payload.time_text) {
       alert('Time is required.');
       return;
@@ -489,6 +502,11 @@
   });
 
   // ---------- Buttons / events ----------
+
+  document.getElementById('backCalendar')?.addEventListener('click', () => {
+    window.location.href = `${baseUrl}/calendar`;
+  });
+
   document.getElementById('prevWeek').addEventListener('click', async () => {
     const d = new Date((state.week?.start || currentBaseDate) + 'T00:00:00');
     d.setDate(d.getDate() - 7);
@@ -508,7 +526,12 @@
     await fetchWeek(currentBaseDate);
   });
 
-  document.getElementById('closePicker').addEventListener('click', () => closeOverlay(pickerOverlay));
+  document.getElementById('closePicker').addEventListener('click', () => {
+    state.selectedCell = null;
+    state.shiftContext = null;
+    closeOverlay(pickerOverlay);
+  });
+
   document.getElementById('closeForm').addEventListener('click', () => closeOverlay(formOverlay));
 
   document.getElementById('openCreateShift').addEventListener('click', () => {

@@ -47,6 +47,31 @@
                             Schedules
                         </a>
 
+                        @if ($todayShift && $todayShift->shift)
+                            <div class="today-shift-card {{ $todayShift->shift->color ?? 'gray' }}">
+                                <div class="today-shift-title">
+                                    <i class='bx bx-time-five'></i>
+                                    Today’s Shift
+                                </div>
+
+                                <div class="today-shift-time">
+                                    {{ $todayShift->shift->is_time_off ? $todayShift->shift->time_off_type : $todayShift->shift->time_text }}
+                                </div>
+                            </div>
+                        @else
+                            <div class="today-shift-card empty">
+                                <div class="today-shift-title">
+                                    <i class='bx bx-time-five'></i>
+                                    Today’s Shift
+                                </div>
+
+                                <div class="today-shift-time muted">
+                                    No shift scheduled for today
+                                </div>
+                            </div>
+                        @endif
+
+
                     </div>
 
                     <!-- CALENDAR -->
