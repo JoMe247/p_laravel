@@ -7,6 +7,7 @@ use App\Models\CalendarEvent;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\ScheduleAssignment;
+use Illuminate\Support\Facades\Log;
 
 
 class CalendarController extends Controller
@@ -15,27 +16,36 @@ class CalendarController extends Controller
     {
         $today = Carbon::today()->toDateString();
 
-        // detectar sesión (user o sub user)
-        if (session()->has('sub_user')) {
-            $targetType = 'sub_user';
-            $targetId = session('sub_user')->id;
-        } elseif (session()->has('user')) {
-            $targetType = 'user';
-            $targetId = session('user')->id;
-        } else {
-            // ⚠️ NO redirigimos, solo no mostramos horario
+        // ✅ Detectar guard e id desde tu sesión real
+        $guard = session('auth_guard'); // 'web' (user) o 'sub' (sub user)
+        $idKey = $guard ? 'login_' . $guard . '_59ba36addc2b2f9401580f014c7f58ea4e30989d' : null;
+        $authId = $idKey ? session($idKey) : null;
+
+        if (!$guard || !$authId) {
             $todayShift = null;
             return view('calendar', compact('todayShift'));
         }
 
+        // ✅ Mapear a como lo guardas en schedule_assignments.target_type
+        $targetType = ($guard === 'sub') ? 'sub' : 'user';
+        $targetId   = (int) $authId;
+
+        // ✅ Agency (si tu middleware la guarda en sesión úsala; si no, la omitimos)
+        $agency = session('agency') ?? null;
+
         $todayShift = ScheduleAssignment::with('shift')
-            ->where('date', $today)
+            ->whereDate('shift_date', $today)
             ->where('target_type', $targetType)
             ->where('target_id', $targetId)
+            ->when($agency, fn($q) => $q->where('agency', $agency))
+            ->orderByDesc('id')
             ->first();
 
         return view('calendar', compact('todayShift'));
     }
+
+
+
 
 
     public function store(Request $request)

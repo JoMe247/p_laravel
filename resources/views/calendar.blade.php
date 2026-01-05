@@ -57,6 +57,11 @@
                                 <div class="today-shift-time">
                                     {{ $todayShift->shift->is_time_off ? $todayShift->shift->time_off_type : $todayShift->shift->time_text }}
                                 </div>
+
+                                <div class="today-shift-date" style="margin-top:6px;font-size:12px;color:#64748b;">
+                                    {{ \Carbon\Carbon::parse($todayShift->shift_date)->format('M d, Y') }}
+                                </div>
+
                             </div>
                         @else
                             <div class="today-shift-card empty">

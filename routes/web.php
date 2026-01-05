@@ -158,19 +158,21 @@ Route::post('/tasks/delete', [TaskController::class, 'delete']);
 
 
 // Calendar Routes
-Route::get('/calendar', [CalendarController::class, 'index'])
-    ->name('calendar');
-Route::post('/calendar/save', [CalendarController::class, 'store'])
-    ->name('calendar.save');
-    
-Route::get('/calendar/events', [CalendarController::class, 'load'])
-    ->name('calendar.load');
+Route::middleware('auth.multi')->group(function () {
 
-Route::post('/calendar/update', [CalendarController::class, 'update'])
-    ->name('calendar.update');
+    // Calendar Routes (PROTEGIDAS)
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
 
-Route::delete('/calendar/delete/{id}', [CalendarController::class, 'delete'])
-    ->name('calendar.delete');
+    Route::post('/calendar/save', [CalendarController::class, 'store'])->name('calendar.save');
+
+    Route::get('/calendar/events', [CalendarController::class, 'load'])->name('calendar.load');
+
+    Route::post('/calendar/update', [CalendarController::class, 'update'])->name('calendar.update');
+
+    Route::delete('/calendar/delete/{id}', [CalendarController::class, 'delete'])->name('calendar.delete');
+
+});
+
 
 // =======================
 // 📄 Policies
