@@ -17,7 +17,7 @@ class CalendarController extends Controller
         $today = Carbon::today()->toDateString();
 
         // ===============================
-        // 🔐 Detectar guard e ID real
+        // 🔐 Detectar guard e ID real (sin hardcode)
         // ===============================
         $guard  = session('auth_guard'); // 'web' (user) o 'sub'
         $authId = null;
@@ -31,34 +31,42 @@ class CalendarController extends Controller
             }
         }
 
-        // Si no hay sesión válida, no mostramos turno
         if (!$guard || !$authId) {
-            $todayShift = null;
-            return view('calendar', compact('todayShift'));
+            $weekShifts = collect(); // <-- importante para que el blade no falle
+            return view('calendar', compact('weekShifts'));
         }
 
-        // ===============================
-        // 🎯 Mapear a schedule_assignments
-        // ===============================
         $targetType = ($guard === 'sub') ? 'sub' : 'user';
         $targetId   = (int) $authId;
 
-        // Agency (si existe en sesión)
         $agency = session('agency') ?? null;
 
         // ===============================
-        // 📅 Obtener turno de HOY
+        // 📅 Semana (Lunes a Viernes)
         // ===============================
-        $todayShift = ScheduleAssignment::with('shift')
-            ->whereDate('shift_date', $today)
+        $monday = Carbon::now(config('app.timezone'))->startOfWeek(Carbon::MONDAY)->toDateString();
+        $friday = Carbon::now(config('app.timezone'))->startOfWeek(Carbon::MONDAY)->addDays(4)->toDateString();
+        $monday = Carbon::now(config('app.timezone'))
+            ->startOfWeek(Carbon::MONDAY)
+            ->toDateString();
+
+        $sunday = Carbon::now(config('app.timezone'))
+            ->startOfWeek(Carbon::MONDAY)
+            ->addDays(6)
+            ->toDateString();
+
+
+        $weekShifts = ScheduleAssignment::with('shift')
+            ->whereBetween('shift_date', [$monday, $sunday])
             ->where('target_type', $targetType)
             ->where('target_id', $targetId)
             ->when($agency, fn($q) => $q->where('agency', $agency))
-            ->orderByDesc('id')
-            ->first();
+            ->orderBy('shift_date')
+            ->get();
 
-        return view('calendar', compact('todayShift'));
+        return view('calendar', compact('weekShifts'));
     }
+
 
     public function store(Request $request)
     {

@@ -6,18 +6,17 @@
     <title>Calendar</title>
     <link rel="icon" href="img/favicon.png">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="base-url" content="{{ url('/') }}">
+
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dropdown.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
+
+
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/account.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/company.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/help.css') }}">
+
+
     <link rel="stylesheet" href="{{ asset('css/calendar.css') }}">
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -25,12 +24,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 </head>
 
 <body>
-    <div id="main-container"> @include('menu') <section id="dash">
+    <div id="main-container">
+
+        @include('menu')
+
+        <section id="dash">
 
             <div id="dash-content">
 
@@ -47,34 +51,46 @@
                             Schedules
                         </a>
 
-                        @if ($todayShift && $todayShift->shift)
-                            <div class="today-shift-card {{ $todayShift->shift->color ?? 'gray' }}">
-                                <div class="today-shift-title">
-                                    <i class='bx bx-time-five'></i>
-                                    Today’s Shift
-                                </div>
+                        @php
+                            $monday = \Carbon\Carbon::now(config('app.timezone'))->startOfWeek(\Carbon\Carbon::MONDAY);
+                            $days = collect(range(0, 6))->map(fn($i) => $monday->copy()->addDays($i));
+                            $weekByDate = ($weekShifts ?? collect())->keyBy(
+                                fn($a) => \Carbon\Carbon::parse($a->shift_date)->toDateString(),
+                            );
+                        @endphp
 
-                                <div class="today-shift-time">
-                                    {{ $todayShift->shift->is_time_off ? $todayShift->shift->time_off_type : $todayShift->shift->time_text }}
-                                </div>
-
-                                <div class="today-shift-date" style="margin-top:6px;font-size:12px;color:#64748b;">
-                                    {{ \Carbon\Carbon::parse($todayShift->shift_date)->format('M d, Y') }}
-                                </div>
-
+                        <div class="today-shift-card">
+                            <div class="today-shift-title">
+                                <i class='bx bx-time-five'></i>
+                                This Week (Mon–Sun)
                             </div>
-                        @else
-                            <div class="today-shift-card empty">
-                                <div class="today-shift-title">
-                                    <i class='bx bx-time-five'></i>
-                                    Today’s Shift
-                                </div>
 
-                                <div class="today-shift-time muted">
-                                    No shift scheduled for today
-                                </div>
+                            <div class="week-shifts">
+                                @foreach ($days as $d)
+                                    @php
+                                        $dateKey = $d->toDateString();
+                                        $a = $weekByDate->get($dateKey);
+                                    @endphp
+
+                                    <div class="week-row">
+                                        <div class="week-left">
+                                            <div class="week-dow">{{ $d->format('D') }}</div>
+                                            <div class="week-date">{{ $d->format('M d') }}</div>
+                                        </div>
+
+                                        <div class="week-right">
+                                            @if ($a && $a->shift)
+                                                {{ $a->shift->is_time_off ? $a->shift->time_off_type ?? 'Time Off' : $a->shift->time_text ?? '—' }}
+                                            @else
+                                                <span class="week-muted">No shift</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
-                        @endif
+
+                        </div>
+
 
 
                     </div>
@@ -229,7 +245,7 @@
     <script src="{{ asset('js/table.js') }}"></script>
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
-    <script src="{{ asset('js/help.js') }}"></script>
+
     <script src="{{ asset('js/calendar.js') }}"></script>
 </body>
 
