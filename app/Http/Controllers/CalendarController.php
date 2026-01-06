@@ -16,23 +16,39 @@ class CalendarController extends Controller
     {
         $today = Carbon::today()->toDateString();
 
-        // ✅ Detectar guard e id desde tu sesión real
-        $guard = session('auth_guard'); // 'web' (user) o 'sub' (sub user)
-        $idKey = $guard ? 'login_' . $guard . '_59ba36addc2b2f9401580f014c7f58ea4e30989d' : null;
-        $authId = $idKey ? session($idKey) : null;
+        // ===============================
+        // 🔐 Detectar guard e ID real
+        // ===============================
+        $guard  = session('auth_guard'); // 'web' (user) o 'sub'
+        $authId = null;
 
+        if ($guard) {
+            foreach (array_keys(session()->all()) as $key) {
+                if (str_starts_with($key, 'login_' . $guard . '_')) {
+                    $authId = session($key);
+                    break;
+                }
+            }
+        }
+
+        // Si no hay sesión válida, no mostramos turno
         if (!$guard || !$authId) {
             $todayShift = null;
             return view('calendar', compact('todayShift'));
         }
 
-        // ✅ Mapear a como lo guardas en schedule_assignments.target_type
+        // ===============================
+        // 🎯 Mapear a schedule_assignments
+        // ===============================
         $targetType = ($guard === 'sub') ? 'sub' : 'user';
         $targetId   = (int) $authId;
 
-        // ✅ Agency (si tu middleware la guarda en sesión úsala; si no, la omitimos)
+        // Agency (si existe en sesión)
         $agency = session('agency') ?? null;
 
+        // ===============================
+        // 📅 Obtener turno de HOY
+        // ===============================
         $todayShift = ScheduleAssignment::with('shift')
             ->whereDate('shift_date', $today)
             ->where('target_type', $targetType)
@@ -43,10 +59,6 @@ class CalendarController extends Controller
 
         return view('calendar', compact('todayShift'));
     }
-
-
-
-
 
     public function store(Request $request)
     {
