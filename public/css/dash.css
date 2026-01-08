@@ -936,6 +936,14 @@ body{
     accent-color: #e74c3c;
 }
 
+#select-all-customers{
+    accent-color: #a43737;
+}
+
+.select-customer{
+    accent-color: #e74c3c;
+}
+
 
 /*  Media Screens  */
 

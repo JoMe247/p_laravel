@@ -123,9 +123,14 @@ function imageExp() {
     }else{
         // console.log("SamePic");
 
-        // console.log("La imagen ya está registrada");
-        document.getElementById('home-image').style.backgroundImage = `url(${localStorage.getItem(localStorageKey)})`;
-        document.getElementById('view-full-picture').setAttribute('onclick',`window.open('${localStorage.getItem(imagePage)}')`);
+        try {
+            // console.log("La imagen ya está registrada");
+            document.getElementById('home-image').style.backgroundImage = `url(${localStorage.getItem(localStorageKey)})`;
+            document.getElementById('view-full-picture').setAttribute('onclick',`window.open('${localStorage.getItem(imagePage)}')`);
+        } catch (error) {
+            
+        }
+        
     }
 }
 
@@ -146,6 +151,11 @@ function getEnglishDate() {
   const englishDate = getEnglishDate();
 //   console.log(englishDate);
 
-  document.getElementById("welcome-date").innerText = englishDate;
+try {
+    document.getElementById("welcome-date").innerText = englishDate;
+} catch (error) {
+    
+}
+  
 
   

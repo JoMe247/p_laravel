@@ -112,7 +112,12 @@ try {
         $(".lateral-row").eq(0).css("background-color", "unset");
         $("#lateral-blur").css("backdrop-filter", `blur(4px)`);
 
+<<<<<<< Updated upstream
         document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(img/menu/${imageN}.jpg)`;
+=======
+        document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(../img/menu/${imageN}.jpg)`;
+        // console.log("aqui");
+>>>>>>> Stashed changes
     
     }else{
 

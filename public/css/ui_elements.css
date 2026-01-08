@@ -714,11 +714,11 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 18px; height: 18px; border-radius: 50%;
-  background: #111827; cursor: pointer;
+  background: var(--red1); cursor: pointer;
 }
 input[type="range"]::-moz-range-thumb {
   width: 18px; height: 18px; border-radius: 50%;
-  background: #111827; cursor: pointer; border: none;
+  background: var(--red1); cursor: pointer; border: none;
 }
 .value {
   min-width: 84px;
