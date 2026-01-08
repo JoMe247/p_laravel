@@ -1,0 +1,573 @@
+/* =========================== */
+/*     LAYOUT GENERAL          */
+/* =========================== */
+
+#profile-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 20px 30px;
+    box-sizing: border-box;
+}
+
+/* =========================== */
+/*   MENU LATERAL PROFILE     */
+/* =========================== */
+
+.profile-side-menu {
+    width: 240px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 18px 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Navegación */
+.profile-side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Botón base */
+.profile-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: none;
+
+    background: #f3f3f3;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Íconos */
+.profile-menu-item i {
+    font-size: 18px;
+    color: #555;
+    transition: color 0.2s ease;
+}
+
+/* Hover */
+.profile-menu-item:hover {
+    background: #e9e9e9;
+}
+
+/* =========================== */
+/*        ACTIVO (AZUL)        */
+/* =========================== */
+
+.profile-menu-item.active {
+    background: #3498db; /* AZUL PRINCIPAL */
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.45);
+}
+
+/* Ícono activo */
+.profile-menu-item.active i {
+    color: #ffffff;
+}
+
+/* Texto activo */
+.profile-menu-item.active span {
+    color: #ffffff;
+}
+
+
+/* =========================== */
+/*     PROFILE PHOTO           */
+/* =========================== */
+
+.profile-photo-section {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.profile-photo-frame {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 14px;
+    border: 4px solid #3498db;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+}
+
+.profile-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#upload-photo-btn {
+    background: #3498db;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.18s;
+}
+
+#upload-photo-btn:hover {
+    background: #2d89c4;
+}
+
+/* === MAIN PROFILE CARD === */
+.profile-card-container {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 25px 35px;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+/* Centered Name */
+.profile-name {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* Top small info row */
+.profile-info-grid {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+}
+
+.info-row {
+    text-align: center;
+}
+
+.info-row .label {
+    font-size: 12px;
+    opacity: 0.7;
+    display: block;
+}
+
+.info-row .value {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Section boxes */
+.profile-section-box {
+    margin-top: 25px;
+    background: #f5f5f5;
+    padding: 15px 18px;
+    border-radius: 12px;
+}
+
+.profile-section-box h3 {
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+/* Grids */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.form-grid-2 input,
+.form-grid-3 input {
+    padding: 7px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* Photo section */
+.profile-photo-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-photo-frame {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: auto;
+    border: 4px solid #3498db;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+.upload-photo-btn {
+    margin-top: 10px;
+    background: #3498db;
+    color: white;
+    border-radius: 10px;
+    padding: 6px 15px;
+}
+
+/* Actions */
+.profile-actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.profile-actions .btn {
+    margin: 0 8px;
+}
+/* TOP ROW EDITABLE (DOB, GENDER, MARITAL) */
+.profile-info-grid.editable-top {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.editable-top .info-row {
+    text-align: center;
+}
+
+.editable-top .info-row label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: .7;
+    margin-bottom: 4px;
+}
+
+.editable-top .info-row input {
+    padding: 6px 10px;
+    width: 150px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* GRID DE CONTACTO (4 columnas iguales) */
+.profile-contact-grid {
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px 30px;
+    width: 100%;
+}
+
+/* Cada celda (label + input) */
+.profile-contact-grid .info-row {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo uniforme para inputs */
+.profile-contact-grid input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* GRID PARA DETAILS Y OFFICE */
+.details-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px 30px;
+    width: 100%;
+}
+
+.details-grid .info-row {
+    display: flex;
+    flex-direction: column;
+}
+
+.details-grid input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.age-box {
+    display: block;
+    background: #f7f7f7;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    min-height: 40px;
+    line-height: 22px;
+}
+
+.added-display {
+    display: block;
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    padding: 10px 12px;
+    border-radius: 10px;
+    min-height: 40px;
+    line-height: 20px;
+    font-size: 14px;
+    color: #333;
+}
+
+#profile-alert-container {
+    margin-bottom: 15px;
+    width: fit-content;
+}
+
+.alert-box {
+    background: rgb(255, 225, 155);
+    border-left: 4px solid #e69500;
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #5a3c00;
+}
+
+.alert-box i {
+    font-size: 20px;
+    color: #e69500;
+}
+
+.alert-box {
+    position: relative;
+    background: rgb(255, 232, 170);
+    border-left: 6px solid #e2a200;
+    padding: 12px 45px 12px 18px; /* MÁS ESPACIO A LA DERECHA */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #5a3c00;
+    width: fit-content;
+    max-width: 350px;
+    box-sizing: border-box;
+}
+
+/* Icono de alerta */
+.alert-box i.bx-error {
+    font-size: 22px;
+    color: #e2a200;
+}
+
+.alert-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #a66a00;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 3px;
+    border-radius: 6px;
+    z-index: 10;
+    transition: 0.25s;
+}
+
+.alert-delete:hover {
+    background: #ffdddd;
+    color: red;
+    transform: scale(1.15);
+}
+
+/* =========================== */
+
+.notes-box {
+    width: 240px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 16px 18px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,0.08);
+    margin-top: 22px;
+}
+
+.notes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.notes-scroll {
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.note-item {
+    background: #fafafa;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+.notes-header h3 {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.btn-note-add {
+    padding: 4px 10px;
+    font-size: 13px;
+    border: none;
+    border-radius: 10px;
+    background: var(--action-color, #3498db);
+    color: #fff;
+    cursor: pointer;
+}
+
+.note-card {
+    background: #fafafa;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 14px;
+    padding: 12px;
+    margin-top: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+}
+
+.note-meta {
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.note-fields p {
+    margin: 2px 0;
+    font-size: 13px;
+}
+
+.note-text {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    white-space: pre-wrap;
+}
+
+.note-delete-btn {
+    background: #fff6f6;
+    border: 1px solid #ffb3b3;
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #d33;
+}
+
+.note-delete-btn i {
+    font-size: 18px;
+}
+
+.left-column {
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* Bloque NOTES igual estilo que el menú */
+.profile-notes {
+    background: #fff;
+    border-radius: 18px;
+    padding: 18px 20px;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* Sticky REAL */
+.sticky-notes {
+    position: sticky;
+    top: 20px;  /* se pega debajo del menú */
+    z-index: 9;
+}
+
+
+#note-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.note-window {
+    background: white;
+    padding: 25px 30px;
+    width: 480px;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.note-window input,
+.note-window textarea {
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.overlay-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.note-item {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.note-item small {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.note-delete-btn {
+    margin-top: 12px;
+    background: #ffe9e9;
+    border: 1px solid #ffb7b7;
+    color: #d33;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.note-delete-btn:hover {
+    background: #ffd6d6;
+}

@@ -1,0 +1,358 @@
+#calendar {
+    max-width: 1100px;
+    margin: 40px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+/* Overlay */
+#event-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.overlay-box {
+    width: 550px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.overlay-box input,
+.overlay-box textarea,
+.overlay-box select {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.color-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.color-box {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.color-box.selected {
+    border-color: black;
+}
+
+.public-box {
+    margin-top: 10px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.save-btn {
+    background: #2563EB;
+    color: white;
+    padding: 7px 15px;
+    border-radius: 6px;
+}
+
+.delete-btn {
+    background: #dc2626;
+    color:white;
+    padding:7px 15px;
+    border-radius:6px;
+}
+
+#calendar {
+    width: calc(100% - 260px) !important;
+    margin-left: 260px;
+    margin-top: 20px;
+    padding: 25px;
+}
+
+.fc .fc-daygrid-day-frame {
+    min-height: 110px !important;
+}
+
+.fc .fc-scrollgrid {
+    border-radius: 14px;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 28px;
+    font-weight: 600;
+}
+
+/* ========================= */
+/*  CALENDAR LEFT PANEL     */
+/* ========================= */
+
+.calendar-layout {
+    display: flex;
+    align-items: flex-start;
+}
+
+.calendar-left-panel {
+    width: 260px;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.left-big-icon {
+    height: 160px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.left-big-icon i {
+    font-size: 90px;
+    color: rgba(255,255,255,0.95);
+}
+
+.left-action-btn {
+    height: 46px;
+    border-radius: 14px;
+    background: rgba(37,99,235,0.18);
+    border: 1px solid rgba(37,99,235,0.35);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .2s ease;
+}
+
+.left-action-btn:hover {
+    background: rgba(37,99,235,0.28);
+    transform: translateY(-1px);
+}
+
+.today-shift-card {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border-left: 6px solid #94a3b8;
+}
+
+.today-shift-card.blue   { border-color: #3b82f6; }
+.today-shift-card.green  { border-color: #22c55e; }
+.today-shift-card.orange { border-color: #f97316; }
+.today-shift-card.purple { border-color: #a855f7; }
+.today-shift-card.red    { border-color: #ef4444; }
+
+.today-shift-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.today-shift-time {
+    margin-top: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* --- LEFT PANEL: subir botón y estirar card (ajustado) --- */
+.calendar-left-panel{
+    height: calc(100vh - 40px);
+    padding: 18px 16px;          /* menos ancho lateral */
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.left-big-icon{
+    height: 130px;
+}
+
+.left-action-btn{
+    margin-top: 0;
+}
+
+/* El card ocupa el espacio sobrante */
+.today-shift-card{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 240px;           /* evita que se “aplane” raro */
+}
+
+/* --- Lista semanal --- */
+.week-shifts{
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+    overflow: auto;
+    padding-right: 8px;
+}
+
+/* --- Filas en 2 columnas (mejor para 260px) --- */
+.week-row{
+    display: grid;
+    grid-template-columns: 62px 1fr;  /* ✅ izquierda más angosta */
+    align-items: start;
+    gap: 10px;
+}
+
+/* izquierda: día y fecha */
+.week-left{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+    white-space: nowrap;
+}
+
+.week-dow{
+    font-size: 12px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.week-date{
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+/* derecha: horario */
+.week-right{
+    font-size: 12px;
+    font-weight: 800;
+    color: #0f172a;
+    text-align: left;            /* ✅ mejor en espacios angostos */
+    line-height: 1.15;
+    word-break: normal;          /* ✅ ya no rompe palabras */
+    overflow-wrap: anywhere;     /* si es muy largo, rompe bonito */
+}
+
+/* opcional: cuando es OFF, que no se rompa feo */
+.week-right span,
+.week-right{
+    white-space: normal;
+}
+
+.week-muted{
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+/* ============================= */
+/* FIX: WEEK CARD LAYOUT (FINAL) */
+/* ============================= */
+
+/* asegura que el card use todo el ancho y no “centre” el contenido */
+.calendar-left-panel .today-shift-card{
+    width: 125%;
+}
+
+/* lista: que use todo el ancho disponible */
+.calendar-left-panel .week-shifts{
+    width: 100%;
+}
+
+/* fila: 2 columnas reales, alineadas y con ancho completo */
+.calendar-left-panel .week-row{
+    width: 100%;
+    grid-template-columns: 78px minmax(0, 1fr); /* más espacio al horario */
+    align-items: center;
+}
+
+/* izquierda: centrado vertical correcto y compacto */
+.calendar-left-panel .week-left{
+    align-items: flex-start;
+}
+
+/* derecha: que sea una “columna” completa */
+.calendar-left-panel .week-right{
+    width: 100%;
+    text-align: right;         /* ✅ vuelve a columna derecha */
+    white-space: nowrap;       /* ✅ mantiene el rango en una línea */
+    overflow: hidden;
+    text-overflow: ellipsis;   /* si no cabe, "..." en vez de romper feo */
+}
+
+/* si es OFF, también en una sola línea */
+.calendar-left-panel .week-right .week-muted{
+    white-space: nowrap;
+}
+
+/* opcional: separador sutil para que se lea mejor */
+.calendar-left-panel .week-row{
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.calendar-left-panel .week-row:last-child{
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* =============================== */
+/* FINAL FIX: week-right 2 líneas  */
+/* =============================== */
+
+.calendar-left-panel .week-right{
+    text-align: right;
+    white-space: normal;        /* permite salto de línea */
+    overflow: visible;          /* no cortes */
+    text-overflow: unset;       /* quita ... */
+
+    display: -webkit-box;       /* clamp 2 líneas */
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;           /* necesario para clamp */
+}
+
+/* =============================== */
+/* FIX: panel izquierdo arriba y card largo */
+/* =============================== */
+
+/* fuerza al layout a ocupar alto de pantalla */
+.calendar-layout{
+    min-height: calc(100vh - 120px); /* ajusta si tu header/espacios cambian */
+}
+
+/* panel izquierdo: que se pegue arriba */
+.calendar-left-panel{
+    align-self: flex-start;
+    margin-top: 0 !important;
+    padding-top: 10px !important;
+}
+
+/* botón más arriba (pegado al icono) */
+.left-action-btn{
+    margin-top: -100px !important;
+}
+
+/* card ocupa todo el sobrante debajo del botón */
+.calendar-left-panel .today-shift-card{
+    flex: 1;
+    min-height: 520px;  /* ✅ esto lo hace “más largo” aunque haya poco contenido */
+}

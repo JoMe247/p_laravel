@@ -27,7 +27,7 @@ function selectImage(n){
     $(".color-pick").removeAttr("color-tile");
     $(".thumb-options").removeAttr("image");
     $("#dash-options").removeAttr("color");
-     document.getElementById("main-logo").setAttribute("src", "img/logo-short-white.png");
+     document.getElementById("main-logo").setAttribute("src", "../img/logo-short-white.png");
     // Almacenar la imagen en localStorage
     localStorage.setItem("sideImage", n);
 
@@ -37,7 +37,7 @@ function selectImage(n){
 
     $(".lateral-row").eq(0).css("background-color", "unset");
 
-    document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(img/menu/${n}.jpg)`;
+    document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(../img/menu/${n}.jpg)`;
 }
 
 //Seleccionar Color Side y Guardar sideColor en localStorage
@@ -63,9 +63,9 @@ function selectColor(element){
     document.getElementById("lateral").style.backgroundImage = "";
 
     if(color == "white"){
-        document.getElementById("main-logo").setAttribute("src", "img/logo-black.png")
+        document.getElementById("main-logo").setAttribute("src", "../img/logo-black.png")
     }else{
-        document.getElementById("main-logo").setAttribute("src", "img/logo-short-white.png")
+        document.getElementById("main-logo").setAttribute("src", "../img/logo-short-white.png")
     }
 }
 
@@ -112,7 +112,8 @@ try {
         $(".lateral-row").eq(0).css("background-color", "unset");
         $("#lateral-blur").css("backdrop-filter", `blur(4px)`);
 
-        document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(img/menu/${imageN}.jpg)`;
+        document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(../img/menu/${imageN}.jpg)`;
+        console.log("aqui");
     
     }else{
 
@@ -123,9 +124,9 @@ try {
             document.getElementById("dash-options").setAttribute("color", colorN);
 
             if(colorN == "white"){
-                document.getElementById("main-logo").setAttribute("src", "img/logo-black.png")
+                document.getElementById("main-logo").setAttribute("src", "../img/logo-black.png")
             }else{
-                document.getElementById("main-logo").setAttribute("src", "img/logo-short-white.png")
+                document.getElementById("main-logo").setAttribute("src", "../img/logo-short-white.png")
             }
 
             document.querySelectorAll('#background-color-option-container > .color-pick-container .color-pick')

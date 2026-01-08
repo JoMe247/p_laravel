@@ -1,0 +1,337 @@
+/* ===================== CONTENEDOR PRINCIPAL ===================== */
+.container {
+    background:  #3a3a3a;
+    padding: 40px 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    max-width: 900px;
+    margin: 160px auto;
+    margin-right: 390px !important; 
+    top: 50px;
+
+}
+
+/* ===================== TOPBAR ===================== */
+.office-topbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.btn {
+    background: #3a3a3a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s ease, transform 0.15s ease;
+}
+.btn:hover {
+    background: #4b4b4b;
+    transform: translateY(-1px);
+}
+.btn.primary {
+    background: #00bcd4;
+}
+.btn.primary:hover {
+    background: #0097a7;
+}
+
+/* ===================== TABLA ===================== */
+.office-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #2b2b2b;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+.office-table thead {
+    background: #00bcd4;
+    color: #fff;
+    text-align: left;
+}
+
+.office-table th, 
+.office-table td {
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #ddd;
+    border-bottom: 1px solid #333;
+}
+
+.office-table th:first-child {
+    border-top-left-radius: 12px;
+}
+.office-table th:last-child {
+    border-top-right-radius: 12px;
+}
+
+.office-table tbody tr:hover {
+    background: #242424;
+}
+
+.office-table .btn-delete {
+    background: transparent;
+    color: #ff4d4d;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.office-table .btn-delete:hover {
+    color: #ff0000;
+}
+
+.admin-lock {
+    color: #777;
+    font-size: 18px;
+}
+
+/* ===================== OVERLAY ===================== */
+#overlay-subuser {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+#overlay-subuser.show {
+    opacity: 1;
+    visibility: visible;
+}
+.overlay-content {
+    background: #2b2b2b;
+    border: 1px solid #333;
+    border-radius: 14px;
+    padding: 28px 32px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.4);
+    position: relative;
+    animation: slideDown 0.3s ease;
+}
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.overlay-content h2 {
+    color: #00bcd4;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+.overlay-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: 22px;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.25s ease;
+}
+.overlay-close:hover { color: #fff; }
+
+.overlay-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+/* ===================== TABLA CON SCROLL ===================== */
+.office-table-container {
+    max-height: 420px;           /* altura visible */
+    overflow-y: auto;            /* scroll vertical */
+    overflow-x: hidden;          /* sin scroll horizontal */
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+/* Barra de scroll personalizada */
+.office-table-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.office-table-container::-webkit-scrollbar-track {
+    background: #1e1e1e;
+    border-radius: 10px;
+}
+
+.office-table-container::-webkit-scrollbar-thumb {
+    background-color: #00bcd4;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.office-table-container::-webkit-scrollbar-thumb:hover {
+    background-color: #0097a7;
+}
+
+/* ===================== TABLA CON SCROLL Y CABECERA FIJA ===================== */
+.office-table-wrapper {
+    max-height: 420px;
+    overflow-y: auto;
+    border: 1px solid #333;
+    border-radius: 12px;
+    background: #2b2b2b;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+/* Scroll personalizado */
+.office-table-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+.office-table-wrapper::-webkit-scrollbar-thumb {
+    background-color: #0400d4;
+    border-radius: 10px;
+}
+.office-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background-color: #0097a7;
+}
+
+.office-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 600px;
+}
+
+/* 🔥 Cabecera fija y fondo sólido */
+.office-table thead th {
+    position: sticky;
+    top: 0;
+    background: #00bcd4;
+    color: #fff;
+    font-weight: 600;
+    padding: 12px 18px;
+    text-align: left;
+    border-bottom: 2px solid #0097a7;
+    z-index: 5;
+}
+
+/* Celdas y filas */
+.office-table td {
+    padding: 12px 18px;
+    color: #ddd;
+    border-bottom: 1px solid #333;
+}
+
+.office-table tbody tr:hover {
+    background: #242424;
+}
+
+/* Botón de eliminar */
+.btn-delete {
+    background: transparent;
+    color: #ff4d4d;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.btn-delete:hover {
+    color: #ff0000;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #555 !important;
+}
+.btn:disabled i {
+    opacity: 0.8;
+}
+
+.btn-delete:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* FORMULARIO AGENCIA (arriba derecha) */
+.agency-info-box {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    background: #2b2b2b;
+    padding: 20px;
+    width: 280px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.agency-info-box h3 {
+    color: #00bcd4;
+    margin-bottom: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.agency-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.agency-row label {
+    color: #ccc;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.agency-row input {
+    background: #1c1c1c;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+
+.agency-row input:focus {
+    border-color: #00bcd4;
+    outline: none;
+}
+
+/* ===================== LOGO ===================== */
+
+.office-logo-box {
+    position: absolute;
+    top: 1px;
+    left: 220px;
+    background: var(--card-bg);
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    width: 180px;
+}
+
+.logo-preview img {
+    width: 60%;
+    height: auto;
+    border-radius: 10px;
+    border: 2px solid #444;
+}
+
+.upload-btn {
+    margin-top: 10px;
+    display: inline-block;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.upload-btn input[type="file"] {
+    display: none;
+}

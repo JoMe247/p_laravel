@@ -1,0 +1,308 @@
+.btn-new-ticket {
+    margin-left: 20px;
+    background: #008cff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#ticket-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(3px);
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.ticket-modal {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 14px;
+    width: 420px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.25);
+}
+
+.ticket-modal h2 {
+    margin-bottom: 20px;
+}
+
+.ticket-modal input,
+.ticket-modal select {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.btn-save {
+    width: 100%;
+    background: #00a62a;
+    color: white;
+    padding: 12px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.btn-cancel {
+    width: 100%;
+    background: #e63939;
+    color: white;
+    padding: 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+/* TOP BAR */
+.ticket-top-bar {
+    margin-top: 25px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.ticket-status-counters .st {
+    background: #f1f1f1;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #666;
+    border: 1px solid #e0e0e0;
+}
+
+.ticket-search {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+}
+
+.ticket-search input {
+    border: none;
+    outline: none;
+    margin-left: 8px;
+}
+
+/* BOTÓN DE FILTROS */
+.btn-filters {
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+
+/* TABLA */
+.ticket-table-wrapper {
+    margin-top: 20px;
+    margin-left: 20px;
+    width: calc(100% - 40px);
+}
+
+.ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.ticket-table thead {
+    background: #f8f8f8;
+}
+
+.ticket-table th {
+    padding: 14px 18px;    /* igual en th y td */
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    text-align: left;
+}
+
+.ticket-table td {
+    padding: 14px 18px;    /* igual al th */
+    font-size: 14px;
+    color: #333;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.ticket-table tr:last-child td {
+    border-bottom: none;
+}
+
+.ticket-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.empty-msg {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+}
+
+/* ===========================
+   COLORS FOR PRIORITY
+   =========================== */
+
+.pr-low {
+    color: #1a7f37;
+    background: #d8f3dc;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.pr-medium {
+    color: #996c00;
+    background: #fff4cc;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.pr-high {
+    color: #b30000;
+    background: #ffd6d6;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.pr-urgent {
+    color: #ffffff;
+    background: #e60000;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+
+/* ===========================
+   COLORS FOR STATUS
+   =========================== */
+
+.st-open {
+    background: #ffd6d6;
+    color: #d10000 !important;
+    border: 1px solid #ffb3b3 !important;
+}
+
+.st-progress {
+    background: #fff3cd;
+    color: #b68900 !important;
+    border: 1px solid #ffe8a1 !important;
+}
+
+.st-answered {
+    background: #d6f0ff;
+    color: #0077b6 !important;
+    border: 1px solid #aee1ff !important;
+}
+
+.st-hold {
+    background: #f0e6ff;
+    color: #6d3bb3 !important;
+    border: 1px solid #d8caff !important;
+}
+
+.st-closed {
+    background: #d4edda;
+    color: #1e7e34 !important;
+    border: 1px solid #c3e6cb !important;
+}
+
+
+/* STYLE TAG FOR STATUS IN TABLE */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* ============================
+   DESCRIPTION FIELD
+   ============================ */
+
+.ticket-modal textarea[name="description"] {
+    width: 100%;
+    height: 110px;
+    resize: none;
+    background: #f9f9f9;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+    outline: none;
+    transition: all .2s ease-in-out;
+}
+
+/* Hover */
+.ticket-modal textarea[name="description"]:hover {
+    background: #ffffff;
+    border-color: #c8c8c8;
+}
+
+/* Focus */
+.ticket-modal textarea[name="description"]:focus {
+    background: #ffffff;
+    border-color: #6ea8fe;
+    box-shadow: 0 0 0 2px rgba(30, 115, 250, 0.2);
+}
+
+#description-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.description-modal {
+    background: #ffffff;
+    padding: 25px;
+    width: 420px;
+    border-radius: 12px;
+}
+
+.description-modal h3 {
+    margin-bottom: 12px;
+}
+
+#description-text {
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+.actions-cell i {
+    font-size: 22px;
+    margin-right: 10px;
+    cursor: pointer;
+}

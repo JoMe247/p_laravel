@@ -1,0 +1,271 @@
+/* ============================================================
+   OVERLAY
+   ============================================================ */
+#company-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center !important;
+    z-index: 9999;
+}
+
+/* SweetAlert arriba del overlay */
+.swal2-container {
+    z-index: 20000 !important;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+#company-modal {
+    background: #fff;
+    width: 420px;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0px 6px 25px rgba(0,0,0,0.2);
+    animation: fadeIn .2s ease-out;
+
+    /* FIX: evitar modal gigante */
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#company-modal h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+/* Inputs */
+#company-modal input,
+#company-modal textarea,
+#company-modal select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 14px;
+    font-size: 15px;
+}
+
+/* ============================================================
+   BOTONES DEL MODAL
+   ============================================================ */
+
+.btn-save-company {
+    width: 100%;
+    padding: 12px;
+    background: #0066ff;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.btn-close-company {
+    width: 100%;
+    padding: 11px;
+    background: #eee;
+    border: none;
+    color: #333;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* ============================================================
+   BOTÓN: ADD COMPANY
+   ============================================================ */
+.btn-add-company {
+    margin-top: 20px;
+    margin-left: 20px;
+    padding: 10px 18px;
+    background: #0066ff;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    font-size: 15px;
+}
+
+/* ============================================================
+   TÍTULO DE PÁGINA
+   ============================================================ */
+.page-title {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+/* ============================================================
+   ANIMACIÓN DEL MODAL
+   ============================================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================================
+   GRID DE TARJETAS
+   ============================================================ */
+.company-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    padding: 20px;
+}
+
+/* ============================================================
+   TARJETA DE COMPANY
+   ============================================================ */
+.company-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0px 4px 18px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 280px;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Título */
+.company-card h3 {
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+/* Campos */
+.company-field {
+    font-size: 14px;
+    margin-bottom: 6px;
+    max-width: 100%;
+    display: block;
+}
+
+/* Evitar que las contraseñas o URLs distorsionen la tarjeta */
+.company-field span,
+.company-field a {
+    display: inline-block;
+    max-width: 250px;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+/* Imagen */
+.company-img {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-top: 12px;
+}
+
+/* Botones dentro de la tarjeta */
+.company-card-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.btn-edit {
+    background: #0066ff;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.btn-delete {
+    background: #d9534f;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+/* ============================================================
+   SCROLL DEL CONTENEDOR PRINCIPAL
+   ============================================================ */
+.main-container {
+    height: calc(100vh - 20px);
+    overflow-y: auto;
+    padding-bottom: 40px;
+}
+
+/* Scroll */
+.main-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-container::-webkit-scrollbar-track {
+    background: #e5e5e5;
+    border-radius: 10px;
+}
+
+.main-container::-webkit-scrollbar-thumb {
+    background: #b5b5b5;
+    border-radius: 10px;
+}
+
+.main-container::-webkit-scrollbar-thumb:hover {
+    background: #9b9b9b;
+}
+
+/* ============================================================
+   CONTROL PARA EVITAR ROTURA DE DISEÑO EN TARJETAS
+   ============================================================ */
+.company-card * {
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.company-filters {
+    margin-left: 20px;
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.filter-btn {
+    background: #f1f1f1;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.filter-btn:hover {
+    background: #e2e2e2;
+}
+
+.filter-btn.active {
+    background: #0066ff;
+    color: white;
+}

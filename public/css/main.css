@@ -88,3 +88,60 @@
         display: flex;
     }
 }
+
+.swal2-container{
+    backdrop-filter: blur(1px) !important;
+}
+
+.swal2-popup{
+    border-radius: 12px;
+}
+
+.swal2-title{
+    font-size: 1.3rem;
+    color: #1a1a1a;
+    font-weight: 500;
+    font-family: var(--montserrat);
+    text-align: center;
+}
+
+.swal2-html-container{
+    font-size: 1rem;
+    color: #1a1a1a;
+    font-family: var(--montserrat);
+    text-align: center;
+    margin-top: 5px;
+}
+
+.swal2-confirm {
+    background-color: var(--red1);
+    color: white;
+    border: 1px solid var(--red1);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--montserrat);
+    cursor: pointer;
+    text-align: center;
+    width: 320px;
+}
+
+.swal2-cancel {
+    background-color: #fdfdfd;
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--montserrat);
+    cursor: pointer;
+    text-align: center;
+    width: 320px;
+}
+
+.swal2-icon{
+    font-family: var(--montserrat);
+    font-weight: 500;
+}

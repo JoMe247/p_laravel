@@ -725,3 +725,18 @@ input[type="range"]::-moz-range-thumb {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+/* --- Delete Button (Profile Page) --- */
+.delete-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+}
