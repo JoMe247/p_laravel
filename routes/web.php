@@ -20,6 +20,7 @@ use App\Http\Controllers\CustomerNotesController;
 use App\Http\Controllers\CustomerFilesController;
 use App\Http\Controllers\RemindersController;
 use App\Http\Controllers\SchedulesController;
+use App\Http\Controllers\PaymentsInvoicesController;
 
 
 // Página inicial
@@ -241,3 +242,13 @@ Route::middleware(['auth.multi'])->group(function () {
     Route::delete('/schedules/assign', [SchedulesController::class, 'removeAssignment'])->name('schedules.assign.delete');
 });
 
+// invoices
+
+Route::get('/customers/{customerId}/payments', [PaymentsInvoicesController::class, 'payments'])
+    ->name('payments');
+
+Route::get('/customers/{customerId}/invoices', [PaymentsInvoicesController::class, 'invoices'])
+    ->name('invoices');
+
+Route::post('/customers/{customerId}/invoices/rows', [PaymentsInvoicesController::class, 'storeRow'])
+    ->name('invoices.rows.store');

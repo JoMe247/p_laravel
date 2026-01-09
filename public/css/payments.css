@@ -1,0 +1,23 @@
+.payments-wrapper{
+    padding: 20px;
+}
+
+.btn-invoices{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    background: #111827;
+    color: #fff;
+    font-weight: 600;
+}
+
+.payments-card{
+    margin-top: 18px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.06);
+}
