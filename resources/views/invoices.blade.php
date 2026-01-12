@@ -69,9 +69,24 @@
                             {{ $customer->City ?? '' }}{{ $customer->State ?? '' ? ', ' . $customer->State : '' }}
                         </div>
 
-                        <div class="policies-count">
-                            Total Policies: <span>{{ $policiesCount }}</span>
+                        <div class="policy-select-wrap">
+                            <label class="policy-label">Policy</label>
+
+                            <select id="policySelect" class="policy-select">
+                                @if (($policyNumbers ?? collect())->count() === 0)
+                                    <option value="">No policies</option>
+                                @else
+                                    @foreach ($policyNumbers as $p)
+                                        <option value="{{ $p }}">{{ $p }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+
+                            <div class="policy-small">
+                                Total Policies: <span>{{ $policiesCount }}</span>
+                            </div>
                         </div>
+
                     </div>
 
                 </div>
@@ -83,6 +98,35 @@
             <!-- TABLE AREA -->
             <div class="table-card">
 
+                <div class="invoice-dates"
+                    data-save-url="{{ route('invoices.dates.save', ['customerId' => $customerId]) }}">
+
+                    <!-- CREATION DATE -->
+                    <div class="date-row">
+                        <label class="date-label">Creation Date</label>
+
+                        <div class="date-input-wrap">
+                            <input type="date" id="creationDateInput" class="date-input"
+                                value="{{ $creationDate ?: now()->format('Y-m-d') }}">
+                            <span class="date-icon"></span>
+                        </div>
+                    </div>
+
+                    <!-- PAYMENT DATE -->
+                    <div class="date-row">
+                        <label class="date-label">Payment Date</label>
+
+                        <div class="date-input-wrap">
+                            <input type="date" id="paymentDateInput" class="date-input"
+                                value="{{ $paymentDate ?: now()->format('Y-m-d') }}">
+                            <span class="date-icon"></span>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
                 <div class="table-topbar">
                     <button id="btnAddRow" class="btn-add-row">Add Row</button>
 
@@ -92,30 +136,80 @@
                 </div>
 
                 <div class="table-scroll">
+
+
+                    <datalist id="invoiceItemOptions">
+                        <option value="Add Coverage - Comp & Collision Or Umbi/umpd"></option>
+                        <option value="Add Driver"></option>
+                        <option value="Add Vehicle W/comp & Collision Or Umbi/umpd"></option>
+                        <option value="Add Vehicle W/liability"></option>
+                        <option value="Address Change"></option>
+                        <option value="Certificate Of Insurance"></option>
+                        <option value="Credit Card Fee"></option>
+                        <option value="Delete Vehicle"></option>
+                        <option value="Exclude Driver"></option>
+                        <option value="Installment"></option>
+                        <option value="Installment Fee"></option>
+                        <option value="Late Fee"></option>
+                        <option value="New Business Commercial"></option>
+                        <option value="New Business Comp & Collision Or Umbi/umpd W/dl"></option>
+                        <option value="New Business Comp & Collision Or Umbi/umpd W/out Dl"></option>
+                        <option value="New Business General Liability"></option>
+                        <option value="New Business Homeowners"></option>
+                        <option value="New Business Liability W/dl"></option>
+                        <option value="New Business Liability W/out Dl"></option>
+                        <option value="New Business Motorcycle"></option>
+                        <option value="New Business Renters W/lemonade"></option>
+                        <option value="New Business Renters W/progressive"></option>
+                        <option value="New Business Sr22 Suspended Dl"></option>
+                        <option value="Notary"></option>
+                        <option value="Nsf Fee"></option>
+                        <option value="Other"></option>
+                        <option value="Reinstate"></option>
+                        <option value="Renewal Fee - 12 Months"></option>
+                        <option value="Renewal Fee - 2 Months"></option>
+                        <option value="Renewal Fee - 3 Months"></option>
+                        <option value="Renewal Fee - 6 Months"></option>
+                        <option value="Rewrite Comp & Collision Or Umbi/umpd"></option>
+                        <option value="Rewrite Liability"></option>
+                        <option value="Sr-22"></option>
+                        <option value="Swap Drivers"></option>
+                        <option value="Swap Vehicle"></option>
+                    </datalist>
+
                     <table class="invoice-table" id="invoiceTable">
                         <thead>
                             <tr>
-                                <th>Column 1</th>
-                                <th>Column 2</th>
-                                <th>Amount ($)</th>
+                                <th>Item</th>
+                                <th>Amount</th>
+                                <th>Price ($)</th>
                                 <th>Total</th>
                             </tr>
                         </thead>
 
                         <tbody id="invoiceTbody">
                             @foreach ($rows as $r)
-                                <tr class="row-item">
+                                <tr class="row-item" data-row-id="{{ $r->id }}">
                                     <td>
-                                        <input class="cell-input" type="text" value="{{ $r->col_1 }}">
+                                        <input class="cell-input item-input" type="text" list="invoiceItemOptions"
+                                            value="{{ $r->item }}">
                                     </td>
+
                                     <td>
-                                        <input class="cell-input" type="text" value="{{ $r->col_2 }}">
+                                        <input class="cell-input qty-input" type="text"
+                                            value="{{ $r->col_2 }}">
                                     </td>
+
                                     <td>
-                                        <input class="cell-input amount-input" type="text"
+                                        <input class="cell-input price-input" type="text"
                                             value="{{ $r->amount }}">
                                     </td>
+
                                     <td class="row-total">$0.00</td>
+
+                                    <td class="row-actions">
+                                        <button type="button" class="btn-trash" title="Delete row">🗑</button>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

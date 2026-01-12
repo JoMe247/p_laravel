@@ -81,7 +81,7 @@ Route::get('/profile/{id}', [CustomersController::class, 'profile'])->name('prof
 Route::put('/profile/{id}', [CustomersController::class, 'update'])->name('customers.update'); // guarda el resto del perfil
 Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMultiple']);
 Route::post('/customers/{id}/upload-photo', [CustomersController::class, 'uploadPhoto'])
-     ->name('customers.uploadPhoto');
+    ->name('customers.uploadPhoto');
 Route::post('/customers/{id}/alert', [CustomersController::class, 'saveAlert']);
 Route::post('/customers/{id}/alert/remove', [CustomersController::class, 'removeAlert']);
 // Listar notas
@@ -171,7 +171,6 @@ Route::middleware('auth.multi')->group(function () {
     Route::post('/calendar/update', [CalendarController::class, 'update'])->name('calendar.update');
 
     Route::delete('/calendar/delete/{id}', [CalendarController::class, 'delete'])->name('calendar.delete');
-
 });
 
 
@@ -218,7 +217,8 @@ Route::delete('/files/delete/{fileId}', [CustomerFilesController::class, 'destro
 // Reminders
 Route::get('/reminders/{id}', [RemindersController::class, 'index'])->name('reminders.index');
 Route::post('/reminders/{id}', [RemindersController::class, 'store'])->name('reminders.store');
-Route::delete('/reminders/{id}/{reminder}', 
+Route::delete(
+    '/reminders/{id}/{reminder}',
     [App\Http\Controllers\RemindersController::class, 'destroy']
 )->name('reminders.destroy');
 
@@ -252,3 +252,6 @@ Route::get('/customers/{customerId}/invoices', [PaymentsInvoicesController::clas
 
 Route::post('/customers/{customerId}/invoices/rows', [PaymentsInvoicesController::class, 'storeRow'])
     ->name('invoices.rows.store');
+
+Route::post('/customers/{customerId}/invoices/dates', [PaymentsInvoicesController::class, 'saveDates'])
+    ->name('invoices.dates.save');

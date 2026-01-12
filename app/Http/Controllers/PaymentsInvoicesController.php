@@ -53,10 +53,27 @@ class PaymentsInvoicesController extends Controller
             ->where('customer_id', $customerId)
             ->count();
 
+        $policyNumbers = DB::table('policies')
+            ->where('customer_id', $customerId)
+            ->orderBy('id', 'asc')
+            ->pluck('pol_number')
+            ->filter()
+            ->values();
+
+
         $rows = Invoices::where('agency', (string)$agency)
             ->where('customer_id', (string)$customerId)
             ->orderBy('created_at', 'desc')
             ->get();
+
+        $invoiceMeta = Invoices::where('agency', (string)$agency)
+            ->where('customer_id', (string)$customerId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $creationDate = $invoiceMeta->creation_date ?? '';
+        $paymentDate  = $invoiceMeta->payment_date ?? '';
+
 
         return view('invoices', compact(
             'customerId',
@@ -64,7 +81,10 @@ class PaymentsInvoicesController extends Controller
             'agencyInfo',
             'customer',
             'policiesCount',
-            'rows'
+            'rows',
+            'policyNumbers',
+            'creationDate',
+            'paymentDate'
         ));
     }
 
@@ -74,7 +94,7 @@ class PaymentsInvoicesController extends Controller
         $agency = session('agency');
 
         $data = $request->validate([
-            'col_1'   => 'nullable|string|max:255',
+            'item'   => 'nullable|string|max:255',
             'col_2'   => 'nullable|string|max:255',
             'amount'  => 'nullable|string|max:50',
         ]);
@@ -86,7 +106,7 @@ class PaymentsInvoicesController extends Controller
             'id'         => $id,
             'agency'     => (string)$agency,
             'customer_id' => (string)$customerId,
-            'col_1'      => $data['col_1'] ?? '',
+            'item'      => $data['item'] ?? '',
             'col_2'      => $data['col_2'] ?? '',
             'amount'     => $data['amount'] ?? '',
             'created_at' => $now,
@@ -94,5 +114,28 @@ class PaymentsInvoicesController extends Controller
         ]);
 
         return response()->json(['ok' => true, 'id' => $id]);
+    }
+
+    public function saveDates(Request $request, $customerId)
+    {
+        $authUser = \Illuminate\Support\Facades\Auth::guard('web')->user() ?? \Illuminate\Support\Facades\Auth::guard('sub')->user();
+        if (!$authUser) return response()->json(['ok' => false], 401);
+
+        $agency = $authUser->agency;
+
+        $data = $request->validate([
+            'creation_date' => 'nullable|string|max:30',
+            'payment_date'  => 'nullable|string|max:30',
+        ]);
+
+        Invoices::where('agency', (string)$agency)
+            ->where('customer_id', (string)$customerId)
+            ->update([
+                'creation_date' => $data['creation_date'] ?? '',
+                'payment_date'  => $data['payment_date'] ?? '',
+                'updated_at'    => now()->format('Y-m-d H:i:s'),
+            ]);
+
+        return response()->json(['ok' => true]);
     }
 }
