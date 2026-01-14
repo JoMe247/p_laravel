@@ -1,4 +1,5 @@
 (function () {
+
   const tbody = document.getElementById("invoiceTbody");
   const btnAddRow = document.getElementById("btnAddRow");
   const grandTotalEl = document.getElementById("grandTotal");
@@ -266,7 +267,11 @@
     });
   }
 
+
+
 })();
+
+
 
 // ====== SAVE DATES (DATE INPUTS) ======
 const datesWrap = document.querySelector(".invoice-dates");
@@ -295,3 +300,74 @@ function saveDates() {
 if (creationInput) creationInput.addEventListener("change", saveDates);
 if (paymentInput) paymentInput.addEventListener("change", saveDates);
 
+
+function cleanMoney(v) {
+  if (!v) return "";
+  return String(v).replace(/[^0-9.]/g, "");
+}
+
+// ====== SAVE TABLE JSON ======
+const btnSaveTable = document.getElementById("btnSaveTable");
+const tableCard = document.querySelector(".table-card");
+const tbody = document.getElementById("invoiceTbody");
+const grandTotalEl = document.getElementById("grandTotal");
+
+
+function saveTableJson() {
+  const url = tableCard ? tableCard.getAttribute("data-save-url") : "";
+  if (!url) {
+    console.error("No data-save-url found on .table-card");
+    return;
+  }
+
+  const rows = [];
+  tbody.querySelectorAll("tr.row-item").forEach((tr) => {
+    const item = (tr.querySelector(".item-input")?.value || "").trim();
+    const amount = (tr.querySelector(".qty-input")?.value || "").trim();
+    const price = (tr.querySelector(".price-input")?.value || "").trim();
+    const total = (tr.querySelector(".row-total")?.textContent || "").trim();
+
+    rows.push({
+      item,
+      amount,
+      price: cleanMoney(price),
+      total: cleanMoney(total),
+    });
+  });
+
+  const grandTotal = cleanMoney(grandTotalEl.textContent);
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": csrf || "",
+      "Accept": "application/json",
+    },
+    body: JSON.stringify({ rows, grand_total: grandTotal }),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Save failed");
+      return res.json();
+    })
+    .then(() => {
+      Swal.fire({
+        icon: "success",
+        title: "Saved",
+        text: "Invoice information saved successfully",
+        timer: 1600,
+        showConfirmButton: false,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Could not save invoice information",
+      });
+    });
+
+}
+if (btnSaveTable) btnSaveTable.addEventListener("click", saveTableJson);

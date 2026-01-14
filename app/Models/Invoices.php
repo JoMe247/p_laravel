@@ -18,9 +18,7 @@ class Invoices extends Model
         'customer_id',
         'creation_date',
         'payment_date',
-        'item',
-        'amount',
-        'price',
+        'inv_prices',
         'created_at',
         'updated_at',
 

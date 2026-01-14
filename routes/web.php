@@ -258,3 +258,9 @@ Route::post('/customers/{customerId}/invoices/dates', [PaymentsInvoicesControlle
 
 Route::post('/customers/{customerId}/invoices/charges', [PaymentsInvoicesController::class, 'saveCharges'])
     ->name('invoices.charges.save');
+
+Route::post('/customers/{customerId}/invoices/save-table', [PaymentsInvoicesController::class, 'saveInvoiceTable'])
+    ->name('invoices.table.save');
+
+Route::post('/customers/{customerId}/invoices/save-table', [PaymentsInvoicesController::class, 'saveInvoiceTable'])
+    ->name('invoices.table.save');

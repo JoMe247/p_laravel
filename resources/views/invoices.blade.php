@@ -96,7 +96,11 @@
 
 
             <!-- TABLE AREA -->
-            <div class="table-card">
+            <div class="table-card" data-save-url="{{ route('invoices.table.save', ['customerId' => $customerId]) }}">
+
+
+                <button id="btnSaveTable" class="btn-save-table">Save</button>
+
 
                 <div class="charges-box"
                     data-save-url="{{ route('invoices.charges.save', ['customerId' => $customerId]) }}">
@@ -122,7 +126,8 @@
                                     <option value="Cash" {{ ($feeP1Method ?? '') === 'Cash' ? 'selected' : '' }}>Cash
                                     </option>
                                     <option value="Credit/Debit Card"
-                                        {{ ($feeP1Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>Credit/Debit
+                                        {{ ($feeP1Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>
+                                        Credit/Debit
                                         Card</option>
                                     <option value="EFT" {{ ($feeP1Method ?? '') === 'EFT' ? 'selected' : '' }}>EFT
                                     </option>
@@ -139,7 +144,8 @@
                                     <option value="Cash" {{ ($feeP2Method ?? '') === 'Cash' ? 'selected' : '' }}>Cash
                                     </option>
                                     <option value="Credit/Debit Card"
-                                        {{ ($feeP2Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>Credit/Debit
+                                        {{ ($feeP2Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>
+                                        Credit/Debit
                                         Card</option>
                                     <option value="EFT" {{ ($feeP2Method ?? '') === 'EFT' ? 'selected' : '' }}>EFT
                                     </option>
@@ -159,7 +165,8 @@
                             placeholder="Premium">
 
                         <label class="check-row">
-                            <input id="premiumSplitCheck" type="checkbox" {{ !empty($premiumSplit) ? 'checked' : '' }}>
+                            <input id="premiumSplitCheck" type="checkbox"
+                                {{ !empty($premiumSplit) ? 'checked' : '' }}>
                             <span>Premium Split Payment</span>
                         </label>
 
@@ -170,7 +177,8 @@
                                 <label class="charge-label">Payment 1 Method</label>
                                 <select id="premiumP1Method" class="charge-select">
                                     <option value="">Select</option>
-                                    <option value="Cash" {{ ($premiumP1Method ?? '') === 'Cash' ? 'selected' : '' }}>
+                                    <option value="Cash"
+                                        {{ ($premiumP1Method ?? '') === 'Cash' ? 'selected' : '' }}>
                                         Cash</option>
                                     <option value="Credit/Debit Card"
                                         {{ ($premiumP1Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>
@@ -187,7 +195,8 @@
                                 <label class="charge-label">Payment 2 Method</label>
                                 <select id="premiumP2Method" class="charge-select">
                                     <option value="">Select</option>
-                                    <option value="Cash" {{ ($premiumP2Method ?? '') === 'Cash' ? 'selected' : '' }}>
+                                    <option value="Cash"
+                                        {{ ($premiumP2Method ?? '') === 'Cash' ? 'selected' : '' }}>
                                         Cash</option>
                                     <option value="Credit/Debit Card"
                                         {{ ($premiumP2Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>
@@ -296,35 +305,38 @@
                         </thead>
 
                         <tbody id="invoiceTbody">
-                            @foreach ($rows as $r)
-                                <tr class="row-item" data-row-id="{{ $r->id }}">
-                                    <td>
-                                        <div class="item-wrap">
-                                            <input class="cell-input item-input" type="text"
-                                                list="invoiceItemOptions" value="{{ $r->item }}">
-                                            <span class="item-arrow"></span>
-                                        </div>
-                                    </td>
+                            @if (!empty($invRows))
+                                @foreach ($invRows as $r)
+                                    <tr class="row-item">
+                                        <td>
+                                            <div class="item-wrap">
+                                                <input class="cell-input item-input" type="text"
+                                                    list="invoiceItemOptions" value="{{ $r['item'] ?? '' }}">
+                                                <span class="item-arrow"></span>
+                                            </div>
+                                        </td>
 
+                                        <td>
+                                            <input class="cell-input qty-input" type="text"
+                                                value="{{ $r['amount'] ?? '' }}">
+                                        </td>
 
-                                    <td>
-                                        <input class="cell-input qty-input" type="text"
-                                            value="{{ $r->amount }}">
-                                    </td>
+                                        <td>
+                                            <input class="cell-input price-input" type="text"
+                                                value="{{ $r['price'] ?? '' }}">
+                                        </td>
 
-                                    <td>
-                                        <input class="cell-input price-input" type="text"
-                                            value="{{ $r->price }}">
-                                    </td>
+                                        <td class="row-total">{{ !empty($r['total']) ? '$' . $r['total'] : '$0.00' }}
+                                        </td>
 
-                                    <td class="row-total">$0.00</td>
-
-                                    <td class="row-actions">
-                                        <button type="button" class="btn-trash" title="Delete row">🗑</button>
-                                    </td>
-                                </tr>
-                            @endforeach
+                                        <td class="row-actions">
+                                            <button type="button" class="btn-trash" title="Delete row">🗑</button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
                         </tbody>
+
                     </table>
                 </div>
 

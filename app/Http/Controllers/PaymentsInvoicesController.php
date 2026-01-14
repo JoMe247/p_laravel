@@ -61,11 +61,6 @@ class PaymentsInvoicesController extends Controller
             ->values();
 
 
-        $rows = Invoices::where('agency', (string)$agency)
-            ->where('customer_id', (string)$customerId)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
         $invoiceMeta = Invoices::where('agency', (string)$agency)
             ->where('customer_id', (string)$customerId)
             ->orderBy('created_at', 'desc')
@@ -78,6 +73,19 @@ class PaymentsInvoicesController extends Controller
             ->where('customer_id', (string)$customerId)
             ->orderBy('created_at', 'desc')
             ->first();
+
+        $invRows = [];
+        $grandTotalSaved = '';
+
+        if ($meta && !empty($meta->inv_prices)) {
+            $decoded = json_decode($meta->inv_prices, true);
+
+            if (is_array($decoded)) {
+                $invRows = $decoded['rows'] ?? [];
+                $grandTotalSaved = $decoded['grand_total'] ?? '';
+            }
+        }
+
 
         $creationDate = $meta->creation_date ?? '';
         $paymentDate  = $meta->payment_date ?? '';
@@ -104,7 +112,7 @@ class PaymentsInvoicesController extends Controller
             'agencyInfo',
             'customer',
             'policiesCount',
-            'rows',
+
             'policyNumbers',
             'creationDate',
             'paymentDate',
@@ -121,6 +129,8 @@ class PaymentsInvoicesController extends Controller
             'premiumP1Value',
             'premiumP2Method',
             'premiumP2Value',
+            'invRows',
+            'grandTotalSaved',
         ));
     }
 
@@ -205,6 +215,46 @@ class PaymentsInvoicesController extends Controller
             ->update(array_merge($data, [
                 'updated_at' => now()->format('Y-m-d H:i:s'),
             ]));
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function saveInvoiceTable(Request $request, $customerId)
+    {
+        $authUser = \Illuminate\Support\Facades\Auth::guard('web')->user()
+            ?? \Illuminate\Support\Facades\Auth::guard('sub')->user();
+
+        if (!$authUser) return response()->json(['ok' => false, 'error' => 'not_auth'], 401);
+
+        $agency = $authUser->agency;
+
+        $rows = $request->input('rows', []);
+        $grandTotal = $request->input('grand_total', '');
+
+        if (!is_array($rows)) $rows = [];
+
+        $payload = [
+            'rows' => $rows,
+            'grand_total' => $grandTotal,
+            'saved_at' => now()->format('Y-m-d H:i:s'),
+        ];
+
+        $invoice = Invoices::where('agency', (string)$agency)
+            ->where('customer_id', (string)$customerId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$invoice) {
+            $invoice = new Invoices();
+            $invoice->id = (string) \Illuminate\Support\Str::uuid();
+            $invoice->agency = (string)$agency;
+            $invoice->customer_id = (string)$customerId;
+            $invoice->created_at = now()->format('Y-m-d H:i:s');
+        }
+
+        $invoice->inv_prices = json_encode($payload, JSON_UNESCAPED_UNICODE);
+        $invoice->updated_at = now()->format('Y-m-d H:i:s');
+        $invoice->save();
 
         return response()->json(['ok' => true]);
     }

@@ -423,3 +423,23 @@ input[list] {
     flex-direction: column;
     gap: 8px;
 }
+
+.table-actions-right{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-save-table{
+    border: none;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.btn-save-table:hover{
+    opacity: .92;
+}
