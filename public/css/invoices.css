@@ -98,6 +98,23 @@
     border-radius: 14px;
     padding: 16px;
     box-shadow: 0 10px 25px rgba(0,0,0,.06);
+    max-height: 705px;          /* ajusta este valor a tu gusto */
+    overflow-y: auto;           /* scroll vertical */
+    overflow-x: hidden;
+    padding-right: 6px; 
+}
+
+.table-card::-webkit-scrollbar{
+    width: 8px;
+}
+
+.table-card::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+.table-card::-webkit-scrollbar-thumb{
+    background: #e5e7eb;
+    border-radius: 10px;
 }
 
 .table-topbar{
@@ -299,4 +316,110 @@
 /* Opcional: hover */
 .date-input:hover{
     border-color: #cbd5f5;
+}
+
+/* ========== ITEM ARROW (always visible) ========== */
+.item-wrap{
+    position: relative;
+    width: 100%;
+}
+
+
+
+
+/* Flecha fija */
+.item-wrap .item-arrow{
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #111827;
+
+    pointer-events: auto;
+    cursor: pointer;
+
+    z-index: 5; /* <-- CLAVE: queda encima del input */
+    opacity: .85;
+}
+
+/* Chrome / Edge / Safari */
+input[list]::-webkit-calendar-picker-indicator {
+    display: none !important;
+    -webkit-appearance: none;
+}
+
+/* Firefox */
+input[list] {
+    appearance: none;
+    -moz-appearance: textfield;
+}
+
+.item-wrap.has-value .item-arrow{
+    display: none;
+}
+
+.charges-box{
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.06);
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.charge-section{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.charge-section:last-child{
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.charge-label{
+    font-weight: 800;
+    color: #111827;
+}
+
+.charge-input, .charge-select{
+    max-width: 320px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-weight: 700;
+    outline: none;
+    background: #fff;
+}
+
+.check-row{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.split-fields{
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-left: 10px;
+    border-left: 3px solid #eef2f7;
+}
+
+.split-block{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }

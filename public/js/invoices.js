@@ -58,6 +58,93 @@
         recalc();          // recalcula total general
       });
     }
+
+
+    const itemInput = tr.querySelector(".item-input");
+    const itemWrap = tr.querySelector(".item-wrap");
+
+    if (itemInput && itemWrap) {
+      const toggleArrow = () => {
+        if (itemInput.value.trim() !== "") {
+          itemWrap.classList.add("has-value");
+        } else {
+          itemWrap.classList.remove("has-value");
+        }
+      };
+
+      // al cargar (por si ya trae valor desde BD)
+      toggleArrow();
+
+      // al escribir o seleccionar
+      itemInput.addEventListener("input", toggleArrow);
+      itemInput.addEventListener("change", toggleArrow);
+    }
+
+
+    // ===== DATALIST: mostrar TODAS las opciones al enfocar =====
+    let prevItemValue = "";
+
+    itemInput.addEventListener("focus", () => {
+      prevItemValue = itemInput.value;   // guardamos lo que tenía
+
+      // Limpia temporalmente para que el datalist muestre todo
+      itemInput.value = "";
+
+      // Dispara input para que el navegador refresque sugerencias
+      itemInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+
+    itemInput.addEventListener("click", () => {
+      // mismo comportamiento que focus
+      if (itemInput.value.trim() !== "") {
+        prevItemValue = itemInput.value;
+        itemInput.value = "";
+        itemInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+
+    // ====== ITEM: abrir lista completa con 1 click ======
+    function openItemOptions() {
+      if (!itemInput) return;
+
+      // Truco: tocar el valor para que el navegador muestre todas las opciones
+      const current = itemInput.value;
+
+      // fuerza focus
+      itemInput.focus();
+
+      // cambia y regresa (no visible, pero dispara sugerencias)
+      itemInput.value = " ";
+      itemInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+      setTimeout(() => {
+        itemInput.value = current;
+        itemInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+        // Para que el desplegable aparezca (especialmente Chrome/Edge)
+        itemInput.click();
+      }, 0);
+    }
+
+    // click en input -> abre lista completa (sin doble click)
+    itemInput.addEventListener("mousedown", (e) => {
+      // evita que el click normal se "coma" el refresco
+      e.preventDefault();
+      openItemOptions();
+    });
+
+    // click en la flecha -> abre lista completa
+    const arrow = tr.querySelector(".item-arrow");
+    if (arrow) {
+      arrow.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openItemOptions();
+      });
+    }
+
+
+
   }
 
   function createRow() {
@@ -65,7 +152,13 @@
     tr.className = "row-item";
 
     tr.innerHTML = `
-      <td><input class="cell-input item-input" type="text" list="invoiceItemOptions" value=""></td>
+      <td>
+  <div class="item-wrap">
+    <input class="cell-input item-input" type="text" list="invoiceItemOptions" value="">
+    <span class="item-arrow"></span>
+  </div>
+</td>
+
       <td><input class="cell-input qty-input" type="text" value=""></td>
       <td><input class="cell-input price-input" type="text" value=""></td>
       <td class="row-total">$0.00</td>
@@ -90,6 +183,89 @@
   tbody.querySelectorAll("tr.row-item").forEach(bindRow);
 
   recalc();
+
+  // ====== FEE / PREMIUM UI + SAVE ======
+  const chargesBox = document.querySelector(".charges-box");
+  if (chargesBox) {
+    const saveUrl = chargesBox.getAttribute("data-save-url");
+    const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+    const feeInput = document.getElementById("feeInput");
+    const feeSplitCheck = document.getElementById("feeSplitCheck");
+    const feeSplitFields = document.getElementById("feeSplitFields");
+    const feeP1Method = document.getElementById("feeP1Method");
+    const feeP1Value = document.getElementById("feeP1Value");
+    const feeP2Method = document.getElementById("feeP2Method");
+    const feeP2Value = document.getElementById("feeP2Value");
+
+    const premiumInput = document.getElementById("premiumInput");
+    const premiumSplitCheck = document.getElementById("premiumSplitCheck");
+    const premiumSplitFields = document.getElementById("premiumSplitFields");
+    const premiumP1Method = document.getElementById("premiumP1Method");
+    const premiumP1Value = document.getElementById("premiumP1Value");
+    const premiumP2Method = document.getElementById("premiumP2Method");
+    const premiumP2Value = document.getElementById("premiumP2Value");
+
+    function toggleFee() {
+      if (!feeSplitFields) return;
+      feeSplitFields.style.display = feeSplitCheck && feeSplitCheck.checked ? "block" : "none";
+      saveCharges();
+    }
+
+    function togglePremium() {
+      if (!premiumSplitFields) return;
+      premiumSplitFields.style.display = premiumSplitCheck && premiumSplitCheck.checked ? "block" : "none";
+      saveCharges();
+    }
+
+    let t = null;
+    function debounceSave() {
+      clearTimeout(t);
+      t = setTimeout(saveCharges, 250);
+    }
+
+    function saveCharges() {
+      if (!saveUrl) return;
+
+      fetch(saveUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": csrf,
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          fee: feeInput ? feeInput.value : "",
+          fee_split: feeSplitCheck && feeSplitCheck.checked ? "1" : "0",
+          fee_payment1_method: feeP1Method ? feeP1Method.value : "",
+          fee_payment1_value: feeP1Value ? feeP1Value.value : "",
+          fee_payment2_method: feeP2Method ? feeP2Method.value : "",
+          fee_payment2_value: feeP2Value ? feeP2Value.value : "",
+
+          premium: premiumInput ? premiumInput.value : "",
+          premium_split: premiumSplitCheck && premiumSplitCheck.checked ? "1" : "0",
+          premium_payment1_method: premiumP1Method ? premiumP1Method.value : "",
+          premium_payment1_value: premiumP1Value ? premiumP1Value.value : "",
+          premium_payment2_method: premiumP2Method ? premiumP2Method.value : "",
+          premium_payment2_value: premiumP2Value ? premiumP2Value.value : "",
+        }),
+      }).catch(() => { });
+    }
+
+    // toggles
+    if (feeSplitCheck) feeSplitCheck.addEventListener("change", toggleFee);
+    if (premiumSplitCheck) premiumSplitCheck.addEventListener("change", togglePremium);
+
+    // inputs autosave
+    [
+      feeInput, feeP1Method, feeP1Value, feeP2Method, feeP2Value,
+      premiumInput, premiumP1Method, premiumP1Value, premiumP2Method, premiumP2Value
+    ].forEach((el) => {
+      if (el) el.addEventListener("input", debounceSave);
+      if (el) el.addEventListener("change", debounceSave);
+    });
+  }
+
 })();
 
 // ====== SAVE DATES (DATE INPUTS) ======

@@ -19,10 +19,25 @@ class Invoices extends Model
         'creation_date',
         'payment_date',
         'item',
-        'col_2',
         'amount',
+        'price',
         'created_at',
         'updated_at',
+
+        'fee',
+        'fee_split',
+        'fee_payment1_method',
+        'fee_payment1_value',
+        'fee_payment2_method',
+        'fee_payment2_value',
+
+        'premium',
+        'premium_split',
+        'premium_payment1_method',
+        'premium_payment1_value',
+        'premium_payment2_method',
+        'premium_payment2_value',
+
     ];
 
     public $timestamps = false; // porque created_at/updated_at son varchar

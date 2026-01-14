@@ -98,6 +98,114 @@
             <!-- TABLE AREA -->
             <div class="table-card">
 
+                <div class="charges-box"
+                    data-save-url="{{ route('invoices.charges.save', ['customerId' => $customerId]) }}">
+
+                    <!-- FEE -->
+                    <div class="charge-section">
+                        <label class="charge-label">Fee</label>
+                        <input id="feeInput" class="charge-input" type="text" value="{{ $fee ?? '' }}"
+                            placeholder="Fee">
+
+                        <label class="check-row">
+                            <input id="feeSplitCheck" type="checkbox" {{ !empty($feeSplit) ? 'checked' : '' }}>
+                            <span>Fee Split Payment</span>
+                        </label>
+
+                        <div id="feeSplitFields" class="split-fields"
+                            style="{{ !empty($feeSplit) ? '' : 'display:none;' }}">
+
+                            <div class="split-block">
+                                <label class="charge-label">Payment 1 Method</label>
+                                <select id="feeP1Method" class="charge-select">
+                                    <option value="">Select</option>
+                                    <option value="Cash" {{ ($feeP1Method ?? '') === 'Cash' ? 'selected' : '' }}>Cash
+                                    </option>
+                                    <option value="Credit/Debit Card"
+                                        {{ ($feeP1Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>Credit/Debit
+                                        Card</option>
+                                    <option value="EFT" {{ ($feeP1Method ?? '') === 'EFT' ? 'selected' : '' }}>EFT
+                                    </option>
+                                </select>
+
+                                <input id="feeP1Value" class="charge-input" type="text"
+                                    value="{{ $feeP1Value ?? '' }}" placeholder="Payment 1 Amount">
+                            </div>
+
+                            <div class="split-block">
+                                <label class="charge-label">Payment 2 Method</label>
+                                <select id="feeP2Method" class="charge-select">
+                                    <option value="">Select</option>
+                                    <option value="Cash" {{ ($feeP2Method ?? '') === 'Cash' ? 'selected' : '' }}>Cash
+                                    </option>
+                                    <option value="Credit/Debit Card"
+                                        {{ ($feeP2Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>Credit/Debit
+                                        Card</option>
+                                    <option value="EFT" {{ ($feeP2Method ?? '') === 'EFT' ? 'selected' : '' }}>EFT
+                                    </option>
+                                </select>
+
+                                <input id="feeP2Value" class="charge-input" type="text"
+                                    value="{{ $feeP2Value ?? '' }}" placeholder="Payment 2 Amount">
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- PREMIUM -->
+                    <div class="charge-section">
+                        <label class="charge-label">Premium</label>
+                        <input id="premiumInput" class="charge-input" type="text" value="{{ $premium ?? '' }}"
+                            placeholder="Premium">
+
+                        <label class="check-row">
+                            <input id="premiumSplitCheck" type="checkbox" {{ !empty($premiumSplit) ? 'checked' : '' }}>
+                            <span>Premium Split Payment</span>
+                        </label>
+
+                        <div id="premiumSplitFields" class="split-fields"
+                            style="{{ !empty($premiumSplit) ? '' : 'display:none;' }}">
+
+                            <div class="split-block">
+                                <label class="charge-label">Payment 1 Method</label>
+                                <select id="premiumP1Method" class="charge-select">
+                                    <option value="">Select</option>
+                                    <option value="Cash" {{ ($premiumP1Method ?? '') === 'Cash' ? 'selected' : '' }}>
+                                        Cash</option>
+                                    <option value="Credit/Debit Card"
+                                        {{ ($premiumP1Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>
+                                        Credit/Debit Card</option>
+                                    <option value="EFT" {{ ($premiumP1Method ?? '') === 'EFT' ? 'selected' : '' }}>
+                                        EFT</option>
+                                </select>
+
+                                <input id="premiumP1Value" class="charge-input" type="text"
+                                    value="{{ $premiumP1Value ?? '' }}" placeholder="Payment 1 Amount">
+                            </div>
+
+                            <div class="split-block">
+                                <label class="charge-label">Payment 2 Method</label>
+                                <select id="premiumP2Method" class="charge-select">
+                                    <option value="">Select</option>
+                                    <option value="Cash" {{ ($premiumP2Method ?? '') === 'Cash' ? 'selected' : '' }}>
+                                        Cash</option>
+                                    <option value="Credit/Debit Card"
+                                        {{ ($premiumP2Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>
+                                        Credit/Debit Card</option>
+                                    <option value="EFT" {{ ($premiumP2Method ?? '') === 'EFT' ? 'selected' : '' }}>
+                                        EFT</option>
+                                </select>
+
+                                <input id="premiumP2Value" class="charge-input" type="text"
+                                    value="{{ $premiumP2Value ?? '' }}" placeholder="Payment 2 Amount">
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+
                 <div class="invoice-dates"
                     data-save-url="{{ route('invoices.dates.save', ['customerId' => $customerId]) }}">
 
@@ -191,18 +299,22 @@
                             @foreach ($rows as $r)
                                 <tr class="row-item" data-row-id="{{ $r->id }}">
                                     <td>
-                                        <input class="cell-input item-input" type="text" list="invoiceItemOptions"
-                                            value="{{ $r->item }}">
+                                        <div class="item-wrap">
+                                            <input class="cell-input item-input" type="text"
+                                                list="invoiceItemOptions" value="{{ $r->item }}">
+                                            <span class="item-arrow"></span>
+                                        </div>
                                     </td>
+
 
                                     <td>
                                         <input class="cell-input qty-input" type="text"
-                                            value="{{ $r->col_2 }}">
+                                            value="{{ $r->amount }}">
                                     </td>
 
                                     <td>
                                         <input class="cell-input price-input" type="text"
-                                            value="{{ $r->amount }}">
+                                            value="{{ $r->price }}">
                                     </td>
 
                                     <td class="row-total">$0.00</td>

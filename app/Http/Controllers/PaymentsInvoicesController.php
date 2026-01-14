@@ -74,6 +74,29 @@ class PaymentsInvoicesController extends Controller
         $creationDate = $invoiceMeta->creation_date ?? '';
         $paymentDate  = $invoiceMeta->payment_date ?? '';
 
+        $meta = Invoices::where('agency', (string)$agency)
+            ->where('customer_id', (string)$customerId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $creationDate = $meta->creation_date ?? '';
+        $paymentDate  = $meta->payment_date ?? '';
+
+        $fee                 = $meta->fee ?? '';
+        $feeSplit            = ($meta->fee_split ?? '') === '1';
+        $feeP1Method         = $meta->fee_payment1_method ?? '';
+        $feeP1Value          = $meta->fee_payment1_value ?? '';
+        $feeP2Method         = $meta->fee_payment2_method ?? '';
+        $feeP2Value          = $meta->fee_payment2_value ?? '';
+
+        $premium             = $meta->premium ?? '';
+        $premiumSplit        = ($meta->premium_split ?? '') === '1';
+        $premiumP1Method     = $meta->premium_payment1_method ?? '';
+        $premiumP1Value      = $meta->premium_payment1_value ?? '';
+        $premiumP2Method     = $meta->premium_payment2_method ?? '';
+        $premiumP2Value      = $meta->premium_payment2_value ?? '';
+
+
 
         return view('invoices', compact(
             'customerId',
@@ -84,7 +107,20 @@ class PaymentsInvoicesController extends Controller
             'rows',
             'policyNumbers',
             'creationDate',
-            'paymentDate'
+            'paymentDate',
+            'fee',
+            'feeSplit',
+            'feeP1Method',
+            'feeP1Value',
+            'feeP2Method',
+            'feeP2Value',
+
+            'premium',
+            'premiumSplit',
+            'premiumP1Method',
+            'premiumP1Value',
+            'premiumP2Method',
+            'premiumP2Value',
         ));
     }
 
@@ -95,8 +131,8 @@ class PaymentsInvoicesController extends Controller
 
         $data = $request->validate([
             'item'   => 'nullable|string|max:255',
-            'col_2'   => 'nullable|string|max:255',
-            'amount'  => 'nullable|string|max:50',
+            'amount'   => 'nullable|string|max:255',
+            'price'  => 'nullable|string|max:50',
         ]);
 
         $id  = (string) \Illuminate\Support\Str::uuid();
@@ -107,8 +143,8 @@ class PaymentsInvoicesController extends Controller
             'agency'     => (string)$agency,
             'customer_id' => (string)$customerId,
             'item'      => $data['item'] ?? '',
-            'col_2'      => $data['col_2'] ?? '',
-            'amount'     => $data['amount'] ?? '',
+            'amount'      => $data['amount'] ?? '',
+            'price'     => $data['price'] ?? '',
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -135,6 +171,40 @@ class PaymentsInvoicesController extends Controller
                 'payment_date'  => $data['payment_date'] ?? '',
                 'updated_at'    => now()->format('Y-m-d H:i:s'),
             ]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function saveCharges(Request $request, $customerId)
+    {
+        $authUser = \Illuminate\Support\Facades\Auth::guard('web')->user()
+            ?? \Illuminate\Support\Facades\Auth::guard('sub')->user();
+
+        if (!$authUser) return response()->json(['ok' => false], 401);
+
+        $agency = $authUser->agency;
+
+        $data = $request->validate([
+            'fee' => 'nullable|string|max:50',
+            'fee_split' => 'nullable|string|max:10',
+            'fee_payment1_method' => 'nullable|string|max:30',
+            'fee_payment1_value' => 'nullable|string|max:50',
+            'fee_payment2_method' => 'nullable|string|max:30',
+            'fee_payment2_value' => 'nullable|string|max:50',
+
+            'premium' => 'nullable|string|max:50',
+            'premium_split' => 'nullable|string|max:10',
+            'premium_payment1_method' => 'nullable|string|max:30',
+            'premium_payment1_value' => 'nullable|string|max:50',
+            'premium_payment2_method' => 'nullable|string|max:30',
+            'premium_payment2_value' => 'nullable|string|max:50',
+        ]);
+
+        Invoices::where('agency', (string)$agency)
+            ->where('customer_id', (string)$customerId)
+            ->update(array_merge($data, [
+                'updated_at' => now()->format('Y-m-d H:i:s'),
+            ]));
 
         return response()->json(['ok' => true]);
     }
