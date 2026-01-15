@@ -8,6 +8,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
     <meta name="customer-id" content="{{ $customer->ID }}">
+    <meta name="invoice-id" content="{{ $invoiceId ?? '' }}">
+
 
 
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
@@ -85,6 +87,13 @@
                             <div class="policy-small">
                                 Total Policies: <span>{{ $policiesCount }}</span>
                             </div>
+
+                            <div class="invoice-number-wrap">
+                                <label class="invoice-number-label">Invoice #</label>
+                                <input id="invoiceNumberBox" class="invoice-number-box" type="text"
+                                    value="{{ $invoiceNumber ?? '' }}" placeholder="INV-0000" readonly>
+                            </div>
+
                         </div>
 
                     </div>

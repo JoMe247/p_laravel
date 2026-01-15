@@ -337,6 +337,14 @@ function saveTableJson() {
 
   const grandTotal = cleanMoney(grandTotalEl.textContent);
   const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
+  const policySelect = document.getElementById("policySelect");
+  const policyNumber = policySelect ? policySelect.value : "";
+
+  const invoiceIdMeta = document.querySelector('meta[name="invoice-id"]');
+  const invoiceId = invoiceIdMeta ? invoiceIdMeta.getAttribute("content") : "";
+
+  const invoiceBox = document.getElementById("invoiceNumberBox");
+
 
   fetch(url, {
     method: "POST",
@@ -345,13 +353,20 @@ function saveTableJson() {
       "X-CSRF-TOKEN": csrf || "",
       "Accept": "application/json",
     },
-    body: JSON.stringify({ rows, grand_total: grandTotal }),
+    body: JSON.stringify({ rows, grand_total: grandTotal, policy_number: policyNumber, invoice_id: invoiceId }),
   })
     .then((res) => {
       if (!res.ok) throw new Error("Save failed");
       return res.json();
     })
-    .then(() => {
+    .then((data) => {
+      if (data && data.invoice_number && invoiceBox) {
+        invoiceBox.value = data.invoice_number;
+      }
+      if (data && data.invoice_id && invoiceIdMeta) {
+        invoiceIdMeta.setAttribute("content", data.invoice_id);
+      }
+
       Swal.fire({
         icon: "success",
         title: "Saved",
@@ -360,6 +375,7 @@ function saveTableJson() {
         showConfirmButton: false,
       });
     })
+
     .catch((err) => {
       console.error(err);
       Swal.fire({

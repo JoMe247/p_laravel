@@ -36,6 +36,10 @@ class Invoices extends Model
         'premium_payment2_method',
         'premium_payment2_value',
 
+        'policy_number',
+        'invoice_number',
+
+
     ];
 
     public $timestamps = false; // porque created_at/updated_at son varchar

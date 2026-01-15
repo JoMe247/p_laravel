@@ -74,6 +74,10 @@ class PaymentsInvoicesController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
+        $invoiceId = $meta->id ?? '';
+        $invoiceNumber = $meta->invoice_number ?? '';
+
+
         $invRows = [];
         $grandTotalSaved = '';
 
@@ -131,6 +135,8 @@ class PaymentsInvoicesController extends Controller
             'premiumP2Value',
             'invRows',
             'grandTotalSaved',
+            'invoiceId',
+            'invoiceNumber',
         ));
     }
 
@@ -230,6 +236,8 @@ class PaymentsInvoicesController extends Controller
 
         $rows = $request->input('rows', []);
         $grandTotal = $request->input('grand_total', '');
+        $policyNumber = $request->input('policy_number', '');
+        $invoiceIdFromClient = $request->input('invoice_id', '');
 
         if (!is_array($rows)) $rows = [];
 
@@ -239,11 +247,24 @@ class PaymentsInvoicesController extends Controller
             'saved_at' => now()->format('Y-m-d H:i:s'),
         ];
 
-        $invoice = Invoices::where('agency', (string)$agency)
-            ->where('customer_id', (string)$customerId)
-            ->orderBy('created_at', 'desc')
-            ->first();
+        // 1) Intentar usar el invoice_id enviado por el cliente
+        $invoice = null;
+        if (!empty($invoiceIdFromClient)) {
+            $invoice = Invoices::where('id', (string)$invoiceIdFromClient)
+                ->where('agency', (string)$agency)
+                ->where('customer_id', (string)$customerId)
+                ->first();
+        }
 
+        // 2) Si no hay invoice actual, toma el más reciente
+        if (!$invoice) {
+            $invoice = Invoices::where('agency', (string)$agency)
+                ->where('customer_id', (string)$customerId)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
+
+        // 3) Si aún no existe, crea uno nuevo
         if (!$invoice) {
             $invoice = new Invoices();
             $invoice->id = (string) \Illuminate\Support\Str::uuid();
@@ -252,10 +273,42 @@ class PaymentsInvoicesController extends Controller
             $invoice->created_at = now()->format('Y-m-d H:i:s');
         }
 
+        // 4) Si NO tiene invoice_number, generar consecutivo INV-0001 por agency
+        if (empty($invoice->invoice_number)) {
+            $next = DB::transaction(function () use ($agency) {
+                // Tomamos el último consecutivo por agency
+                $last = DB::table('invoices')
+                    ->where('agency', (string)$agency)
+                    ->whereNotNull('invoice_number')
+                    ->orderBy('invoice_number', 'desc')
+                    ->lockForUpdate()
+                    ->value('invoice_number');
+
+                $num = 0;
+                if ($last && preg_match('/^INV-(\d+)$/', $last, $m)) {
+                    $num = (int)$m[1];
+                }
+
+                $num++;
+                return 'INV-' . str_pad((string)$num, 4, '0', STR_PAD_LEFT);
+            });
+
+            $invoice->invoice_number = $next;
+        }
+
+        // 5) Guardar policy_number seleccionado
+        $invoice->policy_number = (string)$policyNumber;
+
+        // 6) Guardar el JSON de tabla
         $invoice->inv_prices = json_encode($payload, JSON_UNESCAPED_UNICODE);
         $invoice->updated_at = now()->format('Y-m-d H:i:s');
         $invoice->save();
 
-        return response()->json(['ok' => true]);
+        return response()->json([
+            'ok' => true,
+            'invoice_id' => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+            'policy_number' => $invoice->policy_number,
+        ]);
     }
 }
