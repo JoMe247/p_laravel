@@ -11,7 +11,6 @@
     <meta name="invoice-id" content="{{ $invoiceId ?? '' }}">
 
 
-
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">

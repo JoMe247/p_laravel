@@ -17,14 +17,42 @@ class PaymentsInvoicesController extends Controller
 
         $agency = $authUser->agency;
 
+        // ✅ últimos 30 invoices del customer (por agency)
+        $invoices = Invoices::where('agency', (string)$agency)
+            ->where('customer_id', (string)$customerId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(30);
+
+        // ✅ agregar columnas calculadas: amount + first_item
+        $invoices->getCollection()->transform(function ($inv) {
+            $amount = '';
+            $firstItem = '';
+
+            if (!empty($inv->inv_prices)) {
+                $decoded = json_decode($inv->inv_prices, true);
+
+                if (is_array($decoded)) {
+                    $amount = $decoded['grand_total'] ?? '';
+
+                    $rows = $decoded['rows'] ?? [];
+                    if (is_array($rows) && count($rows) > 0) {
+                        $firstItem = $rows[0]['item'] ?? '';
+                    }
+                }
+            }
+
+            $inv->amount_calc = $amount;
+            $inv->first_item = $firstItem;
+
+            return $inv;
+        });
+
         return view('payments', [
             'customerId' => $customerId,
             'agency' => $agency,
+            'invoices' => $invoices,
         ]);
     }
-
-
-
 
 
     public function invoices($customerId)
@@ -49,49 +77,66 @@ class PaymentsInvoicesController extends Controller
         $customer = DB::table('customers')->where('ID', $customerId)->first();
         if (!$customer) abort(404, 'Customer no encontrado');
 
-        $new = request()->boolean('new'); // true si ?new=1
+        $invoiceIdParam = request('invoiceId');
 
-        if ($new) {
-            // Crear invoice nuevo (vacío) con consecutivo
-            $invoice = new Invoices();
-            $invoice->id = (string) \Illuminate\Support\Str::uuid();
-            $invoice->agency = (string)$agency;
-            $invoice->customer_id = (string)$customerId;
-            $invoice->created_at = now()->format('Y-m-d H:i:s');
-            $invoice->updated_at = now()->format('Y-m-d H:i:s');
-
-            // Generar invoice_number INV-0001 por agency
-            $next = DB::transaction(function () use ($agency) {
-                $last = DB::table('invoices')
-                    ->where('agency', (string)$agency)
-                    ->whereNotNull('invoice_number')
-                    ->orderBy('invoice_number', 'desc')
-                    ->lockForUpdate()
-                    ->value('invoice_number');
-
-                $num = 0;
-                if ($last && preg_match('/^INV-(\d+)$/', $last, $m)) {
-                    $num = (int)$m[1];
-                }
-                $num++;
-                return 'INV-' . str_pad((string)$num, 4, '0', STR_PAD_LEFT);
-            });
-
-            $invoice->invoice_number = $next;
-            $invoice->save();
-
-            // Este será el invoice "actual" en la vista
-            $meta = $invoice;
-        } else {
-            // tu lógica actual (abrir el último)
-            $meta = Invoices::where('agency', (string)$agency)
+        if (!empty($invoiceIdParam)) {
+            $meta = Invoices::where('id', (string)$invoiceIdParam)
+                ->where('agency', (string)$agency)
                 ->where('customer_id', (string)$customerId)
-                ->orderBy('created_at', 'desc')
                 ->first();
+
+            if (!$meta) abort(404, 'Invoice not found');
+        } else {
+
+            $new = request()->boolean('new'); // true si ?new=1
+
+            if ($new) {
+                // Crear invoice nuevo (vacío) con consecutivo
+                $invoice = new Invoices();
+                $invoice->id = (string) \Illuminate\Support\Str::uuid();
+                $invoice->agency = (string)$agency;
+                $invoice->customer_id = (string)$customerId;
+                $invoice->created_at = now()->format('Y-m-d H:i:s');
+                $invoice->updated_at = now()->format('Y-m-d H:i:s');
+
+                // Generar invoice_number INV-0001 por agency
+                $next = DB::transaction(function () use ($agency) {
+                    $last = DB::table('invoices')
+                        ->where('agency', (string)$agency)
+                        ->whereNotNull('invoice_number')
+                        ->orderBy('invoice_number', 'desc')
+                        ->lockForUpdate()
+                        ->value('invoice_number');
+
+                    $num = 0;
+                    if ($last && preg_match('/^INV-(\d+)$/', $last, $m)) {
+                        $num = (int)$m[1];
+                    }
+                    $num++;
+                    return 'INV-' . str_pad((string)$num, 4, '0', STR_PAD_LEFT);
+                });
+
+                $invoice->invoice_number = $next;
+                $today = now()->format('Y-m-d');
+                $invoice->creation_date = $today;
+                $invoice->payment_date  = $today;
+
+                $invoice->save();
+
+                // Este será el invoice "actual" en la vista
+                $meta = $invoice;
+            } else {
+                // tu lógica actual (abrir el último)
+                $meta = Invoices::where('agency', (string)$agency)
+                    ->where('customer_id', (string)$customerId)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+            }
         }
+
+
         $invoiceId = $meta->id ?? '';
         $invoiceNumber = $meta->invoice_number ?? '';
-
 
         $policiesCount = DB::table('policies')
             ->where('customer_id', $customerId)
@@ -374,5 +419,20 @@ class PaymentsInvoicesController extends Controller
             'invoice_number' => $invoice->invoice_number,
             'policy_number' => $invoice->policy_number,
         ]);
+    }
+
+
+    public function destroy($invoiceId)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) return redirect()->route('login');
+
+        $agency = $authUser->agency;
+
+        Invoices::where('id', (string)$invoiceId)
+            ->where('agency', (string)$agency)
+            ->delete();
+
+        return back()->with('success', 'Invoice deleted');
     }
 }

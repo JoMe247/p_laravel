@@ -190,6 +190,8 @@
   if (chargesBox) {
     const saveUrl = chargesBox.getAttribute("data-save-url");
     const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+    let isInitCharges = true;
+
 
     const feeInput = document.getElementById("feeInput");
     const feeSplitCheck = document.getElementById("feeSplitCheck");
@@ -209,15 +211,37 @@
 
     function toggleFee() {
       if (!feeSplitFields) return;
-      feeSplitFields.style.display = feeSplitCheck && feeSplitCheck.checked ? "block" : "none";
-      saveCharges();
+
+      const active = feeSplitCheck && feeSplitCheck.checked;
+      feeSplitFields.style.display = active ? "block" : "none";
+
+      // REQUIRED dinámico
+      if (feeP1Method) feeP1Method.required = active;
+      if (feeP1Value) feeP1Value.required = active;
+      if (feeP2Method) feeP2Method.required = active;
+      if (feeP2Value) feeP2Value.required = active;
+
+      // ✅ NO autosave durante inicialización
+      if (!isInitCharges) saveCharges();
     }
 
     function togglePremium() {
       if (!premiumSplitFields) return;
-      premiumSplitFields.style.display = premiumSplitCheck && premiumSplitCheck.checked ? "block" : "none";
-      saveCharges();
+
+      const active = premiumSplitCheck && premiumSplitCheck.checked;
+      premiumSplitFields.style.display = active ? "block" : "none";
+
+      // REQUIRED dinámico
+      if (premiumP1Method) premiumP1Method.required = active;
+      if (premiumP1Value) premiumP1Value.required = active;
+      if (premiumP2Method) premiumP2Method.required = active;
+      if (premiumP2Value) premiumP2Value.required = active;
+
+      // ✅ NO autosave durante inicialización
+      if (!isInitCharges) saveCharges();
     }
+
+
 
     let t = null;
     function debounceSave() {
@@ -254,6 +278,8 @@
       }).catch(() => { });
     }
 
+
+
     // toggles
     if (feeSplitCheck) feeSplitCheck.addEventListener("change", toggleFee);
     if (premiumSplitCheck) premiumSplitCheck.addEventListener("change", togglePremium);
@@ -266,7 +292,15 @@
       if (el) el.addEventListener("input", debounceSave);
       if (el) el.addEventListener("change", debounceSave);
     });
+
+    // Inicializar required al cargar
+    if (feeSplitCheck) toggleFee();
+    if (premiumSplitCheck) togglePremium();
+    isInitCharges = false;
+    if (typeof validateInvoiceForm === "function") validateInvoiceForm();
+
   }
+
 
 
 
@@ -398,3 +432,48 @@ function saveTableJson() {
 
 }
 if (btnSaveTable) btnSaveTable.addEventListener("click", saveTableJson);
+
+function validateInvoiceForm() {
+  const btnSave = document.getElementById("btnSaveTable");
+  if (!btnSave) return;
+
+  let valid = true;
+
+  /* Policy seleccionada */
+  const policySelect = document.getElementById("policySelect");
+  if (!policySelect || !policySelect.value) {
+    valid = false;
+  }
+
+  /*  Al menos una fila válida */
+  const rows = document.querySelectorAll("#invoiceTbody tr.row-item");
+  if (!rows.length) {
+    valid = false;
+  } else {
+    let hasValidRow = false;
+    rows.forEach(tr => {
+      const item = tr.querySelector(".item-input")?.value.trim();
+      const qty = tr.querySelector(".qty-input")?.value.trim();
+      const price = tr.querySelector(".price-input")?.value.trim();
+      if (item && qty && price) {
+        hasValidRow = true;
+      }
+    });
+    if (!hasValidRow) valid = false;
+  }
+
+  /* Validar REQUIRED visibles */
+  document.querySelectorAll("input[required], select[required]").forEach(el => {
+    if (el.offsetParent !== null && !el.value) {
+      valid = false;
+    }
+  });
+
+  btnSave.disabled = !valid;
+  document.addEventListener("input", validateInvoiceForm);
+  document.addEventListener("change", validateInvoiceForm);
+  document.addEventListener("click", validateInvoiceForm);
+}
+
+document.addEventListener("DOMContentLoaded", validateInvoiceForm);
+

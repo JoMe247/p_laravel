@@ -468,3 +468,9 @@ input[list] {
     color: #111827;
     letter-spacing: .5px;
 }
+
+.btn-save-table:disabled{
+    background: #9ca3af;
+    cursor: not-allowed;
+    opacity: .7;
+}

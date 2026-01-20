@@ -262,3 +262,5 @@ Route::post('/customers/{customerId}/invoices/charges', [PaymentsInvoicesControl
 Route::post('/customers/{customerId}/invoices/save-table', [PaymentsInvoicesController::class, 'saveInvoiceTable'])
     ->name('invoices.table.save');
 
+Route::delete('/invoices/{invoiceId}', [PaymentsInvoicesController::class, 'destroy'])
+    ->name('invoices.destroy');
