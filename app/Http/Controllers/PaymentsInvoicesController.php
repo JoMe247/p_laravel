@@ -16,6 +16,9 @@ class PaymentsInvoicesController extends Controller
         if (!$authUser) return redirect()->route('login');
 
         $agency = $authUser->agency;
+        $customer = DB::table('customers')->where('ID', $customerId)->first();
+        if (!$customer) abort(404, 'Customer no encontrado');
+
 
         // ✅ últimos 30 invoices del customer (por agency)
         $invoices = Invoices::where('agency', (string)$agency)
@@ -50,6 +53,7 @@ class PaymentsInvoicesController extends Controller
         return view('payments', [
             'customerId' => $customerId,
             'agency' => $agency,
+            'customer' => $customer,
             'invoices' => $invoices,
         ]);
     }

@@ -123,3 +123,43 @@
 .payments-pagination{
     margin-top: 12px;
 }
+
+/* ==========================================
+   PAYMENTS LAYOUT (override de profile.css)
+   Solo afecta a payments.blade.php
+========================================== */
+
+.payments-layout{
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    width: 100%;
+}
+
+/* izquierda fija */
+.payments-layout .left-column{
+    width: 240px;      /* ajusta a 240/260/280 según tu menú */
+    min-width: 240px;
+}
+
+/* derecha ocupa el resto */
+.payments-layout .payments-wrapper{
+    flex: 1;
+    min-width: 0;      /* CLAVE: permite que el overflow funcione */
+}
+
+/* scroll externo para que el botón + tabla no se pierdan */
+.payments-layout .payments-wrapper{
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+    padding-right: 6px;
+}
+
+/* scrollbar suave */
+.payments-layout .payments-wrapper::-webkit-scrollbar{
+    width: 8px;
+}
+.payments-layout .payments-wrapper::-webkit-scrollbar-thumb{
+    background: #e5e7eb;
+    border-radius: 10px;
+}

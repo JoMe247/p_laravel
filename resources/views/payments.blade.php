@@ -8,13 +8,15 @@
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
-    <meta name="invoice-id" content="{{ $invoiceId ?? '' }}">
+    <meta name="customer-id" content="{{ $customer->ID }}">
+
 
 
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 
 
     <link rel="stylesheet" href="{{ asset('css/payments.css') }}">
@@ -38,98 +40,187 @@
 
         <section id="dash">
 
-            <div class="payments-wrapper">
-                <a class="btn-invoices" href="{{ route('invoices', ['customerId' => $customerId, 'new' => 1]) }}">
-                    Invoices
-                </a>
+            <div class="payments-layout">
 
-                <div class="payments-card">
-                    <h2>Payments</h2>
+                <div class="left-column">
 
-                    <div class="invoices-table-wrap">
-                        <table class="invoices-table">
-                            <thead>
-                                <tr>
-                                    <th>Invoice#</th>
-                                    <th>Customer</th>
-                                    <th>Date</th>
-                                    <th>Due Date</th>
-                                    <th>Policy#</th>
-                                    <th>Amount</th>
-                                    <th>Fee</th>
-                                    <th>Premium</th>
-                                    <th>Item</th>
-                                    <th style="width:140px;">Actions</th>
-                                </tr>
-                            </thead>
+                    {{-- MENU LATERAL --}}
+                    <aside class="profile-side-menu">
+                        <nav class="profile-side-nav">
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
+                                <i class='bx bx-id-card'></i>
+                                <span>Profile</span>
+                            </button>
 
-                            <tbody>
-                                @forelse($invoices as $inv)
-                                    <tr>
-                                        <td class="td-strong">{{ $inv->invoice_number ?? '' }}</td>
-                                        <td>{{ $inv->customer_id ?? '' }}</td>
-                                        <td>{{ $inv->creation_date ?? '' }}</td>
-                                        <td>{{ $inv->payment_date ?? '' }}</td>
-                                        <td>{{ $inv->policy_number ?? '' }}</td>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
+                                <i class='bx bx-shield-quarter'></i>
+                                <span>Policies</span>
+                            </button>
 
-                                        <td class="td-money">
-                                            @php
-                                                $a = $inv->amount_calc ?? '';
-                                            @endphp
-                                            {{ $a !== '' ? '$' . number_format((float) $a, 2) : '' }}
-                                        </td>
+                            <button type="button" class="profile-menu-item active"
+                                onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
+                                <i class='bx bx-credit-card'></i>
+                                <span>Invoices (Payments)</span>
+                            </button>
 
-                                        <td class="td-money">
-                                            @php $f = $inv->fee ?? ''; @endphp
-                                            {{ $f !== '' ? '$' . number_format((float) preg_replace('/[^0-9.]/', '', $f), 2) : '' }}
-                                        </td>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
+                                <i class='bx bx-task'></i>
+                                <span>Reminders</span>
+                            </button>
 
-                                        <td class="td-money">
-                                            @php $p = $inv->premium ?? ''; @endphp
-                                            {{ $p !== '' ? '$' . number_format((float) preg_replace('/[^0-9.]/', '', $p), 2) : '' }}
-                                        </td>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
+                                <i class='bx bx-folder'></i>
+                                <span>Files</span>
+                            </button>
 
-                                        <td class="td-item" title="{{ $inv->first_item ?? '' }}">
-                                            {{ $inv->first_item ?? '' }}
-                                        </td>
+                            <button type="button" class="profile-menu-item">
+                                <i class='bx bx-file'></i>
+                                <span>Documents</span>
+                            </button>
 
-                                        <td class="td-actions">
-                                            {{-- EDIT: abre invoices en modo edición (mismo invoice) --}}
-                                            <a class="icon-btn" title="Edit"
-                                                href="{{ route('invoices', ['customerId' => $customerId, 'invoiceId' => $inv->id]) }}">
-                                                <i class='bx bx-edit-alt'></i>
-                                            </a>
+                            <button type="button" class="profile-menu-item">
+                                <i class='bx bx-map'></i>
+                                <span>Map</span>
+                            </button>
+                        </nav>
+                    </aside>
 
-                                            {{-- PDF: por ahora placeholder --}}
-                                            <button class="icon-btn" type="button" title="Download PDF (coming soon)"
-                                                disabled>
-                                                <i class='bx bxs-file-pdf'></i>
-                                            </button>
+                    {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
+                    <div class="profile-notes sticky-notes">
 
-                                            {{-- DELETE --}}
-                                            <form class="inline-form" method="POST"
-                                                action="{{ route('invoices.destroy', ['invoiceId' => $inv->id]) }}"
-                                                onsubmit="return confirm('Delete this invoice?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="icon-btn danger" type="submit" title="Delete">
-                                                    <i class='bx bxs-trash'></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="10" class="td-empty">No invoices yet.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                        <div class="notes-header">
+                            <h3>Notes</h3>
+                            <button id="add-note-btn" class="btn small">+ Add Note</button>
+                        </div>
+
+                        <div class="notes-scroll">
+                            <div id="notes-list"></div>
+                        </div>
+
                     </div>
 
-                    {{-- PAGINACIÓN --}}
-                    <div class="payments-pagination">
-                        {{ $invoices->links() }}
+                </div> <!-- /.left-column -->
+
+
+                {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
+                <div id="note-overlay">
+                    <div class="note-window">
+                        <h2 style="margin-bottom:15px;">Add Note</h2>
+
+                        <label>Policy</label>
+                        <input type="text" id="note-policy">
+
+                        <label>Subject</label>
+                        <input type="text" id="note-subject">
+
+                        <label>Note</label>
+                        <textarea id="note-text" rows="5"></textarea>
+
+                        <div class="overlay-actions">
+                            <button class="btn secondary" id="note-cancel">Cancel</button>
+                            <button class="btn" id="note-save">Save</button>
+                        </div>
+                    </div>
+                </div>
+                {{-- /.left-column --}}
+
+                <div class="payments-wrapper">
+                    <a class="btn-invoices" href="{{ route('invoices', ['customerId' => $customerId, 'new' => 1]) }}">
+                        Invoices
+                    </a>
+
+                    <div class="payments-card">
+                        <h2>Payments</h2>
+
+                        <div class="invoices-table-wrap">
+                            <table class="invoices-table">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice#</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Due Date</th>
+                                        <th>Policy#</th>
+                                        <th>Amount</th>
+                                        <th>Fee</th>
+                                        <th>Premium</th>
+                                        <th>Item</th>
+                                        <th style="width:140px;">Actions</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @forelse($invoices as $inv)
+                                        <tr>
+                                            <td class="td-strong">{{ $inv->invoice_number ?? '' }}</td>
+                                            <td>{{ $inv->customer_id ?? '' }}</td>
+                                            <td>{{ $inv->creation_date ?? '' }}</td>
+                                            <td>{{ $inv->payment_date ?? '' }}</td>
+                                            <td>{{ $inv->policy_number ?? '' }}</td>
+
+                                            <td class="td-money">
+                                                @php
+                                                    $a = $inv->amount_calc ?? '';
+                                                @endphp
+                                                {{ $a !== '' ? '$' . number_format((float) $a, 2) : '' }}
+                                            </td>
+
+                                            <td class="td-money">
+                                                @php $f = $inv->fee ?? ''; @endphp
+                                                {{ $f !== '' ? '$' . number_format((float) preg_replace('/[^0-9.]/', '', $f), 2) : '' }}
+                                            </td>
+
+                                            <td class="td-money">
+                                                @php $p = $inv->premium ?? ''; @endphp
+                                                {{ $p !== '' ? '$' . number_format((float) preg_replace('/[^0-9.]/', '', $p), 2) : '' }}
+                                            </td>
+
+                                            <td class="td-item" title="{{ $inv->first_item ?? '' }}">
+                                                {{ $inv->first_item ?? '' }}
+                                            </td>
+
+                                            <td class="td-actions">
+                                                {{-- EDIT: abre invoices en modo edición (mismo invoice) --}}
+                                                <a class="icon-btn" title="Edit"
+                                                    href="{{ route('invoices', ['customerId' => $customerId, 'invoiceId' => $inv->id]) }}">
+                                                    <i class='bx bx-edit-alt'></i>
+                                                </a>
+
+                                                {{-- PDF: por ahora placeholder --}}
+                                                <button class="icon-btn" type="button"
+                                                    title="Download PDF (coming soon)" disabled>
+                                                    <i class='bx bxs-file-pdf'></i>
+                                                </button>
+
+                                                {{-- DELETE --}}
+                                                <form class="inline-form" method="POST"
+                                                    action="{{ route('invoices.destroy', ['invoiceId' => $inv->id]) }}"
+                                                    onsubmit="return confirm('Delete this invoice?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="icon-btn danger" type="submit" title="Delete">
+                                                        <i class='bx bxs-trash'></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="10" class="td-empty">No invoices yet.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- PAGINACIÓN --}}
+                        <div class="payments-pagination">
+                            {{ $invoices->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -137,7 +228,7 @@
     </div>
 
 
-        <!-- UI Elements -->
+    <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
             <div class="confirm-window-content">
