@@ -12,7 +12,7 @@
 <body>
 
     <div class="payments-wrapper">
-        <a class="btn-invoices" href="{{ route('invoices', ['customerId' => $customerId]) }}">
+        <a class="btn-invoices" href="{{ route('invoices', ['customerId' => $customerId, 'new' => 1]) }}">
             Invoices
         </a>
 

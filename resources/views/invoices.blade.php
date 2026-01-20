@@ -105,7 +105,8 @@
 
 
             <!-- TABLE AREA -->
-            <div class="table-card" data-save-url="{{ route('invoices.table.save', ['customerId' => $customerId]) }}">
+            <div class="table-card" data-save-url="{{ route('invoices.table.save', ['customerId' => $customerId]) }}"
+                data-payments-url="{{ route('payments', ['customerId' => $customerId]) }}">
 
 
                 <button id="btnSaveTable" class="btn-save-table">Save</button>

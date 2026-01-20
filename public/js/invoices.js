@@ -236,6 +236,7 @@
           "Accept": "application/json",
         },
         body: JSON.stringify({
+          invoice_id: invoiceId,
           fee: feeInput ? feeInput.value : "",
           fee_split: feeSplitCheck && feeSplitCheck.checked ? "1" : "0",
           fee_payment1_method: feeP1Method ? feeP1Method.value : "",
@@ -277,6 +278,7 @@
 const datesWrap = document.querySelector(".invoice-dates");
 const creationInput = document.getElementById("creationDateInput");
 const paymentInput = document.getElementById("paymentDateInput");
+const invoiceId = document.querySelector('meta[name="invoice-id"]')?.getAttribute("content") || "";
 
 function saveDates() {
   if (!datesWrap) return;
@@ -291,6 +293,7 @@ function saveDates() {
       "Accept": "application/json",
     },
     body: JSON.stringify({
+      invoice_id: invoiceId,
       creation_date: creationInput ? creationInput.value : "",
       payment_date: paymentInput ? paymentInput.value : "",
     }),
@@ -371,9 +374,17 @@ function saveTableJson() {
         icon: "success",
         title: "Saved",
         text: "Invoice information saved successfully",
-        timer: 1600,
+        timer: 900,
         showConfirmButton: false,
       });
+
+      // Redirect a Payments
+      const paymentsUrl = tableCard ? tableCard.getAttribute("data-payments-url") : "";
+      if (paymentsUrl) {
+        setTimeout(() => {
+          window.location.href = paymentsUrl;
+        }, 900);
+      }
     })
 
     .catch((err) => {

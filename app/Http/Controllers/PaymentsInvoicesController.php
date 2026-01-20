@@ -49,6 +49,50 @@ class PaymentsInvoicesController extends Controller
         $customer = DB::table('customers')->where('ID', $customerId)->first();
         if (!$customer) abort(404, 'Customer no encontrado');
 
+        $new = request()->boolean('new'); // true si ?new=1
+
+        if ($new) {
+            // Crear invoice nuevo (vacío) con consecutivo
+            $invoice = new Invoices();
+            $invoice->id = (string) \Illuminate\Support\Str::uuid();
+            $invoice->agency = (string)$agency;
+            $invoice->customer_id = (string)$customerId;
+            $invoice->created_at = now()->format('Y-m-d H:i:s');
+            $invoice->updated_at = now()->format('Y-m-d H:i:s');
+
+            // Generar invoice_number INV-0001 por agency
+            $next = DB::transaction(function () use ($agency) {
+                $last = DB::table('invoices')
+                    ->where('agency', (string)$agency)
+                    ->whereNotNull('invoice_number')
+                    ->orderBy('invoice_number', 'desc')
+                    ->lockForUpdate()
+                    ->value('invoice_number');
+
+                $num = 0;
+                if ($last && preg_match('/^INV-(\d+)$/', $last, $m)) {
+                    $num = (int)$m[1];
+                }
+                $num++;
+                return 'INV-' . str_pad((string)$num, 4, '0', STR_PAD_LEFT);
+            });
+
+            $invoice->invoice_number = $next;
+            $invoice->save();
+
+            // Este será el invoice "actual" en la vista
+            $meta = $invoice;
+        } else {
+            // tu lógica actual (abrir el último)
+            $meta = Invoices::where('agency', (string)$agency)
+                ->where('customer_id', (string)$customerId)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
+        $invoiceId = $meta->id ?? '';
+        $invoiceNumber = $meta->invoice_number ?? '';
+
+
         $policiesCount = DB::table('policies')
             ->where('customer_id', $customerId)
             ->count();
@@ -137,6 +181,8 @@ class PaymentsInvoicesController extends Controller
             'grandTotalSaved',
             'invoiceId',
             'invoiceNumber',
+            'invoiceId',
+            'invoiceNumber',
         ));
     }
 
@@ -170,17 +216,25 @@ class PaymentsInvoicesController extends Controller
 
     public function saveDates(Request $request, $customerId)
     {
-        $authUser = \Illuminate\Support\Facades\Auth::guard('web')->user() ?? \Illuminate\Support\Facades\Auth::guard('sub')->user();
-        if (!$authUser) return response()->json(['ok' => false], 401);
+        $authUser = \Illuminate\Support\Facades\Auth::guard('web')->user()
+            ?? \Illuminate\Support\Facades\Auth::guard('sub')->user();
+
+        if (!$authUser) return response()->json(['ok' => false, 'error' => 'not_auth'], 401);
 
         $agency = $authUser->agency;
+
+        $invoiceId = (string) $request->input('invoice_id', '');
+        if (empty($invoiceId)) {
+            return response()->json(['ok' => false, 'error' => 'missing_invoice_id'], 422);
+        }
 
         $data = $request->validate([
             'creation_date' => 'nullable|string|max:30',
             'payment_date'  => 'nullable|string|max:30',
         ]);
 
-        Invoices::where('agency', (string)$agency)
+        $updated = Invoices::where('id', $invoiceId)
+            ->where('agency', (string)$agency)
             ->where('customer_id', (string)$customerId)
             ->update([
                 'creation_date' => $data['creation_date'] ?? '',
@@ -188,18 +242,27 @@ class PaymentsInvoicesController extends Controller
                 'updated_at'    => now()->format('Y-m-d H:i:s'),
             ]);
 
-        return response()->json(['ok' => true]);
+        return response()->json(['ok' => true, 'updated' => $updated]);
     }
+
 
     public function saveCharges(Request $request, $customerId)
     {
         $authUser = \Illuminate\Support\Facades\Auth::guard('web')->user()
             ?? \Illuminate\Support\Facades\Auth::guard('sub')->user();
 
-        if (!$authUser) return response()->json(['ok' => false], 401);
+        if (!$authUser) return response()->json(['ok' => false, 'error' => 'not_auth'], 401);
 
         $agency = $authUser->agency;
 
+        // ✅ invoice_id separado (NO dentro de $data para update)
+        $invoiceId = (string) $request->input('invoice_id', '');
+
+        if (empty($invoiceId)) {
+            return response()->json(['ok' => false, 'error' => 'missing_invoice_id'], 422);
+        }
+
+        // ✅ valida SOLO los campos de charges (sin invoice_id)
         $data = $request->validate([
             'fee' => 'nullable|string|max:50',
             'fee_split' => 'nullable|string|max:10',
@@ -216,13 +279,14 @@ class PaymentsInvoicesController extends Controller
             'premium_payment2_value' => 'nullable|string|max:50',
         ]);
 
-        Invoices::where('agency', (string)$agency)
+        $updated = Invoices::where('id', $invoiceId)
+            ->where('agency', (string)$agency)
             ->where('customer_id', (string)$customerId)
             ->update(array_merge($data, [
                 'updated_at' => now()->format('Y-m-d H:i:s'),
             ]));
 
-        return response()->json(['ok' => true]);
+        return response()->json(['ok' => true, 'updated' => $updated]);
     }
 
     public function saveInvoiceTable(Request $request, $customerId)
