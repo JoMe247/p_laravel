@@ -264,3 +264,9 @@ Route::post('/customers/{customerId}/invoices/save-table', [PaymentsInvoicesCont
 
 Route::delete('/invoices/{invoiceId}', [PaymentsInvoicesController::class, 'destroy'])
     ->name('invoices.destroy');
+
+Route::get('/invoices/{invoiceId}/pdf', [PaymentsInvoicesController::class, 'downloadPdf'])
+    ->name('invoices.pdf');
+
+Route::post('/payments/invoice-footer-image', [PaymentsInvoicesController::class, 'uploadInvoiceFooterImage'])
+    ->name('payments.invoice_footer_image.upload');

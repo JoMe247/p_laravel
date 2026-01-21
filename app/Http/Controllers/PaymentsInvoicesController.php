@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Invoices;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
+
+
 
 class PaymentsInvoicesController extends Controller
 {
@@ -102,6 +106,8 @@ class PaymentsInvoicesController extends Controller
                 $invoice->customer_id = (string)$customerId;
                 $invoice->created_at = now()->format('Y-m-d H:i:s');
                 $invoice->updated_at = now()->format('Y-m-d H:i:s');
+                $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+                $invoice->created_by_name = $authUser->name ?? '';
 
                 // Generar invoice_number INV-0001 por agency
                 $next = DB::transaction(function () use ($agency) {
@@ -438,5 +444,96 @@ class PaymentsInvoicesController extends Controller
             ->delete();
 
         return back()->with('success', 'Invoice deleted');
+    }
+
+    public function downloadPdf($invoiceId)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) return redirect()->route('login');
+
+        $agency = $authUser->agency;
+
+        $invoice = Invoices::where('id', (string)$invoiceId)
+            ->where('agency', (string)$agency)
+            ->first();
+
+        if (!$invoice) abort(404, 'Invoice not found');
+
+        $agencyInfo = DB::table('agency')
+            ->where('agency_code', $agency)
+            ->first();
+
+        $agencyInfo = $agencyInfo ?: (object)[
+            'agency_code'    => $agency,
+            'agency_name'    => '',
+            'office_phone'   => '',
+            'agency_address' => '',
+            'agency_logo'    => '',
+            'office_email'   => '',
+        ];
+
+        $customer = DB::table('customers')->where('ID', $invoice->customer_id)->first();
+        if (!$customer) abort(404, 'Customer no encontrado');
+
+        // Decode JSON inv_prices
+        $rows = [];
+        $grandTotal = '';
+        if (!empty($invoice->inv_prices)) {
+            $decoded = json_decode($invoice->inv_prices, true);
+            if (is_array($decoded)) {
+                $rows = $decoded['rows'] ?? [];
+                $grandTotal = $decoded['grand_total'] ?? '';
+            }
+        }
+
+        // Normaliza rows (por si viene vacío o con strings)
+        $rows = is_array($rows) ? $rows : [];
+        $firstItem = $rows[0]['item'] ?? '';
+
+        $pdf = Pdf::loadView('pdf.invoice', [
+            'invoice'     => $invoice,
+            'agencyInfo'  => $agencyInfo,
+            'customer'    => $customer,
+            'rows'        => $rows,
+            'grandTotal'  => $grandTotal,
+            'firstItem'   => $firstItem,
+        ])->setPaper('letter', 'portrait');
+
+        $fileName = ($invoice->invoice_number ?: 'INV') . '.pdf';
+        return $pdf->download($fileName);
+    }
+
+    public function uploadInvoiceFooterImage(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) return response()->json(['ok' => false], 401);
+
+        $agency = (string) $authUser->agency;
+
+        $request->validate([
+            'footer_image' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096', // 4MB
+        ]);
+
+        $agencyRow = DB::table('agency')->where('agency_code', $agency)->first();
+        if (!$agencyRow) return response()->json(['ok' => false, 'error' => 'agency_not_found'], 404);
+
+        // borrar anterior si existe
+        if (!empty($agencyRow->invoice_footer_image)) {
+            Storage::disk('public')->delete($agencyRow->invoice_footer_image);
+        }
+
+        $file = $request->file('footer_image');
+        $name = 'footer_' . $agency . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+        // se guarda en storage/app/public/invoice_footer_images/...
+        $path = $file->storeAs('invoice_footer_images/' . $agency, $name, 'public');
+
+        DB::table('agency')
+            ->where('agency_code', $agency)
+            ->update([
+                'invoice_footer_image' => $path,
+            ]);
+
+        return response()->json(['ok' => true, 'path' => $path]);
     }
 }

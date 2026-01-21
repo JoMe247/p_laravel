@@ -129,9 +129,17 @@
                 {{-- /.left-column --}}
 
                 <div class="payments-wrapper">
-                    <a class="btn-invoices" href="{{ route('invoices', ['customerId' => $customerId, 'new' => 1]) }}">
-                        Invoices
-                    </a>
+                    <div class="payments-actions">
+                        <a class="btn-invoices"
+                            href="{{ route('invoices', ['customerId' => $customerId, 'new' => 1]) }}">
+                            Invoices
+                        </a>
+
+                        <label class="switch">
+                            <input type="checkbox" id="footerImgToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
                     <div class="payments-card">
                         <h2>Payments</h2>
@@ -141,7 +149,6 @@
                                 <thead>
                                     <tr>
                                         <th>Invoice#</th>
-                                        <th>Customer</th>
                                         <th>Date</th>
                                         <th>Due Date</th>
                                         <th>Policy#</th>
@@ -157,7 +164,6 @@
                                     @forelse($invoices as $inv)
                                         <tr>
                                             <td class="td-strong">{{ $inv->invoice_number ?? '' }}</td>
-                                            <td>{{ $inv->customer_id ?? '' }}</td>
                                             <td>{{ $inv->creation_date ?? '' }}</td>
                                             <td>{{ $inv->payment_date ?? '' }}</td>
                                             <td>{{ $inv->policy_number ?? '' }}</td>
@@ -191,9 +197,11 @@
                                                 </a>
 
                                                 {{-- PDF: por ahora placeholder --}}
-                                                <button class="icon-btn" type="button"
-                                                    title="Download PDF (coming soon)" disabled>
-                                                    <i class='bx bxs-file-pdf'></i>
+                                                <button class="icon-btn" type="button" title="Download PDF">
+                                                    <a class="icon-btn" title="Download PDF"
+                                                        href="{{ route('invoices.pdf', ['invoiceId' => $inv->id]) }}">
+                                                        <i class='bx bxs-file-pdf'></i>
+                                                    </a>
                                                 </button>
 
                                                 {{-- DELETE --}}
@@ -224,6 +232,37 @@
                     </div>
                 </div>
             </div>
+
+            <div id="footer-img-overlay" class="overlay" style="display:none;">
+                <div class="overlay-box">
+                    <div class="overlay-head">
+                        <h3>Invoice PDF Footer Image</h3>
+                        <button type="button" class="overlay-close" id="closeFooterOverlay">
+                            <i class='bx bx-x'></i>
+                        </button>
+                    </div>
+
+                    <p class="overlay-muted">
+                        Upload an image that will appear at the bottom of every invoice PDF for this agency.
+                    </p>
+
+                    <button type="button" class="btn-upload" id="btnAddFooterImage">
+                        + Add Image
+                    </button>
+
+                    <input type="file" id="footerImageInput" accept="image/*" style="display:none;">
+
+                    <div class="overlay-preview" id="footerPreview" style="display:none;">
+                        <img id="footerPreviewImg" alt="Preview">
+                    </div>
+
+                    <div class="overlay-actions">
+                        <button type="button" class="btn secondary" id="cancelFooterUpload">Cancel</button>
+                        <button type="button" class="btn" id="saveFooterUpload">Save</button>
+                    </div>
+                </div>
+            </div>
+
         </section>
     </div>
 
@@ -401,6 +440,8 @@
     <script src="{{ asset('js/profile.js') }}"></script>
     <script src="{{ asset('js/policies.js') }}"></script>
     <script src="{{ asset('js/invoices.js') }}"></script>
+    <script src="{{ asset('js/payments.js') }}"></script>
+
 
 </body>
 
