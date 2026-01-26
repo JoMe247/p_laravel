@@ -279,3 +279,21 @@
     gap:10px;
     margin-top: 14px;
 }
+
+.footer-image-controls{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.btn-footer-img{
+    border:none;
+    padding:10px 12px;
+    border-radius:12px;
+    background:#111827;
+    color:#fff;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.btn-footer-img:hover{ opacity:.92; }

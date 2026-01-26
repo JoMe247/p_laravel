@@ -10,25 +10,38 @@
         }
 
         body {
-            margin: 28px;
+            margin: 26px 28px;
+            color: #111827;
+            font-size: 12px;
+        }
+
+        /* Encabezados */
+        .title {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: .4px;
+            margin: 0;
+        }
+
+        .label {
+            color: #6b7280;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        .value {
+            font-weight: 800;
             color: #111827;
         }
 
-        .top-grid {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
+        /* Cards formales (menos “rounded”, más factura) */
         .card {
             border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 14px;
-        }
-
-        .logo {
-            width: 220px;
-            height: 120px;
-            object-fit: contain;
+            border-radius: 8px;
+            padding: 12px;
+            background: #fff;
         }
 
         .right {
@@ -37,80 +50,79 @@
 
         .muted {
             color: #6b7280;
-            font-size: 12px;
             font-weight: 600;
         }
 
-        .h1 {
-            font-size: 18px;
-            font-weight: 900;
-            margin: 0;
+        /* Tabla grid */
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .h2 {
-            font-size: 14px;
-            font-weight: 800;
-            margin: 0 0 8px 0;
+        .top-gap {
+            height: 10px;
         }
 
-        .spacer {
+        .section-gap {
             height: 14px;
         }
 
-        .mid-grid {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 14px;
+        /* Logo */
+        .logo {
+            width: 220px;
+            height: 90px;
+            object-fit: contain;
         }
 
-        .box {
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 12px;
-            vertical-align: top;
-        }
-
-        .kv {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .kv td {
-            padding: 3px 0;
-            font-size: 12px;
-        }
-
-        .kv td:first-child {
+        /* Invoice Total */
+        .total-box .total-title {
+            font-weight: 900;
+            font-size: 11px;
             color: #6b7280;
-            font-weight: 700;
-            width: 95px;
+            letter-spacing: .6px;
         }
 
-        .total-big {
+        .total-box .total-amount {
             font-size: 22px;
             font-weight: 900;
             margin: 6px 0 10px 0;
         }
 
-        table.items {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            overflow: hidden;
+        .kv td {
+            padding: 4px 0;
+            vertical-align: top;
         }
 
-        table.items thead th {
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-            text-align: left;
-            padding: 10px;
-            font-size: 12px;
+        .kv td:first-child {
+            width: 92px;
+            color: #6b7280;
+            font-weight: 700;
+        }
+
+        .kv td:last-child {
             font-weight: 900;
         }
 
-        table.items tbody td {
+        /* Items table - estilo contable */
+        .items {
+            margin-top: 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .items thead th {
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #6b7280;
+            font-weight: 900;
+        }
+
+        .items tbody td {
             border-bottom: 1px solid #eef2f7;
             padding: 10px;
             font-size: 12px;
@@ -122,29 +134,100 @@
             white-space: nowrap;
         }
 
-        .footer-total {
-            width: 100%;
+        /* Totales */
+        .totals {
             margin-top: 10px;
+            width: 100%;
             border-collapse: collapse;
         }
 
-        .footer-total td {
+        .totals td {
             padding: 10px;
             font-weight: 900;
-            font-size: 14px;
+            border-top: 2px solid #111827;
+            font-size: 13px;
         }
 
-        .footer-total td:last-child {
+        .totals td:last-child {
             text-align: right;
         }
 
-        .small-footer {
-            margin-top: 18px;
-            text-align: center;
-            font-size: 11px;
+        /* Footer */
+        .footer {
+            margin-top: 12px;
+            font-size: 10px;
             color: #6b7280;
+            text-align: center;
+        }
+
+        /* ============================================
+       IMAGEN FOOTER: SIEMPRE 1 PÁGINA
+       - Reservamos espacio fijo (contenedor)
+       - La imagen se ajusta dentro sin crecer
+    ============================================ */
+
+        .footer-image-wrap {
+            margin-top: 12px;
+            width: 100%;
+            height: 140px;
+            /* ✅ AJUSTA AQUÍ: reserva espacio fijo */
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            page-break-inside: avoid;
+            /* evita corte dentro del contenedor */
+        }
+
+        .footer-image-wrap img {
+            width: 100%;
+            height: 140px;
+            /* mismo que el contenedor */
+            object-fit: contain;
+            /* ✅ encaja sin salirse */
+            display: block;
+        }
+
+        /* Evita que dompdf intente partir secciones críticas */
+        .avoid-break {
+            page-break-inside: avoid;
+        }
+
+        .logo-wrap {
+            width: 100%;
+            height: 90px;
+            /* altura controlada */
+            overflow: hidden;
+        }
+
+        .logo-img {
+            width: 100%;
+            height: 90px;
+            object-fit: contain;
+            /* ✅ no distorsiona */
+            display: block;
+        }
+
+        .footer-image-wrap {
+            margin-top: 12px;
+            width: 100%;
+            height: 120px;
+            /* ✅ para 5 filas */
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+
+        .footer-img {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            /* ✅ no distorsiona */
+            display: block;
+            background: #fff;
         }
     </style>
+
 </head>
 
 <body>
@@ -157,15 +240,20 @@
 
                 {{-- Logo SOLO --}}
                 <div class="card">
-                    @if (!empty($agencyInfo->agency_logo))
-                        <img class="logo" src="{{ public_path('storage/' . $agencyInfo->agency_logo) }}" alt="Logo">
-                    @else
-                        <div class="muted"
-                            style="height:120px; display:flex; align-items:center; justify-content:center;">
-                            LOGO
-                        </div>
-                    @endif
+                    <div class="logo-wrap">
+                        @if (!empty($agencyInfo->agency_logo))
+                            <img class="logo-img" src="{{ public_path('storage/' . $agencyInfo->agency_logo) }}"
+                                alt="Logo">
+                        @else
+                            <div class="muted"
+                                style="height:90px; display:flex; align-items:center; justify-content:center;">
+                                LOGO
+                            </div>
+                        @endif
+                    </div>
                 </div>
+
+
 
                 <div style="height:10px;"></div>
 
@@ -280,12 +368,15 @@
         </tr>
     </table>
 
-    @if (!empty($agencyInfo->invoice_footer_image))
-        <div style="margin-top:18px;">
-            <img src="{{ public_path('storage/' . $agencyInfo->invoice_footer_image) }}"
-                style="width:100%; max-height:260px; object-fit:contain;">
+    @if (!empty($agencyInfo->invoice_footer_image) && !empty($agencyInfo->invoice_footer_enabled))
+        <div class="footer-image-wrap avoid-break">
+            <img class="footer-img" src="{{ public_path('storage/' . $agencyInfo->invoice_footer_image) }}"
+                alt="Footer Image">
         </div>
     @endif
+
+
+
 
 
     <div class="small-footer">

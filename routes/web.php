@@ -270,3 +270,9 @@ Route::get('/invoices/{invoiceId}/pdf', [PaymentsInvoicesController::class, 'dow
 
 Route::post('/payments/invoice-footer-image', [PaymentsInvoicesController::class, 'uploadInvoiceFooterImage'])
     ->name('payments.invoice_footer_image.upload');
+
+Route::post('/payments/invoice-footer-image/enabled', [PaymentsInvoicesController::class, 'setInvoiceFooterEnabled'])
+    ->name('payments.invoice_footer_image.enabled');
+
+Route::post('/payments/invoice-footer-image/delete', [PaymentsInvoicesController::class, 'deleteInvoiceFooterImage'])
+    ->name('payments.invoice_footer_image.delete');

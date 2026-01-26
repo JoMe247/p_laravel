@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 
-
-
 class PaymentsInvoicesController extends Controller
 {
     public function payments($customerId)
@@ -22,6 +20,8 @@ class PaymentsInvoicesController extends Controller
         $agency = $authUser->agency;
         $customer = DB::table('customers')->where('ID', $customerId)->first();
         if (!$customer) abort(404, 'Customer no encontrado');
+        $agencyInfo = DB::table('agency')->where('agency_code', $agency)->first();
+
 
 
         // ✅ últimos 30 invoices del customer (por agency)
@@ -59,6 +59,7 @@ class PaymentsInvoicesController extends Controller
             'agency' => $agency,
             'customer' => $customer,
             'invoices' => $invoices,
+            'agencyInfo' => $agencyInfo,
         ]);
     }
 
@@ -532,8 +533,55 @@ class PaymentsInvoicesController extends Controller
             ->where('agency_code', $agency)
             ->update([
                 'invoice_footer_image' => $path,
+                'invoice_footer_enabled' => 1, // ✅ al subir, se activa
             ]);
 
         return response()->json(['ok' => true, 'path' => $path]);
+    }
+
+    public function setInvoiceFooterEnabled(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) return response()->json(['ok' => false], 401);
+
+        $agency = (string) $authUser->agency;
+
+        $data = $request->validate([
+            'enabled' => 'required|in:0,1',
+        ]);
+
+        DB::table('agency')
+            ->where('agency_code', $agency)
+            ->update([
+                'invoice_footer_enabled' => (int)$data['enabled'],
+            ]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function deleteInvoiceFooterImage(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) return response()->json(['ok' => false], 401);
+
+        $agency = (string) $authUser->agency;
+
+        $agencyRow = DB::table('agency')->where('agency_code', $agency)->first();
+        if (!$agencyRow) return response()->json(['ok' => false, 'error' => 'agency_not_found'], 404);
+
+        // borrar archivo si existe
+        if (!empty($agencyRow->invoice_footer_image)) {
+            Storage::disk('public')->delete($agencyRow->invoice_footer_image);
+        }
+
+        // limpiar BD y desactivar
+        DB::table('agency')
+            ->where('agency_code', $agency)
+            ->update([
+                'invoice_footer_image'   => null,
+                'invoice_footer_enabled' => 0,
+            ]);
+
+        return response()->json(['ok' => true]);
     }
 }

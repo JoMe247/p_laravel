@@ -130,16 +130,30 @@
 
                 <div class="payments-wrapper">
                     <div class="payments-actions">
+
                         <a class="btn-invoices"
                             href="{{ route('invoices', ['customerId' => $customerId, 'new' => 1]) }}">
                             Invoices
                         </a>
 
-                        <label class="switch">
-                            <input type="checkbox" id="footerImgToggle">
-                            <span class="slider"></span>
-                        </label>
+                        <div class="footer-image-controls">
+                            <label class="switch">
+                                <input type="checkbox" id="footerImgToggle"
+                                    {{ !empty($agencyInfo->invoice_footer_enabled) ? 'checked' : '' }}>
+                                <span class="slider"></span>
+                            </label>
+
+                            <button type="button" class="btn-footer-img" id="openFooterOverlay"
+                                data-has-image="{{ !empty($agencyInfo->invoice_footer_image) ? '1' : '0' }}"
+                                style="{{ !empty($agencyInfo->invoice_footer_enabled) && !empty($agencyInfo->invoice_footer_image) ? '' : 'display:none;' }}">
+                                Update Image
+                            </button>
+
+                        </div>
+
+
                     </div>
+
 
                     <div class="payments-card">
                         <h2>Payments</h2>
