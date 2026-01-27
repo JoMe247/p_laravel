@@ -240,6 +240,8 @@ Route::middleware(['auth.multi'])->group(function () {
 
     Route::post('/schedules/assign', [SchedulesController::class, 'assignShift'])->name('schedules.assign');
     Route::delete('/schedules/assign', [SchedulesController::class, 'removeAssignment'])->name('schedules.assign.delete');
+    Route::get('/schedules/pdf', [SchedulesController::class, 'downloadWeekPdf'])
+        ->name('schedules.pdf');
 });
 
 // invoices

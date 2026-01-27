@@ -41,6 +41,14 @@
 
   const COLORS = new Set(['blue', 'green', 'orange', 'purple', 'red']);
 
+  function setPdfLink(weekStartStr) {
+    const btn = document.getElementById('downloadPdf');
+    if (!btn) return;
+
+    // weekStartStr debe ser Monday YYYY-MM-DD
+    btn.href = `${baseUrl}/schedules/pdf?start=${encodeURIComponent(weekStartStr)}`;
+  }
+
   function fmtDowHeaders(weekStartStr) {
     // Mon..Sun dates
     const start = new Date(weekStartStr + 'T00:00:00');
@@ -76,6 +84,7 @@
     state.canEdit = !!data.canEdit;
     weekTitle.textContent = data.week.title;
     renderTable();
+    setPdfLink(state.week.start);
   }
 
   async function fetchShifts() {

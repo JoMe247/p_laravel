@@ -52,6 +52,7 @@
                                     <button class="week-btn" id="prevWeek"><i class='bx bx-chevron-left'></i></button>
                                     <button class="week-btn" id="nextWeek"><i class='bx bx-chevron-right'></i></button>
                                     <button class="week-btn ghost" id="goToday">Today</button>
+                                    <a class="week-btn ghost" id="downloadPdf" href="#">PDF</a>
                                 </div>
                             </div>
 
