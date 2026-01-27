@@ -688,10 +688,15 @@
 
 
 .slider-wrap {
-  max-width: 420px;
+  max-width: 100%;
   margin: 24px auto;
   font-family: system-ui, Arial, sans-serif;
 }
+
+.slider-wrap label{
+  font-size: 1.2em;
+}
+
 .row {
   display: flex;
   align-items: center;

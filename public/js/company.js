@@ -38,8 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const id = form.getAttribute("data-id"); // null => create
             const url = id
-                ? `${baseUrl}/company/update/${id}`
-                : `${baseUrl}/company/store`;
+                ? `${baseUrl}/companies/update/${id}`
+                : `${baseUrl}/companies/store`;
 
             const data = new FormData(form);
 
@@ -89,7 +89,7 @@ window.editCompany = async function (id) {
     const baseUrl = document.querySelector("meta[name=base-url]").content;
 
     try {
-        let req = await fetch(`${baseUrl}/company/edit/${id}`);
+        let req = await fetch(`${baseUrl}/companies/edit/${id}`);
         let res = await req.json();
 
         if (!res.ok) {

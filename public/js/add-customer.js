@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function () {
         outerBox.innerHTML = `
             <div class="customer-modal-content">
                 <div class="customer-modal-header">
-                    <h3>Add Customer</h3>
-                    <button id="customer-close" class="btn-close"><i class="bx bx-x"></i></button>
+                    <h2>Add Customer</h2>
+                    <button id="customer-close" class="btn-close" style="display:none"><i class="bx bx-x"></i></button>
                 </div>
                 <form id="customer-form">
                     <div class="customer-modal-fields">
@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>
                     <div class="customer-modal-buttons">
-                        <button type="button" id="customer-cancel" class="btn-cancel">Cancel</button>
-                        <button type="submit" id="customer-save" class="btn-save">Save</button>
+                        <button type="submit" id="customer-save" class="btn-save">Registrar</button>
+                        <button type="button" id="customer-cancel" class="btn-cancel">Cancelar</button>
                     </div>
                     <div id="customer-error" class="customer-error"></div>
                 </form>

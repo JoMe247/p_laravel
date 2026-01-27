@@ -49,8 +49,18 @@ body{
     width: 100%;
     height: inherit;
     z-index: 2;
+    position: relative;
 
     /* backdrop-filter: blur(4px); */
+}
+
+#img-hover{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    opacity: .5;
+    left: 0;
 }
 
 .lateral-row:has(> #main-logo){
@@ -201,6 +211,12 @@ body{
 
 [data="option"]:hover{
     background-color: rgba(0, 0, 0, 0.3);
+}
+
+[tab="active"]{
+    background-color: rgba(0, 0, 0, 0.3);
+    margin-top: 1px;
+    margin-bottom: 1px;
 }
 
 #dash{
@@ -732,6 +748,17 @@ body{
     padding-top: 10px;
 }
 
+#lower-table-clients .base-table a{
+    text-decoration: none;
+    color: unset;
+}
+
+#lower-table-clients .base-table a:not(.table-panel-options p a):hover{
+    text-decoration: underline;
+    color: #444;
+}
+
+
 #lower-table-clients #table-header{
     color: #555;
     height: 40px;
@@ -785,7 +812,7 @@ body{
     content: '';
     width: 100%;
     height: 1px;
-    /* background-color: #ddd; */
+    background-color: #f2f2f2;
     left: 0;
     /* border-bottom: 1px solid #ddd; */
 }

@@ -56,6 +56,10 @@
     font-family: var(--montserrat);
   }
 
+  #img-hover{
+
+  }
+
   .select-menu .options .option {
     display: flex;
     height: 55px;
@@ -272,9 +276,20 @@
     display: flex;
   }
 
+  #clients-list:not(:has(> :nth-child(5))) .table-panel-options {
+    margin-top: 170px !important;
+  }
+
+  #table-border:not(:has(#clients-list > tr:nth-child(5))) {
+    overflow-y: visible;
+    overflow-x: visible;
+  }
+
   .base-table tr:nth-last-child(1) td:has(i):hover .table-panel-options{
     margin-top: -170px !important;
   }
+
+  
 
   .base-table tr:nth-last-child(2) td:has(i):hover .table-panel-options{
     margin-top: -170px !important;

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account · Plan</title>
+    <title>Account</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
     <link rel="icon" href="img/favicon.png">
@@ -42,55 +42,107 @@
 
                 <div id="account-content-inner">
 
-                    <h1>Agency {{ $agency->agency_code }}</h1>
+                    <h1 style="color:var(--red1);">Agency {{ $agency->agency_code }}</h1>
                     <h2>Plan actual: {{ $plan->account_type }}</h2>
 
-                    {{-- ===================
-                     SMS
-                    ==================== --}}
-                    <div class="account-card">
-                        <h3>Mensajes SMS</h3>
+                    {{-- ======================================================
+                        BLOQUE ACTUAL (USO REAL DEL PLAN ACTIVO)
+                    ======================================================= --}}
+                    <div class="account-grid">
 
-                        <p><b>Twilio Number:</b> {{ $twilioNumber }}</p>
-                        <p><b>Enviados HOY:</b> {{ $dailySmsCount }}</p>
-                        <p><b>Enviados este mes:</b> {{ $monthlySmsCount }} / {{ $smsLimit }}</p>
+                        {{-- SMS --}}
+                        <div class="account-card">
+                            <h3>Mensajes SMS</h3>
+                            <p style="font-size:1em;padding-top:0px;"><b>Twilio Number:</b> {{ $twilioNumber }}</p>
+                            <p style="font-size:1em;"><b>Enviados HOY:</b> {{ $dailySmsCount }}</p>
+                            <p style="font-size:1em;padding-bottom:10px;"><b>Enviados este mes:</b> {{ $monthlySmsCount }} / {{ $smsLimit }}</p>
 
-                        @if ($isSmsOverLimit)
-                            <div class="account-alert">
-                                ⚠ Has excedido tu límite mensual de mensajes.
-                            </div>
-                        @endif
+                            @if ($isSmsOverLimit)
+                                <div class="account-alert">
+                                    ⚠ Has excedido tu límite mensual de mensajes.
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- DOCUMENTOS --}}
+                        <div class="account-card">
+                            <h3>e-Sign Docs</h3>
+                            <p style="padding-top:15px"><b style="font-size:1.2em"> {{ $monthlyDocCount }} / {{ $docLimit }}</b> </p>
+
+                            @if ($isDocsOverLimit)
+                                <div class="account-alert">
+                                    ⚠ Has excedido el límite mensual de documentos.
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- USUARIOS --}}
+                        <div class="account-card">
+                            <h3>Usuarios</h3>
+                            <p><b>Usuarios creados:</b> {{ $totalUsers }} / {{ $userLimit }}</p>
+
+                            @if ($isUserOverLimit)
+                                <div class="account-alert">
+                                    ⚠ Límite de usuarios alcanzado.
+                                </div>
+                            @endif
+                        </div>
+
                     </div>
 
-                    {{-- ===================
-                     DOCUMENTOS
-                ==================== --}}
-                    <div class="account-card">
-                        <h3>Documentos</h3>
 
-                        <p><b>Subidos este mes:</b> {{ $monthlyDocCount }} / {{ $docLimit }}</p>
+                    {{-- ======================================================
+                        PLANES DISPONIBLES (3 COLUMNAS / 3 MINI CARDS)
+                    ======================================================= --}}
+                    <h2 style="margin-top:20px;color:var(--red1);font-size:2em">Planes disponibles</h2>
 
-                        @if ($isDocsOverLimit)
-                            <div class="account-alert">
-                                ⚠ Has excedido el límite mensual de documentos.
+                    <div class="plans-row">
+                        @foreach($allPlans as $p)
+                            @php $isCurrent = ($p->account_type === $currentAccountType); @endphp
+
+                            <div class="plan-col {{ $isCurrent ? 'is-current' : '' }}">
+
+                                <div class="plan-col-header">
+                                    <div class="plan-title">{{ $p->account_type }}</div>
+
+                                    @if($isCurrent)
+                                        <div class="plan-badge">PLAN ACTUAL</div>
+                                    @endif
+                                </div>
+
+                                <div class="plan-mini-stack">
+
+                                    <div class="account-card mini-card">
+                                        <h4><i class='bx bxs-message' ></i> Mensajes SMS</h4>
+                                        <p>Límite mensual: <e style="color:var(--red1);font-weight:bold;">{{ (int)$p->msg_limit }}</e></p>
+                                    </div>
+
+                                    <div class="account-card mini-card">
+                                        <h4><i class='bx bx-pencil' ></i> e-Sign Docs</h4>
+                                        <p>Límite mensual: <e style="color:var(--red1);font-weight:bold;">{{ (int)$p->doc_limit }}</e></p>
+                                    </div>
+
+                                    <div class="account-card mini-card">
+                                        <h4><i class='bx bxs-user'></i> Usuarios</h4>
+                                        <p>Límite total: <e style="color:var(--red1);font-weight:bold;">{{ (int)$p->user_limit }}</e></p>
+                                    </div>
+
+                                    @if(str_contains($p->account_type, 'Pro'))
+                                        <div class="account-card mini-card">
+                                            <h4><i class='bx bx-globe'></i> Website Setup</h4>
+                                        </div>
+                                    @endif
+
+                                    <div class="account-card mini-card">
+                                        <h4><i class='bx bx-support' ></i> Customer Support</h4>
+                                    </div>
+
+                                </div>
                             </div>
-                        @endif
+                        @endforeach
                     </div>
 
-                    {{-- ===================
-                     USUARIOS
-                ==================== --}}
-                    <div class="account-card">
-                        <h3>Usuarios</h3>
-
-                        <p><b>Usuarios creados:</b> {{ $totalUsers }} / {{ $userLimit }}</p>
-
-                        @if ($isUserOverLimit)
-                            <div class="account-alert">
-                                ⚠ Límite de usuarios alcanzado.
-                            </div>
-                        @endif
-                    </div>
+                    <div id="upgrade-button">Cambiar Plan</div>
 
                 </div>
 

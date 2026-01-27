@@ -28,14 +28,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* Mantiene el overlay por encima de todo */
-        #cust-edit-customer {
-            z-index: 9999;
-        }
-
-        #dim-screen {
-            z-index: 9998;
-        }
 
         #cust-outer-box {
             transition: transform 0.35s ease, opacity 0.25s ease;
@@ -49,8 +41,6 @@
 
         <section id="dash">
             <div id="lower-table-clients" type="fullscreen">
-<<<<<<< Updated upstream
-
                 <h3>Recent Clients</h3>
 
                 <!-- Contenedor combinado de buscador y botones -->
@@ -59,68 +49,6 @@
                         <label for="tableSearch"><i class='bx bx-search'></i></label>
                         <input id="tableSearch" type="text" placeholder="Search">
                     </div>
-                <div id="table-menu">
-                    <!-- Remove 'active' class, this is just to show in Codepen thumbnail -->
-                    <div class="select-menu" status="pending-drop">
-                        <div class="select-btn" id="action-drop-button">
-                        <span class="sBtn-text">Quick Action</span>
-                        <i class="bx bx-chevron-down"></i>
-                        </div>
-                    
-                        <ul id="table-drop" class="options" style="display: none;">
-                            <li class="option">
-                                <i class='bx bxs-message' style="color: rgb(80, 80, 80);"></i>
-                                <span class="option-text" style="color: rgb(80, 80, 80);">SMS</span>
-                            </li>
-                            <li class="option">
-                                <i class='bx bx-envelope' style="color: rgb(80, 80, 80);"></i>
-                                <span class="option-text" style="color: rgb(80, 80, 80);">Email</span>
-                            </li>
-                            <li class="option">
-                                <i class='bx bx-table' style="color: rgb(80, 80, 80);"></i>
-                                <span class="option-text" style="color: rgb(80, 80, 80);">Export CSV</span>
-                            </li>
-                            <li class="option">
-                                <i class='bx bx-edit' style="color: rgb(80, 80, 80);"></i>
-                                <span class="option-text" style="color: rgb(80, 80, 80);">Edit</span>
-                            </li>
-                            <li class="option">
-                                <i class='bx bxs-trash' style="color: rgb(179, 57, 57);"></i>
-                                <span class="option-text" style="color: rgb(179, 57, 57);">Delete</span>
-                            </li>
-                            <li class="option">
-                                <i class='bx bx-x-circle' style="color: #c2c2c2;"></i>
-                                <span class="option-text" style="color: #c2c2c2;">Close</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="button" color="dodgerblue" size="xsmall" position="absolute" id="allAction-btn" status="pending" ><i class='bx bx-right-arrow-alt' ></i></div>
-=======
-                <h3>Customers</h3>
-
-                <!-- Contenedor combinado de buscador y botones -->
-                <div id="cust-top-bar" style="display:flex;">
-                    <div id="search-container" style="position:unset;margin-top:20px;margin-left:20px !important;margin-right:20px">
-                        <label for="tableSearch"><i class='bx bx-search'></i></label>
-                        <input id="tableSearch" type="text" placeholder="Search">
-                    </div>
-
-                    <div id="cust-table-menu" style="margin-top:20px;margin-bottom:0px">
-                        <button id="cust-addCustomer-btn" class="button" title="Agregar nuevo cliente">
-                            <i class="bx bx-user-plus"></i> Add Customer
-                        </button>
-                        <button id="cust-deleteSelected-btn" class="button" title="Eliminar seleccionados" disabled>
-                            <i class='bx bx-trash'></i>
-                        </button>
-                    </div>
->>>>>>> Stashed changes
-                </div>
-
-                <div id="search-container">
-                    <label for="tableSearch"><i class='bx bx-search'></i></label>
-                    <input id="tableSearch" type="text" placeholder="Search">
-                </div>
 
                     <div id="cust-table-menu">
                         <button id="cust-addCustomer-btn" class="button" title="Agregar nuevo cliente">
@@ -136,112 +64,52 @@
 
                 <!-- Tabla de clientes -->
                 <div id="table-border">
-<<<<<<< Updated upstream
-                
                     <table class="base-table" id="customers-table">
                         <tr id="table-header">
                             <th><input type="checkbox" id="select-all-customers"></th><!-- Casilla de selección -->
-                            <th><input id="selectAll-chk" type="checkbox" onchange="checkAll(this)"></th>
-=======
-                    <table class="base-table" id="customers-table" style="padding-bottom:500px;">
-                        <tr id="table-header">
-                            <th><input type="checkbox" id="select-all-customers"></th><!-- Casilla de selección -->
-                            <div class="select-menu" status="pending-drop" style="display:none">
-                                <div class="select-btn" id="action-drop-button">
-                                    <span class="sBtn-text">Quick Action</span>
-                                    <i class="bx bx-chevron-down"></i>
-                                </div>
-
-                                <ul id="table-drop" class="options" style="display: none;">
-                                    <li class="option">
-                                        <i class='bx bxs-message' style="color: rgb(80, 80, 80);"></i>
-                                        <span class="option-text" style="color: rgb(80, 80, 80);">SMS</span>
-                                    </li>
-                                    <li class="option">
-                                        <i class='bx bx-envelope' style="color: rgb(80, 80, 80);"></i>
-                                        <span class="option-text" style="color: rgb(80, 80, 80);">Email</span>
-                                    </li>
-                                    <li class="option">
-                                        <i class='bx bx-table' style="color: rgb(80, 80, 80);"></i>
-                                        <span class="option-text" style="color: rgb(80, 80, 80);">Export CSV</span>
-                                    </li>
-                                    <li class="option">
-                                        <i class='bx bx-edit' style="color: rgb(80, 80, 80);"></i>
-                                        <span class="option-text" style="color: rgb(80, 80, 80);">Edit</span>
-                                    </li>
-                                    <li class="option">
-                                        <i class='bx bxs-trash' style="color: rgb(179, 57, 57);"></i>
-                                        <span class="option-text" style="color: rgb(179, 57, 57);">Delete</span>
-                                    </li>
-                                    <li class="option">
-                                        <i class='bx bx-x-circle' style="color: #c2c2c2;"></i>
-                                        <span class="option-text" style="color: #c2c2c2;">Close</span>
-                                    </li>
-                                </ul>
-                            </div>
->>>>>>> Stashed changes
                             <th>ID</th>
                             <th>NAME</th>
+                            <th>POLICIES</th>
                             <th>ADDRESS</th>
                             <th>PHONE</th>
                             <th>DOB</th>
                         </tr>
-
-<<<<<<< Updated upstream
                         <tbody id="clients-list">
                             @foreach ($customers as $c)
                                 <tr>
                                     <td><input type="checkbox" class="select-customer" data-id="{{ $c->ID }}">
                                     </td>
 
-                                    <td onclick="window.location.href='profile/{{ $c->ID }}'">{{ $c->ID }}</td>
-                                    <td>{{ $c->Name }}</td>
+                                    <td><a href="{{ url('profile/' . $c->ID) }}">{{ $c->ID }}</a></td>
+                                    <td><a href="{{ url('profile/' . $c->ID) }}">{{ $c->Name }}</a></td>
+                                    <td><a href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a></td>
                                     <td>{{ $c->Address }}</td>
                                     <td>{{ $c->Phone }}</td>
                                     <td>{{ $c->DOB }}</td>
+
+                                    <td class="customer-drop">
+                                            <i class='bx bx-dots-horizontal-rounded'></i>
+
+                                            <label class="table-panel-options">
+                                                <p onclick="window.location.href='profile/{{ $c->ID }}'"><i class='bx bx-id-card'></i>
+                                                    <a>Open</a>
+                                                </p>
+
+                                                <p><i class='bx bx-trash'></i>
+                                                    <a href="{{ url('delete-customer/' . $c->ID) }}">Delete</a>
+                                                </p>
+
+                                                <p><i class='bx bxs-message'></i>
+                                                    <a href="{{ url('sms/?contact=1' . $c->Phone) }}">SMS</a>
+                                                </p>
+
+                                                <p><i class='bx bx-file'></i>
+                                                    <a href="#">Invoice</a>
+                                                </p>
+                                            </label>
+                                        </td>
                                 </tr>
                             @endforeach
-
-
-                            <tr>
-                                <td><input type="checkbox" name="customer_select" id="" onchange="checkboxActive()"></td>
-                                <td class="customer-id">0004</td>
-                                <td class="table-name" id="customer-name">Sarah Thompson</td>
-                                <td class="customer-policy">4000000</td>
-                                <td class="customer-address">101 Pine Street</td>
-                                <td class="customer-phone">555-987-6543</td>
-                                <td class="customer-dob">03/12/1982</td>
-                                <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                    <label class="table-panel-options">
-                                        <p><i class='bx bx-id-card'></i><a href="">Open</a></p>
-                                        <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                        <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                        <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                        <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                    </label>
-                                </td>
-                            </tr>
-
-                           
-                            
-=======
-                                    <td style="cursor:pointer;" onclick="window.location.href='profile/{{ $c->ID }}'">{{ $c->ID }}</td>
-                                    <td>{{ $c->Name }}</td>
-                                    <td>{{ $c->Address }}</td>
-                                    <td>{{ $c->Phone }}</td>
-                                    <td>{{ $c->DOB }}</td>
-                                    <td class="customer-drop"><i class='bx bx-dots-horizontal-rounded'></i>
-                                        <label class="table-panel-options">
-                                            <p onclick="window.location.href='profile/{{ $c->ID }}'"><i class='bx bx-id-card'></i><a>Open</a></p>
-                                            <p><i class='bx bx-edit'></i><a href="">Edit</a></p>
-                                            <p><i class='bx bx-trash'></i><a href="">Delete</a></p>
-                                            <p><i class='bx bxs-message'></i><a href="">SMS</a></p>
-                                            <p><i class='bx bx-file'></i><a href="">Invoice</a></p>
-                                        </label>
-                                    </td>
-                                </tr>
-                            @endforeach
->>>>>>> Stashed changes
                         </tbody>
                     </table>
                 </div>

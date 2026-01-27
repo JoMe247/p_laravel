@@ -2,28 +2,36 @@ $('#upload-photo-btn').on('click', function () {
     $('#photo-input').click();
 });
 
-$('#photo-input').on('change', function () {
+try {
 
-    const customerId = $('#profile-wrapper').data('id'); // ← AHORA SÍ OBTIENE 53
-    let formData = new FormData($('#photo-upload-form')[0]);
+    $('#photo-input').on('change', function () {
 
-    $.ajax({
-        url: `/customers/${customerId}/upload-photo`,
-        type: "POST",
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (res) {
-            if (res.success) {
-                // Actualizar la foto en pantalla
-                $('#customer-photo').attr('src', res.path + '?v=' + Date.now());
+        const customerId = $('#profile-wrapper').data('id'); // ← AHORA SÍ OBTIENE 53
+        let formData = new FormData($('#photo-upload-form')[0]);
+
+        $.ajax({
+            url: `/customers/${customerId}/upload-photo`,
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res.success) {
+                    // Actualizar la foto en pantalla
+                    $('#customer-photo').attr('src', res.path + '?v=' + Date.now());
+                }
+            },
+            error: function (xhr) {
+                console.error("UPLOAD ERROR:", xhr.responseText);
             }
-        },
-        error: function (xhr) {
-            console.error("UPLOAD ERROR:", xhr.responseText);
-        }
+        });
     });
-});
+    
+} catch (error) {
+    
+}
+
+
 
 
 /**
@@ -100,8 +108,7 @@ function activateAddAlert() {
         Swal.fire({
             title: "Add Alert",
             input: "textarea",
-            inputLabel: "Write an alert or note for this customer",
-            inputPlaceholder: "Type the alert here...",
+            inputPlaceholder: "Type here...",
             inputAttributes: { "aria-label": "Alert text" },
             showCancelButton: true,
             confirmButtonText: "Save",
