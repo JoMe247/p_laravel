@@ -13,8 +13,20 @@
     align-items: center;
 }
 
+#cust-top-bar{
+    display: flex;
+    margin-top: 10px;
+}
+
+#cust-top-bar #search-container{
+    position: unset;
+    margin-top: unset;
+    margin-left: 30px !important;
+    margin-right: 20px;
+}
+
 /* === Caja principal === */
-#cust-outer-box {
+/* #cust-outer-box {
     width: 80%;
     height: 90%;
     overflow-y: scroll;
@@ -23,7 +35,7 @@
     border-radius: 10px;
     transform: translateY(150%);
     transition: 0.3s ease-in-out;
-}
+} */
 
 /* === Contenedor de inputs === */
 #cust-customer-inputs {
@@ -84,7 +96,11 @@ p.cust-input-name-upper {
     border-radius: 10px;
     background-color: rgba(200, 200, 200, 0.5);
     backdrop-filter: blur(4px);
+    /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);  */
 }
+
+
+
 
 /* === Botón Agregar Cliente === */
 #cust-addCustomer-btn {
@@ -100,7 +116,7 @@ p.cust-input-name-upper {
     justify-content: center;
     gap: 6px;
     transition: background 0.2s ease;
-    height: 34px;
+    height: 37px;
     position: relative;
     z-index: 50;
 }
@@ -117,7 +133,7 @@ p.cust-input-name-upper {
     justify-content: flex-start;
     margin-bottom: 12px;
     position: relative;
-    z-index: 50;
+    /* z-index: 50; */
 }
 
 /* === Modal === */
@@ -241,37 +257,47 @@ p.cust-input-name-upper {
 }
 
 #cust-outer-box {
-    width: 80%;
-    max-width: 850px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    padding: 25px 30px;
-    transform: translateY(150%);
-    transition: transform 0.35s ease, opacity 0.25s ease;
-    opacity: 0;
+    background: #fff;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    padding: 28px 32px;
+    width: 100%;
+    max-width: 520px;
+    position: relative;
+    animation: slideDown 0.3s ease;
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
 }
 
 /* Contenedor interno del modal */
 .customer-modal-content {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-flow: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    /* flex-direction: column; */
+    /* gap: 15px; */
     font-family: var(--montserrat);
+    justify-content: center;
 }
 
 /* Cabecera del modal */
 .customer-modal-header {
     display: flex;
-    justify-content: space-between;
+    flex-flow: wrap;
+    justify-content: center;
     align-items: center;
+    width: 100%;
 }
 
-.customer-modal-header h3 {
-    margin: 0;
-    font-size: 1.5em;
-    font-weight: 600;
-    color: #333;
+.customer-modal-header h2 {
+    font-size: 1.3rem;
+    color: #1a1a1a;
+    font-weight: 500;
+    font-family: var(--montserrat);
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 .btn-close {
@@ -287,72 +313,93 @@ p.cust-input-name-upper {
     color: #e74c3c;
 }
 
+#customer-form{
+    
+}
+
 /* Campos del formulario */
 .customer-modal-fields {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
+    
 }
 
 .customer-field {
-    flex: 1 1 200px;
     display: flex;
-    flex-direction: column;
+    flex-flow: wrap;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-family: var(--montserrat);
+    /* justify-content: center; */
 }
 
 .customer-field label {
-    font-weight: 500;
+    /* font-weight: 500; */
     margin-bottom: 4px;
-    color: #555;
+    color: #000;
+    /* width: 100%; */
 }
 
 .customer-field input {
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    height: 40px;
+    width: 100%;
+    font-size: 1.2em;
+    padding-left: 8px;
+    border: none;
     outline: none;
-    font-size: 1em;
-    transition: border 0.2s;
+    color: #555;
+    font-family: var(--montserrat);
+    font-weight: 400;
+    cursor: text;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+    border-radius: 5px;
 }
 
-.customer-field input:focus {
-    border-color: #2ecc71;
-}
 
 /* Botones de acción */
 .customer-modal-buttons {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 15px;
+    flex-flow: wrap;
+    justify-content: center;
+    margin-top: 18px;
 }
 
 .btn-cancel {
-    background-color: #e74c3c;
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 6px;
-    border: none;
+    width: 320px;
+    background-color: #fdfdfd;
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--montserrat);
     cursor: pointer;
-    transition: background 0.2s;
+    text-align: center;
 }
 
 .btn-cancel:hover {
-    background-color: #c0392b;
+    background-color: #d8d8d8;
+    border: 1px solid #d8d8d8;
 }
 
 .btn-save {
-    background-color: #2ecc71;
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 6px;
-    border: none;
+    background-color: var(--red1);
+    color: white;
+    border: 1px solid var(--red1);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--montserrat);
     cursor: pointer;
-    transition: background 0.2s;
+    text-align: center;
+    width: 320px;
 }
 
 .btn-save:hover {
-    background-color: #27ae60;
+    background-color: var(--red2);
+    border: 1px solid var(--red2);
 }
 
 /* Mensaje de error */
@@ -375,7 +422,10 @@ p.cust-input-name-upper {
 
 /* --- Botón Delete Selected --- */
 #cust-deleteSelected-btn {
+
+    background: #000000;
     background: #e74c3c;
+
     border: none;
     color: white;
     cursor: pointer;
@@ -383,6 +433,10 @@ p.cust-input-name-upper {
     border-radius: 6px;
     margin-left: 8px;
     transition: background 0.2s ease, transform 0.2s ease;
+
+    font-size: 1.5em;
+    height: 37px;
+
 }
 
 #cust-deleteSelected-btn:disabled {
@@ -392,7 +446,11 @@ p.cust-input-name-upper {
 }
 
 #cust-deleteSelected-btn:not(:disabled):hover {
+
+    background: #333;
+
     background: #c0392b;
+
     transform: scale(1.05);
 }
 

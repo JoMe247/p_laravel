@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\CustomerNote;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 
 class CustomersController extends Controller
@@ -14,7 +15,27 @@ class CustomersController extends Controller
     public function index()
     {
         $customers = Customer::orderBy('ID', 'desc')->get();
-        return view('customers', compact('customers'));
+
+        // ids de customers
+        $customerIds = $customers->pluck('ID')->filter()->values()->all();
+
+        // Consulta independiente (NO depende de relaciones)
+        $policyCounts = $this->getPolicyCountsByCustomerId($customerIds);
+
+        return view('customers', compact('customers', 'policyCounts'));
+    }
+
+    private function getPolicyCountsByCustomerId(array $customerIds): array
+    {
+        if (empty($customerIds)) return [];
+
+        // OJO: cambia 'policies' si tu tabla se llama diferente
+        return DB::table('policies')
+            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
+            ->selectRaw('customer_id, COUNT(*) as total')
+            ->groupBy('customer_id')
+            ->pluck('total', 'customer_id')
+            ->toArray();
     }
 
     // store: guarda los 4 campos rápidos (recibe JSON o form)
@@ -83,7 +104,7 @@ class CustomersController extends Controller
         $customer->fill($validated);
         $customer->save();
 
-        return redirect()->route('customers.index')->with('success', 'Customer updated.');
+        return redirect('profile/'.$id)->with('success', 'Customer updated.');
     }
     public function deleteMultiple(Request $request)
     {
@@ -111,7 +132,7 @@ class CustomersController extends Controller
 
         // Guardar nueva foto
         $file = $request->file('photo');
-        $newName = uniqid('cust_') . '.' . $file->getClientOriginalExtension();
+        $newName = $id . '.' . $file->getClientOriginalExtension();
         $file->move(public_path('uploads/customers'), $newName);
 
         $path = 'uploads/customers/' . $newName;

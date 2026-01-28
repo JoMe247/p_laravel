@@ -131,11 +131,11 @@ Route::middleware(['auth:web,sub'])->group(function () {
 });
 
 // Company Routes
-Route::get('/company', [CompanyController::class, 'index'])->name('company');
-Route::post('/company/store', [CompanyController::class, 'store']);
-Route::get('/company/edit/{id}', [CompanyController::class, 'edit']);
-Route::post('/company/update/{id}', [CompanyController::class, 'update']);
-Route::post('/company/delete/{id}', [CompanyController::class, 'delete'])->name('company.delete');
+Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
+Route::post('/companies/store', [CompanyController::class, 'store']);
+Route::get('/companies/edit/{id}', [CompanyController::class, 'edit']);
+Route::post('/companies/update/{id}', [CompanyController::class, 'update']);
+Route::post('/companies/delete/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
 
 // Help Routes
 Route::get('/help', [HelpController::class, 'index'])->name('help');

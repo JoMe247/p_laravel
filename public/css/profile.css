@@ -8,6 +8,7 @@
     gap: 24px;
     padding: 20px 30px;
     box-sizing: border-box;
+    width: 100%;
 }
 
 /* =========================== */
@@ -83,22 +84,30 @@
 }
 
 
+
+
+
 /* =========================== */
 /*     PROFILE PHOTO           */
 /* =========================== */
 
 .profile-photo-section {
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    width: 200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .profile-photo-frame {
     width: 170px;
     height: 170px;
-    border-radius: 50%;
+    border-radius: 10px;
     overflow: hidden;
-    margin: 0 auto 14px;
-    border: 4px solid #3498db;
+    margin-bottom: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.22);
 }
 
@@ -106,39 +115,88 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
+.profile-photo-frame img:hover{
+    transform: scale(1.2);
+}
+
+
+
 #upload-photo-btn {
-    background: #3498db;
-    border: none;
+    background-color: var(--red1);
     color: white;
-    padding: 8px 16px;
-    border-radius: 10px;
+    border-radius: 6px;
+    border: none;
+    padding: 8px 14px;
     cursor: pointer;
-    transition: 0.18s;
+    font-size: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s ease;
+    height: 37px;
+    width: max-content;
+    position: relative;
+    z-index: 50;
 }
 
 #upload-photo-btn:hover {
-    background: #2d89c4;
+    background-color: var(--red2);
+    border: 1px solid var(--red2);
 }
 
 /* === MAIN PROFILE CARD === */
-.profile-card-container {
+
+.profile-main{
+    height: 100%;
     width: 100%;
-    max-width: 900px;
+}
+
+.profile-card-container {
+    width: 90%;
+    height: 90vh;
+    overflow-y: scroll;
     margin: auto;
     background: white;
     padding: 25px 35px;
     border-radius: 18px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    display: flex;
+    flex-flow: wrap;
+    position: relative;
+}
+
+.profile-card-container::-webkit-scrollbar {
+    width: 8px;
+    padding-right: 10px;
+    margin-right: 10px;
+}
+
+.profile-card-container::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: rgba(200, 200, 200, 0.5);
+    backdrop-filter: blur(4px);
+    /* -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5); */
+}
+
+.profile-card-container::-webkit-scrollbar-track {
+    /* -webkit-box-shadow: 0 0 6px rgb(0, 0, 0); */
+    border-radius: 10px;
 }
 
 /* Centered Name */
 .profile-name {
+    width: 100%;
     text-align: center;
     font-size: 26px;
     font-weight: 600;
     margin-top: 5px;
+    font-family: var(--montserrat);
 }
 
 /* Top small info row */
@@ -153,28 +211,44 @@
     text-align: center;
 }
 
-.info-row .label {
-    font-size: 12px;
-    opacity: 0.7;
+.info-row label {
     display: block;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: .7;
+    margin-bottom: 4px;
+    font-family: var(--montserrat);
 }
 
-.info-row .value {
-    font-size: 14px;
-    font-weight: bold;
-}
+/* .info-row .value {
+    padding: 6px 10px;
+    width: 150px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: center;
+    height: 17px;
+} */
 
 /* Section boxes */
 .profile-section-box {
-    margin-top: 25px;
+    margin-top: 45px;
     background: #f5f5f5;
     padding: 15px 18px;
     border-radius: 12px;
+    position: relative;
 }
 
 .profile-section-box h3 {
-    margin-bottom: 10px;
-    font-size: 16px;
+    position: absolute;
+    font-size: 1em;
+    top: -20px;
+    left: 10px;
+    font-family: var(--montserrat);
+    text-transform: uppercase;
+}
+
+#profile-form{
+    width: 100%;
 }
 
 /* Grids */
@@ -197,46 +271,65 @@
     border-radius: 6px;
 }
 
-/* Photo section */
-.profile-photo-section {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.profile-photo-frame {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin: auto;
-    border: 4px solid #3498db;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-}
-
-.upload-photo-btn {
-    margin-top: 10px;
-    background: #3498db;
-    color: white;
-    border-radius: 10px;
-    padding: 6px 15px;
-}
 
 /* Actions */
 .profile-actions {
     margin-top: 30px;
     text-align: center;
+    display: flex;
+    position: absolute;
+    left: 20px;
+    top: 0;
 }
 
-.profile-actions .btn {
+.profile-actions .btn, .profile-actions a {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 0 8px;
+    font-size: 1.2em;
 }
+
+#profile-back{
+    background-color: #333;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+#profile-back:hover{
+    background-color: #222;
+}
+
+#profile-save{
+    width: 120px;
+    background: #3c86e7;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+#profile-save:hover{
+    background: #3574c6;
+}
+
 /* TOP ROW EDITABLE (DOB, GENDER, MARITAL) */
 .profile-info-grid.editable-top {
     display: flex;
+    flex-flow: wrap;
     justify-content: center;
     gap: 60px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    /* margin-top: 20px; */
+    /* margin-bottom: 20px; */
+    /* position: absolute; */
+    /* width: 500px; */
+    /* top: 50px; */
+    /* right: 20%; */
 }
 
 .editable-top .info-row {
@@ -249,15 +342,20 @@
     font-weight: 600;
     opacity: .7;
     margin-bottom: 4px;
+    font-family: var(--montserrat);
 }
 
 .editable-top .info-row input {
     padding: 6px 10px;
     width: 150px;
     border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: 6px;
     text-align: center;
+    font-family: var(--montserrat);
+    outline: none;    
+    font-size: inherit;
 }
+
 
 /* GRID DE CONTACTO (4 columnas iguales) */
 .profile-contact-grid {
@@ -276,16 +374,17 @@
 
 /* Estilo uniforme para inputs */
 .profile-contact-grid input {
-    width: 100%;
+    /* width: 100%; */
     padding: 8px 12px;
     border: 1px solid #ccc;
-    border-radius: 10px;
+    border-radius: 6px;
     font-size: 14px;
+    outline: none;
 }
 
 /* GRID PARA DETAILS Y OFFICE */
 .details-grid {
-    margin-top: 20px;
+    /* margin-top: 20px; */
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px 30px;
@@ -298,78 +397,98 @@
 }
 
 .details-grid input {
-    width: 100%;
+    /* width: 100%; */
     padding: 8px 12px;
     border: 1px solid #ccc;
-    border-radius: 10px;
+    border-radius: 6px;
     font-size: 14px;
+    outline: none;
 }
 
 .age-box {
-    display: block;
-    background: #f7f7f7;
-    padding: 8px 12px;
-    border-radius: 10px;
+    padding: 6px 10px;
     border: 1px solid #ccc;
-    font-size: 14px;
-    min-height: 40px;
-    line-height: 22px;
+    border-radius: 6px;
+    text-align: center;
+    width: 150px;
+    height: 17px;
+    justify-content: center;
+    display: flex;
+    user-select: none;
+    background: #f6f6f6;
+    font-family: var(--montserrat);
 }
 
 .added-display {
-    display: block;
-    background: #f7f7f7;
+    padding: 8px 12px;
+    background: #ffffff;
     border: 1px solid #ccc;
-    padding: 10px 12px;
-    border-radius: 10px;
-    min-height: 40px;
-    line-height: 20px;
+    border-radius: 6px;
     font-size: 14px;
-    color: #333;
+    font-family: var(--montserrat);
+    font-weight: bold;
+    color: #666;
+    user-select: none;
 }
 
 #profile-alert-container {
-    margin-bottom: 15px;
-    width: fit-content;
+    right: 0;
+    position: absolute;
 }
 
-.alert-box {
-    background: rgb(255, 225, 155);
-    border-left: 4px solid #e69500;
-    padding: 10px 14px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    color: #5a3c00;
-}
 
-.alert-box i {
-    font-size: 20px;
-    color: #e69500;
-}
 
 .alert-box {
     position: relative;
-    background: rgb(255, 232, 170);
-    border-left: 6px solid #e2a200;
+    background: var(--red1);
+    /* border-left: 6px solid var(--red2); */
     padding: 12px 45px 12px 18px; /* MÁS ESPACIO A LA DERECHA */
-    border-radius: 12px;
     display: flex;
     align-items: center;
+    font-family: var(--montserrat);
     gap: 10px;
-    font-weight: 600;
-    color: #5a3c00;
-    width: fit-content;
-    max-width: 350px;
+    font-weight: 500;
+    color: #fff;
+    width: 400px;
     box-sizing: border-box;
+    border-radius: 5px;
+}
+
+#alert-border{
+    height: 100%;
+    width: 50px;
+    background-color: var(--red2);
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.alert-box i {
+    font-size: 1.5em;
+    color: var(--red2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alert-box i::before{
+    margin-top: 2px;
+    margin-left: 1px;
+}
+
+.alert-box span {
+    padding-left: 50px;
+    padding-right: 30px;
 }
 
 /* Icono de alerta */
 .alert-box i.bx-error {
-    font-size: 22px;
-    color: #e2a200;
+    font-size: 1.8em;
+    color: #fff;
 }
 
 .alert-delete {
@@ -388,8 +507,7 @@
 
 .alert-delete:hover {
     background: #ffdddd;
-    color: red;
-    transform: scale(1.15);
+    color: var(--red1);
 }
 
 /* =========================== */
@@ -570,4 +688,53 @@
 
 .note-delete-btn:hover {
     background: #ffd6d6;
+}
+
+#add-alert-btn{
+    background-color: #ffdf3e;
+    color: #333;
+    margin-left: 29px;
+    border-radius: 6px;
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s ease;
+    height: 37px;
+    width: max-content;
+    position: relative;
+    z-index: 50;
+}
+
+#add-alert-btn:hover{
+    background-color: #eccf41;
+}
+
+
+div:where(.swal2-container) .swal2-textarea{
+    width: 450px;
+    height: 180px;
+    resize: none;
+    outline: none;
+    font-family: var(--montserrat);
+}
+
+div:where(.swal2-container) input:where(.swal2-input):focus, div:where(.swal2-container) input:where(.swal2-file):focus, div:where(.swal2-container) textarea:where(.swal2-textarea):focus{
+    border: 1px solid #d9d9d9 !important;
+    box-shadow: none !important;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):hover{
+    background-color: var(--red2) !important;
+    border: 1px solid var(--red2) !important;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-cancel):hover{
+    background-color: #d8d8d8 !important;
+    border: 1px solid #d8d8d8 !important;
 }

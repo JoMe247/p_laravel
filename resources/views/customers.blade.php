@@ -28,14 +28,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* Mantiene el overlay por encima de todo */
-        #cust-edit-customer {
-            z-index: 9999;
-        }
-
-        #dim-screen {
-            z-index: 9998;
-        }
 
         #cust-outer-box {
             transition: transform 0.35s ease, opacity 0.25s ease;
@@ -77,6 +69,7 @@
                             <th><input type="checkbox" id="select-all-customers"></th><!-- Casilla de selección -->
                             <th>ID</th>
                             <th>NAME</th>
+                            <th>POLICIES</th>
                             <th>ADDRESS</th>
                             <th>PHONE</th>
                             <th>DOB</th>
@@ -87,11 +80,34 @@
                                     <td><input type="checkbox" class="select-customer" data-id="{{ $c->ID }}">
                                     </td>
 
-                                    <td onclick="window.location.href='profile/{{ $c->ID }}'">{{ $c->ID }}</td>
-                                    <td>{{ $c->Name }}</td>
+                                    <td><a href="{{ url('profile/' . $c->ID) }}">{{ $c->ID }}</a></td>
+                                    <td><a href="{{ url('profile/' . $c->ID) }}">{{ $c->Name }}</a></td>
+                                    <td><a href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a></td>
                                     <td>{{ $c->Address }}</td>
                                     <td>{{ $c->Phone }}</td>
                                     <td>{{ $c->DOB }}</td>
+
+                                    <td class="customer-drop">
+                                            <i class='bx bx-dots-horizontal-rounded'></i>
+
+                                            <label class="table-panel-options">
+                                                <p onclick="window.location.href='profile/{{ $c->ID }}'"><i class='bx bx-id-card'></i>
+                                                    <a>Open</a>
+                                                </p>
+
+                                                <p><i class='bx bx-trash'></i>
+                                                    <a href="{{ url('delete-customer/' . $c->ID) }}">Delete</a>
+                                                </p>
+
+                                                <p><i class='bx bxs-message'></i>
+                                                    <a href="{{ url('sms/?contact=1' . $c->Phone) }}">SMS</a>
+                                                </p>
+
+                                                <p><i class='bx bx-file'></i>
+                                                    <a href="#">Invoice</a>
+                                                </p>
+                                            </label>
+                                        </td>
                                 </tr>
                             @endforeach
                         </tbody>

@@ -43,23 +43,32 @@ class AccountController extends Controller
 
         $twilioNumber = $ownerUser->twilio_number;
 
-        // 4) Obtener plan desde BD doc_config.limits
-        $plan = DB::connection('doc_config')
+        // 4) Obtener TODOS los planes disponibles (doc_config.limits)
+        $allPlans = DB::connection('doc_config')
             ->table('limits')
-            ->where('account_type', $agency->account_type)
-            ->first();
+            ->orderBy('id_lim') // o ->orderBy('account_type')
+            ->get();
+
+        // 4.1) Obtener plan actual desde BD doc_config.limits
+        $plan = $allPlans->firstWhere('account_type', $agency->account_type);
 
         if (!$plan) {
-            // fallback a un plan por defecto
-            $plan = DB::connection('doc_config')
-                ->table('limits')
-                ->where('account_type', 'P1')
-                ->first();
+            // fallback a un plan por defecto (P1)
+            $plan = $allPlans->firstWhere('account_type', 'Basic');
+
+            // si aun así no existe, como último recurso busca directo
+            if (!$plan) {
+                $plan = DB::connection('doc_config')
+                    ->table('limits')
+                    ->where('account_type', 'BASIC')
+                    ->first();
+            }
         }
 
-        $smsLimit  = (int) $plan->msg_limit;
-        $docLimit  = (int) $plan->doc_limit;
-        $userLimit = (int) $plan->user_limit;
+        $smsLimit  = (int) ($plan->msg_limit ?? 0);
+        $docLimit  = (int) ($plan->doc_limit ?? 0);
+        $userLimit = (int) ($plan->user_limit ?? 0);
+
 
         // 5) Fechas
         $today      = Carbon::today();
@@ -134,7 +143,10 @@ class AccountController extends Controller
 
             // Info extra
             'plan'             => $plan,
+            'allPlans'         => $allPlans,
+            'currentAccountType' => $agency->account_type,
             'twilioNumber'     => $twilioNumber,
         ]);
+
     }
 }

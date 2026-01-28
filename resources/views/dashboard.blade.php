@@ -168,7 +168,7 @@
                                 <th><input id="selectAll-chk" type="checkbox" onchange="checkAll(this)"></th>
                                 <th>ID</th>
                                 <th>NAME</th>
-                                <th>POLICY</th>
+                                <th>POLICIES</th>
                                 <th>ADDRESS</th>
                                 <th>PHONE</th>
                                 <th>DOB</th>
@@ -183,9 +183,9 @@
                                                 onchange="checkboxActive()">
                                         </td>
 
-                                        <td class="customer-id">{{ $c->ID }}</td>
-                                        <td class="table-name">{{ $c->Name }}</td>
-                                        <td class="customer-policy">{{ $c->Policy ?? '—' }}</td>
+                                        <td class="customer-id"><a href="{{ url('profile/' . $c->ID) }}">{{ $c->ID }}</a></td>
+                                        <td class="table-name"><a href="{{ url('profile/' . $c->ID) }}">{{ $c->Name }}</a></td>
+                                        <td class="customer-policy"><a href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a></td>
                                         <td class="customer-address">{{ $c->Address }}</td>
                                         <td class="customer-phone">{{ $c->Phone }}</td>
                                         <td class="customer-dob">{{ $c->DOB }}</td>
@@ -198,9 +198,9 @@
                                                     <a href="{{ url('profile/' . $c->ID) }}">Open</a>
                                                 </p>
 
-                                                <p><i class='bx bx-edit'></i>
+                                                <!-- <p><i class='bx bx-edit'></i>
                                                     <a href="{{ url('profile/' . $c->ID) }}">Edit</a>
-                                                </p>
+                                                </p> -->
 
                                                 <p><i class='bx bx-trash'></i>
                                                     <a href="{{ url('delete-customer/' . $c->ID) }}">Delete</a>
@@ -352,11 +352,6 @@
 
         </div>
     </div>
-
-
-
-
-
 
     <!-- UI Elements -->
     <div class="window-confirm">
@@ -519,7 +514,6 @@
 
     <div id="dim-screen"></div>
 
-
     <!-- <script src="js/main.js"></script> -->
     <script src="{{ asset('js/image.js') }}"></script>
     <script src="{{ asset('js/weather.js') }}"></script>
@@ -531,7 +525,7 @@
     <script src="{{ asset('js/dashboard.js') }}"></script>
 
 
-    {{-- 🔔 REMINDERS OVERLAY --}}
+     <!-- 🔔 REMINDERS OVERLAY  -->
     <div id="reminders-overlay" class="overlay">
         <div class="overlay-box" style="max-width:520px;">
             <div class="overlay-head">

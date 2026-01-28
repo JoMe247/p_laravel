@@ -31,188 +31,205 @@
 
 </head>
 
-<body class="dark">
+<body >
     <div id="main-container">
+
+        <!-- Menu Include-->
         @include('menu')
 
-        <div class="office-logo-box">
-            <form action="{{ route('office.uploadLogo') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+        <section id="dash">
 
-                <div class="logo-preview">
-                    <img src="{{ $agencyData->agency_logo ? asset('storage/' . $agencyData->agency_logo) : asset('img/default-logo.png') }}"
-                        alt="Logo Agencia">
-                </div>
+            <div id="top-container">
 
-                <label class="btn secondary upload-btn">
-                    Subir Logo
-                    <input type="file" name="agency_logo" accept="image/*" onchange="this.form.submit()">
-                </label>
-            </form>
-        </div>
+                <!-- FORMULARIO DE AGENCIA -->
+                <div class="agency-info-box">
+                    <div id="office-left">
+                        <h3>Datos de Agencia</h3>
 
+                        <div class="office-logo-box">
+                            <form action="{{ route('office.uploadLogo') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
 
-        {{-- FORMULARIO DE AGENCIA (arriba a la derecha) --}}
-        <div class="agency-info-box">
+                                <div class="logo-preview">
+                                    <img src="{{ $agencyData->agency_logo ? asset('storage/' . $agencyData->agency_logo) : asset('img/default-logo.png') }}"
+                                        alt="Logo Agencia">
+                                </div>
 
-            <h3>Datos de Agencia</h3>
+                                <label class="btn secondary upload-btn">
+                                    <i class='bx bx-image-alt'></i> &nbsp;Actualizar Logo
+                                    <input type="file" name="agency_logo" accept="image/*" onchange="this.form.submit()">
+                                </label>
+                            </form>
+                        </div>
 
-            {{-- Código de Agencia heredado (solo lectura) --}}
-            <div class="agency-row">
-                <label>Código de Agencia:</label>
-                <input type="text" value="{{ $agency }}" disabled>
-            </div>
+                        {{-- Código de Agencia heredado (solo lectura) --}}
+                        <div class="agency-row">
+                            <label>Código de Agencia</label>
+                            <input type="text" value="{{ $agency }}" disabled>
+                        </div>
 
-            {{-- Número Twilio heredado (solo lectura) --}}
-            <div class="agency-row">
-                <label>Número Twilio:</label>
-                <input type="text" value="{{ $twilioNumber }}" disabled>
-            </div>
+                        {{-- Número Twilio heredado (solo lectura) --}}
+                        <div class="agency-row">
+                            <label>Número Twilio</label>
+                            <input type="text" value="{{ $twilioNumber }}" disabled>
+                        </div>
+                    </div>
 
-            <form action="{{ route('agency.save') }}" method="POST">
-                @csrf
+                    <hr>
 
-                {{-- Código de agencia que se usará para guardar --}}
-                <input type="hidden" name="agency_code" value="{{ $agency }}">
-
-                <div class="agency-row">
-                    <label>Teléfono Oficina</label>
-                    <input type="text" name="office_phone" value="{{ $agencyData->office_phone ?? '' }}">
-                </div>
-
-                <div class="agency-row">
-                    <label>Dirección Agencia</label>
-                    <input type="text" name="agency_address" value="{{ $agencyData->agency_address ?? '' }}">
-                </div>
-
-                <div class="agency-row">
-                    <label>Nombre Agencia</label>
-                    <input type="text" name="agency_name" value="{{ $agencyData->agency_name ?? '' }}" required>
-                </div>
-
-                <div class="agency-row">
-                    <label>Correo Agencia</label>
-                    <input type="email" name="agency_email" value="{{ $agencyData->agency_email ?? '' }}" required>
-                </div>
-
-
-                <button class="btn primary" type="submit">Guardar</button>
-            </form>
-        </div>
-
-        <div class="container">
-
-            <div class="office-topbar">
-                <button id="btn-open-overlay" class="btn primary"
-                    @if (auth('sub')->check()) disabled title="Los sub users no pueden agregar sub users"
-                    @elseif ($isUserLimitReached)
-        disabled title="Límite de usuarios alcanzado para este plan" @endif>
-                    <i class='bx bx-user-plus'></i> Agregar Sub-User
-                </button>
-
-            </div>
-
-            <div class="office-table-wrapper">
-                <table class="office-table">
-                    <thead>
-                        <tr>
-                            <th>Nombre de Usuario</th>
-                            <th>Nombre</th>
-                            <th>Correo</th>
-                            <th>Tipo</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($members as $member)
-                            <tr>
-                                <td>{{ $member->username }}</td>
-                                <td>{{ $member->name }}</td>
-                                <td>{{ $member->email }}</td>
-                                <td>{{ $member->tipo }}</td>
-                                <td>
-                                    @if ($member->tipo === 'Usuario')
-                                        @if (auth('web')->check())
-                                            <!-- Usuario principal SÍ puede eliminar -->
-                                            <form method="POST"
-                                                action="{{ route('office.delete', ['id' => $member->id]) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn-delete" type="submit">
-                                                    <i class='bx bx-trash'></i>
-                                                </button>
-                                            </form>
-                                        @else
-                                            <!-- Sub User NO puede eliminar -->
-                                            <button class="btn-delete" disabled
-                                                title="Los sub users no pueden eliminar usuarios.">
-                                                <i class='bx bx-trash'></i>
-                                            </button>
-                                        @endif
-                                    @else
-                                        <span class="admin-lock"><i class='bx bx-lock'></i></span>
-                                    @endif
-
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Overlay para registrar Sub-User -->
-            <div id="overlay-subuser">
-                <div class="overlay-content">
-                    <i class='bx bx-x overlay-close' id="close-overlay"></i>
-                    <h2>Registrar Sub-User</h2>
-
-                    <form method="POST" action="{{ route('office.store') }}" class="card">
+                    <form action="{{ route('agency.save') }}" method="POST">
                         @csrf
 
-                        <div class="form-row">
-                            <label>Username</label>
-                            <input type="text" name="username" required>
+                        {{-- Código de agencia que se usará para guardar --}}
+                        <input type="hidden" name="agency_code" value="{{ $agency }}">
+
+                        <div class="agency-row">
+                            <label>Nombre Oficina</label>
+                            <input type="text" name="agency_name" value="{{ $agencyData->agency_name ?? '' }}" required>
                         </div>
 
-                        <div class="form-row">
-                            <label>Nombre</label>
-                            <input type="text" name="name" required>
+                        <div class="agency-row">
+                            <label>Teléfono Oficina</label>
+                            <input type="text" name="office_phone" value="{{ $agencyData->office_phone ?? '' }}">
                         </div>
 
-                        <div class="form-row">
-                            <label>Email</label>
-                            <input type="email" name="email" required>
+                        <div class="agency-row">
+                            <label>Dirección Oficina</label>
+                            <input type="text" name="agency_address" value="{{ $agencyData->agency_address ?? '' }}">
                         </div>
 
-                        <div class="form-row">
-                            <label>Password</label>
-                            <input type="password" name="password" required>
+                        <div class="agency-row">
+                            <label>Correo Oficina</label>
+                            <input type="email" name="agency_email" value="{{ $agencyData->agency_email ?? '' }}" required>
                         </div>
 
-                        @isset($agency)
-                            <div class="form-row">
-                                <label>Agency</label>
-                                <input type="text" value="{{ $agency }}" disabled>
-                            </div>
-                        @endisset
 
-                        @isset($twilioNumber)
-                            <div class="form-row">
-                                <label>Twilio From</label>
-                                <input type="text" value="{{ $twilioNumber }}" disabled />
-                            </div>
-                        @endisset
-
-                        <div class="overlay-actions">
-                            <button type="submit" class="btn primary">Registrar</button>
-                        </div>
+                        <button class="btn primary" type="submit">Guardar</button>
                     </form>
                 </div>
+
+                <div class="container">
+
+                <div class="office-topbar">
+                    <button id="btn-open-overlay" class="btn primary"
+                        @if (auth('sub')->check()) disabled title="No tienes permisos para agregar usuarios."
+                        @elseif ($isUserLimitReached)
+                            disabled title="Límite de usuarios alcanzado para este plan" @endif>
+                        <i class='bx bx-user-plus'></i> Agregar Usuario
+                    </button>
+
+                </div>
+
+                <div class="office-table-wrapper">
+                    <table class="office-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre de Usuario</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Tipo</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($members as $member)
+                                <tr>
+                                    <td><b>{{ $member->username }}</b></td>
+                                    <td>{{ $member->name }}</td>
+                                    <td>{{ $member->email }}</td>
+                                    <td>{{ $member->tipo }}</td>
+                                    <td>
+                                        @if ($member->tipo === 'Usuario')
+                                            @if (auth('web')->check())
+                                                <!-- Usuario principal SÍ puede eliminar -->
+                                                <form method="POST"
+                                                    action="{{ route('office.delete', ['id' => $member->id]) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn-delete" type="submit">
+                                                        <i class='bx bx-trash'></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <!-- Sub User NO puede eliminar -->
+                                                <button class="btn-delete" disabled
+                                                    title="Los sub users no pueden eliminar usuarios.">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
+                                            @endif
+                                        @else
+                                            <span class="admin-lock"><i class='bx bx-lock'></i></span>
+                                        @endif
+
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Overlay para registrar Sub-User -->
+                <div id="overlay-subuser">
+                    <div class="overlay-content">
+                        
+                        <h2>Registrar Usuario</h2>
+
+                        <form method="POST" action="{{ route('office.store') }}" class="card">
+                            @csrf
+
+                            <div class="form-row">
+                                <label>Username</label>
+                                <input type="text" name="username" autocomplete="one-time-code" required>
+                            </div>
+
+                            <div class="form-row">
+                                <label>Nombre</label>
+                                <input type="text" name="name" autocomplete="one-time-code" required>
+                            </div>
+
+                            <div class="form-row">
+                                <label>Email</label>
+                                <input type="email" name="email" autocomplete="one-time-code" required>
+                            </div>
+
+                            <div class="form-row">
+                                <label>Password</label>
+                                <input type="password" name="password" autocomplete="one-time-code" required>
+                            </div>
+
+                            @isset($agency)
+                                <div class="form-row">
+                                    <label>Agency</label>
+                                    <input type="text" value="{{ $agency }}" disabled>
+                                </div>
+                            @endisset
+
+                            @isset($twilioNumber)
+                                <div class="form-row">
+                                    <label>Twilio From</label>
+                                    <input type="text" value="{{ $twilioNumber }}" disabled />
+                                </div>
+                            @endisset
+
+                            <div class="overlay-actions">
+                                <button type="submit" class="btn primary">Registrar</button>
+                                <div id="close-overlay">Cancelar</div>
+                               
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
             </div>
 
+            </div>
 
-        </div>
+            
+
+        </section>
     </div>
+
     <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">

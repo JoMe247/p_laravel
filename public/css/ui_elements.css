@@ -1,6 +1,6 @@
 @import url('https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css');
 
-#dim-screen-1{
+#dim-screen{
     width: 100%;
     height: 100%;
     top: 0;
@@ -688,10 +688,15 @@
 
 
 .slider-wrap {
-  max-width: 420px;
+  max-width: 100%;
   margin: 24px auto;
   font-family: system-ui, Arial, sans-serif;
 }
+
+.slider-wrap label{
+  font-size: 1.2em;
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -714,11 +719,11 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 18px; height: 18px; border-radius: 50%;
-  background: #111827; cursor: pointer;
+  background: var(--red1); cursor: pointer;
 }
 input[type="range"]::-moz-range-thumb {
   width: 18px; height: 18px; border-radius: 50%;
-  background: #111827; cursor: pointer; border: none;
+  background: var(--red1); cursor: pointer; border: none;
 }
 .value {
   min-width: 84px;

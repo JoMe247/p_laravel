@@ -5,7 +5,7 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Customer Profile</title>
+    <title>{{ $customer->Name }} - Profile</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}">
+    <!-- <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}"> -->
     <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 
     <!-- Icons -->
@@ -39,7 +39,7 @@
 
         <section id="dash">
             
-            <div id="lower-table-clients" type="fullscreen">
+            
 
                 {{-- CONTENEDOR GENERAL DEL PROFILE --}}
                 <div id="profile-wrapper" data-id="{{ $customer->ID }}">
@@ -140,12 +140,14 @@
                             <div id="profile-alert-container">
                                 @if (!$customer->Alert)
                                     <button id="add-alert-btn" class="button" style="margin-bottom: 15px;">
-                                        <i class='bx bx-error-circle'></i> Add Alert
+                                        <i class='bx bx-error'></i> Add Alert
                                     </button>
                                 @else
                                     <div id="customer-alert-box" class="alert-box">
                                         <i class='bx bx-x alert-delete'></i>
-                                        <i class='bx bx-error bx-tada'></i>
+                                        <div id="alert-border">
+                                            <i class='bx bx-error bx-tada'></i>
+                                        </div>
                                         <span>{{ $customer->Alert }}</span>
                                     </div>
                                 @endif
@@ -154,13 +156,13 @@
 
                             <div class="profile-photo-section">
                                 <div class="profile-photo-frame">
-                                    <img id="customer-photo"
+                                    <img id="customer-photo" onclick="window.open('{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}')"
                                         src="{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}"
                                         alt="Profile Photo">
                                 </div>
 
                                 <button id="upload-photo-btn" class="btn upload-photo-btn">
-                                    Upload Photo
+                                    <i class='bx bx-image-alt'></i> Change Photo
                                 </button>
 
                                 <form id="photo-upload-form" enctype="multipart/form-data" style="display:none;">
@@ -279,7 +281,7 @@
 
                                 {{-- OFFICE INFO --}}
                                 <div class="profile-section-box">
-                                    <h3>Office Information</h3>
+                                    <h3>Office</h3>
 
                                     <div class="details-grid">
 
@@ -310,7 +312,7 @@
                                         </div>
 
                                         <div class="info-row">
-                                            <label>Added</label>
+                                            <label>Added Date</label>
                                             <span class="added-display">
                                                 {{ $customer->Added ? \Carbon\Carbon::parse($customer->Added)->format('Y-m-d') : '—' }}
                                             </span>
@@ -320,10 +322,12 @@
                                 </div>
 
                                 <div class="profile-actions">
-                                    <button type="submit" class="btn profile-btn-save">Save</button>
-                                    <a href="{{ route('customers.index') }}" class="btn secondary">Back</a>
-                                    <button type="button" id="delete-customer-btn"
-                                        class="btn delete-btn">Delete</button>
+
+                                    <button id="profile-save" type="submit" class="btn profile-btn-save">Guardar</button>
+
+                                    <a id="profile-back" href="{{ route('customers.index') }}" class="btn secondary"><i class='bx bx-arrow-back'></i></a>
+
+                                    <button type="button" id="delete-customer-btn" class="btn delete-btn"><i class='bx bx-trash' ></i></button>
                                 </div>
                             </form>
 
@@ -333,7 +337,7 @@
 
                 </div> {{-- /#profile-wrapper --}}
 
-            </div>
+            
         </section>
     </div>
 
@@ -439,29 +443,29 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="{{ asset('../img/menu/thumbs/1.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
+                        <label class="thumb-options" onclick="selectImage(2)"><img src="{{ asset('../img/menu/thumbs/2.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg"
+                        <label class="thumb-options" onclick="selectImage(3)"><img src="{{ asset('../img/menu/thumbs/3.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(4)"><img src="img/menu/thumbs/4.jpg"
+                        <label class="thumb-options" onclick="selectImage(4)"><img src="{{ asset('../img/menu/thumbs/4.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(5)"><img src="img/menu/thumbs/5.jpg"
+                        <label class="thumb-options" onclick="selectImage(5)"><img src="{{ asset('../img/menu/thumbs/5.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(6)"><img src="img/menu/thumbs/6.jpg"
+                        <label class="thumb-options" onclick="selectImage(6)"><img src="{{ asset('../img/menu/thumbs/6.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(7)"><img src="img/menu/thumbs/7.jpg"
+                        <label class="thumb-options" onclick="selectImage(7)"><img src="{{ asset('../img/menu/thumbs/7.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(8)"><img src="img/menu/thumbs/8.jpg"
+                        <label class="thumb-options" onclick="selectImage(8)"><img src="{{ asset('../img/menu/thumbs/8.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(9)"><img src="img/menu/thumbs/9.jpg"
+                        <label class="thumb-options" onclick="selectImage(9)"><img src="{{ asset('../img/menu/thumbs/9.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(10)"><img src="img/menu/thumbs/10.jpg"
+                        <label class="thumb-options" onclick="selectImage(10)"><img src="{{ asset('../img/menu/thumbs/10.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(11)"><img src="img/menu/thumbs/11.jpg"
+                        <label class="thumb-options" onclick="selectImage(11)"><img src="{{ asset('../img/menu/thumbs/11.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(12)"><img src="img/menu/thumbs/12.jpg"
+                        <label class="thumb-options" onclick="selectImage(12)"><img src="{{ asset('../img/menu/thumbs/12.jpg') }}"
                                 alt=""></label>
 
 
@@ -502,10 +506,10 @@
 
     <!-- Archivos JS -->
     <script src="{{ asset('js/image.js') }}"></script>
-    <script src="{{ asset('js/weather.js') }}"></script>
-    <script src="{{ asset('js/dropdown.js') }}"></script>
+    <!-- <script src="{{ asset('js/weather.js') }}"></script> -->
+    <!-- <script src="{{ asset('js/dropdown.js') }}"></script> -->
     <script src="{{ asset('js/menu.js') }}"></script>
-    <script src="{{ asset('js/table.js') }}"></script>
+    <!-- <script src="{{ asset('js/table.js') }}"></script> -->
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/help.js') }}"></script>

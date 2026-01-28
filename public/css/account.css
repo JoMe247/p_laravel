@@ -1,76 +1,164 @@
-/* =========================================
-   ACCOUNT VIEW - CUSTOM LAYOUT
-   ========================================= */
+    #dash-content{
+        width: 95%;
+        height: 90%;
+        padding: 30px;
+        margin-top: 20px;
+        font-family: var(--montserrat);
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        border-radius: 10px;
+        /* align-content: center; */
+    }
+    .account-card:not(.plan-mini-stack .account-card){
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        /* padding: 15px; */
+        border-radius: 20px;
+        overflow: hidden;
+    }
 
-/* --- Contenedor general del contenido --- */
-#account-content {
-    width: calc(100% - 320px); /* deja espacio para el menú lateral */
-    margin-left: 320px;        /* mismo ancho del menú */
-    padding: 40px;
-    padding-top: 60px;
-    min-height: 100vh;
-    box-sizing: border-box;
-    overflow: visible !important;
-    position: relative;
-}
+    .account-card:not(.plan-mini-stack .account-card) h3{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        width: 100%;
+        height: 30px;
+        background-color: var(--red1);
+        color: #fff;
+        position: relative;
+    }
 
-/* Fondo blanco para que el contenido destaque */
-#account-content-inner {
-    background: rgba(255, 255, 255, 0.92);
-    border-radius: 16px;
-    padding: 30px 40px;
-    box-shadow: 0px 6px 25px rgba(0,0,0,0.12);
-}
+    .account-card:not(.plan-mini-stack .account-card) p{
+        font-size: 1.4em;
+        padding-top: 5px;
+    }
 
-/* --- Títulos --- */
-#account-content h1 {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
+    p{
+        color: #333;
+    }
 
-#account-content h2 {
-    font-size: 22px;
-    font-weight: 600;
-    opacity: 0.85;
-}
+    h1, h2, h3{
+        color: #555;
+        text-transform: uppercase;
+    }
 
-#account-content h3 {
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-size: 20px;
-    color: #333;
-}
+/* ====== GRID PRINCIPAL ====== */
+    .account-grid{
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap:16px;
+        margin-top:18px;
+    }
 
-#account-content p {
-    font-size: 15px;
-    margin: 3px 0;
-}
+    /* ====== PLANES EN COLUMNAS ====== */
+    .plans-row{
+        margin-top:18px;
+        display:grid;
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+        gap:18px;
+        align-items:start;
+    }
 
-/* --- Tarjetas --- */
-.account-card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 20px 25px;
-    box-shadow: 0 2px 14px rgba(0,0,0,0.1);
-    margin-bottom: 25px;
-    border-left: 4px solid #4b91ff;
-}
+    .plan-col{
+        background:#fff;
+        /* border:1px solid #e6e6e6; */
+        box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+        border-radius:25px;
+        overflow: hidden;
+        height: 480px;
+        /* padding:14px; */
+    }
 
-.account-card.alert {
-    border-left-color: #e53935;
-}
+    .plan-col.is-current{
+        border:2px solid rgba(229, 0, 85, .3);
+        /* box-shadow:0 0 0 1px var(--red1); */
+    }
 
-.account-card p {
-    margin: 5px 0;
-}
+    .plan-col-header{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        width: 100%;
+        height: 50px;
+        background-color: var(--red1);
+        
+        color: #fff;
+        position: relative;
+    }
 
-/* --- Alertas --- */
-.account-alert {
-    background: #ffe2e2;
-    color: #c62828;
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-top: 12px;
-    font-weight: bold;
-}
+    .plan-title{
+        font-weight:800;
+        font-size:18px;
+        font-size: 1.4em;
+    }
+
+    .plan-badge{
+        background:#fff;
+        color:var(--red1);
+        font-size:12px;
+        padding:5px 10px;
+        border-radius:999px;
+        font-weight:700;
+        white-space:nowrap;
+        right: 20px;
+        position: absolute;
+    }
+
+    /* ====== MINI CARDS ====== */
+    .plan-mini-stack{
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+    }
+
+    .mini-card{
+        padding:14px;
+        color: #333;
+        font-size: 1.2em;
+    }
+
+    .mini-card h4{
+        margin-bottom:6px;
+        font-size:1em;
+        text-transform: uppercase;
+    }
+
+    #upgrade-button{
+        width: 200px;
+        height: 40px;
+        font-size: 1.2em;
+        background: transparent;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+        border: 1px solid #e50055;
+        border-radius: 0px;
+        color: #e50055;
+        font-weight: bold;
+        padding-right: 40px;
+        padding-left: 40px;
+        margin-top: 20px;
+        margin-bottom: 30px;
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: 40px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    #upgrade-button:hover {
+        background: #e50055;
+        color: #fff;
+    }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 900px){
+        .plans-row{
+            grid-template-columns: 1fr;
+        }
+    }
