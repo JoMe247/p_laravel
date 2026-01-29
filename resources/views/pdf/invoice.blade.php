@@ -5,128 +5,236 @@
     <meta charset="utf-8">
     <title>Invoice PDF</title>
     <style>
+        @font-face {
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 400;
+            /* Regular */
+            src: url("{{ public_path('fonts/Montserrat-Regular.ttf') }}") format("truetype");
+        }
+
+        @font-face {
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 700;
+            /* Bold */
+            src: url("{{ public_path('fonts/Montserrat-Bold.ttf') }}") format("truetype");
+        }
+
+        /* =========================================================
+   VARIABLES RÁPIDAS
+   ✅ Cambia aquí tamaños y espacios globales
+========================================================= */
+        :root {
+            /* (1) Tamaño base del documento */
+            --font-base: 11.5px;
+
+            /* (2) Tamaños clave */
+            --title-size: 22px;
+            /* "INVOICE" (si lo usas) */
+            --total-size: 24px;
+            /* total grande */
+            --label-size: 10px;
+            /* labels (Invoice#, Date...) */
+            --table-head-size: 10px;
+            /* header tabla */
+            --table-row-size: 11.5px;
+            /* filas tabla */
+            --footer-size: 10px;
+            /* footer abajo */
+
+            /* (3) Colores */
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --border-soft: #eef2f7;
+            --head-bg: #f9fafb;
+
+            /* (4) Bordes y padding */
+            --radius: 8px;
+            --pad: 12px;
+
+            /* (5) Logo y footer image height */
+            --logo-h: 86px;
+            /* ✅ alto del logo (no distorsiona) */
+            --footer-img-h: 120px;
+            /* ✅ alto imagen inferior (no distorsiona) */
+        }
+
+        /* =========================================================
+   BASE
+========================================================= */
         * {
-            font-family: DejaVu Sans, sans-serif;
+            font-family: 'Montserrat' !important;
+            /* ✅ solo Montserrat */
+            font-weight: 400;
+            box-sizing: border-box;
         }
 
         body {
             margin: 26px 28px;
-            color: #111827;
-            font-size: 12px;
+            /* ✅ márgenes del PDF */
+            color: var(--text);
+            font-size: var(--font-base);
+            /* ✅ cambia tamaño general */
+            line-height: 1.25;
         }
 
-        /* Encabezados */
-        .title {
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: .4px;
-            margin: 0;
-        }
-
-        .label {
-            color: #6b7280;
-            font-weight: 700;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: .6px;
-        }
-
-        .value {
-            font-weight: 800;
-            color: #111827;
-        }
-
-        /* Cards formales (menos “rounded”, más factura) */
-        .card {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 12px;
-            background: #fff;
-        }
-
+        /* Utilidades */
         .right {
             text-align: right;
         }
 
         .muted {
-            color: #6b7280;
-            font-weight: 600;
+            color: var(--muted);
+            font-weight: 400;
         }
 
-        /* Tabla grid */
-        table {
+        .bold {
+            font-weight: 700;
+        }
+
+        .avoid-break {
+            page-break-inside: avoid;
+        }
+
+        /* =========================================================
+   TIPOGRAFÍA FORMAL
+========================================================= */
+        .h-invoice {
+            font-size: var(--title-size);
+            /* ✅ tamaño título */
+            font-weight: 700;
+            letter-spacing: .9px;
+            margin: 0;
+        }
+
+        .label {
+            font-size: var(--label-size);
+            /* ✅ tamaño labels */
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .75px;
+            color: var(--muted);
+        }
+
+        .value {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* =========================================================
+   CAJAS / CARDS (FORMAL)
+========================================================= */
+
+        .card {
+            padding: var(--pad);
+            background: #fff;
+        }
+
+        /* Separadores de espacio (por si los usas) */
+        .sp-10 {
+            height: 50px;
+        }
+
+        .sp-14 {
+            height: 14px;
+        }
+
+        /* =========================================================
+   LOGO (NO DISTORSIÓN)
+   ✅ Cambia el alto en --logo-h
+========================================================= */
+        .logo-wrap {
+            width: 60%;
+            height: var(--logo-h);
+            overflow: hidden;
+        }
+
+        .logo-img {
+            width: 60%;
+            height: var(--logo-h);
+            object-fit: contain;
+        }
+
+        /* =========================================================
+   CAJA TOTAL (derecha)
+========================================================= */
+        .total-box {
+            padding: 14px;
+            background: #fff;
+        }
+
+        .total-title {
+            font-size: var(--label-size);
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .75px;
+            margin-bottom: 6px;
+        }
+
+        .total-big {
+            font-size: var(--total-size);
+            /* ✅ tamaño total grande */
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        /* Key/Value list */
+        .kv {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .top-gap {
-            height: 10px;
-        }
-
-        .section-gap {
-            height: 14px;
-        }
-
-        /* Logo */
-        .logo {
-            width: 220px;
-            height: 90px;
-            object-fit: contain;
-        }
-
-        /* Invoice Total */
-        .total-box .total-title {
-            font-weight: 900;
-            font-size: 11px;
-            color: #6b7280;
-            letter-spacing: .6px;
-        }
-
-        .total-box .total-amount {
-            font-size: 22px;
-            font-weight: 900;
-            margin: 6px 0 10px 0;
-        }
-
         .kv td {
-            padding: 4px 0;
+            padding: 5px 0;
             vertical-align: top;
         }
 
         .kv td:first-child {
-            width: 92px;
-            color: #6b7280;
+            width: 112px;
+            /* ✅ ancho labels */
+            color: var(--muted);
             font-weight: 700;
         }
 
         .kv td:last-child {
-            font-weight: 900;
+            font-weight: 700;
         }
 
-        /* Items table - estilo contable */
+        /* =========================================================
+   TABLA DE ITEMS (FORMAL / CLÁSICA)
+========================================================= */
         .items {
             margin-top: 14px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
         }
 
         .items thead th {
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 10px;
-            font-size: 11px;
+            background: var(--head-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 10px;
+            font-size: var(--table-head-size);
             text-transform: uppercase;
-            letter-spacing: .6px;
-            color: #6b7280;
-            font-weight: 900;
+            letter-spacing: .75px;
+            color: var(--muted);
+            font-weight: 700;
         }
 
         .items tbody td {
-            border-bottom: 1px solid #eef2f7;
-            padding: 10px;
-            font-size: 12px;
-            vertical-align: top;
+            padding: 10px 10px;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: var(--table-row-size);
+            font-weight: 400;
+        }
+
+        .items tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .num {
@@ -134,97 +242,62 @@
             white-space: nowrap;
         }
 
-        /* Totales */
-        .totals {
+        /* =========================================================
+   GRAND TOTAL (LÍNEA FINAL)
+========================================================= */
+        .footer-total {
             margin-top: 10px;
             width: 100%;
             border-collapse: collapse;
         }
 
-        .totals td {
-            padding: 10px;
-            font-weight: 900;
+        .footer-total td {
+            padding: 10px 0;
+            font-weight: 700;
             border-top: 2px solid #111827;
-            font-size: 13px;
         }
 
-        .totals td:last-child {
+        .footer-total td:last-child {
             text-align: right;
         }
 
-        /* Footer */
-        .footer {
+        /* =========================================================
+   IMAGEN INFERIOR (NO DISTORSIÓN / 1 PÁGINA)
+   ✅ Alto fijo en --footer-img-h
+========================================================= */
+        .footer-image-wrap {
             margin-top: 12px;
-            font-size: 10px;
-            color: #6b7280;
+            width: 100%;
+            height: 240px;
+            /* área reservada */
+            overflow: hidden;
+            page-break-inside: avoid;
+
+            /* ✅ CENTRADO REAL */
             text-align: center;
         }
 
-        /* ============================================
-       IMAGEN FOOTER: SIEMPRE 1 PÁGINA
-       - Reservamos espacio fijo (contenedor)
-       - La imagen se ajusta dentro sin crecer
-    ============================================ */
-
-        .footer-image-wrap {
-            margin-top: 12px;
-            width: 100%;
-            height: 140px;
-            /* ✅ AJUSTA AQUÍ: reserva espacio fijo */
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            overflow: hidden;
-            page-break-inside: avoid;
-            /* evita corte dentro del contenedor */
-        }
-
-        .footer-image-wrap img {
-            width: 100%;
-            height: 140px;
-            /* mismo que el contenedor */
-            object-fit: contain;
-            /* ✅ encaja sin salirse */
-            display: block;
-        }
-
-        /* Evita que dompdf intente partir secciones críticas */
-        .avoid-break {
-            page-break-inside: avoid;
-        }
-
-        .logo-wrap {
-            width: 100%;
-            height: 90px;
-            /* altura controlada */
-            overflow: hidden;
-        }
-
-        .logo-img {
-            width: 100%;
-            height: 90px;
-            object-fit: contain;
-            /* ✅ no distorsiona */
-            display: block;
-        }
-
-        .footer-image-wrap {
-            margin-top: 12px;
-            width: 100%;
-            height: 120px;
-            /* ✅ para 5 filas */
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            overflow: hidden;
-            page-break-inside: avoid;
-        }
-
         .footer-img {
-            width: 100%;
-            height: 120px;
+            display: inline-block;
+            /* clave para centrar */
+            max-width: 70%;
+            /* controla ancho */
+            max-height: 220px;
+            /* controla alto */
             object-fit: contain;
-            /* ✅ no distorsiona */
-            display: block;
+            /* NO distorsiona */
             background: #fff;
+        }
+
+        /* =========================================================
+   FOOTER PEQUEÑO
+========================================================= */
+        .small-footer {
+            margin-top: 10px;
+            font-size: var(--footer-size);
+            color: var(--muted);
+            text-align: center;
+            font-weight: 400;
         }
     </style>
 
