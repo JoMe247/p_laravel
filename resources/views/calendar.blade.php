@@ -16,7 +16,6 @@
 
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
 
-
     <link rel="stylesheet" href="{{ asset('css/calendar.css') }}">
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
