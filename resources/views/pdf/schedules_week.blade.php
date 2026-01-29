@@ -9,10 +9,11 @@
         }
 
         body {
-            font-family: DejaVu Sans, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             font-size: 11px;
             color: #0f172a;
         }
+
 
         /* ===== Header ===== */
         .header {
@@ -65,7 +66,7 @@
         thead th {
             background: #111;
             color: #fff;
-            font-weight: 900;
+            font-weight: 700;
             font-size: 14px;
             letter-spacing: .4px;
             text-transform: uppercase;
@@ -92,21 +93,15 @@
         .nameCell .n {
             font-size: 14px;
             color: #0f172a;
-            font-family: 'Montserrat';
-            font-weight: normal;
-            font-style: normal;
-            src: url("{{ storage_path('fonts/montserrat/Montserrat-Regular.ttf') }}") format('truetype');
-        }
+            font-weight: 700;
+           }
 
         .nameCell .t {
             margin-top: 2px;
             font-size: 10px;
             color: #64748b;
-            font-family: 'Montserrat';
-            font-weight: normal;
-            font-style: normal;
-            src: url("{{ storage_path('fonts/montserrat/Montserrat-Regular.ttf') }}") format('truetype');
-        }
+            font-weight: 400;
+           }
 
         /* ===== Shift cell ===== */
         .shiftWrap {
@@ -125,11 +120,8 @@
             color: #0f172a;
             line-height: 1.15;
             margin-top: 2px;
-            font-family: 'Montserrat';
-            font-weight: normal;
-            font-style: normal;
-            src: url("{{ storage_path('fonts/montserrat/Montserrat-Regular.ttf') }}") format('truetype');
-        }
+            font-weight: 700;
+           }
 
         /* etiqueta abajo (csr) */
         .shiftTag {
@@ -137,11 +129,8 @@
             font-size: 12px;
             color: #64748b;
             text-transform: lowercase;
-            font-family: 'Montserrat';
-            font-weight: normal;
-            font-style: normal;
-            src: url("{{ storage_path('fonts/montserrat/Montserrat-Regular.ttf') }}") format('truetype');
-        }
+            font-weight: 400;
+            }
 
         /* cuando no hay shift */
         .empty {
@@ -166,10 +155,6 @@
             font-weight: bold;
             font-style: normal;
             src: url("{{ storage_path('fonts/montserrat/Montserrat-Bold.ttf') }}") format('truetype');
-        }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
         }
     </style>
 </head>
