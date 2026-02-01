@@ -57,14 +57,14 @@
             /* (5) Logo y footer image height */
             --logo-h: 86px;
             /* ✅ alto del logo (no distorsiona) */
-            --footer-img-h: 120px;
+            --footer-img-h: 105px;
             /* ✅ alto imagen inferior (no distorsiona) */
         }
 
         /* =========================================================
    BASE
 ========================================================= */
-        * {
+        body {
             font-family: 'Montserrat' !important;
             /* ✅ solo Montserrat */
             font-weight: 400;
@@ -72,7 +72,7 @@
         }
 
         body {
-            margin: 26px 28px;
+            margin: 0px;
             /* ✅ márgenes del PDF */
             color: var(--text);
             font-size: var(--font-base);
@@ -96,6 +96,10 @@
 
         .avoid-break {
             page-break-inside: avoid;
+        }
+
+        @page {
+            margin: 26px 28px 42px 28px;
         }
 
         /* =========================================================
@@ -130,6 +134,7 @@
         .card {
             padding: var(--pad);
             background: #fff;
+            
         }
 
         /* Separadores de espacio (por si los usas) */
@@ -146,13 +151,13 @@
    ✅ Cambia el alto en --logo-h
 ========================================================= */
         .logo-wrap {
-            width: 60%;
+            width: 70%;
             height: var(--logo-h);
             overflow: hidden;
         }
 
         .logo-img {
-            width: 60%;
+            width: 30%;
             height: var(--logo-h);
             object-fit: contain;
         }
@@ -268,7 +273,7 @@
         .footer-image-wrap {
             margin-top: 12px;
             width: 100%;
-            height: 240px;
+            height: 220px;
             /* área reservada */
             overflow: hidden;
             page-break-inside: avoid;
@@ -282,7 +287,7 @@
             /* clave para centrar */
             max-width: 70%;
             /* controla ancho */
-            max-height: 220px;
+            max-height: 200px;
             /* controla alto */
             object-fit: contain;
             /* NO distorsiona */
@@ -292,12 +297,17 @@
         /* =========================================================
    FOOTER PEQUEÑO
 ========================================================= */
-        .small-footer {
-            margin-top: 10px;
-            font-size: var(--footer-size);
-            color: var(--muted);
-            text-align: center;
+        .pdf-fixed-footer {
+            position: fixed;
+            right: 28px;
+            /* debe coincidir con margen derecho @page */
+            bottom: 14px;
+            /* separación del borde inferior */
+            font-size: 10px;
+            color: #6b7280;
             font-weight: 400;
+            text-align: right;
+            white-space: nowrap;
         }
     </style>
 
@@ -342,7 +352,7 @@
 
             </td>
 
-            {{-- DERECHA: Customer info (SOLO una vez) --}}
+            {{-- DERECHA: Customer info (SOLO una vez) 
             <td style="width:50%; vertical-align:top; padding-left:12px;">
                 <div class="card right">
                     <p class="h2" style="margin-bottom:6px;">Invoice to:</p>
@@ -354,50 +364,86 @@
                     <div class="muted">{{ $customer->Email1 ?? '' }}</div>
                     <div class="muted">{{ $customer->Phone ?? '' }}</div>
                 </div>
-            </td>
+            </td> --}}
         </tr>
     </table>
 
 
     {{-- MID: Invoice To (izq) + Totals/Invoice meta (der) --}}
-    <table class="mid-grid">
+    {{-- MID: Customer (izq) + Totals/Invoice meta (der) --}}
+    {{-- MID: TOTAL + META (izq) | CUSTOMER (der) --}}
+    <table class="mid-grid" style="width:100%; border-collapse:collapse; margin-top:14px;">
         <tr>
-            <td style="width:55%;"></td>
-            <td style="width:45%; padding-left:10px;">
-                <div class="box">
-                    <div class="muted" style="font-weight:900;">INVOICE TOTAL</div>
+
+            {{-- IZQUIERDA: TOTAL + META --}}
+            <td style="width:45%; vertical-align:top; padding-right:12px;">
+                <div class="total-box">
+
+                    <div class="total-title">Invoice total</div>
                     <div class="total-big">
                         ${{ number_format((float) ($grandTotal ?: 0), 2) }}
                     </div>
 
                     <table class="kv">
                         <tr>
+                            <td>Next payment date</td>
+                            <td class="bold">{{ $invoice->next_py_date ?? '' }}</td>
+                        </tr>
+                        <tr>
                             <td>Invoice #</td>
-                            <td style="font-weight:900;">{{ $invoice->invoice_number ?? '' }}</td>
+                            <td class="bold">{{ $invoice->invoice_number ?? '' }}</td>
                         </tr>
                         <tr>
                             <td>Date</td>
-                            <td style="font-weight:900;">{{ $invoice->creation_date ?? '' }}</td>
+                            <td class="bold">{{ $invoice->creation_date ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td>Due Date</td>
-                            <td style="font-weight:900;">{{ $invoice->payment_date ?? '' }}</td>
+                            <td>Due date</td>
+                            <td class="bold">{{ $invoice->payment_date ?? '' }}</td>
                         </tr>
                         <tr>
                             <td>Policy #</td>
-                            <td style="font-weight:900;">{{ $invoice->policy_number ?? '' }}</td>
+                            <td class="bold">{{ $invoice->policy_number ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td>Sales Agent</td>
-                            <td style="font-weight:900;">
-                                {{ $invoice->created_by_name ?? '' }}
-                            </td>
+                            <td>Sales agent</td>
+                            <td class="bold">{{ $invoice->created_by_name ?? '' }}</td>
                         </tr>
                     </table>
+
                 </div>
             </td>
+
+            {{-- DERECHA: CUSTOMER --}}
+            <td style="width:55%; vertical-align:top; padding-left:12px;">
+                <div class="card right">
+                    <div class="label" style="margin-bottom:6px;">Invoice to</div>
+
+                    <div class="bold" style="margin-bottom:2px;">
+                        {{ $customer->Name ?? '' }}
+                    </div>
+
+                    @if (!empty($customer->Address))
+                        <div class="muted">{{ $customer->Address }}</div>
+                    @endif
+
+                    <div class="muted">
+                        {{ $customer->City ?? '' }}{{ !empty($customer->State) ? ', ' . $customer->State : '' }}
+                    </div>
+
+                    @if (!empty($customer->Email1))
+                        <div class="muted">{{ $customer->Email1 }}</div>
+                    @endif
+
+                    @if (!empty($customer->Phone))
+                        <div class="muted">{{ $customer->Phone }}</div>
+                    @endif
+                </div>
+            </td>
+
         </tr>
     </table>
+
 
     {{-- ITEMS TABLE --}}
     <table class="items">
@@ -452,9 +498,10 @@
 
 
 
-    <div class="small-footer">
+    <div class="pdf-fixed-footer">
         {{ $agencyInfo->agency_name ?? '' }} • {{ date('Y') }}
     </div>
+
 
 </body>
 

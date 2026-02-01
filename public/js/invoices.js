@@ -310,6 +310,7 @@
 
 // ====== SAVE DATES (DATE INPUTS) ======
 const datesWrap = document.querySelector(".invoice-dates");
+const nextPaymentInput = document.getElementById("nextPaymentDateInput");
 const creationInput = document.getElementById("creationDateInput");
 const paymentInput = document.getElementById("paymentDateInput");
 const invoiceId = document.querySelector('meta[name="invoice-id"]')?.getAttribute("content") || "";
@@ -328,11 +329,13 @@ function saveDates() {
     },
     body: JSON.stringify({
       invoice_id: invoiceId,
+      next_py_date: nextPaymentInput ? nextPaymentInput.value : "",
       creation_date: creationInput ? creationInput.value : "",
       payment_date: paymentInput ? paymentInput.value : "",
     }),
   }).catch(() => { });
 }
+saveDates();
 
 if (creationInput) creationInput.addEventListener("change", saveDates);
 if (paymentInput) paymentInput.addEventListener("change", saveDates);

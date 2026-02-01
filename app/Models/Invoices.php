@@ -16,6 +16,7 @@ class Invoices extends Model
         'id',
         'agency',
         'customer_id',
+        'next_py_date',
         'creation_date',
         'payment_date',
         'inv_prices',

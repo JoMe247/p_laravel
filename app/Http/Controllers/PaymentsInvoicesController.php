@@ -166,6 +166,7 @@ class PaymentsInvoicesController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
+        $nextPyDate = $meta->next_py_date ?? '';
         $creationDate = $invoiceMeta->creation_date ?? '';
         $paymentDate  = $invoiceMeta->payment_date ?? '';
 
@@ -218,6 +219,7 @@ class PaymentsInvoicesController extends Controller
             'policiesCount',
 
             'policyNumbers',
+            'nextPyDate',
             'creationDate',
             'paymentDate',
             'fee',
@@ -285,6 +287,7 @@ class PaymentsInvoicesController extends Controller
         }
 
         $data = $request->validate([
+            'next_py_date' => 'nullable|string|max:30',
             'creation_date' => 'nullable|string|max:30',
             'payment_date'  => 'nullable|string|max:30',
         ]);
@@ -293,6 +296,7 @@ class PaymentsInvoicesController extends Controller
             ->where('agency', (string)$agency)
             ->where('customer_id', (string)$customerId)
             ->update([
+                'next_py_date' => $data['next_py_date'] ?? '',
                 'creation_date' => $data['creation_date'] ?? '',
                 'payment_date'  => $data['payment_date'] ?? '',
                 'updated_at'    => now()->format('Y-m-d H:i:s'),
