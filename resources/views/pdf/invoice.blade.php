@@ -10,7 +10,7 @@
             font-style: normal;
             font-weight: 400;
             /* Regular */
-            src: url("{{ public_path('fonts/Montserrat-Regular.ttf') }}") format("truetype");
+             src: url("{{ storage_path('fonts/montserrat/Montserrat-Regular.ttf') }}") format("truetype");
         }
 
         @font-face {
@@ -18,7 +18,7 @@
             font-style: normal;
             font-weight: 700;
             /* Bold */
-            src: url("{{ public_path('fonts/Montserrat-Bold.ttf') }}") format("truetype");
+            src: url("{{ storage_path('fonts/montserrat/Montserrat-Bold.ttf') }}") format("truetype");
         }
 
         /* =========================================================
@@ -27,7 +27,7 @@
 ========================================================= */
         :root {
             /* (1) Tamaño base del documento */
-            --font-base: 11.5px;
+            --font-base: 12px;
 
             /* (2) Tamaños clave */
             --title-size: 22px;
@@ -54,8 +54,6 @@
             --radius: 8px;
             --pad: 12px;
 
-            /* (5) Logo y footer image height */
-            --logo-h: 86px;
             /* ✅ alto del logo (no distorsiona) */
             --footer-img-h: 105px;
             /* ✅ alto imagen inferior (no distorsiona) */
@@ -65,10 +63,9 @@
    BASE
 ========================================================= */
         body {
-            font-family: 'Montserrat' !important;
+            font-family: 'Montserrat', sans-serif;
             /* ✅ solo Montserrat */
             font-weight: 400;
-            box-sizing: border-box;
         }
 
         body {
@@ -134,7 +131,7 @@
         .card {
             padding: var(--pad);
             background: #fff;
-            
+
         }
 
         /* Separadores de espacio (por si los usas) */
@@ -152,13 +149,12 @@
 ========================================================= */
         .logo-wrap {
             width: 70%;
-            height: var(--logo-h);
             overflow: hidden;
         }
 
         .logo-img {
-            width: 30%;
-            height: var(--logo-h);
+            width: 100%;
+            max-height: 100%;
             object-fit: contain;
         }
 
@@ -193,7 +189,7 @@
         }
 
         .kv td {
-            padding: 5px 0;
+            padding: 0px 0;
             vertical-align: top;
         }
 
@@ -271,27 +267,24 @@
    ✅ Alto fijo en --footer-img-h
 ========================================================= */
         .footer-image-wrap {
-            margin-top: 12px;
-            width: 100%;
-            height: 220px;
-            /* área reservada */
-            overflow: hidden;
-            page-break-inside: avoid;
 
-            /* ✅ CENTRADO REAL */
-            text-align: center;
         }
 
         .footer-img {
             display: inline-block;
             /* clave para centrar */
-            max-width: 70%;
+            max-width: 100%;
             /* controla ancho */
-            max-height: 200px;
+            max-height: 300px;
             /* controla alto */
             object-fit: contain;
             /* NO distorsiona */
             background: #fff;
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            
         }
 
         /* =========================================================
@@ -315,58 +308,52 @@
 
 <body>
 
-    {{-- TOP: Logo (izq) + Customer info (der) --}}
+    {{-- TOP: Logo (izq) + Agency info (der) EN LA MISMA FILA --}}
     <table class="top-grid" style="width:100%; border-collapse:collapse;">
         <tr>
-            {{-- IZQUIERDA: Logo + Agency info separado --}}
-            <td style="width:50%; vertical-align:top; padding-right:12px;">
+            <td style="width:100%; vertical-align:top;">
 
-                {{-- Logo SOLO --}}
                 <div class="card">
-                    <div class="logo-wrap">
-                        @if (!empty($agencyInfo->agency_logo))
-                            <img class="logo-img" src="{{ public_path('storage/' . $agencyInfo->agency_logo) }}"
-                                alt="Logo">
-                        @else
-                            <div class="muted"
-                                style="height:90px; display:flex; align-items:center; justify-content:center;">
-                                LOGO
-                            </div>
-                        @endif
-                    </div>
-                </div>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr>
+                            {{-- LOGO (izquierda) --}}
+                            <td style="width:35%; vertical-align:middle;">
+                                <div class="logo-wrap">
+                                    @if (!empty($agencyInfo->agency_logo))
+                                        <img class="logo-img"
+                                            src="{{ public_path('storage/' . $agencyInfo->agency_logo) }}"
+                                            alt="Logo">
+                                    @else
+                                        <div class="muted"
+                                            style="height:90px; display:flex; align-items:center; justify-content:center;">
+                                            LOGO
+                                        </div>
+                                    @endif
+                                </div>
+                            </td>
 
-
-
-                <div style="height:10px;"></div>
-
-                {{-- Agency info SEPARADO del logo --}}
-                <div class="card">
-                    <div style="font-weight:900; font-size:14px;">{{ $agencyInfo->agency_name ?? '' }}</div>
-                    <div class="muted">{{ $agencyInfo->agency_address ?? '' }}</div>
-                    <div class="muted">{{ $agencyInfo->office_phone ?? '' }}</div>
-                    @if (!empty($agencyInfo->office_email))
-                        <div class="muted">{{ $agencyInfo->office_email }}</div>
-                    @endif
+                            {{-- AGENCY INFO (derecha del logo) --}}
+                            <td style="width:65%; vertical-align:top; padding-left:0px; font-size:20px;">
+                                {{-- ✅ AQUÍ CAMBIAS LA SEPARACIÓN DEL TEXTO VS LOGO:
+                                 padding-left: 10px (más pegado)
+                                 padding-left: 24px (más separado) --}}
+                                <div style="font-weight:700;">
+                                    {{ $agencyInfo->agency_name ?? '' }}
+                                </div>
+                                <div class="muted">{{ $agencyInfo->agency_address ?? '' }}</div>
+                                <div class="muted">{{ $agencyInfo->office_phone ?? '' }}</div>
+                                @if (!empty($agencyInfo->office_email))
+                                    <div class="muted">{{ $agencyInfo->office_email }}</div>
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
                 </div>
 
             </td>
-
-            {{-- DERECHA: Customer info (SOLO una vez) 
-            <td style="width:50%; vertical-align:top; padding-left:12px;">
-                <div class="card right">
-                    <p class="h2" style="margin-bottom:6px;">Invoice to:</p>
-                    <div style="font-weight:900;">{{ $customer->Name ?? '' }}</div>
-                    <div class="muted">{{ $customer->Address ?? '' }}</div>
-                    <div class="muted">
-                        {{ $customer->City ?? '' }}{{ !empty($customer->State) ? ', ' . $customer->State : '' }}
-                    </div>
-                    <div class="muted">{{ $customer->Email1 ?? '' }}</div>
-                    <div class="muted">{{ $customer->Phone ?? '' }}</div>
-                </div>
-            </td> --}}
         </tr>
     </table>
+
 
 
     {{-- MID: Invoice To (izq) + Totals/Invoice meta (der) --}}
@@ -377,9 +364,9 @@
 
             {{-- IZQUIERDA: TOTAL + META --}}
             <td style="width:45%; vertical-align:top; padding-right:12px;">
-                <div class="total-box">
+                <div class="total-box" style="font-size: 12px">
 
-                    <div class="total-title">Invoice total</div>
+                    <div class="total-title" style="font-size: 14px">Invoice total</div>
                     <div class="total-big">
                         ${{ number_format((float) ($grandTotal ?: 0), 2) }}
                     </div>
@@ -416,8 +403,8 @@
 
             {{-- DERECHA: CUSTOMER --}}
             <td style="width:55%; vertical-align:top; padding-left:12px;">
-                <div class="card right">
-                    <div class="label" style="margin-bottom:6px;">Invoice to</div>
+                <div class="card right" style="font-size: 20px">
+                    <div class="label" style="margin-bottom:6px; font-size:14px;">Invoice to</div>
 
                     <div class="bold" style="margin-bottom:2px;">
                         {{ $customer->Name ?? '' }}
@@ -493,9 +480,6 @@
                 alt="Footer Image">
         </div>
     @endif
-
-
-
 
 
     <div class="pdf-fixed-footer">

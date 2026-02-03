@@ -84,10 +84,6 @@
                                     <span>Documents</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item">
-                                    <i class='bx bx-map'></i>
-                                    <span>Map</span>
-                                </button>
                             </nav>
                         </aside>
 
