@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\CustomerNote;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 
 class CustomersController extends Controller
@@ -17,24 +18,36 @@ class CustomersController extends Controller
         return view('customers', compact('customers'));
     }
 
-    // store: guarda los 4 campos rápidos (recibe JSON o form)
     public function store(Request $request)
     {
-        $data = $request->only(['Name', 'Address', 'Phone', 'DOB']);
-
         $validated = $request->validate([
-            'Name' => 'required|string|max:120',
+            'Name'    => 'required|string|max:120',
             'Address' => 'nullable|string|max:240',
-            'Phone' => 'nullable|string|max:20',
-            'DOB' => 'nullable|date',
+            'Phone'   => 'nullable|string|max:20',
+            'DOB'     => 'nullable|date',
         ]);
 
+        // Detectar quién está logueado (user o sub user)
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // name del agente (user/sub user)
+        $agentName = $user->name ??  null;
+
+        // agency_code del agente (ajusta si tu columna se llama distinto)
+        $agencyCode = $user->agency ?? null;
+
         $validated['Added'] = now()->format('Y-m-d');
+
+        // Guardar en columnas del customer
+        // OJO: si tu DB tiene límites de varchar más chicos, ajusta max o usa Str::limit.
+        $validated['Agent_of_Record'] = $agentName ? Str::limit($agentName, 30, '') : null;
+        $validated['Agency']          = $agencyCode ? Str::limit($agencyCode, 30, '') : null;
 
         $customer = Customer::create($validated);
 
         return response()->json(['id' => $customer->ID], 201);
     }
+
 
     // muestra profile con los datos completos
     public function profile($id)

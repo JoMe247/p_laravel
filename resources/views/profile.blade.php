@@ -38,7 +38,7 @@
         @include('menu')
 
         <section id="dash">
-            
+
             <div id="lower-table-clients" type="fullscreen">
 
                 {{-- CONTENEDOR GENERAL DEL PROFILE --}}
@@ -291,13 +291,17 @@
 
                                         <div class="info-row">
                                             <label>Agent of Record</label>
-                                            <input type="text" name="Agent_of_Record"
-                                                value="{{ $customer->Agent_of_Record }}">
+                                            <span class="added-display">
+                                                {{ $customer->Agent_of_Record }}
+                                            </span>
                                         </div>
 
-                                        <div class="info-row">
+                                        <div class="info-row" style="display:block;">
+
                                             <label>Agency</label>
-                                            <input type="text" name="Agency" value="{{ $customer->Agency }}">
+                                            <span class="added-display">
+                                                {{ $customer->Agency }}
+                                            </span>
                                         </div>
 
                                         <div class="info-row">
