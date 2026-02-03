@@ -87,6 +87,7 @@ Route::post('/customers/{id}/alert/remove', [CustomersController::class, 'remove
 // Listar notas
 Route::get('/customers/{id}/notes', [CustomerNotesController::class, 'index']);
 Route::post('/customers/{id}/notes', [CustomerNotesController::class, 'store']);
+Route::get('/customers/{id}/policies', [CustomerNotesController::class, 'policies']);
 Route::delete('/customers/notes/{id}', [CustomerNotesController::class, 'destroy']);
 
 

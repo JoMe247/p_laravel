@@ -402,6 +402,17 @@ p.cust-input-name-upper {
     transform: scale(1.1);
 }
 
+#customers-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
 
+#customers-pagination nav > div {
+    gap: 8px;
+}
 
-
+#customers-pagination a,
+#customers-pagination span {
+    font-size: 13px;
+}

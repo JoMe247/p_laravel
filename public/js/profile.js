@@ -181,6 +181,7 @@ $(document).ready(function () {
 
     $("#add-note-btn").on("click", function () {
         $("#note-overlay").css("display", "flex");
+        loadCustomerPoliciesIntoSelect();
     });
 
     $("#note-cancel").on("click", function () {
@@ -263,4 +264,24 @@ function deleteNote(noteId) {
 
 }
 
+function loadCustomerPoliciesIntoSelect() {
+    const customerId = $("meta[name='customer-id']").attr("content");
+
+    // Limpia el select y deja opción default
+    const $sel = $("#note-policy");
+    $sel.html(`<option value="">— Select policy —</option>`);
+
+    $.get(`/customers/${customerId}/policies`, function (policies) {
+
+        // policies viene como array: ["POL-0001","POL-0002",...]
+        if (!policies || policies.length === 0) {
+            $sel.append(`<option value="" disabled>(No policies found)</option>`);
+            return;
+        }
+
+        policies.forEach(pol => {
+            $sel.append(`<option value="${pol}">${pol}</option>`);
+        });
+    });
+}
 

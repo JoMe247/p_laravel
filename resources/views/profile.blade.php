@@ -67,6 +67,11 @@
                                     <span>Invoices (Payments)</span>
                                 </button>
 
+                                <button type="button" class="profile-menu-item">
+                                    <i class='bx bx-bar-chart-alt'></i>
+                                    <span>Estimates</span>
+                                </button>
+
                                 <button type="button" class="profile-menu-item"
                                     onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
                                     <i class='bx bx-task'></i>
@@ -110,7 +115,10 @@
                             <h2 style="margin-bottom:15px;">Add Note</h2>
 
                             <label>Policy</label>
-                            <input type="text" id="note-policy">
+                            <select id="note-policy">
+                                <option value="">— Select policy —</option>
+                            </select>
+
 
                             <label>Subject</label>
                             <input type="text" id="note-subject">

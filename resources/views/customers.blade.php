@@ -87,7 +87,8 @@
                                     <td><input type="checkbox" class="select-customer" data-id="{{ $c->ID }}">
                                     </td>
 
-                                    <td onclick="window.location.href='profile/{{ $c->ID }}'">{{ $c->ID }}</td>
+                                    <td onclick="window.location.href='profile/{{ $c->ID }}'">
+                                        {{ $c->ID }}</td>
                                     <td>{{ $c->Name }}</td>
                                     <td>{{ $c->Address }}</td>
                                     <td>{{ $c->Phone }}</td>
@@ -97,6 +98,13 @@
                         </tbody>
                     </table>
                 </div>
+
+                @if ($customers->hasPages())
+                    <div id="customers-pagination">
+                        {{ $customers->onEachSide(1)->links() }}
+                    </div>
+                @endif
+
             </div>
         </section>
     </div>
