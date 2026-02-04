@@ -9,6 +9,68 @@ document.addEventListener("DOMContentLoaded", () => {
     const baseUrl = document.querySelector("meta[name=base-url]").content;
     const token = document.querySelector("meta[name=csrf-token]").content;
 
+
+    // ---------------------------
+    // Phone input: only digits + max 10
+    // ---------------------------
+    const phoneInput = form?.querySelector("input[name='phone_number']");
+    if (phoneInput) {
+        phoneInput.addEventListener("input", () => {
+            phoneInput.value = (phoneInput.value || "").replace(/\D/g, "").slice(0, 10);
+        });
+    }
+
+    // ---------------------------
+    // Search + Type filter combined
+    // ---------------------------
+    const searchInput = document.getElementById("company-search");
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    const cards = document.querySelectorAll(".company-grid .company-card");
+
+    let activeTypeFilter = "all";
+    let activeSearch = "";
+
+    function applyFilters() {
+        const q = (activeSearch || "").trim().toLowerCase();
+
+        cards.forEach(card => {
+            const type = (card.getAttribute("data-type") || "").toLowerCase();
+
+            const name = (card.querySelector(".company-title")?.textContent || "").toLowerCase();
+            const phone = (card.querySelector(".field-phone span")?.textContent || "").toLowerCase();
+
+            const matchType = (activeTypeFilter === "all") || (type === activeTypeFilter.toLowerCase());
+            const matchSearch = !q || name.includes(q) || phone.includes(q);
+
+            card.style.display = (matchType && matchSearch) ? "flex" : "none";
+        });
+    }
+
+    // Search listener
+    if (searchInput) {
+        searchInput.addEventListener("input", () => {
+            activeSearch = searchInput.value;
+            applyFilters();
+        });
+    }
+
+    // Type filter listeners (reutiliza tu UI active)
+    if (filterButtons.length) {
+        filterButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                filterButtons.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+
+                activeTypeFilter = btn.getAttribute("data-filter") || "all";
+                applyFilters();
+            });
+        });
+
+        // default active "All"
+        const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+        if (allBtn) allBtn.classList.add("active");
+    }
+
     // -------------------------------------------------------------
     // Abrir overlay para crear
     // -------------------------------------------------------------
@@ -41,7 +103,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? `${baseUrl}/company/update/${id}`
                 : `${baseUrl}/company/store`;
 
+            // ✅ Primero crear FormData
             const data = new FormData(form);
+
+            // ✅ Validación phone 10 dígitos (antes de enviar)
+            const rawPhone = (data.get("phone_number") || "").toString();
+            const phone = rawPhone.replace(/\D/g, "").slice(0, 10);
+
+            if (phone.length !== 10) {
+                Swal.fire("Phone Number", "Phone number must be exactly 10 digits.", "warning");
+                return;
+            }
+
+            // ✅ Normaliza lo que se manda al backend
+            data.set("phone_number", phone);
 
             try {
                 let req = await fetch(url, {
@@ -59,21 +134,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                // ------------ UPDATE ------------
+                // UPDATE
                 if (id) {
-                    updateCompanyCard(id, res.data); // << actualizar tarjeta
+                    updateCompanyCard(id, res.data);
                     Swal.fire("Saved!", "Company updated.", "success");
                     closeCompanyModal();
                 }
-                // ------------ CREATE ------------
+                // CREATE
                 else {
                     Swal.fire("Saved!", "Company created.", "success")
-                        .then(() => location.reload()); // reload para mostrar nueva tarjeta
+                        .then(() => location.reload());
                 }
 
-            } catch (e) {
+            } catch (err) {
                 Swal.fire("Error", "Unexpected error while saving.", "error");
-                console.error(e);
+                console.error(err);
             }
         });
     }
@@ -107,6 +182,7 @@ window.editCompany = async function (id) {
         // Cargar datos al formulario
         form.company_name.value = c.company_name ?? "";
         form.user_name.value = c.user_name ?? "";
+        form.phone_number.value = c.phone_number ?? "";
         form.password.value = c.password ?? "";
         form.type.value = c.type ?? "";
         form.description.value = c.description ?? "";
@@ -193,6 +269,10 @@ window.updateCompanyCard = function (id, c) {
     // User
     const userSpan = card.querySelector(".field-user span");
     if (userSpan) userSpan.textContent = c.user_name ?? "";
+
+    // Phone
+    const phoneSpan = card.querySelector(".field-phone span");
+    if (phoneSpan) phoneSpan.textContent = c.phone_number ?? "";
 
     // Password
     const passSpan = card.querySelector(".field-password span");

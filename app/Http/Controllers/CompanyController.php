@@ -32,6 +32,7 @@ class CompanyController extends Controller
             $request->validate([
                 'company_name' => 'required|string|max:255',
                 'user_name'    => 'required|string|max:255',
+                'phone_number' => ['required', 'regex:/^\d{10}$/'],
                 'password'     => 'required|string|max:255',
                 'type'         => 'required|string',
                 'url'          => 'required|string|max:255',
@@ -48,6 +49,7 @@ class CompanyController extends Controller
             DB::table('company')->insert([
                 'company_name' => $request->company_name,
                 'user_name'    => $request->user_name,
+                'phone_number' => preg_replace('/\D/', '', $request->phone_number),
                 'password' => encrypt($request->password),
                 'description'  => $request->description,
                 'picture'      => $pictureName,
@@ -86,12 +88,24 @@ class CompanyController extends Controller
     public function update(Request $request, $id)
     {
         try {
+
+            $request->validate([
+                'company_name' => 'required|string|max:255',
+                'user_name'    => 'required|string|max:255',
+                'phone_number' => ['required', 'regex:/^\d{10}$/'],
+                'password'     => 'required|string|max:255',
+                'type'         => 'required|string',
+                'url'          => 'required|string|max:255',
+                'picture'      => 'nullable|image|max:5000',
+            ]);
+
             // Obtener registro actual
             $current = DB::table('company')->where('id', $id)->first();
 
             $data = [
                 'company_name' => $request->company_name,
                 'user_name'    => $request->user_name,
+                'phone_number' => preg_replace('/\D/', '', $request->phone_number),
                 'password'     => encrypt($request->password),
                 'description'  => $request->description,
                 'url'          => $request->url,

@@ -40,10 +40,19 @@
 
                 <div class="main-container">
 
-                    {{-- ✔ Botón Add Company --}}
-                    <button id="btn-add-company" class="btn-add-company">
-                        <i class='bx bx-plus'></i> Add Company
-                    </button>
+                    {{-- ✔ Top bar: Add + Search --}}
+                    <div class="company-topbar">
+                        <button id="btn-add-company" class="btn-add-company">
+                            <i class='bx bx-plus'></i> Add Company
+                        </button>
+
+                        <div class="company-search-wrap">
+                            <i class='bx bx-search'></i>
+                            <input id="company-search" class="company-search" type="text"
+                                placeholder="Search by company name or phone..." autocomplete="off" />
+                        </div>
+                    </div>
+
 
                     <div class="company-filters">
 
@@ -73,6 +82,10 @@
 
                                 <div class="company-field field-user">
                                     <b>User:</b> <span>{{ $c->user_name }}</span>
+                                </div>
+
+                                <div class="company-field field-phone">
+                                    <b>Phone:</b> <span>{{ $c->phone_number }}</span>
                                 </div>
 
                                 <div class="company-field field-password">
@@ -130,6 +143,12 @@
                             <label>Company Name</label>
                             <input type="text" name="company_name" required>
 
+                            <label>Phone Number</label>
+                            <input type="text" name="phone_number" inputmode="numeric" maxlength="10"
+                                placeholder="10 digits" required>
+                            <small class="field-hint">Must be exactly 10 digits.</small>
+
+
                             <label>User</label>
                             <input type="text" name="user_name" required>
 
@@ -168,7 +187,7 @@
         </section>
     </div>
 
-        <!-- UI Elements -->
+    <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
             <div class="confirm-window-content">
