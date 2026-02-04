@@ -402,17 +402,63 @@ p.cust-input-name-upper {
     transform: scale(1.1);
 }
 
-#customers-pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 14px;
+/* =============================== */
+/*   CUSTOM PAGINATION - CUSTOMERS */
+/* =============================== */
+
+#customers-pagination{
+    display:flex;
+    justify-content:center;
+    margin-top:18px;
 }
 
-#customers-pagination nav > div {
-    gap: 8px;
+.cust-paginate{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 12px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid rgba(0,0,0,.06);
 }
 
-#customers-pagination a,
-#customers-pagination span {
-    font-size: 13px;
+.cust-page{
+    min-width:34px;
+    height:34px;
+    padding:0 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:999px;
+    border:1px solid rgba(0,0,0,.08);
+    background:#fff;
+    color:#334155;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:500;
+    transition:.18s ease;
+}
+
+.cust-page:hover{
+    background:#f1f5f9;
+    border-color:#cbd5e1;
+}
+
+.cust-page.active{
+    background:var(--action-color, #2563eb);
+    border-color:var(--action-color, #2563eb);
+    color:#fff;
+    font-weight:700;
+}
+
+.cust-page.disabled{
+    opacity:.45;
+    cursor:default;
+}
+
+.cust-page.dots{
+    border:none;
+    background:transparent;
+    min-width:auto;
+    padding:0 4px;
 }

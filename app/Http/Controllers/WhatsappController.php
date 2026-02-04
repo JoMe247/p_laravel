@@ -65,7 +65,7 @@ class WhatsappController extends Controller
             ->orderByDesc('id')
             ->paginate(20);
 
-        return view('inbox', compact('messages'));
+         return view('whatsapp', compact('messages')); // <-- antes: view('inbox')
     }
 
     // Sincronizar mensajes desde Twilio según agency
@@ -119,7 +119,7 @@ class WhatsappController extends Controller
     public function delete($id)
     {
         Message::findOrFail($id)->delete();
-        return redirect()->route('whatsapp')->with('success', 'Mensaje eliminado');
+        return redirect()->route('whatsapp.inbox')->with('success', 'Mensaje eliminado');
     }
 
     public function deleteMultiple(Request $request)
@@ -127,7 +127,7 @@ class WhatsappController extends Controller
         if ($request->has('messages')) {
             Message::whereIn('id', $request->messages)->delete();
         }
-        return redirect()->route('whatsapp')->with('success', 'Mensajes eliminados');
+        return redirect()->route('whatsapp.inbox')->with('success', 'Mensajes eliminados');
     }
 
     public function showSend(Request $request)
@@ -143,7 +143,7 @@ class WhatsappController extends Controller
             ->orderByDesc('id')
             ->paginate(20);
 
-        return view('sent', compact('messages'));
+        return view('sent_whatsapp', compact('messages'));
     }
 
     // 🔹 NUEVO: obtener número Twilio de la agencia

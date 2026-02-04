@@ -101,9 +101,10 @@
 
                 @if ($customers->hasPages())
                     <div id="customers-pagination">
-                        {{ $customers->onEachSide(1)->links() }}
+                        {{ $customers->onEachSide(1)->links('vendor.pagination.custom-customers') }}
                     </div>
                 @endif
+
 
             </div>
         </section>

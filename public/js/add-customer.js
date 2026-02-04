@@ -163,16 +163,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: { 'X-CSRF-TOKEN': token },
                 success: function (response) {
                     if (response.success) {
+
+                        // 1) Animación: quita del DOM los eliminados
                         selectedIds.forEach(id => {
-                            $(`.select-customer[data-id="${id}"]`).closest('tr').fadeOut(300, function () {
+                            $(`.select-customer[data-id="${id}"]`).closest('tr').fadeOut(200, function () {
                                 $(this).remove();
                             });
                         });
+
+                        // 2) Reset UI
+                        $('#select-all-customers').prop('checked', false);
                         toggleDeleteButton();
+
+                        // 3) IMPORTANTÍSIMO:
+                        //    Recargar automáticamente para que se recalculen tabla + paginación
+                        //    (sin refresh manual)
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 250);
+
                     } else {
                         alert(response.message || 'No se pudieron eliminar los clientes.');
                     }
                 },
+
                 error: function () {
                     alert('Error al eliminar los clientes.');
                 }
@@ -181,5 +195,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    
+
 });
