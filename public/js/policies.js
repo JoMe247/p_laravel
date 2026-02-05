@@ -443,8 +443,13 @@ $(document).ready(function () {
 
                 <label>Model</label>
                 <input type="text" class="edit_model" value="${model}">
+                <div class="vehicle-delete-btn">Eliminar Vehículo</div>
             </div>
         `;
+            });
+
+            $(document).on('click', '.vehicle-delete-btn', function () {
+                $(this).closest('.vehicle-edit-card').remove();
             });
 
 
@@ -566,5 +571,48 @@ $(document).ready(function () {
         const index = $(this).closest('.vehicle-edit-card').data('index');
         updateEditImage(index);
     });
+
+    // =========================================================================
+    //   SISTEMA DE VEHÍCULOS (EDICIÓN) - BOTÓN AÑADIR VEHÍCULO EN OVERLAY EDIT
+    // =========================================================================
+    $(document).on('click', '#add-vehicle-btn-edit', function () {
+
+        const $grid = $('#policy-edit-content').find('.edit-vehicles-grid');
+
+        // Si por alguna razón aún no existe el grid, no hacemos nada.
+        if (!$grid.length) return;
+
+        const count = $grid.find('.vehicle-edit-card').length;
+        if (count >= MAX_VEHICLES) {
+            alert('Máximo ' + MAX_VEHICLES + ' vehículos permitidos.');
+            return;
+        }
+
+        // Usamos un índice único para evitar colisiones con los existentes
+        const index = Date.now();
+
+        $grid.append(`
+        <div class="vehicle-edit-card" data-index="${index}">
+            <div class="vehicle-edit-thumb"
+                 id="vehicle_edit_thumb_${index}"
+                 style="background-image:url('');"></div>
+
+            <label>VIN</label>
+            <input type="text" class="edit_vin" value="">
+
+            <label>Year</label>
+            <input type="text" class="edit_year" value="">
+
+            <label>Make</label>
+            <input type="text" class="edit_make" value="">
+
+            <label>Model</label>
+            <input type="text" class="edit_model" value="">
+
+            <div class="vehicle-delete-btn">Eliminar Vehículo</div>
+        </div>
+    `);
+    });
+
 
 });

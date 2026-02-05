@@ -173,12 +173,16 @@
                                 </form>
                             </div>
 
-                            <h2 class="profile-name">{{ $customer->Name }}</h2>
+                            <h2 class="profile-name" id="customer-name-edit" contenteditable="true"
+                                spellcheck="false">
+                                {{ $customer->Name }}
+                            </h2>
 
                             {{-- *** FORMULARIO ABIERTO AQUÍ *** --}}
                             <form id="profile-form" method="POST"
                                 action="{{ route('customers.update', $customer->ID) }}">
                                 @csrf
+                                <input type="hidden" name="Name" id="customer-name-input" value="{{ $customer->Name }}">
                                 @method('PUT')
 
                                 @php

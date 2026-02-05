@@ -291,7 +291,9 @@
                     <div class="policy-edit-box">
 
                         <h3>Policy</h3>
-
+                        <button id="add-vehicle-btn-edit" class="btn add-vehicle-btn">
+                            + Añadir Vehículo
+                        </button>
                         <div id="policy-edit-content">
                             <!-- Aquí JS insertará todos los campos -->
                         </div>

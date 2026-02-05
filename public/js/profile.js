@@ -285,3 +285,41 @@ function loadCustomerPoliciesIntoSelect() {
     });
 }
 
+// ===============================
+// PROFILE – EDIT CUSTOMER NAME (H2 editable) ✅ FIX CURSOR JUMP
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+    const nameEl = document.getElementById("customer-name-edit");
+    const hiddenInput = document.getElementById("customer-name-input");
+    if (!nameEl || !hiddenInput) return;
+
+    // Pegar solo texto plano
+    nameEl.addEventListener("paste", function (e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text");
+        document.execCommand("insertText", false, text);
+    });
+
+    // Mientras escribe: NO reasignar innerText (para no mover el cursor)
+    nameEl.addEventListener("input", function () {
+        hiddenInput.value = (nameEl.innerText || "").trim();
+    });
+
+    // Al salir: ahora sí normaliza espacios y actualiza ambos
+    nameEl.addEventListener("blur", function () {
+        const cleaned = (nameEl.innerText || "")
+            .trim()
+            .replace(/\s+/g, " ");
+
+        nameEl.innerText = cleaned || "—";
+        hiddenInput.value = cleaned;
+    });
+
+    // Enter no mete salto de línea
+    nameEl.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            nameEl.blur();
+        }
+    });
+});
