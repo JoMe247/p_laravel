@@ -14,6 +14,13 @@ class CustomersController extends Controller
     // Listado simple
     public function index()
     {
+
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $customers = Customer::orderBy('ID', 'desc')->paginate(50);
         return view('customers', compact('customers'));
     }
@@ -52,6 +59,13 @@ class CustomersController extends Controller
     // muestra profile con los datos completos
     public function profile($id)
     {
+
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $customer = Customer::findOrFail($id);
 
         // Cargar notas

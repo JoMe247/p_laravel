@@ -4,11 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyController extends Controller
 {
     public function index()
     {
+
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $companies = DB::table('company')->orderBy('id', 'desc')->get();
 
         foreach ($companies as $c) {
