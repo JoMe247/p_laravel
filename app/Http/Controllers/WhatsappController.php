@@ -60,12 +60,20 @@ class WhatsappController extends Controller
     // VISTA: Inbox (lee de BD local)
     public function showInbox(Request $request)
     {
+
+        // Obtener usuario autenticado (funciona también con remember me)
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $messages = Message::where('direction', 'inbound')
             ->orderByDesc('date_sent')
             ->orderByDesc('id')
             ->paginate(20);
 
-         return view('whatsapp', compact('messages')); // <-- antes: view('inbox')
+        return view('whatsapp', compact('messages')); // <-- antes: view('inbox')
     }
 
     // Sincronizar mensajes desde Twilio según agency

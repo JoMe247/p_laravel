@@ -16,7 +16,7 @@ class AccountController extends Controller
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
         if (!$authUser) {
-            abort(403, 'Usuario no autenticado');
+            return redirect()->route('login');
         }
 
         $agencyCode = $authUser->agency;
