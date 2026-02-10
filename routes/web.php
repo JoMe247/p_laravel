@@ -117,6 +117,9 @@ Route::middleware('auth.multi')->group(function () {
     Route::delete('/office/subusers/{id}', [OfficeController::class, 'destroy'])
         ->name('office.delete');
 
+    Route::put('/office/{id}', [OfficeController::class, 'update'])->name('office.update');
+
+
     Route::post('/office/agency/save', [OfficeController::class, 'saveAgency'])
         ->name('agency.save');
 

@@ -133,25 +133,42 @@
                                 <td>
                                     @if ($member->tipo === 'Usuario')
                                         @if (auth('web')->check())
-                                            <!-- Usuario principal SÍ puede eliminar -->
-                                            <form method="POST"
-                                                action="{{ route('office.delete', ['id' => $member->id]) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn-delete" type="submit">
+                                            <div style="display:flex; gap:10px; align-items:center;">
+                                                <!-- EDIT -->
+                                                <button type="button" class="btn-edit-subuser" title="Editar"
+                                                    data-id="{{ $member->id }}"
+                                                    data-username="{{ $member->username }}"
+                                                    data-name="{{ $member->name }}" data-email="{{ $member->email }}">
+                                                    <i class='bx bxs-edit'></i>
+                                                </button>
+
+                                                <!-- DELETE -->
+                                                <form method="POST"
+                                                    action="{{ route('office.delete', ['id' => $member->id]) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn-delete" type="submit">
+                                                        <i class='bx bx-trash'></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            <div style="display:flex; gap:10px; align-items:center;">
+                                                <button class="btn-edit-subuser" disabled
+                                                    title="Los sub users no pueden editar usuarios.">
+                                                    <i class='bx bx-edit-alt'></i>
+                                                </button>
+
+                                                <button class="btn-delete" disabled
+                                                    title="Los sub users no pueden eliminar usuarios.">
                                                     <i class='bx bx-trash'></i>
                                                 </button>
-                                            </form>
-                                        @else
-                                            <!-- Sub User NO puede eliminar -->
-                                            <button class="btn-delete" disabled
-                                                title="Los sub users no pueden eliminar usuarios.">
-                                                <i class='bx bx-trash'></i>
-                                            </button>
+                                            </div>
                                         @endif
                                     @else
                                         <span class="admin-lock"><i class='bx bx-lock'></i></span>
                                     @endif
+
 
                                 </td>
                             </tr>
@@ -164,30 +181,32 @@
             <div id="overlay-subuser">
                 <div class="overlay-content">
                     <i class='bx bx-x overlay-close' id="close-overlay"></i>
-                    <h2>Registrar Sub-User</h2>
+                    <h2 id="overlay-title">Registrar Sub-User</h2>
 
-                    <form method="POST" action="{{ route('office.store') }}" class="card">
+
+                    <form id="subuser-form" method="POST" action="{{ route('office.store') }}" class="card">
                         @csrf
 
-                        <div class="form-row">
+                        <div class="form-row" id="row-username">
                             <label>Username</label>
-                            <input type="text" name="username" required>
+                            <input id="subuser-username" type="text" name="username" required>
                         </div>
 
                         <div class="form-row">
                             <label>Nombre</label>
-                            <input type="text" name="name" required>
+                            <input id="subuser-name" type="text" name="name" required>
                         </div>
 
                         <div class="form-row">
                             <label>Email</label>
-                            <input type="email" name="email" required>
+                            <input id="subuser-email" type="email" name="email" required>
                         </div>
 
-                        <div class="form-row">
+                        <div class="form-row" id="row-password">
                             <label>Password</label>
-                            <input type="password" name="password" required>
+                            <input id="subuser-password" type="password" name="password" required>
                         </div>
+
 
                         @isset($agency)
                             <div class="form-row">
@@ -204,7 +223,8 @@
                         @endisset
 
                         <div class="overlay-actions">
-                            <button type="submit" class="btn primary">Registrar</button>
+                            <button id="subuser-submit-btn" type="submit" class="btn primary">Registrar</button>
+
                         </div>
                     </form>
                 </div>
@@ -381,7 +401,7 @@
     <script src="js/table.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/operations.js"></script>
-    <script src="{{ asset('js/add-customer.js') }}"></script>
+
 
 
 
@@ -391,15 +411,134 @@
             const btnClose = document.getElementById('close-overlay');
             const overlay = document.getElementById('overlay-subuser');
 
-            if (btnOpen && overlay && btnClose) {
-                btnOpen.addEventListener('click', () => overlay.classList.add('show'));
-                btnClose.addEventListener('click', () => overlay.classList.remove('show'));
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) overlay.classList.remove('show');
+            if (!overlay) return;
+
+            const baseUrlMeta = document.querySelector('meta[name="base-url"]');
+            const baseUrl = baseUrlMeta ? baseUrlMeta.getAttribute('content') : '';
+
+            const form = document.getElementById('subuser-form');
+            const title = document.getElementById('overlay-title');
+            const submitBtn = document.getElementById('subuser-submit-btn');
+
+            const rowUsername = document.getElementById('row-username');
+            const rowPassword = document.getElementById('row-password');
+
+            const inputUsername = document.getElementById('subuser-username');
+            const inputName = document.getElementById('subuser-name');
+            const inputEmail = document.getElementById('subuser-email');
+            const inputPassword = document.getElementById('subuser-password');
+
+            function openOverlay() {
+                overlay.classList.add('show');
+            }
+
+            function closeOverlay() {
+                overlay.classList.remove('show');
+            }
+
+            function removeMethodSpoof() {
+                if (!form) return;
+                const m = form.querySelector('input[name="_method"]');
+                if (m) m.remove();
+            }
+
+            function setCreateMode() {
+                if (title) title.textContent = 'Registrar Sub-User';
+                if (submitBtn) submitBtn.textContent = 'Registrar';
+
+                if (form) {
+                    form.action = "{{ route('office.store') }}";
+                    removeMethodSpoof();
+                }
+
+                // Username visible y editable
+                if (rowUsername) rowUsername.style.display = '';
+                if (inputUsername) {
+                    inputUsername.disabled = false;
+                    inputUsername.readOnly = false;
+                    inputUsername.required = true;
+                    inputUsername.value = '';
+                }
+
+                // Password requerido en create
+                if (rowPassword) rowPassword.style.display = '';
+                if (inputPassword) {
+                    inputPassword.required = true;
+                    inputPassword.value = '';
+                }
+
+                if (inputName) inputName.value = '';
+                if (inputEmail) inputEmail.value = '';
+            }
+
+            function setEditMode(data) {
+                if (title) title.textContent = 'Editar Sub-User';
+                if (submitBtn) submitBtn.textContent = 'Guardar cambios';
+
+                if (form) {
+                    form.action = baseUrl ? `${baseUrl}/office/${data.id}` : `/office/${data.id}`;
+                    removeMethodSpoof();
+
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'PUT';
+                    form.appendChild(method);
+                }
+
+                // Username visible SOLO LECTURA
+                if (rowUsername) rowUsername.style.display = '';
+                if (inputUsername) {
+                    inputUsername.required = false;
+                    inputUsername.disabled = true; // no se envía
+                    inputUsername.readOnly = true; // visual
+                    inputUsername.value = data.username || '';
+                }
+
+                // Password opcional en edit
+                if (rowPassword) rowPassword.style.display = '';
+                if (inputPassword) {
+                    inputPassword.required = false;
+                    inputPassword.value = '';
+                }
+
+                if (inputName) inputName.value = data.name || '';
+                if (inputEmail) inputEmail.value = data.email || '';
+            }
+
+            // Abrir overlay (crear)
+            if (btnOpen) {
+                btnOpen.addEventListener('click', () => {
+                    setCreateMode();
+                    openOverlay();
                 });
             }
+
+            // Cerrar overlay
+            if (btnClose) btnClose.addEventListener('click', closeOverlay);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeOverlay();
+            });
+
+            // Abrir overlay (editar)
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-edit-subuser');
+                if (!btn || btn.disabled) return;
+
+                const data = {
+                    id: btn.getAttribute('data-id'),
+                    username: btn.getAttribute('data-username'),
+                    name: btn.getAttribute('data-name'),
+                    email: btn.getAttribute('data-email'),
+                };
+
+                setEditMode(data);
+                openOverlay();
+            });
         });
     </script>
+
+
 
 </body>
 

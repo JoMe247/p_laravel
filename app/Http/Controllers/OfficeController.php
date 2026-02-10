@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\SubUser;
 use App\Models\Agency;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
 
 
 class OfficeController extends Controller
@@ -187,5 +189,41 @@ class OfficeController extends Controller
         $agency->save();
 
         return back()->with('success', 'Logo actualizado correctamente.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) return redirect()->route('login');
+
+        // Sub users NO pueden editar
+        if (auth('sub')->check()) {
+            return back()->withErrors(['error' => 'Los sub users no pueden editar usuarios.']);
+        }
+
+        $agency = $authUser->agency;
+
+        $subuser = SubUser::where('agency', $agency)->where('id', $id)->first();
+        if (!$subuser) {
+            return back()->withErrors(['error' => 'Sub-user no encontrado o no pertenece a tu agencia.']);
+        }
+
+        $request->validate([
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email|max:100|unique:sub_users,email,' . $subuser->id,
+            'password' => 'nullable|string|min:8', // igual que tu store()
+        ]);
+
+        $subuser->name  = $request->name;
+        $subuser->email = $request->email;
+
+        // ✅ CLAVE: tu password real es password_hash
+        if ($request->filled('password')) {
+            $subuser->password_hash = Hash::make($request->password);
+        }
+
+        $subuser->save();
+
+        return back()->with('success', 'Sub-user actualizado correctamente.');
     }
 }
