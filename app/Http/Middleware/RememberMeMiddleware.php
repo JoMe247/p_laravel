@@ -6,9 +6,9 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cookie;
 use App\Models\User;
 use App\Models\SubUser;
-use Illuminate\Support\Facades\Cookie;
 
 class RememberMeMiddleware
 {
@@ -19,10 +19,20 @@ class RememberMeMiddleware
             return $next($request);
         }
 
-        // Si hay cookie "rememberme_token"
-        $token = $request->cookie('rememberme_token');
+        $cookie = $request->cookie('rememberme_token');
+        if (!$cookie) {
+            return $next($request);
+        }
 
-        if ($token) {
+        // Esperamos formato: "web|TOKEN" o "sub|TOKEN"
+        [$type, $token] = array_pad(explode('|', $cookie, 2), 2, null);
+
+        if (!$type || !$token) {
+            Cookie::queue(Cookie::forget('rememberme_token'));
+            return $next($request);
+        }
+
+        if ($type === 'web') {
             $record = DB::table('user_tokens')
                 ->where('token', $token)
                 ->where('expires_at', '>', now())
@@ -30,26 +40,54 @@ class RememberMeMiddleware
 
             if ($record) {
                 $user = User::find($record->user_id);
-
                 if ($user) {
-                    // Iniciar sesión automáticamente
                     Auth::guard('web')->login($user, true);
-
-                    // Regenerar la sesión para seguridad
                     $request->session()->regenerate();
 
-                    // Refrescar la expiración de la cookie (opcional)
-                    Cookie::queue('rememberme_token', $token, 60 * 24 * 30);
+                    // Sliding expiration (opcional pero recomendado)
+                    DB::table('user_tokens')->where('id', $record->id)->update([
+                        'expires_at' => now()->addDays(30),
+                    ]);
+                    Cookie::queue('rememberme_token', 'web|' . $token, 60 * 24 * 30);
 
-                    // Redirigir al dashboard directamente
-                    return redirect()->route('dashboard');
+                    // Si está en /login, lo sacamos a dashboard
+                    if ($request->is('login')) {
+                        return redirect()->route('dashboard');
+                    }
                 }
-            } else {
-                // Si el token ya no es válido o expiró, borrar cookie
-                Cookie::queue(Cookie::forget('rememberme_token'));
             }
         }
 
+        if ($type === 'sub') {
+            $record = DB::table('sub_user_tokens')
+                ->where('token', $token)
+                ->where('expires_at', '>', now())
+                ->first();
+
+            if ($record) {
+                $sub = SubUser::find($record->sub_user_id);
+                if ($sub) {
+                    Auth::guard('sub')->login($sub, true);
+                    $request->session()->regenerate();
+
+                    // Sliding expiration (opcional)
+                    DB::table('sub_user_tokens')->where('id', $record->id)->update([
+                        'expires_at' => now()->addDays(30),
+                        'updated_at' => now(),
+                    ]);
+
+                    Cookie::queue('rememberme_token', 'sub|' . $token, 60 * 24 * 30);
+
+                    if ($request->is('login')) {
+                        return redirect()->route('dashboard');
+                    }
+                }
+            }
+        }
+
+
+        // Token inválido o expirado → borrar cookie
+        Cookie::queue(Cookie::forget('rememberme_token'));
         return $next($request);
     }
 }
