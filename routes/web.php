@@ -21,6 +21,7 @@ use App\Http\Controllers\CustomerFilesController;
 use App\Http\Controllers\RemindersController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\PaymentsInvoicesController;
+use App\Http\Controllers\SmsMonthlyCounterController;
 
 
 // Página inicial
@@ -278,4 +279,11 @@ Route::middleware('auth.multi')->group(function () {
 
     Route::post('/payments/invoice-footer-image/delete', [PaymentsInvoicesController::class, 'deleteInvoiceFooterImage'])
         ->name('payments.invoice_footer_image.delete');
+
+    // SMS MONTHLY COUNTER
+    Route::post('/sms/monthly-counter/store', [SmsMonthlyCounterController::class, 'store'])
+        ->name('sms.monthlyCounter.store');
+
+    Route::post('/sms/monthly-counter/backfill', [SmsMonthlyCounterController::class, 'backfill'])
+        ->name('sms.monthlyCounter.backfill');
 });

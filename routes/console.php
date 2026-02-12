@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('reminders:process')->everyMinute();
+Schedule::command('sms:monthly-backfill')
+    ->monthlyOn(1, '00:10');
