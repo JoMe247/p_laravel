@@ -67,7 +67,8 @@
                                     <span>Invoices (Payments)</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item">
+                                <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('estimates', $customer->ID) }}'">
                                     <i class='bx bx-bar-chart-alt'></i>
                                     <span>Estimates</span>
                                 </button>

@@ -3,14 +3,12 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Payments</title>
+    <title>Estimates</title>
 
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
     <meta name="customer-id" content="{{ $customer->ID }}">
-
-
 
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
@@ -18,107 +16,78 @@
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
     <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 
+    <link rel="stylesheet" href="{{ asset('css/estimates.css') }}">
 
-    <link rel="stylesheet" href="{{ asset('css/payments.css') }}">
-
-
-    <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-
-    <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </head>
 
 <body>
-
     <div id="main-container">
         @include('menu')
 
         <section id="dash">
-
-            <div class="payments-layout">
+            <div class="estimates-layout">
 
                 <div class="left-column">
-
                     {{-- MENU LATERAL --}}
                     <aside class="profile-side-menu">
                         <nav class="profile-side-nav">
                             <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
-                                <i class='bx bx-id-card'></i>
-                                <span>Profile</span>
+                                <i class='bx bx-id-card'></i><span>Profile</span>
                             </button>
 
                             <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
-                                <i class='bx bx-shield-quarter'></i>
-                                <span>Policies</span>
-                            </button>
-
-                            <button type="button" class="profile-menu-item active"
-                                onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
-                                <i class='bx bx-credit-card'></i>
-                                <span>Invoices (Payments)</span>
+                                <i class='bx bx-shield-quarter'></i><span>Policies</span>
                             </button>
 
                             <button type="button" class="profile-menu-item"
-                                onclick="window.location.href='{{ route('estimates', $customer->ID) }}'">
-                                <i class='bx bx-bar-chart-alt'></i>
-                                <span>Estimates</span>
+                                onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
+                                <i class='bx bx-credit-card'></i><span>Invoices (Payments)</span>
+                            </button>
+
+                            <button type="button" class="profile-menu-item active"
+                                onclick="window.location.href='{{ route('estimates', ['customerId' => $customer->ID]) }}'">
+                                <i class='bx bx-bar-chart-alt'></i><span>Estimates</span>
                             </button>
 
                             <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
-                                <i class='bx bx-task'></i>
-                                <span>Reminders</span>
+                                <i class='bx bx-task'></i><span>Reminders</span>
                             </button>
 
                             <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
-                                <i class='bx bx-folder'></i>
-                                <span>Files</span>
+                                <i class='bx bx-folder'></i><span>Files</span>
                             </button>
 
                             <button type="button" class="profile-menu-item">
-                                <i class='bx bx-file'></i>
-                                <span>Documents</span>
+                                <i class='bx bx-file'></i><span>Documents</span>
                             </button>
-
                         </nav>
                     </aside>
 
-                    {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
+                    {{-- NOTES (igual que payments) --}}
                     <div class="profile-notes sticky-notes">
-
                         <div class="notes-header">
                             <h3>Notes</h3>
                             <button id="add-note-btn" class="btn small">+ Add Note</button>
                         </div>
-
                         <div class="notes-scroll">
                             <div id="notes-list"></div>
                         </div>
-
                     </div>
+                </div>
 
-                </div> <!-- /.left-column -->
-
-
-                {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
+                {{-- OVERLAY NOTE (igual que payments) --}}
                 <div id="note-overlay">
                     <div class="note-window">
                         <h2 style="margin-bottom:15px;">Add Note</h2>
-
-                        <label>Policy</label>
-                        <input type="text" id="note-policy">
-
-                        <label>Subject</label>
-                        <input type="text" id="note-subject">
-
+                        <label>Policy</label><input type="text" id="note-policy">
+                        <label>Subject</label><input type="text" id="note-subject">
                         <label>Note</label>
                         <textarea id="note-text" rows="5"></textarea>
 
@@ -128,43 +97,37 @@
                         </div>
                     </div>
                 </div>
-                {{-- /.left-column --}}
 
-                <div class="payments-wrapper">
-                    <div class="payments-actions">
-
-                        <a class="btn-invoices"
-                            href="{{ route('invoices', ['customerId' => $customerId, 'new' => 1]) }}">
-                            Invoices
+                <div class="estimates-wrapper">
+                    <div class="estimates-actions">
+                        <a class="btn-estimates"
+                            href="{{ route('estimate.register', ['customerId' => $customerId, 'new' => 1]) }}">
+                            + New Estimate
                         </a>
 
                         <div class="footer-image-controls">
                             <label class="switch">
-                                <input type="checkbox" id="footerImgToggle"
-                                    {{ !empty($agencyInfo->invoice_footer_enabled) ? 'checked' : '' }}>
+                                <input type="checkbox" id="estimateFooterImgToggle"
+                                    {{ !empty($agencyInfo->estimate_footer_enabled) ? 'checked' : '' }}>
                                 <span class="slider"></span>
                             </label>
 
-                            <button type="button" class="btn-footer-img" id="openFooterOverlay"
-                                data-has-image="{{ !empty($agencyInfo->invoice_footer_image) ? '1' : '0' }}"
-                                style="{{ !empty($agencyInfo->invoice_footer_enabled) && !empty($agencyInfo->invoice_footer_image) ? '' : 'display:none;' }}">
+                            <button type="button" class="btn-footer-img" id="openEstimateFooterOverlay"
+                                data-has-image="{{ !empty($agencyInfo->estimate_footer_image) ? '1' : '0' }}"
+                                style="{{ !empty($agencyInfo->estimate_footer_enabled) && !empty($agencyInfo->estimate_footer_image) ? '' : 'display:none;' }}">
                                 Update Image
                             </button>
-
                         </div>
-
-
                     </div>
 
+                    <div class="estimates-card">
+                        <h2>Estimates</h2>
 
-                    <div class="payments-card">
-                        <h2>Payments</h2>
-
-                        <div class="invoices-table-wrap">
-                            <table class="invoices-table">
+                        <div class="estimates-table-wrap">
+                            <table class="estimates-table">
                                 <thead>
                                     <tr>
-                                        <th>Invoice#</th>
+                                        <th>Estimate#</th>
                                         <th>Date</th>
                                         <th>Due Date</th>
                                         <th>Policy#</th>
@@ -175,55 +138,50 @@
                                         <th style="width:140px;">Actions</th>
                                     </tr>
                                 </thead>
-
                                 <tbody>
-                                    @forelse($invoices as $inv)
+                                    @forelse($estimates as $est)
                                         <tr>
-                                            <td class="td-strong">{{ $inv->invoice_number ?? '' }}</td>
-                                            <td>{{ $inv->creation_date ?? '' }}</td>
-                                            <td>{{ $inv->payment_date ?? '' }}</td>
-                                            <td>{{ $inv->policy_number ?? '' }}</td>
+                                            <td class="td-strong">{{ $est->estimate_number ?? '' }}</td>
+                                            <td>{{ $est->creation_date ?? '' }}</td>
+                                            <td>{{ $est->payment_date ?? '' }}</td>
+                                            <td>{{ $est->policy_number ?? '' }}</td>
 
                                             <td class="td-money">
-                                                @php
-                                                    $a = $inv->amount_calc ?? '';
-                                                @endphp
+                                                @php $a = $est->amount_calc ?? ''; @endphp
                                                 {{ $a !== '' ? '$' . number_format((float) $a, 2) : '' }}
                                             </td>
 
                                             <td class="td-money">
-                                                @php $f = $inv->fee ?? ''; @endphp
+                                                @php $f = $est->fee ?? ''; @endphp
                                                 {{ $f !== '' ? '$' . number_format((float) preg_replace('/[^0-9.]/', '', $f), 2) : '' }}
                                             </td>
 
                                             <td class="td-money">
-                                                @php $p = $inv->premium ?? ''; @endphp
+                                                @php $p = $est->premium ?? ''; @endphp
                                                 {{ $p !== '' ? '$' . number_format((float) preg_replace('/[^0-9.]/', '', $p), 2) : '' }}
                                             </td>
 
-                                            <td class="td-item" title="{{ $inv->first_item ?? '' }}">
-                                                {{ $inv->first_item ?? '' }}
+                                            <td class="td-item" title="{{ $est->first_item ?? '' }}">
+                                                {{ $est->first_item ?? '' }}
                                             </td>
 
+
                                             <td class="td-actions">
-                                                {{-- EDIT: abre invoices en modo edición (mismo invoice) --}}
+
+                                                <a class="icon-btn" title="PDF"
+                                                    href="{{ route('estimates.pdf', ['customerId' => $customerId, 'estimateId' => $est->id]) }}">
+                                                    <i class='bx bxs-file-pdf'></i>
+                                                </a>
+
+
                                                 <a class="icon-btn" title="Edit"
-                                                    href="{{ route('invoices', ['customerId' => $customerId, 'invoiceId' => $inv->id]) }}">
+                                                    href="{{ route('estimate.register', ['customerId' => $customerId, 'estimateId' => $est->id]) }}">
                                                     <i class='bx bx-edit-alt'></i>
                                                 </a>
 
-                                                {{-- PDF: por ahora placeholder --}}
-                                                <button class="icon-btn" type="button" title="Download PDF">
-                                                    <a class="icon-btn" title="Download PDF"
-                                                        href="{{ route('invoices.pdf', ['invoiceId' => $inv->id]) }}">
-                                                        <i class='bx bxs-file-pdf'></i>
-                                                    </a>
-                                                </button>
-
-                                                {{-- DELETE --}}
                                                 <form class="inline-form" method="POST"
-                                                    action="{{ route('invoices.destroy', ['invoiceId' => $inv->id]) }}"
-                                                    onsubmit="return confirm('Delete this invoice?');">
+                                                    action="{{ route('estimates.destroy', ['estimateId' => $est->id]) }}"
+                                                    onsubmit="return confirm('Delete this estimate?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="icon-btn danger" type="submit" title="Delete">
@@ -234,47 +192,44 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="10" class="td-empty">No invoices yet.</td>
+                                            <td colspan="10" class="td-empty">No estimates yet.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
 
-                        {{-- PAGINACIÓN --}}
-                        <div class="payments-pagination">
-                            {{ $invoices->links() }}
+                        <div class="estimates-pagination">
+                            {{ $estimates->links() }}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="footer-img-overlay" class="overlay" style="display:none;">
+            {{-- OVERLAY FOOTER IMAGE --}}
+            <div id="estimate-footer-img-overlay" class="overlay" style="display:none;">
                 <div class="overlay-box">
                     <div class="overlay-head">
-                        <h3>Invoice PDF Footer Image</h3>
-                        <button type="button" class="overlay-close" id="closeFooterOverlay">
+                        <h3>Estimate PDF Footer Image</h3>
+                        <button type="button" class="overlay-close" id="closeEstimateFooterOverlay">
                             <i class='bx bx-x'></i>
                         </button>
                     </div>
 
                     <p class="overlay-muted">
-                        Upload an image that will appear at the bottom of every invoice PDF for this agency.
+                        Upload an image that will appear at the bottom of every estimate PDF for this agency.
                     </p>
 
-                    <button type="button" class="btn-upload" id="btnAddFooterImage">
-                        + Add Image
-                    </button>
+                    <button type="button" class="btn-upload" id="btnAddEstimateFooterImage">+ Add Image</button>
+                    <input type="file" id="estimateFooterImageInput" accept="image/*" style="display:none;">
 
-                    <input type="file" id="footerImageInput" accept="image/*" style="display:none;">
-
-                    <div class="overlay-preview" id="footerPreview" style="display:none;">
-                        <img id="footerPreviewImg" alt="Preview">
+                    <div class="overlay-preview" id="estimateFooterPreview" style="display:none;">
+                        <img id="estimateFooterPreviewImg" alt="Preview">
                     </div>
 
                     <div class="overlay-actions">
-                        <button type="button" class="btn secondary" id="cancelFooterUpload">Cancel</button>
-                        <button type="button" class="btn" id="saveFooterUpload">Save</button>
+                        <button type="button" class="btn secondary" id="cancelEstimateFooterUpload">Cancel</button>
+                        <button type="button" class="btn" id="saveEstimateFooterUpload">Save</button>
                     </div>
                 </div>
             </div>
@@ -455,10 +410,8 @@
     <script src="{{ asset('js/help.js') }}"></script>
     <script src="{{ asset('js/profile.js') }}"></script>
     <script src="{{ asset('js/policies.js') }}"></script>
-    <script src="{{ asset('js/invoices.js') }}"></script>
-    <script src="{{ asset('js/payments.js') }}"></script>
 
-
+    <script src="{{ asset('js/estimates.js') }}"></script>
 </body>
 
 </html>

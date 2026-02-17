@@ -22,6 +22,7 @@ use App\Http\Controllers\RemindersController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\PaymentsInvoicesController;
 use App\Http\Controllers\SmsMonthlyCounterController;
+use App\Http\Controllers\EstimatesController;
 
 
 // Página inicial
@@ -286,4 +287,28 @@ Route::middleware('auth.multi')->group(function () {
 
     Route::post('/sms/monthly-counter/backfill', [SmsMonthlyCounterController::class, 'backfill'])
         ->name('sms.monthlyCounter.backfill');
+
+
+
+
+
+
+    Route::get('/estimates/{customerId}', [EstimatesController::class, 'estimates'])->name('estimates');
+
+    Route::get('/estimate/register/{customerId}', [EstimatesController::class, 'register'])->name('estimate.register');
+
+    Route::post('/estimates/table/save/{customerId}', [EstimatesController::class, 'saveEstimateTable'])->name('estimates.table.save');
+
+    Route::post('/estimates/dates/save/{customerId}', [EstimatesController::class, 'saveDates'])->name('estimates.dates.save');
+
+    Route::post('/estimates/charges/save/{customerId}', [EstimatesController::class, 'saveCharges'])->name('estimates.charges.save');
+
+    Route::delete('/estimates/{estimateId}', [EstimatesController::class, 'destroy'])->name('estimates.destroy');
+
+    // Footer image estimates (independiente)
+    Route::post('/estimates/estimate-footer-image', [EstimatesController::class, 'uploadEstimateFooterImage']);
+    Route::post('/estimates/estimate-footer-image/enabled', [EstimatesController::class, 'setEstimateFooterEnabled']);
+    Route::post('/estimates/estimate-footer-image/delete', [EstimatesController::class, 'deleteEstimateFooterImage']);
+    Route::get('/estimates/pdf/{customerId}/{estimateId}', [EstimatesController::class, 'pdf'])->name('estimates.pdf');
+
 });
