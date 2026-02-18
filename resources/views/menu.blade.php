@@ -53,7 +53,7 @@
             <i class='bx bxs-buildings'></i> Companies
         </div>
 
-        <div class="lateral-row" data="option">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/documents') }}'">
             <i class='bx bx-file'></i> Documents
         </div>
 

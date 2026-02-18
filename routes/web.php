@@ -23,6 +23,7 @@ use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\PaymentsInvoicesController;
 use App\Http\Controllers\SmsMonthlyCounterController;
 use App\Http\Controllers\EstimatesController;
+use App\Http\Controllers\DocumentsController;
 
 
 // Página inicial
@@ -310,5 +311,10 @@ Route::middleware('auth.multi')->group(function () {
     Route::post('/estimates/estimate-footer-image/enabled', [EstimatesController::class, 'setEstimateFooterEnabled']);
     Route::post('/estimates/estimate-footer-image/delete', [EstimatesController::class, 'deleteEstimateFooterImage']);
     Route::get('/estimates/pdf/{customerId}/{estimateId}', [EstimatesController::class, 'pdf'])->name('estimates.pdf');
+
+
+
+    // Documents
+    Route::get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
 
 });
