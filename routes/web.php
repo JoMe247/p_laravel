@@ -24,6 +24,7 @@ use App\Http\Controllers\PaymentsInvoicesController;
 use App\Http\Controllers\SmsMonthlyCounterController;
 use App\Http\Controllers\EstimatesController;
 use App\Http\Controllers\DocumentsController;
+use App\Http\Controllers\TemplatesController;
 
 
 // Página inicial
@@ -317,4 +318,8 @@ Route::middleware('auth.multi')->group(function () {
     // Documents
     Route::get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
 
+
+
+    Route::get('/templates/create', [TemplatesController::class, 'create'])->name('templates.create');
+    Route::post('/templates/save', [TemplatesController::class, 'store'])->name('templates.store');
 });

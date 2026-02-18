@@ -53,10 +53,11 @@
                             New Document
                         </button>
 
-                        <button type="button" class="btn-template" id="btn-new-template">
+                        <a href="{{ route('templates.create') }}" class="btn-template" id="btn-new-template">
                             <i class='bx bx-plus'></i>
                             New Template
-                        </button>
+                        </a>
+
 
                         <!-- Botón Imprimir (sin funcionamiento por ahora) -->
                         <button type="button" class="btn-secondary" id="btn-print-documents">

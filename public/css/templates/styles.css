@@ -1,0 +1,300 @@
+/* styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Teko:wght@300..700&display=swap');
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container h1{
+    text-transform: uppercase;
+    color: #e90c56;
+}
+
+#pdfCanvas {
+    border: 1px solid var(--clr-light-blue);
+    box-shadow: 0 10px 60px rgb(218, 229, 255);
+    margin: 20px 0;
+}
+
+.overlay-controls {
+    display: flex;
+    flex-flow: wrap;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+button {
+    margin: 0px 6px;
+    font-family: 'Montserrat', sans-serif;font-family: 'Montserrat', sans-serif;
+}
+
+.container-drag{
+    background-color: transparent;
+    margin-bottom: 20px;
+    position: absolute;
+    margin-top: 131px;
+}
+
+.box {
+    min-width: 100px;
+    max-width: 200px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    text-align: center;
+    display: inline-block;
+    align-items: center;
+    align-content: center;
+    justify-content: left;
+    color: #cc1133;
+    cursor: move;
+    border-radius: 5px;
+    margin-left: 0px;
+    margin-top: 0px;
+    font-weight: bold;
+    outline: none;
+
+    background: linear-gradient(90deg, #cc1133 50%, transparent 50%), 
+                linear-gradient(90deg, #cc1133 50%, transparent 50%), 
+                linear-gradient(0deg, #cc1133 50%, transparent 50%), 
+                linear-gradient(0deg, #cc1133 50%, transparent 50%);
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-size: 8px 2px, 8px 2px, 2px 8px, 2px 8px;
+    background-position: 0% 0%, 100% 100%, 0% 100%, 100% 0px;
+    animation: dash 5s linear infinite;
+}
+
+.box::before{
+    position: absolute;
+    content: attr(data-icon);
+    width: 24px;
+    height: 24px;
+    font-family: "boxicons";
+    font-size: 1.2em;
+    left: -23px;
+    top: 0px;
+}
+
+.box[data-icon="text"]::before{
+    position: absolute;
+    content: '\ec44';
+    width: 24px;
+    height: 24px;
+    font-family: "boxicons";
+    font-size: 1.2em;
+    left: -23px;
+    top: 0px;
+}
+
+.box[data-icon="signature"]::before{
+    position: absolute;
+    content: '\ebb0';
+    width: 24px;
+    height: 24px;
+    font-family: "boxicons";
+    font-size: 1.2em;
+    left: -23px;
+    top: 0px;
+}
+
+.box[data-icon="watch"]::before{
+    position: absolute;
+    content: '\eefd';
+    width: 24px;
+    height: 24px;
+    font-family: "boxicons";
+    font-size: 1.2em;
+    left: -23px;
+    top: 1px;
+}
+
+.box[data-icon="calendar"]::before{
+    position: absolute;
+    content: '\ea15';
+    width: 24px;
+    height: 24px;
+    font-family: "boxicons";
+    font-size: 1.2em;
+    left: -23px;
+    top: 1px;
+}
+
+@keyframes dash {
+    to {
+        background-position: 100% 0%, 0% 100%, 0% 0%, 100% 100%;
+    }
+}
+
+#upload-file-button{
+    width: 200px;
+    height: 20px;
+    text-transform: uppercase;
+    font-family: 'Josefin Sans',sans-serif;
+    font-weight: bold;
+    background-color: #e90c56;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    border-radius: 25px;
+    padding: 5px;
+}
+
+#upload-file-button:hover{
+    background-color: #ab1044;
+}
+
+#upload-file-button i{
+    font-size: 1.1em;
+    margin-top: -5px;
+}
+
+.button-controls{
+    width: 75px;
+    height: 75px;
+    border-radius: 5px;
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    background-color: #fafafa;
+    box-shadow: 0 1px 1px rgb(218, 229, 255);
+    border: 1px solid #ddd;
+    transition: 0.3s;
+    margin: 0px 6px;
+}
+.button-controls:not([disabled]){
+    width: 75px;
+    height: 75px;
+    border-radius: 5px;
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    background-color: #fff;
+    box-shadow: 0 1px 1px rgb(218, 229, 255);
+    border: 1px solid #ddd;
+    transition: 0.3s;
+    margin: 0px 6px;
+}
+
+.button-controls:not([disabled]):hover{
+    background-color: #f5f5f5;
+    transform: scale(1.04);
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.button-controls:not([disabled]):hover i, .button-controls:not([disabled]):hover p{
+    color: #444;
+}
+
+.button-controls:not([disabled]) i{
+    width: 100%;
+    height: 25px;
+    font-size: 2.5em;
+    text-align: center;
+    color: #e90c56;
+}
+
+.button-controls i{
+    width: 100%;
+    height: 25px;
+    font-size: 2.5em;
+    text-align: center;
+}
+
+.button-controls p{
+    width: 100%;
+    text-align: center;
+    margin-bottom: 5px
+}
+
+#saveButton{
+    width: 77px;
+    height: 77px;
+}
+
+#paginasTotal{
+    position: absolute;
+    display: flex;
+    top: 50%;
+    font-style: italic;
+    color: #e90c56;
+    opacity: 0.7;
+}
+
+#paginasTotal p{
+    font-weight: bolder;
+    margin-top: -1px;
+    font-size: 1.2em;
+    font-family: Arial, sans-serif;
+}
+
+#paginaActual{
+    position: absolute;
+    display: flex;
+    top: 50%;
+    font-style: italic;
+    color: #e90c56;
+    opacity: 0.7;
+}
+
+#paginaActual p{
+    font-weight: bolder;
+    margin-top: -1px;
+    font-size: 1.2em;
+    font-family: Arial, sans-serif;
+}
+
+#options-bar{
+    width: 50px;
+    height: 100px;
+    display: flex;
+    flex-flow: wrap;
+    position: absolute;
+}
+
+.option-item{
+    width: 40px;
+    height: 40px;
+    border-radius: 3px;
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    font-size: 1.4em;
+    background-color: #fff;
+    box-shadow: 0 1px 1px rgb(218, 229, 255);
+    border: 1px solid #ddd;
+    transition: 0.3s;
+    margin: 5px auto;
+    cursor: pointer;
+}
+
+.option-item:hover{
+    background-color: #e1e1e1;
+}
+
+.option-info{
+    text-align: left;
+    width: 300px;
+    position: absolute;
+    font-size: 0.7em;
+    font-style: italic;
+    left: 54px;
+}
