@@ -38,7 +38,7 @@ class TemplatesController extends Controller
         $safeName = Str::slug($templateName, '-');
 
         // Guardado en storage/app/templates/...
-        $baseDir = "templates/{$userId}/{$safeName}-{$stamp}";
+        $baseDir = "templates/{$safeName}-{$stamp}";
         Storage::disk('local')->makeDirectory($baseDir);
 
         $originalPath = $request->file('pdf')->storeAs($baseDir, 'original_original.pdf', 'local');

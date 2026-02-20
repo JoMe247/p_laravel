@@ -1,0 +1,157 @@
+.page-wrapper{
+  padding: 18px;
+}
+
+.top-bar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.btn-back{
+  text-decoration:none;
+  padding:8px 10px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;
+}
+
+.page-title{
+  margin:0;
+  font-size:18px;
+}
+
+.doc-controls{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+
+.control{
+  height:38px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.15);
+  padding:0 12px;
+  background:transparent;
+  color:inherit;
+}
+
+.btn{
+  cursor:pointer;
+}
+
+.btn[disabled],
+.control[disabled]{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.primary{
+  border-color: rgba(0, 170, 255, .45);
+}
+
+.panel{
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:12px;
+  max-width:720px;
+}
+
+.panel-row{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:10px;
+  position:relative;
+}
+
+.panel-row input, .panel-row select{
+  height:38px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.15);
+  background:transparent;
+  color:inherit;
+  padding:0 12px;
+}
+
+.muted{ opacity:.7; }
+
+.hidden{ display:none !important; }
+
+.suggest{
+  position:absolute;
+  top: 66px;
+  left:0;
+  right:0;
+  background: #0b1220;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  overflow:hidden;
+  z-index:50;
+}
+
+.suggest-item{
+  padding:10px 12px;
+  cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.suggest-item:hover{
+  background: rgba(255,255,255,.04);
+}
+
+.si-title{ font-size:13px; }
+.si-sub{ font-size:12px; opacity:.7; }
+
+.viewer-wrap{
+  margin-top:8px;
+}
+
+#pdfViewer{
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+}
+
+#pdfCanvas{
+  display:block;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+}
+
+#inputOverlay{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+}
+
+#inputOverlay input{
+  background-color: transparent;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:6px;
+  width: 140px;
+  max-width: 180px;
+  padding: 4px 6px;
+  color: inherit;
+}
+
+.viewer-controls{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top:10px;
+}
+
+.btn.small{
+  height:34px;
+  padding:0 10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.15);
+  background:transparent;
+  color:inherit;
+}
