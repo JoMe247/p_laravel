@@ -322,4 +322,25 @@ Route::middleware('auth.multi')->group(function () {
 
     Route::get('/templates/create', [TemplatesController::class, 'create'])->name('templates.create');
     Route::post('/templates/save', [TemplatesController::class, 'store'])->name('templates.store');
+
+    Route::get('/documents/create-document', [DocumentsController::class, 'createDocument'])
+        ->name('documents.create_document');
+
+    Route::get('/documents/templates/options', [DocumentsController::class, 'templateOptions'])
+        ->name('documents.templates.options');
+
+    Route::get('/documents/templates/{id}', [DocumentsController::class, 'templateData'])
+        ->name('documents.templates.data');
+
+    Route::get('/documents/customers/search', [DocumentsController::class, 'searchCustomers'])
+        ->name('documents.customers.search');
+
+    Route::get('/documents/customers/{customerId}/policies', [DocumentsController::class, 'customerPolicies'])
+        ->name('documents.customers.policies');
+
+    Route::post('/documents/save-generated', [DocumentsController::class, 'saveGeneratedPdf'])
+        ->name('documents.save_generated');
+
+    Route::get('/documents/templates/file/{id}', [DocumentsController::class, 'streamTemplatePdf'])
+        ->name('documents.templates.file');
 });

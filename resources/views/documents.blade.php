@@ -48,10 +48,9 @@
                 <div class="documents-topbar">
                     <div class="documents-actions">
                         <!-- Botón Nuevo Documento (sin funcionamiento por ahora) -->
-                        <button type="button" class="btn-primary" id="btn-new-document">
-                            <i class='bx bx-plus'></i>
+                        <a href="{{ route('documents.create_document') }}" class="btn btn-primary" id="newDocumentBtn">
                             New Document
-                        </button>
+                        </a>
 
                         <a href="{{ route('templates.create') }}" class="btn-template" id="btn-new-template">
                             <i class='bx bx-plus'></i>
