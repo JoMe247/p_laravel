@@ -259,6 +259,12 @@ $(function () {
     });
 });
 
+function docNameActive() {
+    document.getElementById("dragged-value").setAttribute("data-icon", "docname");
+    document.getElementById("dragged-value").innerHTML = "DocName@";
+    document.getElementById("dragged-value").setAttribute("contenteditable", "false");
+}
+
 function textActive() {
     document.getElementById("dragged-value").setAttribute("data-icon", "text");
     document.getElementById("dragged-value").innerHTML = "Add Text";

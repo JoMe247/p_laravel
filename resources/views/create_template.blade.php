@@ -125,6 +125,14 @@
     <!-- End Upload Area -->
 
     <div id="options-bar" style="display: none;">
+
+        <div class="option-item" onclick="docNameActive()">
+            <i class='bx bx-user'></i>
+            <p class="option-info">
+                This will place the document name dynamically when sending.
+            </p>
+        </div>
+        
         <div class="option-item" onclick="textActive()">
             <i class='bx bx-text' style="padding-left: 3px;"></i>
             <p class="option-info">Add text fields to the document.</p>

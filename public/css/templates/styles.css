@@ -85,6 +85,17 @@ button {
     top: 0px;
 }
 
+.box[data-icon="docname"]::before{
+    position: absolute;
+    content: '\ee0d'; /* icono de user */
+    width: 24px;
+    height: 24px;
+    font-family: "boxicons";
+    font-size: 1.2em;
+    left: -23px;
+    top: 1px;
+}
+
 .box[data-icon="text"]::before{
     position: absolute;
     content: '\ec44';
