@@ -17,7 +17,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-image: url('img/pattern.png');
+  background-image: url('../../img/pattern.png');
   background-size: 450px;
   background-color: var(--clr-light);
   color: var(--clr-black);
