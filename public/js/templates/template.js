@@ -13,6 +13,7 @@ const redoStack = [];
 const scaleFactor = 0.85;
 const DOCDTIME_TEXT = "{{DocDTime@}}";
 const DOCDTIME_ID_PREFIX = "__DOCDTIME__P";
+const OVERLAY_FONT_SIZE = 20;
 function docDTimeIdForPage(pageNum) {
     return `${DOCDTIME_ID_PREFIX}${pageNum}`;
 }
@@ -48,11 +49,13 @@ async function handleFileSelect(event) {
         const pdfjsLib = window["pdfjs-dist/build/pdf"];
         const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
         totalPages = pdf.numPages;
+        resetDocDTimeState();
 
         initDocDTimeUI();
         ensureDocDTimeOverlay(); // primero insertamos overlay
         scheduleRender(currentPageNumber); // y luego render 1 sola vez
         updatePageInfo(); // vuelve a renderizar para que se vea el DocDTime@
+        updateUndoRedoButtons();
     };
     fileReader.readAsArrayBuffer(file);
 }
@@ -93,13 +96,16 @@ async function renderPage(pageNumber) {
     // Redraw overlay texts for current page
     overlayTexts.forEach((overlay) => {
         if (overlay.page === currentPageNumber) {
-            ctx.font = "20px Arial";
+            ctx.save();
+            ctx.font = `${OVERLAY_FONT_SIZE}px Arial`;
             ctx.fillStyle = "#cc1133";
+            ctx.textBaseline = "top";
             ctx.fillText(
                 overlay.text,
                 overlay.x * scaleFactor,
-                overlay.y * scaleFactor + 15,
+                overlay.y * scaleFactor,
             );
+            ctx.restore();
         }
     });
 
@@ -149,10 +155,12 @@ function addTextOverlay() {
     redoStack.length = 0;
 
     overlayTexts.push({ text, x, y, page: currentPageNumber });
-
-    ctx.font = "20px Arial";
+    ctx.save();
+    ctx.font = `${OVERLAY_FONT_SIZE}px Arial`;
     ctx.fillStyle = "#cc1133";
-    ctx.fillText(text, x * scaleFactor, y * scaleFactor + 15);
+    ctx.textBaseline = "top";
+    ctx.fillText(text, x * scaleFactor, y * scaleFactor);
+    ctx.restore();
 
     hasChanges = true;
     document.getElementById("saveButton").disabled = false;
@@ -165,6 +173,7 @@ function addTextOverlay() {
     });
 
     document.getElementById("dragged-value").innerText = "Add Text";
+    updateUndoRedoButtons();
 }
 
 document.getElementById("saveButton").addEventListener("click", savePDF);
@@ -196,7 +205,7 @@ async function savePDF() {
         page.drawText(overlay.text, {
             x: overlay.x,
             y: height - overlay.y - 20,
-            size: 20,
+            size: OVERLAY_FONT_SIZE,
             color: PDFLib.rgb(1, 0, 0),
         });
     });
@@ -255,6 +264,28 @@ function updatePageInfo() {
     }
 }
 
+function hasUserTextOverlays() {
+    // "inputs de texto" = overlays que NO son locked (DocDTime@ es locked)
+    return overlayTexts.some(o => !o.locked);
+}
+
+function updateUndoRedoButtons() {
+    const undoBtn = document.getElementById("undoButton");
+    const redoBtn = document.getElementById("redoButton");
+    if (!undoBtn || !redoBtn) return;
+
+    // Si no hay textos del usuario, ambos deshabilitados
+    if (!hasUserTextOverlays()) {
+        undoBtn.disabled = true;
+        redoBtn.disabled = true;
+        return;
+    }
+
+    // Si sí hay textos, habilitar según stacks
+    undoBtn.disabled = undoStack.length === 0;
+    redoBtn.disabled = redoStack.length === 0;
+}
+
 function resetCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     overlayTexts = [];
@@ -264,6 +295,8 @@ function resetCanvas() {
 
     hasChanges = false;
     document.getElementById("saveButton").disabled = true;
+    document.getElementById("undoButton").disabled = true;
+    document.getElementById("redoButton").disabled = true;
 
     document.getElementById("xCoordinate").value = "";
     document.getElementById("yCoordinate").value = "";
@@ -272,13 +305,14 @@ function resetCanvas() {
 
 function undo() {
     if (undoStack.length > 0) {
-        rundoStack.push(overlayTexts.map((o) => ({ ...o })));
+        redoStack.push(overlayTexts.map((o) => ({ ...o })));
         overlayTexts = undoStack.pop();
         scheduleRender(currentPageNumber);
         ensureDocDTimeOverlay();
 
         hasChanges = overlayTexts.length > 0;
         document.getElementById("saveButton").disabled = !hasChanges;
+        updateUndoRedoButtons();
     }
 }
 
@@ -291,6 +325,7 @@ function redo() {
 
         hasChanges = overlayTexts.length > 0;
         document.getElementById("saveButton").disabled = !hasChanges;
+        updateUndoRedoButtons();
     }
 }
 
@@ -366,49 +401,41 @@ function measurePdfTextWidth(text, fontSize = 20) {
 
 // Calcula coordenadas en “tu sistema” (y desde arriba)
 function getCornerXY(corner, pageW, pageH) {
-    // padding real al borde (en coordenadas PDF)
-    const pad = 8;
+    const padX = 8;
+    const padTop = 8;
+    const padBottom = 18; // ✅ súbelo del borde inferior (ajusta 25–40 si quieres)
 
-    // Medimos el texto con canvas en pixeles y lo convertimos a "PDF units"
-    // Porque en render dibujas en canvas escalado: x*scaleFactor.
-    // Medimos con la misma fuente/tamaño que usas al renderizar.
     ctx.save();
-    ctx.font = "20px Arial";
-    const textWidthPx = ctx.measureText(DOCDTIME_TEXT).width; // px en canvas
+    ctx.font = `${OVERLAY_FONT_SIZE}px Arial`;
+    const textWidthPx = ctx.measureText(DOCDTIME_TEXT).width;
     ctx.restore();
 
-    // Convertir a unidades PDF (unidades base antes de scale)
     const textWidth = textWidthPx / scaleFactor;
+    const textHeight = OVERLAY_FONT_SIZE / scaleFactor;
 
-    // Altura aproximada (20px font + un pequeño ajuste) en unidades PDF
-    const textHeight = 20 / scaleFactor;
-
-    // NOTA: tu overlay.y es "desde arriba" (top-based). 0 = arriba.
-    // Para TOP: y = pad
-    // Para BOTTOM: y = pageH - textHeight - pad
-    let x = pad;
-    let y = pad;
+    let x = padX;
+    let y = padTop;
 
     switch (corner) {
         case "TL":
-            x = pad;
-            y = pad;
+            x = padX;
+            y = padTop;
             break;
 
         case "TR":
-            x = Math.max(pad, pageW - textWidth - pad);
-            y = pad;
+            x = Math.max(padX, pageW - textWidth - padX);
+            y = padTop;
             break;
 
         case "BL":
-            x = pad;
-            y = Math.max(pad, pageH - textHeight - pad);
+            x = padX;
+            y = Math.max(padTop, pageH - textHeight - padBottom);
             break;
 
         case "BR":
         default:
-            x = Math.max(pad, pageW - textWidth - pad);
-            y = Math.max(pad, pageH - textHeight - pad);
+            x = Math.max(padX, pageW - textWidth - padX);
+            y = Math.max(padTop, pageH - textHeight - padBottom);
             break;
     }
 
@@ -441,8 +468,8 @@ function ensureDocDTimeOverlay() {
         });
     }
 
-    hasChanges = true;
-    document.getElementById("saveButton").disabled = false;
+    hasChanges = hasUserTextOverlays();
+    document.getElementById("saveButton").disabled = !hasChanges;
 }
 
 function moveDocDTimeToCorner(corner) {
@@ -484,6 +511,10 @@ function moveDocDTimeToCorner(corner) {
 }
 
 function setDocDTimeCorner(corner) {
+    // fuerza que el click no deje el mismo checkbox apagado
+    const idMap = { TL: "dtimeTL", TR: "dtimeTR", BL: "dtimeBL", BR: "dtimeBR" };
+    const clicked = document.getElementById(idMap[corner]);
+    if (clicked) clicked.checked = true;
     docDTimeCorner = corner;
 
     // “checkbox exclusivo”: apaga los otros
@@ -499,5 +530,24 @@ function setDocDTimeCorner(corner) {
 function initDocDTimeUI() {
     // por default BR
     const br = document.getElementById("dtimeBR");
+    if (br) br.checked = true;
+}
+
+function resetDocDTimeState() {
+    // Default esquina
+    docDTimeCorner = "BR";
+
+    // Limpia DocDTime overlays previos (de cualquier PDF anterior)
+    overlayTexts = overlayTexts.filter(o => !(o.id && o.id.startsWith(DOCDTIME_ID_PREFIX)));
+
+    // Resetea UI (solo BR marcado)
+    const tl = document.getElementById("dtimeTL");
+    const tr = document.getElementById("dtimeTR");
+    const bl = document.getElementById("dtimeBL");
+    const br = document.getElementById("dtimeBR");
+
+    if (tl) tl.checked = false;
+    if (tr) tr.checked = false;
+    if (bl) bl.checked = false;
     if (br) br.checked = true;
 }

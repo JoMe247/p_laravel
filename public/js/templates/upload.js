@@ -125,6 +125,7 @@ function progressMove() {
         setTimeout(function () {
           document.getElementsByClassName("container")[0].style.display = "";
           document.getElementById("uploadArea").style.display = "none";
+          document.getElementById("pageInfoBar").style.display = "";
         }, 100);
 
         setTimeout(function () {
@@ -135,35 +136,7 @@ function progressMove() {
           document.getElementById("options-bar").style.marginLeft = canvas.width + 60 + "px";
           document.getElementById("options-bar").style.marginTop = alturaBotones + "px";
 
-          if (canvas.height >= 500 && canvas.height <= 530) {
-
-            document.getElementById("paginasTotal").style.marginLeft = leftTotales + "px";
-            document.getElementById("paginasTotal").style.marginTop = canvas.height / 2 + 8 + "px";
-
-            document.getElementById("paginaActual").style.marginLeft = canvas.width / 2 + 90 + "px";
-            document.getElementById("paginaActual").style.marginTop = canvas.height / 2 + 8 + "px";
-
-          }
-
-          if (canvas.height >= 580 && canvas.height <= 690) {
-
-            document.getElementById("paginasTotal").style.marginLeft = leftTotales + "px";
-            document.getElementById("paginasTotal").style.marginTop = canvas.height / 2 + 15 + "px";
-
-            document.getElementById("paginaActual").style.marginLeft = canvas.width / 2 + 90 + "px";
-            document.getElementById("paginaActual").style.marginTop = canvas.height / 2 + 15 + "px";
-
-          }
-
-          if (canvas.height >= 690 && canvas.height <= 750) {
-
-            document.getElementById("paginasTotal").style.marginLeft = leftTotales + "px";
-            document.getElementById("paginasTotal").style.marginTop = canvas.height / 2 + 50 + "px";
-
-            document.getElementById("paginaActual").style.marginLeft = canvas.width / 2 + 90 + "px";
-            document.getElementById("paginaActual").style.marginTop = canvas.height / 2 + 50 + "px";
-
-          }
+    
 
         }, 10);
 

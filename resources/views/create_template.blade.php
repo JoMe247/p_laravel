@@ -33,15 +33,18 @@
     <div class="container" style="display: none;">
         <h1>Create Template</h1>
 
-        <div id="paginaActual">Current Page: &nbsp;&nbsp;<p id="counter">1</p>
-        </div>
-        <div id="paginasTotal">Total Pages: &nbsp;&nbsp;<p id="total-pages"></p>
-        </div>
 
         <label for="upload" id="upload-file-button"><i class='bx bx-upload'></i>&nbsp; Upload New File</label>
         <input type="file" id="upload" accept="application/pdf" style="position: fixed;z-index:-1;opacity: 0;">
 
         <canvas id="pdfCanvas" style="display:none"></canvas>
+
+        <div id="pageInfoBar" style="display:none;">
+            <div id="paginasTotal">Total Pages: &nbsp;&nbsp;<p id="total-pages"></p>
+            </div>
+            <div id="paginaActual">Current Page: &nbsp;&nbsp;<p id="counter">1</p>
+            </div>
+        </div>
 
         <div class="container-drag" id="draggable-area" style="display: none;">
             <div class="box" contenteditable="true" id="dragged-value" spellcheck="false" data-icon="text">Add Text
@@ -49,12 +52,12 @@
         </div>
 
         <div class="overlay-controls">
-            <button class="button-controls" onclick="undo()">
+            <button id="undoButton" class="button-controls" onclick="undo()">
                 <i class='bx bx-undo'></i>
                 <p>Undo</p>
             </button>
 
-            <button class="button-controls" onclick="redo()">
+            <button id="redoButton" class="button-controls" onclick="redo()">
                 <i class='bx bx-redo'></i>
                 <p>Redo</p>
             </button>

@@ -239,34 +239,27 @@ button {
     height: 77px;
 }
 
-#paginasTotal{
-    position: absolute;
+#pageInfoBar{
+    width: 100%;
     display: flex;
-    top: 50%;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -6px; /* ajusta si quieres más separación */
     font-style: italic;
     color: #e90c56;
     opacity: 0.7;
 }
 
-#paginasTotal p{
-    font-weight: bolder;
-    margin-top: -1px;
-    font-size: 1.2em;
-    font-family: Arial, sans-serif;
-}
-
-#paginaActual{
-    position: absolute;
+#paginasTotal, #paginaActual{
+    position: static;
     display: flex;
-    top: 50%;
-    font-style: italic;
-    color: #e90c56;
-    opacity: 0.7;
+    align-items: center;
+    gap: 6px;
 }
 
-#paginaActual p{
+#paginasTotal p, #paginaActual p{
     font-weight: bolder;
-    margin-top: -1px;
+    margin: 0;
     font-size: 1.2em;
     font-family: Arial, sans-serif;
 }
