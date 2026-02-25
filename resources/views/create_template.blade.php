@@ -13,11 +13,13 @@
     <link rel="stylesheet" href="{{ asset('css/templates/upload.css') }}">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js"></script>
-    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{{ asset('js/pdfjs/pdf.min.js') }}"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ asset('js/pdfjs/pdf.worker.min.js') }}";
+    </script>
+    <script src="{{ asset('js/vendor/pdf-lib.min.js') }}"></script>
+    <script src="{{ asset('js/vendor/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ asset('js/vendor/jquery-ui.min.js') }}"></script>
 
     <script>
         window.TEMPLATE_SAVE_URL = "{{ route('templates.store') }}";
@@ -132,7 +134,7 @@
                 This will place the document name dynamically when sending.
             </p>
         </div>
-        
+
         <div class="option-item" onclick="textActive()">
             <i class='bx bx-text' style="padding-left: 3px;"></i>
             <p class="option-info">Add text fields to the document.</p>
@@ -143,14 +145,36 @@
             <p class="option-info">This will be used to place the signature.</p>
         </div>
 
-        <div class="option-item" onclick="watchActive()">
-            <i class='bx bxs-watch'></i>
-            <p class="option-info">This will be used to place the date and time the document was signed.</p>
-        </div>
-
         <div class="option-item" onclick="calendarActive()">
             <i class='bx bx-calendar'></i>
             <p class="option-info">Text field used to place the current day each time you send a document.</p>
+        </div>
+
+        <!-- Completion time (DocDTime@) position -->
+        <div class="dtime-section">
+            <div class="dtime-title">Completion time</div>
+
+            <div class="dtime-grid">
+                <label class="dtime-opt">
+                    <input type="checkbox" id="dtimeTL" onclick="setDocDTimeCorner('TL')">
+                    <span>Top Left</span>
+                </label>
+
+                <label class="dtime-opt">
+                    <input type="checkbox" id="dtimeTR" onclick="setDocDTimeCorner('TR')">
+                    <span>Top Right</span>
+                </label>
+
+                <label class="dtime-opt">
+                    <input type="checkbox" id="dtimeBL" onclick="setDocDTimeCorner('BL')">
+                    <span>Bottom Left</span>
+                </label>
+
+                <label class="dtime-opt">
+                    <input type="checkbox" id="dtimeBR" onclick="setDocDTimeCorner('BR')">
+                    <span>Bottom Right</span>
+                </label>
+            </div>
         </div>
     </div>
 

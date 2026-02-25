@@ -309,3 +309,41 @@ button {
     font-style: italic;
     left: 54px;
 }
+
+/* Panel completion time sin modificar #options-bar */
+.dtime-section{
+    position: absolute;
+    left: 54px;      /* a la derecha de los iconos */
+    top: 230px;      /* debajo de los botones (ajusta si quieres) */
+    width: 300px;
+    padding-top: 10px;
+    border-top: 1px dashed #e90c56;
+}
+
+.dtime-title{
+    font-style: italic;
+    font-size: 0.9em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.dtime-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 18px;
+}
+
+.dtime-opt{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85em;
+    cursor: pointer;
+    user-select: none;
+}
+
+.dtime-opt input{
+    width: 16px;
+    height: 16px;
+    accent-color: #e90c56;
+}
