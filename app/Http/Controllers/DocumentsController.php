@@ -82,7 +82,7 @@ class DocumentsController extends Controller
         if ($q === '') return response()->json(['ok' => true, 'customers' => []]);
 
         $customers = DB::table('customers')
-            ->select('ID', 'Name', 'Phone', 'Phone2')
+            ->select('ID', 'Name', 'Phone', 'Phone2','Email1', 'Email2')
             ->where(function ($w) use ($q) {
                 $w->where('Name', 'like', "%{$q}%")
                     ->orWhere('Phone', 'like', "%{$q}%")

@@ -28,11 +28,14 @@ const saveDocBtn = document.getElementById("saveDocBtn");
 const selectedCustomerInfo = document.getElementById("selectedCustomerInfo");
 const policySelect = document.getElementById("policySelect");
 
-const viewerControls = document.getElementById("viewerControls");
-const prevPageBtn = document.getElementById("prevPage");
+const viewerControls = document.getElementById("viewerControls"); // ahora es el contenedor de botones
+const pageInfoBar = document.getElementById("pageInfoBar"); // barra "Total Pages / Current Page"
+
+const prevPageBtn = document.getElementById("backPage");
 const nextPageBtn = document.getElementById("nextPage");
-const currentPageEl = document.getElementById("currentPage");
-const totalPagesEl = document.getElementById("totalPages");
+
+const currentPageEl = document.getElementById("counter");
+const totalPagesEl = document.getElementById("total-pages");
 
 // ---------------------------
 // Init
@@ -88,6 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             saveInputChangesForCurrentPage();
             currentPageNumber--;
             renderPage(currentPageNumber, overlayData);
+            updatePagerButtons();
         }
     });
 
@@ -96,6 +100,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             saveInputChangesForCurrentPage();
             currentPageNumber++;
             renderPage(currentPageNumber, overlayData);
+            updatePagerButtons();
         }
     });
 });
@@ -171,7 +176,22 @@ async function loadPDF(templateData) {
         totalPagesEl.textContent = totalPages;
         currentPageNumber = 1;
 
-        viewerControls.classList.toggle("hidden", totalPages <= 1);
+      
+
+        currentPageEl.textContent = currentPageNumber;
+
+        // habilitar/deshabilitar igual que template
+        if (totalPages >= 2) {
+            prevPageBtn.disabled = false;
+            nextPageBtn.disabled = false;
+        } else {
+            prevPageBtn.disabled = true;
+            nextPageBtn.disabled = true;
+        }
+
+        pageInfoBar.style.display = "";
+        viewerControls.style.display = "";
+        updatePagerButtons();
 
         await renderPage(currentPageNumber, overlayData);
     } catch (err) {
@@ -180,17 +200,17 @@ async function loadPDF(templateData) {
             "Failed to load PDF preview. Revisa el path original_file_path/original_original.",
         );
         clearViewer();
+        if (pageInfoBar) pageInfoBar.style.display = "none";
+        if (viewerControls) viewerControls.style.display = "none";
     }
 }
 
 function saveInputChangesForCurrentPage() {
     const inputFields = inputOverlay.querySelectorAll("input");
     inputFields.forEach((inputField) => {
-        const placeholder = inputField.dataset.placeholder;
-        const overlay = overlayData.find(
-            (o) => o.text === placeholder && o.page === currentPageNumber,
-        );
-        if (overlay) {
+        const idx = Number(inputField.dataset.overlayIndex);
+        const overlay = overlayData[idx];
+        if (overlay && overlay.page === currentPageNumber) {
             overlay.text = `{{${inputField.value}}}`;
         }
     });
@@ -214,7 +234,7 @@ async function renderPage(pageNumber, overlayDataParam) {
 
     inputOverlay.innerHTML = "";
 
-    overlayDataParam.forEach((overlay) => {
+    overlayDataParam.forEach((overlay, index) => {
         if (
             overlay.page === pageNumber &&
             typeof overlay.text === "string" &&
@@ -225,35 +245,45 @@ async function renderPage(pageNumber, overlayDataParam) {
             inputField.type = "text";
             inputField.value = overlay.text.replace(/{{|}}/g, "");
 
+            // Posición absoluta
             inputField.style.position = "absolute";
-            // Escala visual real del canvas (por CSS / responsive)
+
+            // Escala visual real del canvas (si el canvas se ve diferente por CSS)
             const rect = canvas.getBoundingClientRect();
             const scaleX = rect.width / canvas.width;
             const scaleY = rect.height / canvas.height;
 
-            // Asegura que el overlay tenga el mismo tamaño visual del canvas
+            // Asegura overlay igual al canvas visible
             inputOverlay.style.width = rect.width + "px";
             inputOverlay.style.height = rect.height + "px";
 
-            // Posición (overlay.x/y están en “unidades sin escala”, igual que en template.js)
-            const leftPx = overlay.x * scaleFactor * scaleX;
-            const topPx = overlay.y * scaleFactor * scaleY;
+            // Coordenadas (guardadas como "sin escala" en template.js)
+            let leftPx = overlay.x * scaleFactor * scaleX;
+            let topPx = overlay.y * scaleFactor * scaleY;
 
-            const OFFSET_Y = 2; // ajusta si hace falta
+            // ✅ offset fino (el que preguntabas)
+            const OFFSET_Y = 2; // prueba 2 o 3
+            topPx += OFFSET_Y;
+
+            // Clamp para que no se salgan
+            leftPx = Math.max(0, Math.min(leftPx, rect.width - 10));
+            topPx = Math.max(0, Math.min(topPx, rect.height - 10));
 
             inputField.style.left = `${leftPx}px`;
             inputField.style.top = `${topPx}px`;
-            // Evita que se salga del canvas
-            const left = overlay.x * scaleFactor;
-            const top = overlay.y * scaleFactor;
 
-            inputField.style.left = `${Math.max(0, Math.min(left, canvas.width - 10))}px`;
-            inputField.style.top = `${Math.max(0, Math.min(top, canvas.height - 10))}px`;
             inputField.dataset.placeholder = overlay.text;
 
             inputOverlay.appendChild(inputField);
+            inputField.dataset.overlayIndex = String(index);
         }
     });
+}
+
+function updatePagerButtons() {
+    if (!prevPageBtn || !nextPageBtn) return;
+    prevPageBtn.disabled = currentPageNumber <= 1;
+    nextPageBtn.disabled = currentPageNumber >= totalPages;
 }
 
 function clearViewer() {
@@ -265,6 +295,8 @@ function clearViewer() {
     canvas.height = 1;
     inputOverlay.innerHTML = "";
     viewerControls.classList.add("hidden");
+    if (pageInfoBar) pageInfoBar.style.display = "none";
+    if (viewerControls) viewerControls.style.display = "none";
 }
 
 // ---------------------------

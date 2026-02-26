@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Document</title>
 
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
@@ -64,10 +66,25 @@
             </div>
 
             <!-- Controles debajo del PDF -->
-            <div id="viewerControls" class="viewer-controls hidden">
-                <button id="prevPage" class="btn small">Back P.</button>
-                <span class="muted"><span id="currentPage">1</span>/<span id="totalPages">1</span></span>
-                <button id="nextPage" class="btn small">Next P.</button>
+            <!-- ✅ Igual que Create Template -->
+            <div id="pageInfoBar" style="display:none;">
+                <div id="paginasTotal">Total Pages: &nbsp;&nbsp;<p id="total-pages">1</p>
+                </div>
+                <div id="paginaActual">Current Page: &nbsp;&nbsp;<p id="counter">1</p>
+                </div>
+            </div>
+
+            <!-- ✅ Botones abajo del PDF (solo Back/Next, mismos IDs que template) -->
+            <div class="overlay-controls" id="viewerControls" style="display:none;">
+                <button class="button-controls" id="backPage" disabled>
+                    <i class='bx bx-arrow-from-right'></i>
+                    <p>Back P.</p>
+                </button>
+
+                <button class="button-controls" id="nextPage" disabled>
+                    <i class='bx bx-arrow-to-right'></i>
+                    <p>Next P.</p>
+                </button>
             </div>
         </div>
 
