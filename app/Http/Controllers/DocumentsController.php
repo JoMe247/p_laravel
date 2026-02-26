@@ -78,21 +78,15 @@ class DocumentsController extends Controller
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
         if (!$authUser) return response()->json(['ok' => false], 401);
 
-        $agency = $authUser->agency;
         $q = trim((string)$request->query('q', ''));
-
-        if ($q === '') {
-            return response()->json(['ok' => true, 'customers' => []]);
-        }
+        if ($q === '') return response()->json(['ok' => true, 'customers' => []]);
 
         $customers = DB::table('customers')
-            ->select('ID', 'Name', 'Phone', 'Phone2', 'Email1', 'Email2')
+            ->select('ID', 'Name', 'Phone', 'Phone2')
             ->where(function ($w) use ($q) {
                 $w->where('Name', 'like', "%{$q}%")
                     ->orWhere('Phone', 'like', "%{$q}%")
-                    ->orWhere('Phone2', 'like', "%{$q}%")
-                    ->orWhere('Email1', 'like', "%{$q}%")
-                    ->orWhere('Email2', 'like', "%{$q}%");
+                    ->orWhere('Phone2', 'like', "%{$q}%");
             })
             ->limit(12)
             ->get();
@@ -128,7 +122,7 @@ class DocumentsController extends Controller
             'customer_id' => 'required',
             'customer_name' => 'required|string',
             'customer_phone' => 'required|string',
-            'customer_email' => 'required|string',
+            'customer_email' => 'nullable|string',
             'policy_number' => 'nullable|string',
             'doc_type' => 'required|integer',
             'pdf' => 'required|file|mimes:pdf|max:20480',
@@ -183,7 +177,7 @@ class DocumentsController extends Controller
             'policy_number' => $request->policy_number ?? 'N/A',
             'insured_name'  => $customerName,
             'phone'         => $request->customer_phone,
-            'email'         => $request->customer_email,
+            'email' => $request->customer_email ?? '',
             'user'          => $authUser->username ?? $authUser->name ?? $authUser->email,
             'date'          => now()->toDateString(),
             'time'          => now()->format('H:i:s'),

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -11,12 +12,15 @@
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/create_document.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/templates/styles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/templates/upload.css') }}">
 
     <!-- PDF.js + pdf-lib -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js"></script>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 </head>
+
 <body>
 
     <div class="page-wrapper">
@@ -27,54 +31,29 @@
         </div>
 
         <div class="doc-controls">
-            <!-- 1) Template -->
+            <!-- Template -->
             <select id="templateSelect" class="control">
                 <option value="">Select template...</option>
             </select>
 
-            <!-- 2) Customer (disabled hasta template) -->
-            <button id="customerBtn" class="control btn" disabled>Customer</button>
+            <!-- Customer Search (reemplaza botón) -->
+            <div class="customer-search-wrap">
+                <input id="customerSearch" class="control" type="text"
+                    placeholder="Search customer (name or phone)..." disabled>
+                <div id="customerSuggest" class="suggest hidden"></div>
+            </div>
 
-            <!-- 3) Policies (disabled hasta customer) -->
-            <button id="policiesBtn" class="control btn" disabled>Policies</button>
+            <!-- Policies (sin botón ni segundo menú) -->
+            <select id="policySelect" class="control" disabled>
+                <option value="">Policies...</option>
+            </select>
 
             <!-- Save -->
             <button id="saveDocBtn" class="control btn primary" disabled>Save</button>
         </div>
 
-        <!-- Customer panel -->
-        <div id="customerPanel" class="panel hidden">
-            <div class="panel-row">
-                <label>Name</label>
-                <input id="custName" type="text" placeholder="Type name...">
-                <div id="nameSuggest" class="suggest hidden"></div>
-            </div>
-
-            <div class="panel-row">
-                <label>Phone</label>
-                <input id="custPhone" type="text" placeholder="Type phone...">
-                <div id="phoneSuggest" class="suggest hidden"></div>
-            </div>
-
-            <div class="panel-row">
-                <label>Email</label>
-                <input id="custEmail" type="text" placeholder="Type email...">
-                <div id="emailSuggest" class="suggest hidden"></div>
-            </div>
-
-            <div class="panel-row">
-                <small id="selectedCustomerInfo" class="muted">No customer selected.</small>
-            </div>
-        </div>
-
-        <!-- Policies panel -->
-        <div id="policiesPanel" class="panel hidden">
-            <div class="panel-row">
-                <label>Policy</label>
-                <select id="policySelect">
-                    <option value="">Select policy...</option>
-                </select>
-            </div>
+        <div class="selected-line">
+            <span id="selectedCustomerInfo" class="muted">No customer selected.</span>
         </div>
 
         <!-- PDF Preview -->
@@ -84,10 +63,11 @@
                 <div id="inputOverlay"></div>
             </div>
 
+            <!-- Controles debajo del PDF -->
             <div id="viewerControls" class="viewer-controls hidden">
-                <button id="prevPage" class="btn small">Prev</button>
+                <button id="prevPage" class="btn small">Back P.</button>
                 <span class="muted"><span id="currentPage">1</span>/<span id="totalPages">1</span></span>
-                <button id="nextPage" class="btn small">Next</button>
+                <button id="nextPage" class="btn small">Next P.</button>
             </div>
         </div>
 
@@ -106,4 +86,5 @@
 
     <script src="{{ asset('js/create_document.js') }}"></script>
 </body>
+
 </html>

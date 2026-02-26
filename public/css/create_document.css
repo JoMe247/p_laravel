@@ -1,5 +1,5 @@
-.page-wrapper{
-  padding: 18px;
+.page-wrapper, .doc-controls, .suggest, .suggest-item, input, select, button {
+  font-family: 'Montserrat', sans-serif;
 }
 
 .top-bar{
@@ -21,12 +21,47 @@
   font-size:18px;
 }
 
+/* Controles arriba */
 .doc-controls{
   display:flex;
-  gap:10px;
+  gap:12px;
   align-items:center;
-  margin-bottom:12px;
   flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+/* Customer search wrapper */
+.customer-search-wrap{
+  position:relative;
+}
+
+.customer-search-wrap .suggest{
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid rgba(0,0,0,.10) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.12) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.customer-search-wrap .suggest-item{
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0,0,0,.06) !important;
+}
+
+.customer-search-wrap .suggest-item:hover{
+  background: rgba(0,0,0,.04) !important;
+}
+
+.customer-search-wrap .si-title{
+  font-family: 'Montserrat', sans-serif;
+  color: #111827 !important;
+}
+
+.customer-search-wrap .si-sub{
+  font-family: 'Montserrat', sans-serif;
+  color: rgba(17,24,39,.70) !important;
 }
 
 .control{
@@ -81,17 +116,19 @@
 
 .hidden{ display:none !important; }
 
+/* Dropdown sugerencias */
 .suggest{
   position:absolute;
-  top: 66px;
+  top: 44px;
   left:0;
   right:0;
-  background: #0b1220;
+  background:#0b1220;
   border:1px solid rgba(255,255,255,.12);
   border-radius:12px;
   overflow:hidden;
-  z-index:50;
+  z-index: 50;
 }
+
 
 .suggest-item{
   padding:10px 12px;
@@ -99,21 +136,22 @@
   border-bottom:1px solid rgba(255,255,255,.06);
 }
 
-.suggest-item:hover{
-  background: rgba(255,255,255,.04);
-}
 
-.si-title{ font-size:13px; }
-.si-sub{ font-size:12px; opacity:.7; }
+.suggest-item:hover{ background: rgba(255,255,255,.04); }
+.si-title{ font-size:13px; font-weight:600; }
+.si-sub{ font-size:12px; opacity:.75; margin-top:2px; }
 
+/* PDF centrado */
 .viewer-wrap{
-  margin-top:8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top: 8px;
 }
 
 #pdfViewer{
-  position: relative;
+  position:relative;
   width: fit-content;
-  max-width: 100%;
 }
 
 #pdfCanvas{
@@ -122,29 +160,32 @@
   border-radius:12px;
 }
 
+/* Inputs overlay */
 #inputOverlay{
   position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
+  inset:0;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* importante */
 }
 
 #inputOverlay input{
   background-color: transparent;
   border:1px solid rgba(255,255,255,.22);
   border-radius:6px;
-  width: 140px;
-  max-width: 180px;
   padding: 4px 6px;
-  color: inherit;
+  width: 140px;
+  max-width: 200px;
+  pointer-events: auto; /* para poder escribir */
 }
 
+/* Controles debajo del PDF */
 .viewer-controls{
   display:flex;
-  gap:10px;
+  gap:12px;
   align-items:center;
-  margin-top:10px;
+  margin-top: 12px;
 }
 
 .btn.small{
@@ -154,4 +195,53 @@
   border:1px solid rgba(255,255,255,.15);
   background:transparent;
   color:inherit;
+}
+
+html, body{
+  height: 100%;
+}
+
+body{
+  overflow: hidden; /* evita scroll raro del body */
+}
+
+.page-wrapper{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewer-wrap{
+  flex: 1;
+  overflow: auto;          /* ✅ scroll aquí */
+  padding-bottom: 20px;
+}
+
+/* para que el PDF quede centrado dentro del scroll */
+.viewer-wrap{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ============================
+   ENABLE GLOBAL SCROLL
+   ============================ */
+
+html, body {
+    height: 100%;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+}
+
+/* Quitar restricciones heredadas */
+.page-wrapper {
+    min-height: 100vh;
+    overflow: visible !important;
+}
+
+/* Evitar que algún contenedor bloquee scroll */
+.viewer-wrap,
+#pdfViewer {
+    overflow: visible !important;
 }

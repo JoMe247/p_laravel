@@ -18,20 +18,12 @@ const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('con
 
 // UI
 const templateSelect = document.getElementById('templateSelect');
-const customerBtn = document.getElementById('customerBtn');
-const policiesBtn = document.getElementById('policiesBtn');
+const customerSearch = document.getElementById('customerSearch');
+const customerSuggest = document.getElementById('customerSuggest');
+
+
+
 const saveDocBtn = document.getElementById('saveDocBtn');
-
-const customerPanel = document.getElementById('customerPanel');
-const policiesPanel = document.getElementById('policiesPanel');
-
-const custName = document.getElementById('custName');
-const custPhone = document.getElementById('custPhone');
-const custEmail = document.getElementById('custEmail');
-
-const nameSuggest = document.getElementById('nameSuggest');
-const phoneSuggest = document.getElementById('phoneSuggest');
-const emailSuggest = document.getElementById('emailSuggest');
 
 const selectedCustomerInfo = document.getElementById('selectedCustomerInfo');
 const policySelect = document.getElementById('policySelect');
@@ -54,12 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!id) {
             clearViewer();
-            customerBtn.disabled = true;
-            saveDocBtn.disabled = true;
+            customerSearch.disabled = true;
             return;
         }
 
-        customerBtn.disabled = false;
+        customerSearch.disabled = false;
 
         const data = await fetchTemplateData(id);
         if (!data) return;
@@ -67,21 +58,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         templateDataGlobal = data;
         await loadPDF(data);
 
-        // Si template cargó, ya puedes guardar después (pero exigimos customer para guardar)
+        // Hasta que elija customer, no habilitamos policies ni save
         saveDocBtn.disabled = true;
+        policySelect.disabled = true;
     });
 
-    customerBtn.addEventListener('click', () => {
-        if (customerBtn.disabled) return;
-        togglePanel(customerPanel);
-        hidePanel(policiesPanel);
-    });
-
-    policiesBtn.addEventListener('click', () => {
-        if (policiesBtn.disabled) return;
-        togglePanel(policiesPanel);
-        hidePanel(customerPanel);
-    });
+    // Sugerencias customer
+    attachCustomerSuggest();
 
     policySelect.addEventListener('change', () => {
         selectedPolicyNumber = policySelect.value || '';
@@ -89,12 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     saveDocBtn.addEventListener('click', savePDFToServer);
 
-    // Search suggestions (simple debounce)
-    attachSuggest(custName, nameSuggest, 'name');
-    attachSuggest(custPhone, phoneSuggest, 'phone');
-    attachSuggest(custEmail, emailSuggest, 'email');
-
-    // Pagination
+    // pagination (igual que ya lo tienes)
     prevPageBtn.addEventListener('click', () => {
         if (currentPageNumber > 1) {
             saveInputChangesForCurrentPage();
@@ -223,8 +201,14 @@ async function renderPage(pageNumber, overlayDataParam) {
             inputField.value = overlay.text.replace(/{{|}}/g, '');
 
             inputField.style.position = 'absolute';
-            inputField.style.left = `${(overlay.x * scaleFactor) + 10}px`;
-            inputField.style.top = `${(overlay.y * scaleFactor) + 2}px`;
+            inputField.style.left = `${(overlay.x * scaleFactor)}px`;
+            inputField.style.top = `${(overlay.y * scaleFactor)}px`;
+            // Evita que se salga del canvas
+            const left = overlay.x * scaleFactor;
+            const top = overlay.y * scaleFactor;
+
+            inputField.style.left = `${Math.max(0, Math.min(left, canvas.width - 10))}px`;
+            inputField.style.top = `${Math.max(0, Math.min(top, canvas.height - 10))}px`;
             inputField.dataset.placeholder = overlay.text;
 
             inputOverlay.appendChild(inputField);
@@ -246,45 +230,36 @@ function clearViewer() {
 // ---------------------------
 // Customer suggestions + selection
 // ---------------------------
-function attachSuggest(inputEl, suggestEl, mode) {
+function attachCustomerSuggest() {
     let t = null;
 
-    inputEl.addEventListener('input', () => {
-        const val = inputEl.value.trim();
+    customerSearch.addEventListener('input', () => {
+        const val = customerSearch.value.trim();
         clearTimeout(t);
 
         if (val.length < 2) {
-            hideSuggest(suggestEl);
+            hideSuggest(customerSuggest);
             return;
         }
 
         t = setTimeout(async () => {
             const customers = await fetchCustomers(val);
-            renderSuggest(customers, suggestEl, mode);
-        }, 250);
+            renderCustomerSuggest(customers);
+        }, 220);
     });
 
     document.addEventListener('click', (e) => {
-        if (!suggestEl.contains(e.target) && e.target !== inputEl) hideSuggest(suggestEl);
+        if (!customerSuggest.contains(e.target) && e.target !== customerSearch) {
+            hideSuggest(customerSuggest);
+        }
     });
 }
 
-async function fetchCustomers(q) {
-    try {
-        const url = `${window.ROUTES.customersSearch}?q=${encodeURIComponent(q)}`;
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        const json = await res.json();
-        return json.ok ? (json.customers || []) : [];
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
-}
+function renderCustomerSuggest(customers) {
+    customerSuggest.innerHTML = '';
 
-function renderSuggest(customers, suggestEl, mode) {
-    suggestEl.innerHTML = '';
     if (!customers.length) {
-        hideSuggest(suggestEl);
+        hideSuggest(customerSuggest);
         return;
     }
 
@@ -293,37 +268,49 @@ function renderSuggest(customers, suggestEl, mode) {
         item.className = 'suggest-item';
 
         const phones = [c.Phone, c.Phone2].filter(Boolean).join(' / ');
-        const emails = [c.Email1, c.Email2].filter(Boolean).join(' / ');
 
         item.innerHTML = `
       <div class="si-title">${escapeHtml(c.Name || '')}</div>
-      <div class="si-sub">${escapeHtml(phones)} ${emails ? ' • ' + escapeHtml(emails) : ''}</div>
+      <div class="si-sub">${escapeHtml(phones)}</div>
     `;
 
         item.addEventListener('click', async () => {
-            selectCustomer(c);
-            hideSuggest(suggestEl);
+            selectedCustomer = c;
 
-            // Autocompleta campos base
-            custName.value = c.Name || '';
-            custPhone.value = c.Phone || c.Phone2 || '';
-            custEmail.value = c.Email1 || c.Email2 || '';
+            customerSearch.value = c.Name || '';
+            selectedCustomerInfo.textContent = `Selected: ${c.ID} • ${c.Name || ''}`;
 
-            // Cargar policies
+            hideSuggest(customerSuggest);
+
             await loadPoliciesForCustomer(c.ID);
+
+            policySelect.disabled = false;
+            saveDocBtn.disabled = false;
         });
 
-        suggestEl.appendChild(item);
+        customerSuggest.appendChild(item);
     });
 
-    suggestEl.classList.remove('hidden');
+    customerSuggest.classList.remove('hidden');
 }
 
-function selectCustomer(c) {
-    selectedCustomer = c;
-    selectedCustomerInfo.textContent = `Selected: ${c.ID} • ${c.Name || ''}`;
-    policiesBtn.disabled = false;
-    saveDocBtn.disabled = false; // ya hay template y customer
+async function fetchCustomers(q) {
+    try {
+        const url = `${window.ROUTES.customersSearch}?q=${encodeURIComponent(q)}`;
+
+        console.log('Searching customers:', q);
+        console.log('URL:', url);
+
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        const json = await res.json();
+
+        console.log('Search response:', json);
+
+        return json.ok ? (json.customers || []) : [];
+    } catch (e) {
+        console.error('fetchCustomers error:', e);
+        return [];
+    }
 }
 
 async function loadPoliciesForCustomer(customerId) {
@@ -332,7 +319,8 @@ async function loadPoliciesForCustomer(customerId) {
         const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
         const json = await res.json();
 
-        policySelect.innerHTML = `<option value="">Select policy...</option>`;
+        policySelect.innerHTML = `<option value="">Policies...</option>`;
+        selectedPolicyNumber = '';
 
         if (json.ok && Array.isArray(json.policies)) {
             json.policies.forEach(p => {
@@ -342,10 +330,6 @@ async function loadPoliciesForCustomer(customerId) {
                 policySelect.appendChild(opt);
             });
         }
-
-        // Abre panel automáticamente
-        showPanel(policiesPanel);
-        hidePanel(customerPanel);
     } catch (e) {
         console.error(e);
         alert('Failed to load policies.');
@@ -397,8 +381,8 @@ async function savePDFToServer() {
     formData.append('customer_name', selectedCustomer.Name || '');
     formData.append('policy_number', selectedPolicyNumber || '');
     formData.append('pdf', blob, `document_${Date.now()}.pdf`);
-    formData.append('customer_phone', custPhone.value || '');
-    formData.append('customer_email', custEmail.value || '');
+    const phone = selectedCustomer?.Phone || selectedCustomer?.Phone2 || '';
+    formData.append('customer_phone', phone);
 
     // type: define un número fijo o un select si quieres
     // por ahora lo dejo como 1 (ajústalo según tu lógica)
@@ -438,17 +422,16 @@ function hidePanel(panel) { panel.classList.add('hidden'); }
 function resetCustomerAndPolicies() {
     selectedCustomer = null;
     selectedPolicyNumber = '';
-    custName.value = '';
-    custPhone.value = '';
-    custEmail.value = '';
+
+    customerSearch.value = '';
     selectedCustomerInfo.textContent = 'No customer selected.';
 
-    policiesBtn.disabled = true;
+    policySelect.innerHTML = `<option value="">Policies...</option>`;
+    policySelect.disabled = true;
+
     saveDocBtn.disabled = true;
 
-    policySelect.innerHTML = `<option value="">Select policy...</option>`;
-    hidePanel(customerPanel);
-    hidePanel(policiesPanel);
+    hideSuggest(customerSuggest);
 }
 
 function escapeHtml(str) {
