@@ -401,8 +401,8 @@ function measurePdfTextWidth(text, fontSize = 20) {
 
 // Calcula coordenadas en “tu sistema” (y desde arriba)
 function getCornerXY(corner, pageW, pageH) {
-    const padX = 8;
-    const padTop = 8;
+    const padX = 10;
+    const padTop = 18;
     const padBottom = 18; // ✅ súbelo del borde inferior (ajusta 25–40 si quieres)
 
     ctx.save();

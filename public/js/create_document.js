@@ -1,46 +1,46 @@
 let pdfDoc = null;
 let pdfBytes = null;
 
-const canvas = document.getElementById('pdfCanvas');
-const ctx = canvas.getContext('2d');
-const inputOverlay = document.getElementById('inputOverlay');
+const canvas = document.getElementById("pdfCanvas");
+const ctx = canvas.getContext("2d");
+const inputOverlay = document.getElementById("inputOverlay");
 
-const scaleFactor = 0.85;
+let scaleFactor = 0.85;
 let currentPageNumber = 1;
 let totalPages = 0;
 let overlayData = [];
 let templateDataGlobal = null;
 
 let selectedCustomer = null; // {ID, Name, Phone, Phone2, Email1, Email2}
-let selectedPolicyNumber = '';
+let selectedPolicyNumber = "";
 
-const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+const csrf = document
+    .querySelector('meta[name="csrf-token"]')
+    .getAttribute("content");
 
 // UI
-const templateSelect = document.getElementById('templateSelect');
-const customerSearch = document.getElementById('customerSearch');
-const customerSuggest = document.getElementById('customerSuggest');
+const templateSelect = document.getElementById("templateSelect");
+const customerSearch = document.getElementById("customerSearch");
+const customerSuggest = document.getElementById("customerSuggest");
 
+const saveDocBtn = document.getElementById("saveDocBtn");
 
+const selectedCustomerInfo = document.getElementById("selectedCustomerInfo");
+const policySelect = document.getElementById("policySelect");
 
-const saveDocBtn = document.getElementById('saveDocBtn');
-
-const selectedCustomerInfo = document.getElementById('selectedCustomerInfo');
-const policySelect = document.getElementById('policySelect');
-
-const viewerControls = document.getElementById('viewerControls');
-const prevPageBtn = document.getElementById('prevPage');
-const nextPageBtn = document.getElementById('nextPage');
-const currentPageEl = document.getElementById('currentPage');
-const totalPagesEl = document.getElementById('totalPages');
+const viewerControls = document.getElementById("viewerControls");
+const prevPageBtn = document.getElementById("prevPage");
+const nextPageBtn = document.getElementById("nextPage");
+const currentPageEl = document.getElementById("currentPage");
+const totalPagesEl = document.getElementById("totalPages");
 
 // ---------------------------
 // Init
 // ---------------------------
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", async () => {
     await loadTemplateOptions();
 
-    templateSelect.addEventListener('change', async () => {
+    templateSelect.addEventListener("change", async () => {
         const id = templateSelect.value;
         resetCustomerAndPolicies();
 
@@ -56,6 +56,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!data) return;
 
         templateDataGlobal = data;
+
+        // Si el template trae meta de escala, úsala
+        if (
+            data.overlay_meta &&
+            typeof data.overlay_meta.scaleFactor === "number"
+        ) {
+            scaleFactor = data.overlay_meta.scaleFactor;
+        } else {
+            scaleFactor = 0.85; // fallback
+        }
         await loadPDF(data);
 
         // Hasta que elija customer, no habilitamos policies ni save
@@ -66,14 +76,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Sugerencias customer
     attachCustomerSuggest();
 
-    policySelect.addEventListener('change', () => {
-        selectedPolicyNumber = policySelect.value || '';
+    policySelect.addEventListener("change", () => {
+        selectedPolicyNumber = policySelect.value || "";
     });
 
-    saveDocBtn.addEventListener('click', savePDFToServer);
+    saveDocBtn.addEventListener("click", savePDFToServer);
 
     // pagination (igual que ya lo tienes)
-    prevPageBtn.addEventListener('click', () => {
+    prevPageBtn.addEventListener("click", () => {
         if (currentPageNumber > 1) {
             saveInputChangesForCurrentPage();
             currentPageNumber--;
@@ -81,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    nextPageBtn.addEventListener('click', () => {
+    nextPageBtn.addEventListener("click", () => {
         if (currentPageNumber < totalPages) {
             saveInputChangesForCurrentPage();
             currentPageNumber++;
@@ -95,34 +105,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ---------------------------
 async function loadTemplateOptions() {
     try {
-        const res = await fetch(window.ROUTES.templatesOptions, { headers: { 'Accept': 'application/json' } });
+        const res = await fetch(window.ROUTES.templatesOptions, {
+            headers: { Accept: "application/json" },
+        });
         const json = await res.json();
         if (!json.ok) return;
 
-        json.templates.forEach(t => {
-            const opt = document.createElement('option');
+        json.templates.forEach((t) => {
+            const opt = document.createElement("option");
             opt.value = t.id;
             opt.textContent = t.template_name;
             templateSelect.appendChild(opt);
         });
     } catch (e) {
         console.error(e);
-        alert('Failed to load templates.');
+        alert("Failed to load templates.");
     }
 }
 
 async function fetchTemplateData(id) {
     try {
-        const res = await fetch(`${window.ROUTES.templateDataBase}/${id}`, { headers: { 'Accept': 'application/json' } });
+        const res = await fetch(`${window.ROUTES.templateDataBase}/${id}`, {
+            headers: { Accept: "application/json" },
+        });
         const json = await res.json();
         if (!json.ok) {
-            alert(json.error || 'Template not found.');
+            alert(json.error || "Template not found.");
             return null;
         }
         return json;
     } catch (e) {
         console.error(e);
-        alert('Failed to load template data.');
+        alert("Failed to load template data.");
         return null;
     }
 }
@@ -131,9 +145,11 @@ async function fetchTemplateData(id) {
 // PDF Viewer + Inputs overlay
 // ---------------------------
 async function loadPDF(templateData) {
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    const pdfjsLib = window["pdfjs-dist/build/pdf"];
 
-    overlayData = Array.isArray(templateData.overlay_data) ? templateData.overlay_data : [];
+    overlayData = Array.isArray(templateData.overlay_data)
+        ? templateData.overlay_data
+        : [];
 
     try {
         // Ajusta aquí si tu PDF está en otra ruta.
@@ -146,7 +162,7 @@ async function loadPDF(templateData) {
         const pdfUrl = `${window.BASE_URL}/documents/templates/file/${templateData.id}?v=${Date.now()}`;
 
         const pdfResponse = await fetch(pdfUrl);
-        if (!pdfResponse.ok) throw new Error('Failed to fetch PDF.');
+        if (!pdfResponse.ok) throw new Error("Failed to fetch PDF.");
 
         pdfBytes = await pdfResponse.arrayBuffer();
         pdfDoc = await pdfjsLib.getDocument(pdfBytes).promise;
@@ -155,21 +171,25 @@ async function loadPDF(templateData) {
         totalPagesEl.textContent = totalPages;
         currentPageNumber = 1;
 
-        viewerControls.classList.toggle('hidden', totalPages <= 1);
+        viewerControls.classList.toggle("hidden", totalPages <= 1);
 
         await renderPage(currentPageNumber, overlayData);
     } catch (err) {
         console.error(err);
-        alert('Failed to load PDF preview. Revisa el path original_file_path/original_original.');
+        alert(
+            "Failed to load PDF preview. Revisa el path original_file_path/original_original.",
+        );
         clearViewer();
     }
 }
 
 function saveInputChangesForCurrentPage() {
-    const inputFields = inputOverlay.querySelectorAll('input');
-    inputFields.forEach(inputField => {
+    const inputFields = inputOverlay.querySelectorAll("input");
+    inputFields.forEach((inputField) => {
         const placeholder = inputField.dataset.placeholder;
-        const overlay = overlayData.find(o => o.text === placeholder && o.page === currentPageNumber);
+        const overlay = overlayData.find(
+            (o) => o.text === placeholder && o.page === currentPageNumber,
+        );
         if (overlay) {
             overlay.text = `{{${inputField.value}}}`;
         }
@@ -192,17 +212,37 @@ async function renderPage(pageNumber, overlayDataParam) {
     // Importante: guardamos lo actual antes de limpiar
     saveInputChangesForCurrentPage();
 
-    inputOverlay.innerHTML = '';
+    inputOverlay.innerHTML = "";
 
-    overlayDataParam.forEach(overlay => {
-        if (overlay.page === pageNumber && typeof overlay.text === 'string' && overlay.text.includes('{{') && overlay.text.includes('}}')) {
-            const inputField = document.createElement('input');
-            inputField.type = 'text';
-            inputField.value = overlay.text.replace(/{{|}}/g, '');
+    overlayDataParam.forEach((overlay) => {
+        if (
+            overlay.page === pageNumber &&
+            typeof overlay.text === "string" &&
+            overlay.text.includes("{{") &&
+            overlay.text.includes("}}")
+        ) {
+            const inputField = document.createElement("input");
+            inputField.type = "text";
+            inputField.value = overlay.text.replace(/{{|}}/g, "");
 
-            inputField.style.position = 'absolute';
-            inputField.style.left = `${(overlay.x * scaleFactor)}px`;
-            inputField.style.top = `${(overlay.y * scaleFactor)}px`;
+            inputField.style.position = "absolute";
+            // Escala visual real del canvas (por CSS / responsive)
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = rect.width / canvas.width;
+            const scaleY = rect.height / canvas.height;
+
+            // Asegura que el overlay tenga el mismo tamaño visual del canvas
+            inputOverlay.style.width = rect.width + "px";
+            inputOverlay.style.height = rect.height + "px";
+
+            // Posición (overlay.x/y están en “unidades sin escala”, igual que en template.js)
+            const leftPx = overlay.x * scaleFactor * scaleX;
+            const topPx = overlay.y * scaleFactor * scaleY;
+
+            const OFFSET_Y = 2; // ajusta si hace falta
+
+            inputField.style.left = `${leftPx}px`;
+            inputField.style.top = `${topPx}px`;
             // Evita que se salga del canvas
             const left = overlay.x * scaleFactor;
             const top = overlay.y * scaleFactor;
@@ -223,8 +263,8 @@ function clearViewer() {
     templateDataGlobal = null;
     canvas.width = 1;
     canvas.height = 1;
-    inputOverlay.innerHTML = '';
-    viewerControls.classList.add('hidden');
+    inputOverlay.innerHTML = "";
+    viewerControls.classList.add("hidden");
 }
 
 // ---------------------------
@@ -233,7 +273,7 @@ function clearViewer() {
 function attachCustomerSuggest() {
     let t = null;
 
-    customerSearch.addEventListener('input', () => {
+    customerSearch.addEventListener("input", () => {
         const val = customerSearch.value.trim();
         clearTimeout(t);
 
@@ -248,37 +288,40 @@ function attachCustomerSuggest() {
         }, 220);
     });
 
-    document.addEventListener('click', (e) => {
-        if (!customerSuggest.contains(e.target) && e.target !== customerSearch) {
+    document.addEventListener("click", (e) => {
+        if (
+            !customerSuggest.contains(e.target) &&
+            e.target !== customerSearch
+        ) {
             hideSuggest(customerSuggest);
         }
     });
 }
 
 function renderCustomerSuggest(customers) {
-    customerSuggest.innerHTML = '';
+    customerSuggest.innerHTML = "";
 
     if (!customers.length) {
         hideSuggest(customerSuggest);
         return;
     }
 
-    customers.forEach(c => {
-        const item = document.createElement('div');
-        item.className = 'suggest-item';
+    customers.forEach((c) => {
+        const item = document.createElement("div");
+        item.className = "suggest-item";
 
-        const phones = [c.Phone, c.Phone2].filter(Boolean).join(' / ');
+        const phones = [c.Phone, c.Phone2].filter(Boolean).join(" / ");
 
         item.innerHTML = `
-      <div class="si-title">${escapeHtml(c.Name || '')}</div>
+      <div class="si-title">${escapeHtml(c.Name || "")}</div>
       <div class="si-sub">${escapeHtml(phones)}</div>
     `;
 
-        item.addEventListener('click', async () => {
+        item.addEventListener("click", async () => {
             selectedCustomer = c;
 
-            customerSearch.value = c.Name || '';
-            selectedCustomerInfo.textContent = `Selected: ${c.ID} • ${c.Name || ''}`;
+            customerSearch.value = c.Name || "";
+            selectedCustomerInfo.textContent = `Selected: ${c.ID} • ${c.Name || ""}`;
 
             hideSuggest(customerSuggest);
 
@@ -291,24 +334,26 @@ function renderCustomerSuggest(customers) {
         customerSuggest.appendChild(item);
     });
 
-    customerSuggest.classList.remove('hidden');
+    customerSuggest.classList.remove("hidden");
 }
 
 async function fetchCustomers(q) {
     try {
         const url = `${window.ROUTES.customersSearch}?q=${encodeURIComponent(q)}`;
 
-        console.log('Searching customers:', q);
-        console.log('URL:', url);
+        console.log("Searching customers:", q);
+        console.log("URL:", url);
 
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        const res = await fetch(url, {
+            headers: { Accept: "application/json" },
+        });
         const json = await res.json();
 
-        console.log('Search response:', json);
+        console.log("Search response:", json);
 
-        return json.ok ? (json.customers || []) : [];
+        return json.ok ? json.customers || [] : [];
     } catch (e) {
-        console.error('fetchCustomers error:', e);
+        console.error("fetchCustomers error:", e);
         return [];
     }
 }
@@ -316,15 +361,17 @@ async function fetchCustomers(q) {
 async function loadPoliciesForCustomer(customerId) {
     try {
         const url = `${window.ROUTES.customerPoliciesBase}/${customerId}/policies`;
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        const res = await fetch(url, {
+            headers: { Accept: "application/json" },
+        });
         const json = await res.json();
 
         policySelect.innerHTML = `<option value="">Policies...</option>`;
-        selectedPolicyNumber = '';
+        selectedPolicyNumber = "";
 
         if (json.ok && Array.isArray(json.policies)) {
-            json.policies.forEach(p => {
-                const opt = document.createElement('option');
+            json.policies.forEach((p) => {
+                const opt = document.createElement("option");
                 opt.value = p.pol_number;
                 opt.textContent = p.pol_number;
                 policySelect.appendChild(opt);
@@ -332,22 +379,25 @@ async function loadPoliciesForCustomer(customerId) {
         }
     } catch (e) {
         console.error(e);
-        alert('Failed to load policies.');
+        alert("Failed to load policies.");
     }
 }
 
-function hideSuggest(el) { el.classList.add('hidden'); el.innerHTML = ''; }
+function hideSuggest(el) {
+    el.classList.add("hidden");
+    el.innerHTML = "";
+}
 
 // ---------------------------
 // Save PDF (pdf-lib) + upload Laravel
 // ---------------------------
 async function savePDFToServer() {
     if (!pdfBytes || !templateDataGlobal) {
-        alert('PDF is not loaded.');
+        alert("PDF is not loaded.");
         return;
     }
     if (!selectedCustomer) {
-        alert('Select a customer first.');
+        alert("Select a customer first.");
         return;
     }
 
@@ -357,56 +407,56 @@ async function savePDFToServer() {
     const pdfDocWithText = await PDFLib.PDFDocument.load(pdfBytes);
     const pages = pdfDocWithText.getPages();
 
-    overlayData.forEach(overlay => {
+    overlayData.forEach((overlay) => {
         const page = pages[overlay.page - 1];
         if (!page) return;
 
         const { height } = page.getSize();
-        const inputValue = String(overlay.text || '').replace(/{{|}}/g, '');
+        const inputValue = String(overlay.text || "").replace(/{{|}}/g, "");
 
         page.drawText(inputValue, {
             x: overlay.x,
             y: height - overlay.y - 20,
             size: 20,
-            color: PDFLib.rgb(0, 0, 0)
+            color: PDFLib.rgb(0, 0, 0),
         });
     });
 
     const modifiedPdfBytes = await pdfDocWithText.save();
-    const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+    const blob = new Blob([modifiedPdfBytes], { type: "application/pdf" });
 
     const formData = new FormData();
-    formData.append('template_id', templateSelect.value);
-    formData.append('customer_id', selectedCustomer.ID);
-    formData.append('customer_name', selectedCustomer.Name || '');
-    formData.append('policy_number', selectedPolicyNumber || '');
-    formData.append('pdf', blob, `document_${Date.now()}.pdf`);
-    const phone = selectedCustomer?.Phone || selectedCustomer?.Phone2 || '';
-    formData.append('customer_phone', phone);
+    formData.append("template_id", templateSelect.value);
+    formData.append("customer_id", selectedCustomer.ID);
+    formData.append("customer_name", selectedCustomer.Name || "");
+    formData.append("policy_number", selectedPolicyNumber || "");
+    formData.append("pdf", blob, `document_${Date.now()}.pdf`);
+    const phone = selectedCustomer?.Phone || selectedCustomer?.Phone2 || "";
+    formData.append("customer_phone", phone);
 
     // type: define un número fijo o un select si quieres
     // por ahora lo dejo como 1 (ajústalo según tu lógica)
-    formData.append('doc_type', 1);
+    formData.append("doc_type", 1);
 
     try {
         const res = await fetch(window.ROUTES.saveGenerated, {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrf },
-            body: formData
+            method: "POST",
+            headers: { "X-CSRF-TOKEN": csrf },
+            body: formData,
         });
 
         const json = await res.json();
         if (!json.ok) {
-            alert('Failed to save PDF.');
+            alert("Failed to save PDF.");
             return;
         }
 
-        alert('PDF saved!');
+        alert("PDF saved!");
         // si quieres redirigir a documents:
         window.location.href = `${window.BASE_URL}/documents`;
     } catch (e) {
         console.error(e);
-        alert('Failed to upload PDF.');
+        alert("Failed to upload PDF.");
     }
 }
 
@@ -414,17 +464,21 @@ async function savePDFToServer() {
 // Panels + reset
 // ---------------------------
 function togglePanel(panel) {
-    panel.classList.toggle('hidden');
+    panel.classList.toggle("hidden");
 }
-function showPanel(panel) { panel.classList.remove('hidden'); }
-function hidePanel(panel) { panel.classList.add('hidden'); }
+function showPanel(panel) {
+    panel.classList.remove("hidden");
+}
+function hidePanel(panel) {
+    panel.classList.add("hidden");
+}
 
 function resetCustomerAndPolicies() {
     selectedCustomer = null;
-    selectedPolicyNumber = '';
+    selectedPolicyNumber = "";
 
-    customerSearch.value = '';
-    selectedCustomerInfo.textContent = 'No customer selected.';
+    customerSearch.value = "";
+    selectedCustomerInfo.textContent = "No customer selected.";
 
     policySelect.innerHTML = `<option value="">Policies...</option>`;
     policySelect.disabled = true;
@@ -435,7 +489,15 @@ function resetCustomerAndPolicies() {
 }
 
 function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, (m) => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    }[m]));
+    return String(str).replace(
+        /[&<>"']/g,
+        (m) =>
+            ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;",
+            })[m],
+    );
 }
