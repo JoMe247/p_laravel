@@ -25,6 +25,7 @@ use App\Http\Controllers\SmsMonthlyCounterController;
 use App\Http\Controllers\EstimatesController;
 use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\TemplatesController;
+use App\Http\Controllers\ShortUrlController;
 
 
 // Página inicial
@@ -343,4 +344,15 @@ Route::middleware('auth.multi')->group(function () {
 
     Route::get('/documents/templates/file/{id}', [DocumentsController::class, 'streamTemplatePdf'])
         ->name('documents.templates.file');
+
+
+        
+
+    Route::get('/s/{short}', [ShortUrlController::class, 'show'])->name('short.show');
+    Route::post('/s/{short}', [ShortUrlController::class, 'verify'])->name('short.verify');
+
+    // (luego) pages estáticas
+    Route::view('/signed', 'short.signed')->name('short.signed');
+    Route::view('/error', 'short.error')->name('short.error');
+    Route::view('/success', 'short.success')->name('short.success');
 });

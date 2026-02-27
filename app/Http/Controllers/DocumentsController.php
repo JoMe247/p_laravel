@@ -82,7 +82,7 @@ class DocumentsController extends Controller
         if ($q === '') return response()->json(['ok' => true, 'customers' => []]);
 
         $customers = DB::table('customers')
-            ->select('ID', 'Name', 'Phone', 'Phone2','Email1', 'Email2')
+            ->select('ID', 'Name', 'Phone', 'Phone2', 'Email1', 'Email2')
             ->where(function ($w) use ($q) {
                 $w->where('Name', 'like', "%{$q}%")
                     ->orWhere('Phone', 'like', "%{$q}%")
@@ -177,18 +177,47 @@ class DocumentsController extends Controller
             'policy_number' => $request->policy_number ?? 'N/A',
             'insured_name'  => $customerName,
             'phone'         => $request->customer_phone,
-            'email' => $request->customer_email ?? '',
+            'email'         => $request->customer_email ?? '',
             'user'          => $authUser->username ?? $authUser->name ?? $authUser->email,
             'date'          => now()->toDateString(),
             'time'          => now()->format('H:i:s'),
-            'path'          => $storedPath, // guarda private/customerdocs/...
+            'path'          => $storedPath,
             'signed'        => 0,
         ]);
+
+        // ==========================================================
+        // ✅ NUEVO: Generar short_url + rand y guardarlo en tabla url
+        // ==========================================================
+        $createdBy = $authUser->username ?? $authUser->name ?? $authUser->email ?? 'unknown';
+
+        $shortUrl = $this->generateUniqueShortUrl(8);
+        $rand6    = $this->generateRand6();
+
+        DB::table('url')->insert([
+            'name'         => $customerName,           // mismo name del customer
+            'type'         => (int)$request->doc_type, // o 1 fijo si quieres
+            'created_by'   => $createdBy,
+            'signed_by'    => $customerName,
+            'short_url'    => $shortUrl,
+            'original_url' => '',                      // por ahora lo llenas manual
+            'clicks'       => 0,
+            'signed'       => 'No',
+            'date'         => now()->toDateString(),
+            'time'         => now()->format('H:i:s'),
+            'rand'         => $rand6,
+        ]);
+
+        $publicShortLink = url('/s/' . $shortUrl);
 
         return response()->json([
             'ok' => true,
             'file' => $fileName,
-            'path' => $storedPath
+            'path' => $storedPath,
+
+            // ✅ opcional: para mostrarlo en tu UI
+            'short_url' => $shortUrl,
+            'short_link' => $publicShortLink,
+            'rand' => $rand6,
         ]);
     }
 
@@ -216,5 +245,36 @@ class DocumentsController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="template.pdf"',
         ]);
+    }
+
+    // 6) Generar URL
+
+    private function generateRandomString(int $length = 8): string
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $max = strlen($characters) - 1;
+        $randomString = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $max)];
+        }
+
+        return $randomString;
+    }
+
+    private function generateUniqueShortUrl(int $length = 8): string
+    {
+        do {
+            $short = $this->generateRandomString($length);
+            $exists = DB::table('url')->where('short_url', $short)->exists();
+        } while ($exists);
+
+        return $short;
+    }
+
+    private function generateRand6(): int
+    {
+        // 100000 - 999999 (6 dígitos reales)
+        return random_int(100000, 999999);
     }
 }
