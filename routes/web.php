@@ -34,10 +34,15 @@ Route::get('/', function () {
 });
 
 // =======================
+// 🍪 RememberMe (debe correr ANTES de auth.multi)
+// =======================
+Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(function () {
+
+// =======================
 // 🔐 Autenticación
 // =======================
-// Route::get('/login', [LoginController::class, 'show'])->name('login');
-// Route::post('/login', [LoginController::class, 'login']);
+Route::get('/login', [LoginController::class, 'show'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
@@ -105,16 +110,6 @@ Route::middleware('auth.multi')->group(function () {
     Route::get('/customers/{id}/policies', [CustomerNotesController::class, 'policies']);
     Route::delete('/customers/notes/{id}', [CustomerNotesController::class, 'destroy']);
 
-
-
-
-    // =======================
-    // 🍪 Middleware RememberMe
-    // =======================
-    Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(function () {
-        Route::get('/login', [LoginController::class, 'show'])->name('login');
-        Route::post('/login', [LoginController::class, 'login']);
-    });
 
     Route::get('/office', [OfficeController::class, 'index'])->name('office.index');
 
@@ -355,4 +350,5 @@ Route::middleware('auth.multi')->group(function () {
     Route::view('/signed', 'short.signed')->name('short.signed');
     Route::view('/error', 'short.error')->name('short.error');
     Route::view('/success', 'short.success')->name('short.success');
+});
 });

@@ -15,7 +15,12 @@ class RememberMeMiddleware
     public function handle(Request $request, Closure $next)
     {
         // Si ya está autenticado, continuar
-        if (Auth::guard('web')->check() || Auth::guard('sub')->check()) {
+        if (Auth::guard('web')->check()) {
+            session(['auth_guard' => 'web']);
+            return $next($request);
+        }
+        if (Auth::guard('sub')->check()) {
+            session(['auth_guard' => 'sub']);
             return $next($request);
         }
 
@@ -32,6 +37,12 @@ class RememberMeMiddleware
             return $next($request);
         }
 
+        // Limpieza de expirados (recomendado)
+        DB::table('user_tokens')->where('expires_at', '<', now())->delete();
+        DB::table('sub_user_tokens')->where('expires_at', '<', now())->delete();
+
+        $loggedIn = false;
+
         if ($type === 'web') {
             $record = DB::table('user_tokens')
                 ->where('token', $token)
@@ -40,17 +51,29 @@ class RememberMeMiddleware
 
             if ($record) {
                 $user = User::find($record->user_id);
-                if ($user) {
-                    Auth::guard('web')->login($user, true);
+
+                if ($user && $user->email_verified) {
+                    // OJO: usa false para NO crear cookies remember_* de Laravel
+                    Auth::guard('web')->login($user, false);
+                    session(['auth_guard' => 'web']);
+
+                    // Tu sistema usa session_token + current_session_token
+                    $sessionToken = bin2hex(random_bytes(16));
+                    $user->current_session_token = $sessionToken;
+                    $user->save();
+                    session(['session_token' => $sessionToken]);
+
                     $request->session()->regenerate();
 
-                    // Sliding expiration (opcional pero recomendado)
+                    // Sliding expiration
                     DB::table('user_tokens')->where('id', $record->id)->update([
                         'expires_at' => now()->addDays(30),
+                        'updated_at' => now(),
                     ]);
                     Cookie::queue('rememberme_token', 'web|' . $token, 60 * 24 * 30);
 
-                    // Si está en /login, lo sacamos a dashboard
+                    $loggedIn = true;
+
                     if ($request->is('login')) {
                         return redirect()->route('dashboard');
                     }
@@ -66,17 +89,25 @@ class RememberMeMiddleware
 
             if ($record) {
                 $sub = SubUser::find($record->sub_user_id);
-                if ($sub) {
-                    Auth::guard('sub')->login($sub, true);
+
+                if ($sub && $sub->email_verified) {
+                    Auth::guard('sub')->login($sub, false);
+                    session(['auth_guard' => 'sub']);
+
+                    $sessionToken = bin2hex(random_bytes(16));
+                    $sub->current_session_token = $sessionToken;
+                    $sub->save();
+                    session(['session_token' => $sessionToken]);
+
                     $request->session()->regenerate();
 
-                    // Sliding expiration (opcional)
                     DB::table('sub_user_tokens')->where('id', $record->id)->update([
                         'expires_at' => now()->addDays(30),
                         'updated_at' => now(),
                     ]);
-
                     Cookie::queue('rememberme_token', 'sub|' . $token, 60 * 24 * 30);
+
+                    $loggedIn = true;
 
                     if ($request->is('login')) {
                         return redirect()->route('dashboard');
@@ -85,9 +116,11 @@ class RememberMeMiddleware
             }
         }
 
+        // ✅ SOLO si NO logró autenticar, borramos cookie
+        if (!$loggedIn) {
+            Cookie::queue(Cookie::forget('rememberme_token'));
+        }
 
-        // Token inválido o expirado → borrar cookie
-        Cookie::queue(Cookie::forget('rememberme_token'));
         return $next($request);
     }
 }
