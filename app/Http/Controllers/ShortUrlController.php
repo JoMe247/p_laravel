@@ -56,6 +56,6 @@ class ShortUrlController extends Controller
         }
 
         // Redirige al URL guardado en tabla (tal cual)
-        return redirect()->away($dest);
+        return redirect()->to($dest);
     }
 }

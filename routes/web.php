@@ -26,7 +26,7 @@ use App\Http\Controllers\EstimatesController;
 use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\TemplatesController;
 use App\Http\Controllers\ShortUrlController;
-
+use App\Http\Controllers\SigningController;
 
 // Página inicial
 Route::get('/', function () {
@@ -350,5 +350,12 @@ Route::middleware('auth.multi')->group(function () {
     Route::view('/signed', 'short.signed')->name('short.signed');
     Route::view('/error', 'short.error')->name('short.error');
     Route::view('/success', 'short.success')->name('short.success');
+
+
+
+
+Route::get('/sign/{short}/{docId}', [SigningController::class, 'show'])->name('sign.show');
+Route::get('/sign/{short}/{docId}/pdf', [SigningController::class, 'pdf'])->name('sign.pdf');
+Route::post('/sign/{short}/{docId}/signature', [SigningController::class, 'saveSignature'])->name('sign.signature');
 });
 });

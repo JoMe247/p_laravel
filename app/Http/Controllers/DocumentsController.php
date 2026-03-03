@@ -170,42 +170,45 @@ class DocumentsController extends Controller
         $storedPath = $request->file('pdf')->storeAs($baseDir, $fileName);
 
         // ----------------------------
-        // 🔹 Insertar en tabla documents
-        // ----------------------------
-        DB::table('documents')->insert([
-            'type'          => (int)$request->doc_type,
-            'policy_number' => $request->policy_number ?? 'N/A',
-            'insured_name'  => $customerName,
-            'phone'         => $request->customer_phone,
-            'email'         => $request->customer_email ?? '',
-            'user'          => $authUser->username ?? $authUser->name ?? $authUser->email,
-            'date'          => now()->toDateString(),
-            'time'          => now()->format('H:i:s'),
-            'path'          => $storedPath,
-            'signed'        => 0,
-        ]);
+// 🔹 Insertar en tabla documents (OBTENER ID)
+// ----------------------------
+$documentId = DB::table('documents')->insertGetId([
+    'type'          => (int)$request->doc_type,
+    'policy_number' => $request->policy_number ?? 'N/A',
+    'insured_name'  => $customerName,
+    'phone'         => $request->customer_phone,
+    'email'         => $request->customer_email ?? '',
+    'user'          => $authUser->username ?? $authUser->name ?? $authUser->email,
+    'date'          => now()->toDateString(),
+    'time'          => now()->format('H:i:s'),
+    'path'          => $storedPath,
+    'signed'        => 0,
+]);
 
         // ==========================================================
         // ✅ NUEVO: Generar short_url + rand y guardarlo en tabla url
         // ==========================================================
-        $createdBy = $authUser->username ?? $authUser->name ?? $authUser->email ?? 'unknown';
+       $createdBy = $authUser->username ?? $authUser->name ?? $authUser->email ?? 'unknown';
 
-        $shortUrl = $this->generateUniqueShortUrl(8);
-        $rand6    = $this->generateRand6();
+$shortUrl = $this->generateUniqueShortUrl(8);
+$rand6    = $this->generateRand6();
 
-        DB::table('url')->insert([
-            'name'         => $customerName,           // mismo name del customer
-            'type'         => (int)$request->doc_type, // o 1 fijo si quieres
-            'created_by'   => $createdBy,
-            'signed_by'    => $customerName,
-            'short_url'    => $shortUrl,
-            'original_url' => '',                      // por ahora lo llenas manual
-            'clicks'       => 0,
-            'signed'       => 'No',
-            'date'         => now()->toDateString(),
-            'time'         => now()->format('H:i:s'),
-            'rand'         => $rand6,
-        ]);
+// ✅ URL interna a la vista de firma (preview + firma)
+$originalUrl = url("/sign/{$shortUrl}/{$documentId}");
+
+DB::table('url')->insert([
+    'name'         => $customerName,
+    'type'         => (int)$request->doc_type,
+    'created_by'   => $createdBy,
+    'signed_by'    => $customerName,
+    'short_url'    => $shortUrl,
+    'original_url' => $originalUrl,   // ✅ ahora se autogenera
+    'clicks'       => 0,
+    'signed'       => 'No',
+    'date'         => now()->toDateString(),
+    'time'         => now()->format('H:i:s'),
+    'rand'         => $rand6,
+]);
 
         $publicShortLink = url('/s/' . $shortUrl);
 
