@@ -58,17 +58,20 @@ table.sched-table {
 }
 
 table.sched-table thead th {
-    background: #2f2f2f;
+    background: var(--red1);
     color: #ffffff;
-    font-size: 13px;
+    font-size: 1em;
+    font-family: var(--montserrat);
     font-weight: 600;
     padding: 14px 12px;
-    text-align: left;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 table.sched-table tbody td {
-    padding: 12px 10px;
+    padding: 10px 5px;
     border-bottom: 1px solid #e5e7eb;
+    font-family: var(--montserrat);
 }
 
 /* ===================================================== */
@@ -151,7 +154,7 @@ table.sched-table tbody td {
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+  /* box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); */
 }
 
 
@@ -192,6 +195,7 @@ table.sched-table tbody td {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 /* ===================================================== */
@@ -226,10 +230,16 @@ table.sched-table tbody td {
   z-index: 2;
 }
 .overlay-head h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #111827;
+    font-size: 1.3rem;
+    color: #1a1a1a;
+    font-weight: 500;
+    font-family: var(--montserrat);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#pickerSub{
+    font-family: var(--montserrat);
 }
 
 .icon-btn {
@@ -239,6 +249,17 @@ table.sched-table tbody td {
     border: 1px solid #d1d5db;
     background: #ffffff;
     cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-btn:hover{
+    background: #d8d8d8;
 }
 
 /* ===================================================== */
@@ -275,7 +296,7 @@ table.sched-table tbody td {
     padding: 14px 18px;
     border-top: 1px solid #e5e7eb;
     display: flex;
-    justify-content: space-between;
+    justify-content: right;
 }
 
 .btn {
@@ -286,13 +307,27 @@ table.sched-table tbody td {
     background: #ffffff;
     font-weight: 600;
     cursor: pointer;
+    align-items: center;
+    display: flex;
+    justify-content: center;
 }
 
 .btn.primary {
-    background: #2563eb;
-    border-color: #2563eb;
+    background-color: var(--red1);
+    border: 1px solid var(--red1);
     color: white;
 }
+
+.btn.btn.primary:hover{
+    background-color: var(--red2);
+    border: 1px solid var(--red2);
+}
+
+#backToPicker:hover{
+    background-color: #d8d8d8;
+    border:1px solid #d8d8d8;
+}
+
 
 /* ================================================= */
 /*  FIX – MATCH BLADE STRUCTURE                      */
@@ -311,9 +346,12 @@ table.sched-table tbody td {
 
 .sched-title h2 {
     margin: 0;
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 1.8em;
+    font-weight: 600;
+    text-transform: uppercase;
     color: #111827;
+    font-family: var(--montserrat);
+    margin-top: 30px;
 }
 
 .week-nav {
@@ -323,17 +361,33 @@ table.sched-table tbody td {
 }
 
 .week-btn {
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background: #ffffff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 500;
+    transition: background 0.3s ease, transform 0.15s ease;
+    font-size: 1em;
+    background: var(--red1);
+    user-select: none;
+}
+
+.week-btn:hover{
+    background: var(--red2) !important;
 }
 
 .week-btn.ghost {
-    background: #f3f4f6;
+    margin-top: 10px;
+    display: flex;
+    width: 150px;
+    cursor: pointer;
+    justify-content: center;
+    align-content: center;
+    /* border-radius: 30px; */
+    font-family: var(--montserrat);
+    font-size: 1em;
+    background: var(--red1);
 }
 
 .sched-badges .badge {
@@ -413,8 +467,8 @@ table.sched-table {
 
 .sched-table th.col-assign,
 .sched-table td.col-assign {
-    width: 180px;
-    min-width: 180px;
+    /* width: 180px;
+    min-width: 180px; */
 }
 
 .sched-table th:not(.col-assign),
@@ -425,14 +479,14 @@ table.sched-table {
 /* ================= DAY CELLS ================= */
 
 .day-cell {
-    height: 72px;
+
     border-radius: 14px;
     border: 1px dashed #cbd5f5;
     background: #f8fafc;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px;
+    /* padding: 6px; */
 }
 
 /* ================= SHIFT TEXT ================= */
@@ -441,11 +495,12 @@ table.sched-table {
     width: 100%;
     height: 100%;
     border-radius: 12px;
-    font-size: 13px;
+    font-size: .95em;
     line-height: 1.2;
     text-align: center;
-    padding: 6px;
+    padding: 0px;
     white-space: normal;
+    text-transform: uppercase;
 }
 
 
@@ -472,6 +527,7 @@ table.sched-table {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    font-family: var(--montserrat);
 }
 
 .form-grid .field.checkline {
@@ -479,11 +535,15 @@ table.sched-table {
     flex-direction: row;
     align-items: center;
     gap: 10px;
+    padding-left: 60px;   
 }
 
 .form-grid .field.checkline label {
     margin: 0;
     font-weight: 600;
+    cursor: pointer;
+    padding: 5px;
+    padding-right: 20px;
 }
 
 /* ================= INPUT STYLE ================= */
@@ -496,6 +556,28 @@ table.sched-table {
     padding: 0 12px;
     font-size: 14px;
     background: #ffffff;
+}
+
+.form-grid select{
+    cursor: pointer;
+}
+
+.form-grid input:read-only{
+    background: #d1d5db;
+    border: none;
+    user-select: none;
+}
+
+.form-grid input:read-only::selection{
+    background-color: #d1d5db;
+}
+
+
+.form-grid input:read-only:focus{
+    background: #d1d5db;
+    border: none;
+    box-shadow: unset;
+    user-select: none;
 }
 
 .form-grid input:focus,
@@ -546,6 +628,7 @@ table.sched-table {
     font-size: 13px;
     color: #6b7280;
     margin-top: 4px;
+    font-family: var(--montserrat);
 }
 
 /* ================= FORM FOOTER ================= */
@@ -593,8 +676,8 @@ table.sched-table {
 }
 
 .shift-chip.gray {
-  background: #e5e7eb;
-  color: #374151;
+  /* background: #e5e7eb; */
+  /* color: #374151; */
 }
 
 .shift-chip.blue {
@@ -627,8 +710,9 @@ table.sched-table {
   padding: 12px 14px;
   margin-bottom: 10px;
   display: flex;
-  justify-content: space-between;
+  justify-content: right;
   align-items: center;
+  font-family: var(--montserrat);
 }
 
 .shift-ribbon.blue    { background:#dbeafe; color:#1e40af; }
@@ -650,7 +734,7 @@ table.sched-table {
 .shift-chip.orange  { background: #ffedd5; color:#9a3412; }
 .shift-chip.red     { background: #fee2e2; color:#991b1b; }
 .shift-chip.purple  { background: #f3e8ff; color:#6b21a8; }
-.shift-chip.gray    { background: #e5e7eb; color:#111827; }
+/* .shift-chip.gray    { background: #e5e7eb; color:#111827; } */
 
 /* ============================= */
 /*  Day cell base                */
@@ -703,3 +787,130 @@ table.sched-table {
   z-index: 100000 !important;
 }
 
+
+
+#nextWeek, #prevWeek{
+ height: 39px;
+ margin-top: 10px;
+font-size: 2em;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+#downloadPdf{
+    width: 20px;
+    font-size: 1.2em;
+    text-decoration: none;
+}
+
+.user-name-horario{
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.person-pill i{
+    font-size: 1.5em;
+}
+
+.overlay-title{
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.shift-ribbon{
+    position: relative;
+    cursor: pointer;
+}
+
+.shift-ribbon .left{
+    position: absolute;
+    width: 100%;
+    z-index: 2;
+}
+
+.ribbon-actions{
+    z-index: 3;
+    display: flex;
+}
+
+.ribbon-actions button{
+    background: var(--red1);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+    
+}
+
+.ribbon-actions .pencil-btn, .ribbon-actions .trash-btn{
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 2px;
+    font-size: 1.2em;
+}
+
+.ribbon-actions .pencil-btn{
+   background-color: #0b6ede;
+}
+
+.ribbon-actions .pencil-btn:hover{
+   background-color: #0651a7;
+}
+
+.ribbon-actions .trash-btn:hover{
+    background-color: var(--red2);
+}
+
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-cancel):hover{
+    background-color: #d8d8d8 !important;
+    border: 1px solid #d8d8d8 !important;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):hover{
+    background-color: var(--red2) !important;
+    border: 1px solid var(--red2) !important;
+}
+
+.ribbon-text{
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+[inner-text="OFF - Personal"], [inner-text="OFF - Sick"], [inner-text="OFF - Holiday"], [inner-text="OFF - Vacation"]{
+    color: #a3a3a3;
+    /* text-decoration: underline; */
+    /* text-decoration-style: dotted; */
+}
+
+#openCreateShift{
+    background-color: var(--red1);
+    border: 1px solid var(--red1);
+}
+
+#openCreateShift:hover{
+    background-color: var(--red2);
+    border: 1px solid var(--red2);
+}
+
+#timeOffCheck{
+    cursor: pointer;
+}
+
+.suggest-item{
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    cursor: pointer;
+}
+
+.suggest-item:hover{
+    background-color: #f1f1f1;
+}

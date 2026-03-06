@@ -106,8 +106,7 @@
         <div class="person-cell">
           <div class="person-pill"><i class='bx bx-user'></i></div>
           <div>
-            <div>${escapeHtml(p.name)}</div>
-            <div class="ribbon-sub">${p.type === 'user' ? 'User' : 'Sub User'}</div>
+            <div class="user-name-horario">${escapeHtml(p.name)}</div>
           </div>
         </div>
       `;
@@ -132,6 +131,7 @@
           const cls = chipClass(ass.shift.color);
           const chip = document.createElement('div');
           chip.className = `shift-chip ${cls}`;
+          chip.setAttribute("inner-text", txt);
           chip.textContent = txt;
           cell.appendChild(chip);
           cell.classList.add('has-shift');
@@ -284,7 +284,7 @@
 
   function openNewShift() {
     state.editingShiftId = null;
-    formTitle.textContent = 'New Shift';
+    formTitle.textContent = 'New Shift Template';
 
     // 👉 asignar nombre automáticamente
     assignToInput.value = state.selectedCell

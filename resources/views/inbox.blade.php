@@ -33,26 +33,28 @@
         @include('menu')
 
         <section id="dash">
-            <div id="lower-table-clients" type="fullscreen">
+            <div id="lower-table-clients" type="fullscreen" data="not-inbox">
                 <div class="inbox-container mt-10">
                     <div class="inbox-card">
-                        <h1>📥 Inbox WhatsApp</h1>
-
+                    
                         <div class="inbox-actions">
-                            <a href="{{ route('whatsapp.sent') }}" class="btn btn-primary">📤 Ir a Enviar</a>
-
+                            
                             <form method="POST" action="{{ route('whatsapp.sync') }}">
                                 @csrf
-                                <button type="submit" class="btn btn-secondary">🔄 Sincronizar</button>
+                                <button id="btnSync" type="submit" class="btn btn-secondary"><i class="bx bx-sync"></i></button>
                             </form>
+
+                            <a id="btnSent" href="{{ route('whatsapp.sent') }}" class="btn btn-primary"><i class='bx bx-message-square-check'></i></a>
 
                             <button type="button" class="btn btn-danger" onclick="bulkDelete()">🗑️ Eliminar
                                 seleccionados</button>
-                        </div>
 
-                        <!-- 🔍 Cuadro de búsqueda -->
-                        <div class="search-bar">
-                            <input type="text" id="searchInput" placeholder="Buscar por fecha, número o mensaje...">
+
+                            <div id="search-container" style="position:unset;margin-top:unset;margin-left:unset !important;">
+                                <label for="tableSearch"><i class='bx bx-search'></i></label>
+                                 <input type="text" id="searchInput" placeholder="Buscar por fecha, número o mensaje...">
+                            </div>
+                           
                         </div>
 
                         @if (session('ok'))
@@ -85,8 +87,8 @@
                                         <th>Fecha</th>
                                         <th>De</th>
                                         <th>Dirección</th>
-                                        <th>Estado</th>
-                                        <th>Mensaje</th>
+                                        <!-- <th>Estado</th>
+                                        <th>Mensaje</th> -->
                                         <th>Responder</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -97,27 +99,13 @@
                                             <td><input type="checkbox" class="row-check" value="{{ $m->id }}">
                                             </td>
                                             <td>{{ $m->date_sent?->format('Y-m-d H:i') }}</td>
-                                            <td>{{ $m->from }}</td>
-                                            <td>
-                                                <span
-                                                    class="badge {{ $m->direction_label === 'Entrante' ? 'badge-in' : 'badge-out' }}">
-                                                    {{ $m->direction_label }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span
-                                                    class="badge
-                                                @if ($m->status_label === 'Entregado') badge-success
-                                                @elseif($m->status_label === 'En cola') badge-warning
-                                                @elseif($m->status_label === 'No entregado' || $m->status_label === 'Fallido') badge-error
-                                                @else badge-default @endif">
-                                                    {{ $m->status_label }}
-                                                </span>
-                                            </td>
+                                            <!-- <td>{{ $m->from }}</td> -->
+                                            <td>{{ str_replace('whatsapp:', '', $m->from) }}</td>
+                                            
                                             <td class="message-body">{{ $m->body }}</td>
 
                                             <!-- RESPONDER -->
-                                            <td>
+                                            <td class="boton-whatsapp">
                                                 @if ($m->direction_label === 'Entrante' && $m->date_sent)
                                                     @php
                                                         // obtener la fecha del mensaje y convertirla a la zona configurada en app.php
@@ -157,7 +145,7 @@
                                                     onsubmit="return confirm('¿Seguro que quieres eliminar este mensaje?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">🗑️</button>
+                                                    <button type="submit" class="btn btn-danger" data="boton-eliminar"><i class="bx bx-trash"></i></button>
                                                 </form>
                                             </td>
                                         </tr>

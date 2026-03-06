@@ -50,6 +50,12 @@
 
 #btn-open-overlay{
     width: max-content;
+    display: flex;
+}
+
+#btn-open-overlay i{
+    font-size: 1.4em;
+    margin-right: 5px;
 }
 
 #top-container{
@@ -427,7 +433,7 @@
     cursor: pointer;
     justify-content: center;
     align-content: center;
-    border-radius: 30px;
+    /* border-radius: 30px; */
     font-family: var(--montserrat);
     font-size: 1em;
     background: var(--red1);
