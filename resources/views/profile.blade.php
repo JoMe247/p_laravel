@@ -38,9 +38,7 @@
         @include('menu')
 
         <section id="dash">
-            
-            
-
+        
                 {{-- CONTENEDOR GENERAL DEL PROFILE --}}
                 <div id="profile-wrapper" data-id="{{ $customer->ID }}">
 
@@ -96,7 +94,7 @@
 
                             <div class="notes-header">
                                 <h3>Notes</h3>
-                                <button id="add-note-btn" class="btn small">+ Add Note</button>
+                                <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i>  &nbsp;Add Note</button>
                             </div>
 
                             <div class="notes-scroll">
@@ -322,12 +320,11 @@
                                 </div>
 
                                 <div class="profile-actions">
-
-                                    <button id="profile-save" type="submit" class="btn profile-btn-save">Guardar</button>
-
                                     <a id="profile-back" href="{{ route('customers.index') }}" class="btn secondary"><i class='bx bx-arrow-back'></i></a>
 
                                     <button type="button" id="delete-customer-btn" class="btn delete-btn"><i class='bx bx-trash' ></i></button>
+
+                                    <button id="profile-save" type="submit" class="btn profile-btn-save"><i class='bx bxs-save' ></i></button>
                                 </div>
                             </form>
 

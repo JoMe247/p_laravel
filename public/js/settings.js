@@ -113,7 +113,7 @@ try {
         $("#lateral-blur").css("backdrop-filter", `blur(4px)`);
 
         document.getElementById("lateral").style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.35)), url(../img/menu/${imageN}.jpg)`;
-        console.log("aqui");
+        // console.log("aqui");
     
     }else{
 

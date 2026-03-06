@@ -43,7 +43,7 @@
                     <div class="page-wrap">
                         <div class="schedules-topbar">
                             <div class="sched-title">
-                                <h2 id="weekTitle">Week</h2>
+                                
                                 <div class="week-nav">
                                     <button class="week-btn ghost back-calendar" id="backCalendar">
                                         <i class='bx bx-calendar'></i>
@@ -52,15 +52,17 @@
                                     <button class="week-btn" id="prevWeek"><i class='bx bx-chevron-left'></i></button>
                                     <button class="week-btn" id="nextWeek"><i class='bx bx-chevron-right'></i></button>
                                     <button class="week-btn ghost" id="goToday">Today</button>
-                                    <a class="week-btn ghost" id="downloadPdf" href="#">PDF</a>
+                                    <a class="week-btn ghost" id="downloadPdf" target="_blank"><i class='bx bxs-file-pdf'></i></a>
                                 </div>
+
+                                <h2 id="weekTitle">&nbsp;</h2>
                             </div>
 
-                            <div class="sched-badges">
+                            <!-- <div class="sched-badges">
                                 <span class="badge {{ $isOwner ? 'ok' : 'view' }}">
                                     {{ $isOwner ? 'Edit Enabled (User)' : 'View Only (Sub User)' }}
                                 </span>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="schedules-card">
@@ -92,7 +94,7 @@
                             <div class="overlay-head">
                                 <div class="overlay-title">
                                     <h3 id="pickerTitle">Add a shift</h3>
-                                    <p id="pickerSub">Select a shift to assign</p>
+                                    <p id="pickerSub" style="display:none">Select a shift to assign</p>
                                 </div>
                                 <button class="icon-btn" id="closePicker"><i class='bx bx-x'></i></button>
                             </div>
@@ -102,12 +104,12 @@
                             </div>
 
                             <div class="overlay-foot">
-                                <button class="btn ghost" id="removeAssignmentBtn" style="display:none;">
+                                <button class="btn ghost" id="removeAssignmentBtn" style="display:none;margin-right:auto;">
                                     Remove shift
                                 </button>
 
                                 <button class="btn primary" id="openCreateShift">
-                                    <i class='bx bx-plus'></i> New Shift
+                                    <i class='bx bx-plus' style="font-size:1.4em;font-weight:bold;"></i> Add New Shift
                                 </button>
                             </div>
                         </div>
@@ -118,7 +120,7 @@
                         <div class="overlay-card">
                             <div class="overlay-head">
                                 <div class="overlay-title">
-                                    <h3 id="formTitle">New Shift</h3>
+                                    <h3 id="formTitle">New shift template</h3>
                                     <p class="muted">Create a reusable shift template</p>
                                 </div>
                                 <button class="icon-btn" id="closeForm"><i class='bx bx-x'></i></button>
@@ -152,17 +154,16 @@
                                     </div>
 
                                     <div class="field checkline">
-                                        <label class="check">
-                                            <input type="checkbox" id="timeOffCheck">
-                                            <span>Time off</span>
-                                        </label>
+                                        <input type="checkbox" id="timeOffCheck">
+                                        <label class="check" for="timeOffCheck">Time off</label>
                                     </div>
 
-                                    <div class="field">
+                                    <div class="field" style="margin-top: -16px;margin-bottom: 25px;">
                                         <label>Time off type <span class="req" id="offReq"
                                                 style="display:none;">*</span></label>
                                         <select id="timeOffType" disabled>
                                             <option value="">Select...</option>
+                                            <option value="Vacation">Vacation</option>
                                             <option value="Holiday">Holiday</option>
                                             <option value="Personal">Personal</option>
                                             <option value="Sick">Sick</option>

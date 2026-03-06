@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}">
+    <!-- <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}"> -->
     <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
     <link rel="stylesheet" href="{{ asset('css/policies.css') }}">
 
@@ -38,8 +38,6 @@
         @include('menu')
 
         <section id="dash">
-
-            <div id="lower-table-clients" type="fullscreen">
 
                 <div id="profile-wrapper" data-id="{{ $customer->ID }}">
 
@@ -95,7 +93,7 @@
 
                             <div class="notes-header">
                                 <h3>Notes</h3>
-                                <button id="add-note-btn" class="btn small">+ Add Note</button>
+                                <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i>  &nbsp;Add Note</button>
                             </div>
 
                             <div class="notes-scroll">
@@ -132,10 +130,10 @@
                     <div class="profile-main">
 
                         <div class="policies-header">
-                            <h2>Policies</h2>
+                            <!-- <h2>Policies</h2> -->
 
                             <button id="new-policy-btn" class="btn policies-new-btn">
-                                <i class='bx bx-plus'></i> New Policy
+                                <i class='bx bx-file' style="font-size:1.2em;margin-right:5px;"></i> New Policy
                             </button>
                         </div>
 
@@ -146,13 +144,13 @@
 
                         {{-- TABLA --}}
                         <table class="table policies-table">
-                            <thead>
+                            <thead style="border-top-right-radius: 12px;border-top-left-radius: 12px;">
                                 <tr>
                                     <th>Carrier</th>
                                     <th>Number</th>
                                     <th>Expiration</th>
                                     <th>Status</th>
-                                    <th>Vehicle</th>
+                                    <th>Vehicles</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -188,10 +186,10 @@
                                             @endif
                                         </td>
 
-                                        <td>
+                                        <td style="display:flex;justify-content:center">
 
                                             {{-- Botón INFO (i en un círculo) --}}
-                                            <button class="btn policy-info-btn" title="View / Edit"
+                                            <button class="btn policy-info-btn" title="View / Edit" id="edit-policy-btn"
                                                 data-id="{{ $p->id }}"
                                                 data-url="{{ route('policies.show', $p->id) }}"
                                                 data-update-url="{{ route('policies.update', $p->id) }}">
@@ -199,9 +197,9 @@
                                             </button>
 
 
-                                            <button class="btn delete-btn policy-delete-btn"
+                                            <button class="btn delete-btn policy-delete-btn" id="delete-policy-btn"
                                                 data-url="{{ route('policies.destroy', $p->id) }}">
-                                                Delete
+                                                <i class="bx bx-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -225,38 +223,37 @@
                 <div id="policy-overlay">
                     <div class="policy-overlay-box policy-flex">
 
-                        <h3>New Policy</h3>
 
                         <div class="policy-columns">
 
                             {{-- LEFT PANEL (POLICY FIELDS) --}}
                             <div class="policy-left">
 
-                                <label>Pol Carrier</label>
+                                <label>Carrier</label>
                                 <input type="text" id="pol_carrier">
 
-                                <label>Pol Number</label>
+                                <label>Number</label>
                                 <input type="text" id="pol_number">
 
-                                <label>Pol URL (company website)</label>
+                                <label>URL (Company Website)</label>
                                 <input type="text" id="pol_url">
 
-                                <label>Pol Expiration</label>
+                                <label>Expiration Date</label>
                                 <input type="date" id="pol_expiration">
 
-                                <label>Pol Eff Date</label>
+                                <label>Effective Date</label>
                                 <input type="date" id="pol_eff_date">
 
-                                <label>Pol Added Date</label>
+                                <label>Added Date</label>
                                 <input type="date" id="pol_added_date">
 
-                                <label>Pol Due Day</label>
+                                <label>Payment Due Day</label>
                                 <input type="text" id="pol_due_day">
 
-                                <label>Pol Status</label>
+                                <label>Status</label>
                                 <input type="text" id="pol_status">
 
-                                <label>Pol Agent Record</label>
+                                <label>Agent Record</label>
                                 <input type="text" id="pol_agent_record">
 
                                 <div class="policy-overlay-actions">
@@ -269,8 +266,10 @@
                             {{-- RIGHT PANEL (VEHICLES) --}}
                             <div class="policy-right">
 
+                                <h3>New Policy</h3>
+
                                 <button id="add-vehicle-btn" class="btn add-vehicle-btn">
-                                    + Añadir Vehículo
+                                    <i class='bx bx-car' style="font-size:1.4em"></i>&nbsp; Añadir Vehículo
                                 </button>
 
                                 <div id="vehicle-container" class="vehicle-container">
@@ -289,9 +288,8 @@
                 <div id="policy-edit-overlay" class="policy-edit-overlay" style="display:none;">
                     <div class="policy-edit-box">
 
-                        <h3>Policy</h3>
-
                         <div id="policy-edit-content">
+                            <h3>Policy</h3>
                             <!-- Aquí JS insertará todos los campos -->
                         </div>
 
@@ -303,7 +301,7 @@
                 </div>
 
 
-            </div>
+            
     </div>
     </div>
     </section>
@@ -412,29 +410,29 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="{{ asset('../img/menu/thumbs/1.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
+                        <label class="thumb-options" onclick="selectImage(2)"><img src="{{ asset('../img/menu/thumbs/2.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg"
+                        <label class="thumb-options" onclick="selectImage(3)"><img src="{{ asset('../img/menu/thumbs/3.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(4)"><img src="img/menu/thumbs/4.jpg"
+                        <label class="thumb-options" onclick="selectImage(4)"><img src="{{ asset('../img/menu/thumbs/4.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(5)"><img src="img/menu/thumbs/5.jpg"
+                        <label class="thumb-options" onclick="selectImage(5)"><img src="{{ asset('../img/menu/thumbs/5.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(6)"><img src="img/menu/thumbs/6.jpg"
+                        <label class="thumb-options" onclick="selectImage(6)"><img src="{{ asset('../img/menu/thumbs/6.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(7)"><img src="img/menu/thumbs/7.jpg"
+                        <label class="thumb-options" onclick="selectImage(7)"><img src="{{ asset('../img/menu/thumbs/7.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(8)"><img src="img/menu/thumbs/8.jpg"
+                        <label class="thumb-options" onclick="selectImage(8)"><img src="{{ asset('../img/menu/thumbs/8.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(9)"><img src="img/menu/thumbs/9.jpg"
+                        <label class="thumb-options" onclick="selectImage(9)"><img src="{{ asset('../img/menu/thumbs/9.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(10)"><img src="img/menu/thumbs/10.jpg"
+                        <label class="thumb-options" onclick="selectImage(10)"><img src="{{ asset('../img/menu/thumbs/10.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(11)"><img src="img/menu/thumbs/11.jpg"
+                        <label class="thumb-options" onclick="selectImage(11)"><img src="{{ asset('../img/menu/thumbs/11.jpg') }}"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(12)"><img src="img/menu/thumbs/12.jpg"
+                        <label class="thumb-options" onclick="selectImage(12)"><img src="{{ asset('../img/menu/thumbs/12.jpg') }}"
                                 alt=""></label>
 
 

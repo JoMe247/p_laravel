@@ -7,6 +7,8 @@
   --whiteText:#f9fafb;
   --text1:#333;
   --text2:#535353;
+  --blue:#2e90f2;
+  --blue2:#2c80d4;
 
   /* Fonts */
   --montserrat: 'Montserrat', sans-serif;
@@ -15,7 +17,7 @@
   --lato: 'Lato', sans-serif;
   --poppins: 'Poppins', sans-serif;
 
-
+  --fc-today-bg-color:var(--red1);
   /*Button Border Radius*/
   --radius:7px;
 }

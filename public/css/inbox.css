@@ -27,16 +27,34 @@
 .inbox-table {
     width: 100%;
     border-collapse: collapse;
+    /* position: relative; */
+    font-family: var(--montserrat);
 }
 
 .inbox-table th, .inbox-table td {
-    padding: 10px;
-    border-bottom: 1px solid #e5e7eb;
-    vertical-align: top;
+    text-align: left;
+}
+
+.inbox-table thead {
+    color: #555;
+    height: 40px;
+    user-select: none;
+    text-transform: uppercase;
+}
+
+.inbox-table thead::before {
+    position: absolute;
+    width: 100%;
+    margin-top: 0px;
+    left: 0;
+    height: 40px;
+    content: '';
+    background-color: #ebeef5;
+    z-index: -1;
 }
 
 .inbox-table th {
-    background: #f3f4f6;
+    background: #ebeef5;
     text-align: left;
 }
 
@@ -155,9 +173,88 @@
 
 .btn-whatsapp:hover {
     background-color: #20b954;
-    transform: scale(1.05);
+    /* transform: scale(1.05); */
 }
 
 .btn-whatsapp i {
+    color: #fff !important;
     font-size: 18px;
+}
+
+
+.boton-whatsapp{
+    justify-content: left !important;
+}
+
+.boton-whatsapp:hover{
+    background-color: unset !important;
+}
+
+[data="boton-eliminar"]{
+    background: #e74c3c;
+    border: none;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 6px;
+    margin-left: 8px;
+    transition: background 0.2s ease, transform 0.2s ease;
+    font-size: 1.1em;
+    height: 37px;
+    display: flex;
+    align-items: center;
+}
+
+[data="boton-eliminar"] i{
+    color: white !important;
+}
+
+[data="not-inbox"] tr:not(thead tr){
+    height: 50px;
+}
+
+#select-all{
+    accent-color: #a43737;
+}
+
+.row-check{
+    accent-color: #e74c3c;
+}
+
+#btnSync {
+    font-size: 1.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    padding: 8px;
+    margin-left: 12px;
+    background: #e6eefc;
+    color: #fff;
+    background-color: var(--red1);
+    font-family: var(--montserrat);
+    font-weight: bold;
+}
+
+#btnSync:hover {
+    background-color: var(--red2);
+}
+
+#btnSent{
+    font-size: 1.2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    padding: 8px;
+    /* margin-left: 12px; */
+    background: #e6eefc;
+    color: #fff;
+    background-color: var(--blue);
+    font-family: var(--montserrat);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#btnSent:hover{
+    background-color: var(--blue2);
 }

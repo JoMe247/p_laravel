@@ -237,70 +237,71 @@ $(document).ready(function () {
         );
     });
 
-    // Año → marcas
-    $(document).on('change', '.year-select', function () {
-        const $card = $(this).closest('.vehicle-card');
-        const year = $(this).val();
-        const $makeSel = $card.find('.make-select');
-        const $modelSel = $card.find('.model-select');
+   // Marcas comunes (ajusta a tu mercado)
+const COMMON_MAKES = [
+  "Toyota","Honda","Ford","Chevrolet","Nissan","Hyundai","Kia","Jeep","RAM",
+  "GMC","Subaru","Mazda","Volkswagen","BMW","Mercedes-Benz","Audi","Lexus",
+  "Tesla","Dodge","Chrysler","Buick","Cadillac","Volvo","Mitsubishi"
+];
 
-        $makeSel.empty().append('<option value="">Cargando marcas...</option>');
-        $modelSel.empty().append('<option value="">Seleccione modelo</option>');
+function fillMakeSelect($makeSel){
+  $makeSel.empty().append('<option value="">Seleccione marca</option>');
+  COMMON_MAKES.forEach(make => {
+    $makeSel.append(`<option value="${make}">${make}</option>`);
+  });
+  $makeSel.append('<option value="other">Other</option>');
+}
 
-        if (year === 'other') {
-            $(this).hide();
-            $card.find('.year-other').show();
-            return;
-        }
+// Año → marcas (sin fetch masivo)
+$(document).on('change', '.year-select', function () {
+  const $card = $(this).closest('.vehicle-card');
+  const year = $(this).val();
+  const $makeSel = $card.find('.make-select');
+  const $modelSel = $card.find('.model-select');
 
-        $.get('https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=json',
-            function (res) {
-                $makeSel.empty().append('<option value="">Seleccione marca</option>');
-                res.Results.forEach(m => {
-                    if (m.Make_Name) {
-                        $makeSel.append(`<option value="${m.Make_Name}">${m.Make_Name}</option>`);
-                    }
-                });
-                $makeSel.append('<option value="other">Other</option>');
-            }
-        );
-    });
+  $modelSel.empty().append('<option value="">Seleccione modelo</option>');
 
-    // Marca → modelos
-    $(document).on('change', '.make-select', function () {
-        const make = $(this).val();
-        const $card = $(this).closest('.vehicle-card');
-        const $modelSel = $card.find('.model-select');
+  if (year === 'other') {
+    $(this).hide();
+    $card.find('.year-other').show();
+    return;
+  }
 
-        $modelSel.empty().append('<option value="">Cargando modelos...</option>');
+  fillMakeSelect($makeSel);
+});
 
-        if (make === 'other') {
-            $(this).hide();
-            $card.find('.make-other').show();
-            return;
-        }
+// Marca → modelos (sí consulta VPIC, pero solo para esa marca)
+$(document).on('change', '.make-select', function () {
+  const make = $(this).val();
+  const $card = $(this).closest('.vehicle-card');
+  const $modelSel = $card.find('.model-select');
 
-        $.get(
-            `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${encodeURIComponent(make)}?format=json`,
-            function (res) {
+  $modelSel.empty().append('<option value="">Cargando modelos...</option>');
 
-                $modelSel.empty().append('<option value="">Seleccione modelo</option>');
+  if (make === 'other') {
+    $(this).hide();
+    $card.find('.make-other').show();
+    return;
+  }
 
-                if (!res.Results?.length) {
-                    $modelSel.append('<option value="">No hay modelos</option>');
-                    return;
-                }
+  $.get(
+    `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${encodeURIComponent(make)}?format=json`,
+    function (res) {
+      $modelSel.empty().append('<option value="">Seleccione modelo</option>');
 
-                res.Results.forEach(m => {
-                    if (m.Model_Name) {
-                        $modelSel.append(`<option value="${m.Model_Name}">${m.Model_Name}</option>`);
-                    }
-                });
+      if (!res.Results?.length) {
+        $modelSel.append('<option value="">No hay modelos</option>');
+        return;
+      }
 
-                $modelSel.append('<option value="other">Other</option>');
-            }
-        );
-    });
+      // Opcional: dedupe + sort (a veces VPIC repite)
+      const models = [...new Set(res.Results.map(x => x.Model_Name).filter(Boolean))].sort();
+      models.forEach(model => $modelSel.append(`<option value="${model}">${model}</option>`));
+
+      $modelSel.append('<option value="other">Other</option>');
+    }
+  );
+});
 
     // Modelo → imagen
     $(document).on('change', '.model-select', function () {

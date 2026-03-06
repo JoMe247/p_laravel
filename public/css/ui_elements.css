@@ -733,7 +733,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* --- Delete Button (Profile Page) --- */
 .delete-btn {
-  background: #e74c3c;
+  background: var(--red1);
   color: #fff;
   border: none;
   padding: 8px 14px;
@@ -743,5 +743,5 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .delete-btn:hover {
-  background: #c0392b;
+  background: var(--red2);
 }
