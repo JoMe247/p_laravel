@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\CustomerNote;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 
@@ -15,28 +14,15 @@ class CustomersController extends Controller
     // Listado simple
     public function index()
     {
-        $customers = Customer::orderBy('ID', 'desc')->get();
 
-        // ids de customers
-        $customerIds = $customers->pluck('ID')->filter()->values()->all();
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
-        // Consulta independiente (NO depende de relaciones)
-        $policyCounts = $this->getPolicyCountsByCustomerId($customerIds);
-
-        return view('customers', compact('customers', 'policyCounts'));
-    }
-
-    private function getPolicyCountsByCustomerId(array $customerIds): array
-    {
-        if (empty($customerIds)) return [];
-
-        // OJO: cambia 'policies' si tu tabla se llama diferente
-        return DB::table('policies')
-            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
-            ->selectRaw('customer_id, COUNT(*) as total')
-            ->groupBy('customer_id')
-            ->pluck('total', 'customer_id')
-            ->toArray();
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        $customers = Customer::orderBy('ID', 'desc')->paginate(50);
+        return view('customers', compact('customers'));
     }
 
     public function store(Request $request)
@@ -124,7 +110,7 @@ class CustomersController extends Controller
         $customer->fill($validated);
         $customer->save();
 
-        return redirect('profile/'.$id)->with('success', 'Customer updated.');
+        return redirect()->route('customers.index')->with('success', 'Customer updated.');
     }
     public function deleteMultiple(Request $request)
     {
@@ -152,7 +138,7 @@ class CustomersController extends Controller
 
         // Guardar nueva foto
         $file = $request->file('photo');
-        $newName = $id . '.' . $file->getClientOriginalExtension();
+        $newName = uniqid('cust_') . '.' . $file->getClientOriginalExtension();
         $file->move(public_path('uploads/customers'), $newName);
 
         $path = 'uploads/customers/' . $newName;
