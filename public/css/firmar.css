@@ -203,3 +203,102 @@ button p{
     background-color: #FFF;
     border-radius: 50%;
   }
+
+  .pdf-preview-section{
+    width: 100%;
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.pdf-preview-wrap{
+    width: 900px;
+    min-height: 500px;
+    background: #fff;
+    border: 1px solid #bcd0ff;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 18px;
+    box-sizing: border-box;
+}
+
+#pdfCanvas{
+    display: block;
+    background: #fff;
+    max-width: 100%;
+    height: auto;
+}
+
+.pdf-meta-bar{
+    width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    color: #ef4f8a;
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.pdf-meta-bar p{
+    margin: 0;
+}
+
+.pdf-meta-bar span{
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-left: 8px;
+}
+
+.pdf-nav-buttons{
+    width: 900px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 18px;
+    margin-bottom: 25px;
+}
+
+.pdf-nav-buttons button{
+    width: 95px;
+    height: 90px;
+    border: 1px solid #d8d8d8;
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    font-size: 1.05em;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.pdf-nav-buttons button:hover{
+    background: #f7f7f7;
+}
+
+.pdf-nav-buttons button:disabled{
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 950px){
+    .pdf-preview-wrap,
+    .pdf-meta-bar,
+    .pdf-nav-buttons{
+        width: 95%;
+    }
+
+    .pdf-meta-bar{
+        font-size: 1em;
+    }
+
+    .pdf-nav-buttons button{
+        width: 110px;
+        height: 60px;
+    }
+}

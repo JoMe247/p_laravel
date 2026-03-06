@@ -127,100 +127,83 @@ class DocumentsController extends Controller
             'doc_type' => 'required|integer',
             'pdf' => 'required|file|mimes:pdf|max:20480',
         ]);
+        
 
         $template = DB::table('pdf_overlays')
-            ->select('template_name')
-            ->where('id', (int)$request->template_id)
-            ->first();
+        ->select('id', 'template_name', 'overlay_data')
+        ->where('id', (int)$request->template_id)
+        ->first();
 
         if (!$template) {
             return response()->json(['ok' => false, 'error' => 'Template not found']);
         }
 
-        // ----------------------------
-        // 🔹 Variables base
-        // ----------------------------
-        $customerId   = trim($request->customer_id);
-        $customerName = trim($request->customer_name);
-        $templateName = trim($template->template_name);
+        $docSignOverlay = $this->extractDocSignOverlay($template->overlay_data ?? null);
+  // ----------------------------
+    // 🔹 Variables base
+    // ----------------------------
+    $customerId   = trim($request->customer_id);
+    $customerName = trim($request->customer_name);
+    $templateName = trim($template->template_name);
 
-        // Sanitizar nombres (quitar caracteres raros)
-        $safeCustomerName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $customerName);
-        $safeTemplateName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $templateName);
+    $safeCustomerName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $customerName);
+    $safeTemplateName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $templateName);
 
-        // ----------------------------
-        // 🔹 Carpeta destino
-        // customerdocs/{id}_{name}
-        // ----------------------------
-        $folderName = $customerId . '_' . $safeCustomerName;
-        $baseDir = "private/customerdocs/{$folderName}";
+    $folderName = $customerId . '_' . $safeCustomerName;
+    $baseDir = "private/customerdocs/{$folderName}";
 
-        // ----------------------------
-        // 🔹 Nombre archivo
-        // TemplateName_CustomerName_YYYYMMDD_HHMMSS.pdf
-        // ----------------------------
-        $datePart = now()->format('Ymd');
-        $timePart = now()->format('His');
+    $datePart = now()->format('Ymd');
+    $timePart = now()->format('His');
 
-        $fileName = "{$safeTemplateName}_{$safeCustomerName}_{$datePart}_{$timePart}.pdf";
+    $fileName = "{$safeTemplateName}_{$safeCustomerName}_{$datePart}_{$timePart}.pdf";
 
-        // ----------------------------
-        // 🔹 Guardar archivo
-        // ----------------------------
-        $storedPath = $request->file('pdf')->storeAs($baseDir, $fileName);
+    $storedPath = $request->file('pdf')->storeAs($baseDir, $fileName);
 
-        // ----------------------------
-// 🔹 Insertar en tabla documents (OBTENER ID)
-// ----------------------------
-$documentId = DB::table('documents')->insertGetId([
-    'type'          => (int)$request->doc_type,
-    'policy_number' => $request->policy_number ?? 'N/A',
-    'insured_name'  => $customerName,
-    'phone'         => $request->customer_phone,
-    'email'         => $request->customer_email ?? '',
-    'user'          => $authUser->username ?? $authUser->name ?? $authUser->email,
-    'date'          => now()->toDateString(),
-    'time'          => now()->format('H:i:s'),
-    'path'          => $storedPath,
-    'signed'        => 0,
-]);
+    $documentId = DB::table('documents')->insertGetId([
+        'type'            => (int)$request->doc_type,
+        'template_id'     => (int)$request->template_id,
+        'policy_number'   => $request->policy_number ?? 'N/A',
+        'insured_name'    => $customerName,
+        'phone'           => $request->customer_phone,
+        'email'           => $request->customer_email ?? '',
+        'user'            => $authUser->username ?? $authUser->name ?? $authUser->email,
+        'date'            => now()->toDateString(),
+        'time'            => now()->format('H:i:s'),
+        'path'            => $storedPath,
+        'docsign_overlay' => $docSignOverlay ? json_encode($docSignOverlay) : null,
+        'signed'          => 0,
+    ]);
 
-        // ==========================================================
-        // ✅ NUEVO: Generar short_url + rand y guardarlo en tabla url
-        // ==========================================================
-       $createdBy = $authUser->username ?? $authUser->name ?? $authUser->email ?? 'unknown';
+    $createdBy = $authUser->username ?? $authUser->name ?? $authUser->email ?? 'unknown';
 
-$shortUrl = $this->generateUniqueShortUrl(8);
-$rand6    = $this->generateRand6();
+    $shortUrl = $this->generateUniqueShortUrl(8);
+    $rand6    = $this->generateRand6();
 
-// ✅ URL interna a la vista de firma (preview + firma)
-$originalUrl = url("/sign/{$shortUrl}/{$documentId}");
+    $originalUrl = url("/sign/{$shortUrl}/{$documentId}");
 
-DB::table('url')->insert([
-    'name'         => $customerName,
-    'type'         => (int)$request->doc_type,
-    'created_by'   => $createdBy,
-    'signed_by'    => $customerName,
-    'short_url'    => $shortUrl,
-    'original_url' => $originalUrl,   // ✅ ahora se autogenera
-    'clicks'       => 0,
-    'signed'       => 'No',
-    'date'         => now()->toDateString(),
-    'time'         => now()->format('H:i:s'),
-    'rand'         => $rand6,
-]);
+    DB::table('url')->insert([
+        'name'         => $customerName,
+        'type'         => (int)$request->doc_type,
+        'created_by'   => $createdBy,
+        'signed_by'    => $customerName,
+        'short_url'    => $shortUrl,
+        'original_url' => $originalUrl,
+        'clicks'       => 0,
+        'signed'       => 'No',
+        'date'         => now()->toDateString(),
+        'time'         => now()->format('H:i:s'),
+        'rand'         => $rand6,
+    ]);
 
-        $publicShortLink = url('/s/' . $shortUrl);
+    $publicShortLink = url('/s/' . $shortUrl);
 
-        return response()->json([
-            'ok' => true,
-            'file' => $fileName,
-            'path' => $storedPath,
-
-            // ✅ opcional: para mostrarlo en tu UI
-            'short_url' => $shortUrl,
-            'short_link' => $publicShortLink,
-            'rand' => $rand6,
+    return response()->json([
+        'ok' => true,
+        'file' => $fileName,
+        'path' => $storedPath,
+        'short_url' => $shortUrl,
+        'short_link' => $publicShortLink,
+        'rand' => $rand6,
         ]);
     }
 
@@ -279,5 +262,29 @@ DB::table('url')->insert([
     {
         // 100000 - 999999 (6 dígitos reales)
         return random_int(100000, 999999);
+    }
+
+   private function extractDocSignOverlay(?string $overlayJson): ?array
+  {
+    if (!$overlayJson) return null;
+
+    $items = json_decode($overlayJson, true);
+    if (!is_array($items)) return null;
+
+    foreach ($items as $item) {
+        $text = $item['text'] ?? null;
+
+        if ($text === '{{DocSign@}}') {
+            return [
+                'page'   => (int)($item['page'] ?? 1),
+                'x'      => (float)($item['x'] ?? 0),
+                'y'      => (float)($item['y'] ?? 0),
+                'width'  => 160,
+                'height' => 55,
+            ];
+        }
+    }
+
+    return null;
     }
 }
