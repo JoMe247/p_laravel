@@ -6,11 +6,20 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\SubUser;
 use App\Models\Ticket;
+use Illuminate\Support\Facades\Auth;
 
 class HelpController extends Controller
 {
     public function index()
     {
+
+        // Obtener usuario autenticado (funciona también con remember me)
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $auth = auth('web')->user() ?? auth('sub')->user();
         $agency = $auth->agency;
 

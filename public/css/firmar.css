@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100;200;300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Young+Serif&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;700;900&display=swap');
+
+body{
+    display:flex;
+    flex-flow: wrap;
+    padding-bottom:50px;
+    background-image: url(https://ezzyinsurance.com/img/blackpattern4.png);
+    background-size: 200px;
+}
+
+.document-information{
+    width: 900px;
+    min-height: 500px;
+    border: 1px solid #c3c3c3;
+    margin-bottom: 20px;
+    padding: 20px;
+
+    font-size: 1.1em;
+    /* padding-top: 40px; */
+    text-align: justify;
+    background: #fff;
+    border-radius: 0px;
+    font-family: 'Montserrat',sans-serif;
+}
+
+.document-title{
+    width: 100%;
+    text-align: center;
+    margin-top: 0px;
+    color: #333;
+    font-family: 'Gabarito', sans-serif;
+    font-weight: normal;
+    text-transform: uppercase;
+    line-height: 17px;
+}
+
+.custom-info{
+    font-size: 1.4em;
+    text-align: left;
+    border: 1px solid #ddd;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.custom-info b{
+    font-weight: 500;
+}
+
+
+@media (max-width:800px) {
+    .document-title{
+        width: 100%;
+        font-size: 1.3em;
+        line-height: 24px;
+    }
+
+    .custom-info{
+        width: 107%;
+        margin-left: -10px;
+        font-size: 1em;
+    }
+        
+}
+
+button p{
+    margin: 0;
+}
+
+#firmar{
+    width: 180px;
+    height: 30px;
+    background-color: #88c361;
+    color: #fff;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-weight: bolder;
+    text-transform: uppercase;
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#firmar:hover{
+    background-color: #6b964e;
+}
+
+#clear{
+    width: 150px;
+    height: 30px;
+    background-color: #ff4747;
+    color: #fff;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-weight: bolder;
+    text-transform: uppercase;
+    font-size: 1.4em;
+}
+
+#clear:hover{
+    background-color: #c80202;
+}
+
+#undo{
+    width: 150px;
+    height: 30px;
+    background-color: #5ea4d3;
+    color: #fff;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-weight: bolder;
+    text-transform: uppercase;
+    font-size: 1.4em;
+}
+
+#undo:hover{
+    background-color: rgb(3, 92, 201);
+}
+
+
+@media (max-width:800px) {
+    #clear{
+        width: 320px;
+        height: 40px;
+
+        margin-bottom: 20px;
+    }
+
+    #firmar{
+        width: 320px;
+        height: 40px;
+    }
+
+    #undo{
+        width: 320px;
+        height: 40px;
+        margin-bottom: 20px;
+    }
+
+    #sign-here{
+        margin-top: -240px;
+    }
+}
+
+.container-loading{
+    background-color: white;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    z-index: 1;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 10px 10px rgba(0, 0, 0, 0.05);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+     /* LOADING SCREEN */
+  .spinner-box {
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0);
+    }
+    to{
+      transform: rotate(359deg);
+    }
+  }
+
+  /* ALTERNATING ORBITS */
+
+  .circle-border2 {
+    width: 120px;
+    height: 120px;
+    padding: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: #ffde17;
+    background: linear-gradient(0deg, rgb(255, 222, 23, 0.1) 33%, rgba(255, 222, 23, 1) 100%);
+    animation: spin .8s linear 0s infinite;
+  }
+
+  .circle-core2 {
+    width: 100%;
+    height: 100%;
+    background-color: #FFF;
+    border-radius: 50%;
+  }

@@ -5,22 +5,26 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 class VerifySessionToken
 {
     public function handle(Request $request, Closure $next)
     {
-        // Determinar qué tipo de usuario está autenticado
-        $guard = Auth::guard('web')->check() ? 'web' : (Auth::guard('sub')->check() ? 'sub' : null);
-        $user  = Auth::guard($guard)->user();
+        $guard = null;
 
-        // Si no hay usuario autenticado, continuar
+        if (Auth::guard('web')->check()) $guard = 'web';
+        elseif (Auth::guard('sub')->check()) $guard = 'sub';
+
+        if (!$guard) {
+            return $next($request);
+        }
+
+        $user = Auth::guard($guard)->user();
         if (!$user) {
             return $next($request);
         }
 
-        // Solo aplicar verificación estricta de token a usuarios "web"
+        // Solo "web" valida token estricto
         if ($guard === 'web') {
             $sessionToken = session('session_token');
 
@@ -35,7 +39,6 @@ class VerifySessionToken
             }
         }
 
-        // Si es sub_user, no aplicar verificación de token (evita bucle)
         return $next($request);
     }
 }

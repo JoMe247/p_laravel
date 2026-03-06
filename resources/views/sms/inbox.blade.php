@@ -337,7 +337,6 @@
     <script src="js/table.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/operations.js"></script>
-    <script src="js/inbox.js"></script>
 
     <script>
         window.smsLimitReached = {{ $isSmsOverLimit ? 'true' : 'false' }};

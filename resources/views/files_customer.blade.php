@@ -69,6 +69,12 @@
                                 </button>
 
                                 <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('estimates', $customer->ID) }}'">
+                                    <i class='bx bx-bar-chart-alt'></i>
+                                    <span>Estimates</span>
+                                </button>
+
+                                <button type="button" class="profile-menu-item"
                                     onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
                                     <i class='bx bx-task'></i>
                                     <span>Reminders</span>
@@ -85,10 +91,6 @@
                                     <span>Documents</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item">
-                                    <i class='bx bx-map'></i>
-                                    <span>Map</span>
-                                </button>
                             </nav>
                         </aside>
 

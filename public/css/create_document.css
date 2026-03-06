@@ -1,0 +1,328 @@
+.page-wrapper, .doc-controls, .suggest, .suggest-item, input, select, button {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.top-bar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.btn-back{
+  text-decoration:none;
+  padding:8px 10px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;
+}
+
+.page-title{
+  margin:0;
+  font-size:18px;
+}
+
+/* Controles arriba */
+.doc-controls{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+/* Customer search wrapper */
+.customer-search-wrap{
+  position:relative;
+}
+
+.customer-search-wrap .suggest{
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid rgba(0,0,0,.10) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.12) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.customer-search-wrap .suggest-item{
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0,0,0,.06) !important;
+}
+
+.customer-search-wrap .suggest-item:hover{
+  background: rgba(0,0,0,.04) !important;
+}
+
+.customer-search-wrap .si-title{
+  font-family: 'Montserrat', sans-serif;
+  color: #111827 !important;
+}
+
+.customer-search-wrap .si-sub{
+  font-family: 'Montserrat', sans-serif;
+  color: rgba(17,24,39,.70) !important;
+}
+
+.control{
+  height:38px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.15);
+  padding:0 12px;
+  background:transparent;
+  color:inherit;
+}
+
+.btn{
+  cursor:pointer;
+}
+
+.btn[disabled],
+.control[disabled]{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.primary{
+  border-color: rgba(0, 170, 255, .45);
+}
+
+.panel{
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:12px;
+  max-width:720px;
+}
+
+.panel-row{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:10px;
+  position:relative;
+}
+
+.panel-row input, .panel-row select{
+  height:38px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.15);
+  background:transparent;
+  color:inherit;
+  padding:0 12px;
+}
+
+.muted{ opacity:.7; }
+
+.hidden{ display:none !important; }
+
+/* Dropdown sugerencias */
+.suggest{
+  position:absolute;
+  top: 44px;
+  left:0;
+  right:0;
+  background:#0b1220;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  overflow:hidden;
+  z-index: 50;
+}
+
+
+.suggest-item{
+  padding:10px 12px;
+  cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+
+.suggest-item:hover{ background: rgba(255,255,255,.04); }
+.si-title{ font-size:13px; font-weight:600; }
+.si-sub{ font-size:12px; opacity:.75; margin-top:2px; }
+
+/* PDF centrado */
+.viewer-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-top: 8px;
+}
+
+#pdfViewer{
+  position:relative;
+  width: fit-content;
+}
+
+#pdfCanvas{
+  display:block;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+}
+
+/* Inputs overlay */
+#inputOverlay{
+  position:absolute;
+  inset:0;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* importante */
+}
+
+#inputOverlay input{
+  background-color: transparent;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:6px;
+  padding: 4px 6px;
+  width: 140px;
+  max-width: 200px;
+  pointer-events: auto; /* para poder escribir */
+}
+
+/* Controles debajo del PDF */
+.viewer-controls{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-top: 12px;
+}
+
+.btn.small{
+  height:34px;
+  padding:0 10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.15);
+  background:transparent;
+  color:inherit;
+}
+
+html, body{
+  height: 100%;
+}
+
+
+.page-wrapper{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewer-wrap{
+  flex: 1;
+  overflow: auto;          /* ✅ scroll aquí */
+  padding-bottom: 20px;
+}
+
+/* para que el PDF quede centrado dentro del scroll */
+.viewer-wrap{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ============================
+   ENABLE GLOBAL SCROLL
+   ============================ */
+
+html, body {
+    height: 100%;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+}
+
+/* Quitar restricciones heredadas */
+.page-wrapper {
+    min-height: 100vh;
+    overflow: visible !important;
+}
+
+/* Evitar que algún contenedor bloquee scroll */
+.viewer-wrap,
+#pdfViewer {
+    overflow: visible !important;
+}
+
+/* ==========
+   PAGER UI (copiado de templates/styles.css)
+   ========== */
+
+#pageInfoBar{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  font-style: italic;
+  color: #e90c56;
+  opacity: 0.7;
+}
+
+#paginasTotal, #paginaActual{
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#paginasTotal p, #paginaActual p{
+  font-weight: bolder;
+  margin: 0;
+  font-size: 1.2em;
+  font-family: Arial, sans-serif;
+}
+
+/* Contenedor de botones debajo del PDF */
+.overlay-controls{
+  display: flex;
+  flex-flow: wrap;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+/* Botones estilo template */
+.button-controls{
+  width: 75px;
+  height: 75px;
+  border-radius: 5px;
+  display: flex;
+  flex-flow: wrap;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  background-color: #fafafa;
+  box-shadow: 0 1px 1px rgb(218, 229, 255);
+  border: 1px solid #ddd;
+  transition: 0.3s;
+  margin: 0px 6px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.button-controls:not([disabled]){
+  background-color: #fff;
+}
+
+.button-controls:not([disabled]):hover{
+  background-color: #f5f5f5;
+  transform: scale(1.04);
+  cursor: pointer;
+}
+
+.button-controls:not([disabled]) i{
+  color: #e90c56;
+}
+
+.button-controls i{
+  width: 100%;
+  height: 25px;
+  font-size: 2.5em;
+  text-align: center;
+}
+
+.button-controls p{
+  width: 100%;
+  text-align: center;
+  margin-bottom: 5px;
+}

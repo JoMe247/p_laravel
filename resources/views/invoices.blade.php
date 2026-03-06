@@ -227,6 +227,17 @@
                 <div class="invoice-dates"
                     data-save-url="{{ route('invoices.dates.save', ['customerId' => $customerId]) }}">
 
+                    <!-- NEXT PAYMENT DATE -->
+                    <div class="date-row">
+                        <label class="date-label">Next Payment Date</label>
+
+                        <div class="date-input-wrap">
+                            <input type="date" id="nextPaymentDateInput" class="date-input"
+                                value="{{ $nextPyDate ?: now()->format('Y-m-d') }}">
+                            <span class="date-icon"></span>
+                        </div>
+                    </div>
+
                     <!-- CREATION DATE -->
                     <div class="date-row">
                         <label class="date-label">Creation Date</label>

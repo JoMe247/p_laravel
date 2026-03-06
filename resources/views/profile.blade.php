@@ -66,6 +66,12 @@
                                 </button>
 
                                 <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('estimates', $customer->ID) }}'">
+                                    <i class='bx bx-bar-chart-alt'></i>
+                                    <span>Estimates</span>
+                                </button>
+
+                                <button type="button" class="profile-menu-item"
                                     onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
                                     <i class='bx bx-task'></i>
                                     <span>Reminders</span>
@@ -82,10 +88,6 @@
                                     <span>Documents</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item">
-                                    <i class='bx bx-map'></i>
-                                    <span>Map</span>
-                                </button>
                             </nav>
                         </aside>
 
@@ -112,7 +114,10 @@
                             <h2 style="margin-bottom:15px;">Add Note</h2>
 
                             <label>Policy</label>
-                            <input type="text" id="note-policy">
+                            <select id="note-policy">
+                                <option value="">— Select policy —</option>
+                            </select>
+
 
                             <label>Subject</label>
                             <input type="text" id="note-subject">
@@ -169,12 +174,16 @@
                                 </form>
                             </div>
 
-                            <h2 class="profile-name">{{ $customer->Name }}</h2>
+                            <h2 class="profile-name" id="customer-name-edit" contenteditable="true"
+                                spellcheck="false">
+                                {{ $customer->Name }}
+                            </h2>
 
                             {{-- *** FORMULARIO ABIERTO AQUÍ *** --}}
                             <form id="profile-form" method="POST"
                                 action="{{ route('customers.update', $customer->ID) }}">
                                 @csrf
+                                <input type="hidden" name="Name" id="customer-name-input" value="{{ $customer->Name }}">
                                 @method('PUT')
 
                                 @php
@@ -295,13 +304,17 @@
 
                                         <div class="info-row">
                                             <label>Agent of Record</label>
-                                            <input type="text" name="Agent_of_Record"
-                                                value="{{ $customer->Agent_of_Record }}">
+                                            <span class="added-display">
+                                                {{ $customer->Agent_of_Record }}
+                                            </span>
                                         </div>
 
-                                        <div class="info-row">
+                                        <div class="info-row" style="display:block;">
+
                                             <label>Agency</label>
-                                            <input type="text" name="Agency" value="{{ $customer->Agency }}">
+                                            <span class="added-display">
+                                                {{ $customer->Agency }}
+                                            </span>
                                         </div>
 
                                         <div class="info-row">

@@ -16,7 +16,6 @@
 
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
 
-
     <link rel="stylesheet" href="{{ asset('css/calendar.css') }}">
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -35,12 +34,12 @@
         @include('menu')
 
         <section id="dash">
-            
+
             <!-- LEFT PANEL -->
             <div class="calendar-left-panel">
 
                 <a href="{{ route('schedules.index') }}" class="left-action-btn">
-                   <i class='bx bx-time-five'></i> Schedules
+                    <i class='bx bx-time-five'></i> Schedules
                 </a>
 
                 @php
@@ -106,14 +105,15 @@
                                 style="background: {{ $c }}"></div>
                         @endforeach
                     </div>
-                    <div class="public-box"> 
-                        <input type="checkbox" id="is-public"> 
-                        <label for="is-public">Public Event</label> 
+                    <div class="public-box">
+                        <input type="checkbox" id="is-public">
+                        <label for="is-public">Public Event</label>
                     </div>
-                    <div class="buttons"> 
-                        <button id="save-event" class="save-btn">Save</button> 
-                        <button id="delete-event" class="delete-btn" style="display:none;"><i class="bx bx-trash"></i></button> 
-                        <button id="close-overlay">Close</button> 
+                    <div class="buttons">
+                        <button id="save-event" class="save-btn">Save</button>
+                        <button id="delete-event" class="delete-btn" style="display:none;"><i
+                                class="bx bx-trash"></i></button>
+                        <button id="close-overlay">Close</button>
                     </div>
                 </div>
             </div>

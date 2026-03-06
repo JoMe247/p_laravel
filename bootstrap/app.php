@@ -11,9 +11,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+
+        // ✅ Alias correcto (protege de verdad)
         $middleware->alias([
-            'auth.multi' => \App\Http\Middleware\VerifySessionToken::class,
+            'auth.multi' => \App\Http\Middleware\RequireAuthMulti::class,
         ]);
+
+        // ✅ Web middlewares globales (orden importa)
         $middleware->web([
             \App\Http\Middleware\RememberMeMiddleware::class,
             \App\Http\Middleware\VerifySessionToken::class,

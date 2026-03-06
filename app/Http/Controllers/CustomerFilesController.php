@@ -12,6 +12,14 @@ class CustomerFilesController extends Controller
 {
     public function index($id)
     {
+
+        // Obtener usuario autenticado (funciona también con remember me)
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $customer = Customer::findOrFail($id);
 
         $files = FileCustomer::where('customer_id', $id)
