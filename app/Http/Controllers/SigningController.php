@@ -31,29 +31,37 @@ class SigningController extends Controller
         ]);
     }
 
-    public function pdf(string $short, int $docId)
-    {
-        $urlRow = DB::table('url')->where('short_url', $short)->first();
-        if (!$urlRow) abort(404);
+public function pdf(string $short, int $docId)
+{
+    $urlRow = DB::table('url')->where('short_url', $short)->first();
+    if (!$urlRow) abort(404);
 
-        $doc = DB::table('documents')->where('id', $docId)->first();
-        if (!$doc) abort(404);
+    $doc = DB::table('documents')->where('id', $docId)->first();
+    if (!$doc) abort(404);
 
-        if (trim((string)$doc->insured_name) !== trim((string)$urlRow->name)) {
-            abort(403);
-        }
-
-        // documents.path guarda algo como: private/customerdocs/...
-        $rel = str_replace('\\', '/', $doc->path);
-        $full = storage_path('app/' . ltrim($rel, '/'));
-
-        if (!file_exists($full)) abort(404);
-
-        return response()->file($full, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="document.pdf"',
-        ]);
+    // Seguridad: el doc debe corresponder al mismo customer
+    if (trim((string)$doc->insured_name) !== trim((string)$urlRow->name)) {
+        abort(403);
     }
+
+    // documents.path viene como: private/customerdocs/...
+    $rel = str_replace('\\', '/', (string)$doc->path);
+    $rel = ltrim($rel, '/'); // por si viene con /
+
+    // ✅ Verificar existencia con Storage (más confiable en Windows)
+    if (!Storage::disk('local')->exists($rel)) {
+        // Si quieres depurar rápido, descomenta:
+        // dd(['path_db' => $doc->path, 'rel' => $rel, 'full' => Storage::disk('local')->path($rel)]);
+        abort(404);
+    }
+
+    $full = Storage::disk('local')->path($rel);
+
+    return response()->file($full, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'inline; filename="document.pdf"',
+    ]);
+}
 
     public function saveSignature(Request $request, string $short, int $docId)
     {

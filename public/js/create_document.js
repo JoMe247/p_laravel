@@ -176,8 +176,6 @@ async function loadPDF(templateData) {
         totalPagesEl.textContent = totalPages;
         currentPageNumber = 1;
 
-      
-
         currentPageEl.textContent = currentPageNumber;
 
         // habilitar/deshabilitar igual que template
@@ -210,9 +208,16 @@ function saveInputChangesForCurrentPage() {
     inputFields.forEach((inputField) => {
         const idx = Number(inputField.dataset.overlayIndex);
         const overlay = overlayData[idx];
-        if (overlay && overlay.page === currentPageNumber) {
-            overlay.text = `{{${inputField.value}}}`;
-        }
+        if (!overlay || overlay.page !== currentPageNumber) return;
+
+        const placeholder = String(overlay.text || "")
+            .replace(/{{|}}/g, "")
+            .trim();
+
+        // ✅ No tocar DocCDate@
+        if (placeholder === "DocCDate@") return;
+
+        overlay.text = `{{${inputField.value}}}`;
     });
 }
 
@@ -241,41 +246,64 @@ async function renderPage(pageNumber, overlayDataParam) {
             overlay.text.includes("{{") &&
             overlay.text.includes("}}")
         ) {
-            const inputField = document.createElement("input");
-            inputField.type = "text";
-            inputField.value = overlay.text.replace(/{{|}}/g, "");
+            const placeholder = overlay.text.replace(/{{|}}/g, "").trim();
 
-            // Posición absoluta
-            inputField.style.position = "absolute";
-
-            // Escala visual real del canvas (si el canvas se ve diferente por CSS)
+            // Escala visual real del canvas (si cambia por CSS)
             const rect = canvas.getBoundingClientRect();
             const scaleX = rect.width / canvas.width;
             const scaleY = rect.height / canvas.height;
 
-            // Asegura overlay igual al canvas visible
             inputOverlay.style.width = rect.width + "px";
             inputOverlay.style.height = rect.height + "px";
 
-            // Coordenadas (guardadas como "sin escala" en template.js)
             let leftPx = overlay.x * scaleFactor * scaleX;
             let topPx = overlay.y * scaleFactor * scaleY;
 
-            // ✅ offset fino (el que preguntabas)
-            const OFFSET_Y = 2; // prueba 2 o 3
+            const OFFSET_Y = 2;
             topPx += OFFSET_Y;
 
-            // Clamp para que no se salgan
+            // Clamp (suave) para no salirse
             leftPx = Math.max(0, Math.min(leftPx, rect.width - 10));
             topPx = Math.max(0, Math.min(topPx, rect.height - 10));
 
+            // ✅ 1) DocCDate@ -> texto fijo (NO input)
+            if (placeholder === "DocCDate@") {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, "0");
+                const dd = String(now.getDate()).padStart(2, "0");
+                const dateText = `${yyyy}-${mm}-${dd}`;
+
+                const fixed = document.createElement("div");
+                fixed.textContent = dateText;
+
+                fixed.style.position = "absolute";
+                fixed.style.left = `${leftPx}px`;
+                fixed.style.top = `${topPx}px`;
+
+                fixed.style.pointerEvents = "none"; // ✅ no editable
+                fixed.style.background = "transparent";
+                fixed.style.border = "1px solid rgba(255,255,255,.22)";
+                fixed.style.borderRadius = "6px";
+                fixed.style.padding = "4px 6px";
+                fixed.style.fontSize = "14px";
+                fixed.style.whiteSpace = "nowrap";
+
+                inputOverlay.appendChild(fixed);
+                return; // ✅ importante: no crear input
+            }
+
+            // ✅ 2) resto de placeholders -> input normal
+            const inputField = document.createElement("input");
+            inputField.type = "text";
+            inputField.value = placeholder;
+
+            inputField.style.position = "absolute";
             inputField.style.left = `${leftPx}px`;
             inputField.style.top = `${topPx}px`;
 
-            inputField.dataset.placeholder = overlay.text;
-
-            inputOverlay.appendChild(inputField);
             inputField.dataset.overlayIndex = String(index);
+            inputOverlay.appendChild(inputField);
         }
     });
 }
@@ -444,9 +472,23 @@ async function savePDFToServer() {
         if (!page) return;
 
         const { height } = page.getSize();
-        const inputValue = String(overlay.text || "").replace(/{{|}}/g, "");
 
-        page.drawText(inputValue, {
+        const placeholder = String(overlay.text || "")
+            .replace(/{{|}}/g, "")
+            .trim();
+
+        // ✅ DocCDate@ -> fecha actual automática
+        let textToDraw = placeholder;
+
+        if (placeholder === "DocCDate@") {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, "0");
+            const dd = String(now.getDate()).padStart(2, "0");
+            textToDraw = `${yyyy}-${mm}-${dd}`;
+        }
+
+        page.drawText(textToDraw, {
             x: overlay.x,
             y: height - overlay.y - 20,
             size: 20,
@@ -465,6 +507,13 @@ async function savePDFToServer() {
     formData.append("pdf", blob, `document_${Date.now()}.pdf`);
     const phone = selectedCustomer?.Phone || selectedCustomer?.Phone2 || "";
     formData.append("customer_phone", phone);
+
+    const email =
+        (selectedCustomer?.Email1 && String(selectedCustomer.Email1).trim()) ||
+        (selectedCustomer?.Email2 && String(selectedCustomer.Email2).trim()) ||
+        "";
+
+    formData.append("customer_email", email);
 
     // type: define un número fijo o un select si quieres
     // por ahora lo dejo como 1 (ajústalo según tu lógica)
