@@ -311,7 +311,20 @@
                 // a sistema PDF (origen abajo-izquierda)
                 const pdfY = pageHeight - y - height;
 
-                // 5) Dibujar firma en el PDF
+                // ✅ 5) Tapar el texto DocSign@ con un rectángulo blanco
+                const clearPadX = 12;
+                const clearPadY = 8;
+
+                page.drawRectangle({
+                    x: x - clearPadX,
+                    y: pdfY - clearPadY,
+                    width: width + (clearPadX * 2),
+                    height: height + (clearPadY * 2),
+                    color: PDFLib.rgb(1, 1, 1),
+                    borderWidth: 0,
+                });
+
+                // ✅ 6) Dibujar firma en el PDF
                 page.drawImage(pngImage, {
                     x,
                     y: pdfY,
