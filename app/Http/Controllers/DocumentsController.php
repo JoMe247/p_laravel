@@ -178,9 +178,10 @@ class DocumentsController extends Controller
 
     $shortUrl = $this->generateUniqueShortUrl(8);
     $rand6    = $this->generateRand6();
+    $hash = md5($shortUrl);
 
     $originalUrl = url("/sign/{$shortUrl}/{$documentId}");
-
+    
     DB::table('url')->insert([
         'name'         => $customerName,
         'type'         => (int)$request->doc_type,
@@ -193,6 +194,7 @@ class DocumentsController extends Controller
         'date'         => now()->toDateString(),
         'time'         => now()->format('H:i:s'),
         'rand'         => $rand6,
+        'hash'         => $hash,
     ]);
 
     $publicShortLink = url('/s/' . $shortUrl);
