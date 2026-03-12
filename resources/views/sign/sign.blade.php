@@ -234,6 +234,63 @@
             }
         }
 
+
+        function getTrimmedSignatureDataUrl() {
+            const srcCanvas = canvas;
+            const srcCtx = srcCanvas.getContext('2d', {
+                willReadFrequently: true
+            });
+
+            const w = srcCanvas.width;
+            const h = srcCanvas.height;
+            const imageData = srcCtx.getImageData(0, 0, w, h).data;
+
+            let minX = w;
+            let minY = h;
+            let maxX = -1;
+            let maxY = -1;
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const alpha = imageData[(y * w + x) * 4 + 3];
+                    if (alpha > 0) {
+                        if (x < minX) minX = x;
+                        if (y < minY) minY = y;
+                        if (x > maxX) maxX = x;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+
+            // respaldo por seguridad
+            if (maxX === -1 || maxY === -1) {
+                return signaturePad.toDataURL('image/png');
+            }
+
+            const pad = 6; // pequeño margen extra
+            minX = Math.max(0, minX - pad);
+            minY = Math.max(0, minY - pad);
+            maxX = Math.min(w - 1, maxX + pad);
+            maxY = Math.min(h - 1, maxY + pad);
+
+            const cropWidth = maxX - minX + 1;
+            const cropHeight = maxY - minY + 1;
+
+            const croppedCanvas = document.createElement('canvas');
+            croppedCanvas.width = cropWidth;
+            croppedCanvas.height = cropHeight;
+
+            const croppedCtx = croppedCanvas.getContext('2d');
+            croppedCtx.drawImage(
+                srcCanvas,
+                minX, minY, cropWidth, cropHeight,
+                0, 0, cropWidth, cropHeight
+            );
+
+            return croppedCanvas.toDataURL('image/png');
+        }
+
+
         // ✅ ocultar "SIGN HERE" al primer toque/click en el canvas (100% confiable)
         canvas.addEventListener('pointerdown', hideSignHere, {
             passive: true
@@ -287,9 +344,9 @@
                 // 2) Cargar PDF con pdf-lib
                 const pdfDocLib = await PDFLib.PDFDocument.load(existingPdfBytes);
 
-                // 3) Cargar firma PNG desde el canvas
-                const imgBase64 = signaturePad.toDataURL('image/png');
-                const pngImage = await pdfDocLib.embedPng(imgBase64);
+                // 3) Cargar firma PNG recortada (sin tanto espacio transparente)
+                const trimmedImgBase64 = getTrimmedSignatureDataUrl();
+                const pngImage = await pdfDocLib.embedPng(trimmedImgBase64);
 
                 // 4) Página objetivo
                 const targetPageIndex = Math.max(0, (docsignOverlay.page || 1) - 1);
@@ -302,34 +359,62 @@
 
                 const pageHeight = page.getHeight();
 
-                const x = Number(docsignOverlay.x || 0);
-                const y = Number(docsignOverlay.y || 0);
-                const width = Number(docsignOverlay.width || 160);
-                const height = Number(docsignOverlay.height || 55);
+                // Área base de DocSign@
+                // ESTA sigue viniendo del controller y sirve como referencia del centro
+                const baseX = Number(docsignOverlay.x || 0);
+                const baseY = Number(docsignOverlay.y || 0);
+                const baseWidth = Number(docsignOverlay.width || 160);
+                const baseHeight = Number(docsignOverlay.height || 55);
 
-                // Convertir Y desde sistema tipo canvas (origen arriba-izquierda)
-                // a sistema PDF (origen abajo-izquierda)
-                const pdfY = pageHeight - y - height;
+                // Convertir Y desde canvas (arriba-izquierda) a PDF (abajo-izquierda)
+                const basePdfY = pageHeight - baseY - baseHeight;
 
-                // ✅ 5) Tapar el texto DocSign@ con un rectángulo blanco
+                // ✅ 5) Rectángulo blanco independiente para tapar DocSign@
+                // Este ya NO controla el tamaño de la firma
                 const clearPadX = 12;
                 const clearPadY = 8;
 
                 page.drawRectangle({
-                    x: x - clearPadX,
-                    y: pdfY - clearPadY,
-                    width: width + (clearPadX * 2),
-                    height: height + (clearPadY * 2),
+                    x: baseX - clearPadX,
+                    y: basePdfY - clearPadY,
+                    width: baseWidth + (clearPadX * 2),
+                    height: baseHeight + (clearPadY * 2),
                     color: PDFLib.rgb(1, 1, 1),
                     borderWidth: 0,
                 });
 
-                // ✅ 6) Dibujar firma en el PDF
+                // ✅ 6) Tamaño SOLO de la firma
+                // Cambia este valor para hacerla más grande o más chica
+                const signatureScale = 1.20;
+
+                // Caja objetivo de firma, centrada sobre DocSign@
+                const targetBoxWidth = baseWidth * signatureScale;
+                const targetBoxHeight = baseHeight * signatureScale;
+
+                const targetBoxX = baseX - ((targetBoxWidth - baseWidth) / 2);
+                const targetBoxY = basePdfY - ((targetBoxHeight - baseHeight) / 2);
+
+                // Mantener proporción real de la firma recortada
+                const imgAspect = pngImage.width / pngImage.height;
+
+                let drawWidth = targetBoxWidth;
+                let drawHeight = drawWidth / imgAspect;
+
+                if (drawHeight > targetBoxHeight) {
+                    drawHeight = targetBoxHeight;
+                    drawWidth = drawHeight * imgAspect;
+                }
+
+                // Centrar la firma dentro de la caja objetivo
+                const drawX = targetBoxX + ((targetBoxWidth - drawWidth) / 2);
+                const drawY = targetBoxY + ((targetBoxHeight - drawHeight) / 2);
+
+                // Dibujar firma
                 page.drawImage(pngImage, {
-                    x,
-                    y: pdfY,
-                    width,
-                    height
+                    x: drawX,
+                    y: drawY,
+                    width: drawWidth,
+                    height: drawHeight
                 });
 
                 // 6) Generar PDF final
