@@ -448,6 +448,114 @@ function hideSuggest(el) {
     el.innerHTML = "";
 }
 
+function getBitsLabel() {
+    return /WOW64|Win64|x64|amd64/i.test(navigator.userAgent)
+        ? " (64 Bits)"
+        : " (32 Bits)";
+}
+
+function getAgentDeviceInfo() {
+    let gpuInfo = "";
+    try {
+        gpuInfo =
+            typeof getVideoCardInfo === "function"
+                ? JSON.stringify(getVideoCardInfo())
+                : "";
+    } catch (e) {
+        gpuInfo = "";
+    }
+
+    const browserName =
+        typeof browser !== "undefined"
+            ? browser
+            : window.browserInfo?.browser || "";
+
+    const osName =
+        `${window.browserInfo?.os || ""} ${window.browserInfo?.osVersion || ""}${getBitsLabel()}`.trim();
+
+    return {
+        browser_agent: browserName || "",
+        os_agent: osName || "",
+        dName_agent: `${(window.navigator.userAgent || "").toLowerCase()}${gpuInfo}`,
+        device_agent: window.browserInfo?.mobile
+            ? "Mobile Device"
+            : "Desktop Device",
+    };
+}
+
+function getAgentCoordinates() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            resolve("");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                resolve(
+                    `${position.coords.latitude},${position.coords.longitude}`,
+                );
+            },
+            () => resolve(""),
+            {
+                enableHighAccuracy: true,
+                timeout: 8000,
+                maximumAge: 0,
+            },
+        );
+    });
+}
+
+async function getIpLocationInfo() {
+    const out = {
+        ip: "",
+        city: "",
+        country: "",
+        region: "",
+        coords: "",
+    };
+
+    try {
+        const res = await fetch("https://ipinfo.io/json?token=TU_TOKEN_AQUI");
+        const json = await res.json();
+
+        out.ip = json.ip || "";
+        out.city = json.city || "";
+        out.country = json.country || "";
+        out.region = json.region || "";
+        out.coords = json.loc || "";
+    } catch (e) {
+        console.warn("No se pudo obtener ipinfo:", e);
+    }
+
+    try {
+        if (navigator.geolocation) {
+            const coords = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve(
+                            `${position.coords.latitude},${position.coords.longitude}`,
+                        );
+                    },
+                    reject,
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 8000,
+                        maximumAge: 0,
+                    },
+                );
+            });
+
+            if (coords) {
+                out.coords = coords;
+            }
+        }
+    } catch (e) {
+        console.warn("No se dieron permisos de ubicación:", e);
+    }
+
+    return out;
+}
 // ---------------------------
 // Save PDF (pdf-lib) + upload Laravel
 // ---------------------------
@@ -496,7 +604,9 @@ async function savePDFToServer() {
         });
     });
 
-    const modifiedPdfBytes = await pdfDocWithText.save();
+    const modifiedPdfBytes = await pdfDocWithText.save({
+        useObjectStreams: false,
+    });
     const blob = new Blob([modifiedPdfBytes], { type: "application/pdf" });
 
     const formData = new FormData();
@@ -505,6 +615,7 @@ async function savePDFToServer() {
     formData.append("customer_name", selectedCustomer.Name || "");
     formData.append("policy_number", selectedPolicyNumber || "");
     formData.append("pdf", blob, `document_${Date.now()}.pdf`);
+
     const phone = selectedCustomer?.Phone || selectedCustomer?.Phone2 || "";
     formData.append("customer_phone", phone);
 
@@ -514,6 +625,21 @@ async function savePDFToServer() {
         "";
 
     formData.append("customer_email", email);
+
+    const agentInfo = getAgentDeviceInfo();
+    const geoInfo = await getIpLocationInfo();
+    const agentCoordinates = geoInfo.coords || (await getAgentCoordinates());
+
+    formData.append("browser_agent", agentInfo.browser_agent);
+    formData.append("os_agent", agentInfo.os_agent);
+    formData.append("dName_agent", agentInfo.dName_agent);
+    formData.append("device_agent", agentInfo.device_agent);
+
+    formData.append("ip_agent", geoInfo.ip || "");
+    formData.append("city_agent", geoInfo.city || "");
+    formData.append("country_agent", geoInfo.country || "");
+    formData.append("agent_region", geoInfo.region || "");
+    formData.append("coordinates_agent", agentCoordinates || "");
 
     // type: define un número fijo o un select si quieres
     // por ahora lo dejo como 1 (ajústalo según tu lógica)

@@ -100,7 +100,7 @@
         };
         window.BASE_URL = "{{ url('/') }}";
     </script>
-
+    <script src="{{ asset('js/device.js') }}"></script>
     <script src="{{ asset('js/create_document.js') }}"></script>
 </body>
 

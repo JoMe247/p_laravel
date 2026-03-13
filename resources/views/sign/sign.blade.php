@@ -70,6 +70,7 @@
     </div>
 
     {{-- ✅ Copia signature_pad.umd.js a public/js --}}
+    <script src="{{ asset('js/device.js') }}"></script>
     <script src="{{ asset('js/signature_pad.umd.js') }}"></script>
     <script src="{{ asset('js/pdfjs/pdf.min.js') }}"></script>
     <script src="{{ asset('js/vendor/pdf-lib.min.js') }}"></script>
@@ -105,6 +106,109 @@
 
 
         const signHere = document.getElementById("sign-here");
+
+        function getBitsLabel() {
+            return /WOW64|Win64|x64|amd64/i.test(navigator.userAgent) ?
+                " (64 Bits)" :
+                " (32 Bits)";
+        }
+
+        function getClientDeviceInfo() {
+            let gpuInfo = "";
+            try {
+                gpuInfo = typeof getVideoCardInfo === "function" ?
+                    JSON.stringify(getVideoCardInfo()) :
+                    "";
+            } catch (e) {
+                gpuInfo = "";
+            }
+
+            const browserName =
+                typeof browser !== "undefined" ?
+                browser :
+                (window.browserInfo?.browser || "");
+
+            const osName = `${window.browserInfo?.os || ""} ${window.browserInfo?.osVersion || ""}${getBitsLabel()}`.trim();
+
+            return {
+                browser_client: browserName || "",
+                os_client: osName || "",
+                dName_client: `${(window.navigator.userAgent || "").toLowerCase()}${gpuInfo}`,
+                device_client: window.browserInfo?.mobile ? "Mobile Device" : "Desktop Device",
+            };
+        }
+
+        function getClientCoordinates() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    resolve("");
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve(
+                            `${position.coords.latitude},${position.coords.longitude}`
+                        );
+                    },
+                    () => resolve(""), {
+                        enableHighAccuracy: true,
+                        timeout: 8000,
+                        maximumAge: 0,
+                    }
+                );
+            });
+        }
+
+        async function getClientIpLocationInfo() {
+            const out = {
+                ip: "",
+                city: "",
+                country: "",
+                region: "",
+                coords: "",
+            };
+
+            try {
+                const res = await fetch("https://ipinfo.io/json?token=TU_TOKEN_AQUI");
+                const json = await res.json();
+
+                out.ip = json.ip || "";
+                out.city = json.city || "";
+                out.country = json.country || "";
+                out.region = json.region || "";
+                out.coords = json.loc || "";
+            } catch (e) {
+                console.warn("No se pudo obtener ipinfo client:", e);
+            }
+
+            try {
+                if (navigator.geolocation) {
+                    const coords = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                resolve(
+                                    `${position.coords.latitude},${position.coords.longitude}`
+                                );
+                            },
+                            reject, {
+                                enableHighAccuracy: true,
+                                timeout: 8000,
+                                maximumAge: 0,
+                            }
+                        );
+                    });
+
+                    if (coords) {
+                        out.coords = coords;
+                    }
+                }
+            } catch (e) {
+                console.warn("No se dieron permisos de ubicación client:", e);
+            }
+
+            return out;
+        }
 
         prevPageBtn.disabled = true;
         nextPageBtn.disabled = true;
@@ -347,6 +451,9 @@
                 // 3) Cargar firma PNG recortada (sin tanto espacio transparente)
                 const trimmedImgBase64 = getTrimmedSignatureDataUrl();
                 const pngImage = await pdfDocLib.embedPng(trimmedImgBase64);
+                const clientInfo = getClientDeviceInfo();
+                const clientGeo = await getClientIpLocationInfo();
+                const clientCoordinates = clientGeo.coords || await getClientCoordinates();
 
                 // 4) Página objetivo
                 const targetPageIndex = Math.max(0, (docsignOverlay.page || 1) - 1);
@@ -418,7 +525,9 @@
                 });
 
                 // 6) Generar PDF final
-                const signedPdfBytes = await pdfDocLib.save();
+                const signedPdfBytes = await pdfDocLib.save({
+                    useObjectStreams: false
+                });
 
                 // 7) Enviar PDF final al backend
                 const formData = new FormData();
@@ -427,26 +536,46 @@
                 });
                 formData.append('pdf', blob, 'signed-document.pdf');
 
+                formData.append('signature_data', trimmedImgBase64);
+                formData.append('browser_client', clientInfo.browser_client);
+                formData.append('os_client', clientInfo.os_client);
+                formData.append('dName_client', clientInfo.dName_client);
+                formData.append('device_client', clientInfo.device_client);
+                formData.append('coordinates_client', clientCoordinates);
+                
+                formData.append('ip_client', clientGeo.ip || '');
+                formData.append('city_client', clientGeo.city || '');
+                formData.append('country_client', clientGeo.country || '');
+                formData.append('client_region', clientGeo.region || '');
+
                 const res = await fetch(@json(route('sign.signature', ['short' => $short, 'docId' => $docId])), {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': csrf
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json'
                     },
                     body: formData
                 });
 
-                const data = await res.json();
+                const rawText = await res.text();
+
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (err) {
+                    console.error('Respuesta no JSON:', rawText);
+                    throw new Error('El servidor devolvió HTML en lugar de JSON.');
+                }
 
                 document.getElementById('ok-loading').style.display = 'none';
 
-                if (!data.ok) {
-                    alert(data.error || 'Error guardando PDF firmado');
+                if (!res.ok || !data.ok) {
+                    alert(data.detail || data.error || 'Error guardando PDF firmado');
                     return;
                 }
 
                 alert('PDF firmado guardado correctamente.');
 
-                // refrescar preview
                 pdfDoc = null;
                 await loadPdfPreview();
 
