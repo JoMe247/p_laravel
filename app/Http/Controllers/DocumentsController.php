@@ -258,6 +258,7 @@ class DocumentsController extends Controller
                 'os_agent' => substr((string) ($request->os_agent ?? ''), 0, 50),
                 'dName_agent' => substr((string) ($request->dName_agent ?? ''), 0, 260),
                 'coordinates_agent' => substr((string) ($request->coordinates_agent ?? ''), 0, 80),
+                'agent_region' => substr((string) ($request->agent_region ?? ''), 0, 120),
 
                 'last_seen' => '',
                 'status' => 'Pending',

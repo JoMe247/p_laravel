@@ -78,22 +78,20 @@ class SigningController extends Controller
             return response()->json(['ok' => false, 'error' => 'Forbidden'], 403);
         }
 
-        $request->validate([
-            'pdf' => 'required|file|mimes:pdf|max:20480',
-            'signature_data' => 'required|string',
-            'browser_client' => 'nullable|string',
-            'os_client' => 'nullable|string',
-            'dName_client' => 'nullable|string',
-            'device_client' => 'nullable|string',
-            'coordinates_client' => 'nullable|string',
-
-            // info ip
-            'ip_client' => 'nullable|string',
-            'city_client' => 'nullable|string',
-            'country_client' => 'nullable|string',
-            'client_region' => 'nullable|string',
-        ]);
-
+      $request->validate([
+    'pdf' => 'required|file|mimes:pdf|max:20480',
+    'signature_data' => 'required|string',
+    'browser_client' => 'nullable|string',
+    'os_client' => 'nullable|string',
+    'dName_client' => 'nullable|string',
+    'device_client' => 'nullable|string',
+    'coordinates_client' => 'nullable|string',
+    // info ip
+    'ip_client' => 'nullable|string',
+    'city_client' => 'nullable|string',
+    'country_client' => 'nullable|string',
+    'client_region' => 'nullable|string',
+]);
         $relativePdfPath = ltrim(str_replace('\\', '/', (string) $doc->path), '/');
 
         if (!Storage::disk('local')->exists($relativePdfPath)) {
@@ -126,15 +124,15 @@ class SigningController extends Controller
                 'date_2' => now()->toDateString(),
                 'time_2' => now()->format('H:i:s'),
 
-                'city_client' => substr((string) ($request->city_client ?? $geo['city'] ?? ''), 0, 50),
-                'country_client' => substr((string) ($request->country_client ?? $geo['country'] ?? ''), 0, 80),
-                'client_region' => substr((string) ($request->client_region ?? $geo['region'] ?? ''), 0, 120),
-                'ip_client' => substr((string) ($request->ip_client ?? $request->ip() ?? ''), 0, 80),
-                'device_client' => substr((string) ($request->device_client ?? ''), 0, 120),
-                'browser_client' => substr((string) ($request->browser_client ?? ''), 0, 150),
-                'os_client' => substr((string) ($request->os_client ?? ''), 0, 50),
-                'dName_client' => substr((string) ($request->dName_client ?? ''), 0, 260),
-                'coordinates_client' => substr((string) ($request->coordinates_client ?? ''), 0, 100),
+              'city_client' => substr((string) ($request->city_client ?? ''), 0, 50),
+'country_client' => substr((string) ($request->country_client ?? ''), 0, 80),
+'client_region' => substr((string) ($request->client_region ?? ''), 0, 120),
+'ip_client' => substr((string) ($request->ip_client ?? $request->ip() ?? ''), 0, 80),
+'device_client' => substr((string) ($request->device_client ?? ''), 0, 120),
+'browser_client' => substr((string) ($request->browser_client ?? ''), 0, 150),
+'os_client' => substr((string) ($request->os_client ?? ''), 0, 50),
+'dName_client' => substr((string) ($request->dName_client ?? ''), 0, 260),
+'coordinates_client' => substr((string) ($request->coordinates_client ?? ''), 0, 100),
 
                 'last_seen' => now()->format('m/d/Y \a\t H:i:s'),
                 'status' => 'Completed',

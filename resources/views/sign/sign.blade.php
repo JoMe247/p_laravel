@@ -79,6 +79,10 @@
     </script>
 
     <script>
+        window.IPINFO_TOKEN = @json(config('services.ipinfo.token'));
+    </script>
+
+    <script>
         const pdfUrlBase = @json(route('sign.pdf', ['short' => $short, 'docId' => $docId]));
         const docsignOverlay = @json($docsignOverlay);
 
@@ -160,55 +164,6 @@
             });
         }
 
-        async function getClientIpLocationInfo() {
-            const out = {
-                ip: "",
-                city: "",
-                country: "",
-                region: "",
-                coords: "",
-            };
-
-            try {
-                const res = await fetch("https://ipinfo.io/json?token=TU_TOKEN_AQUI");
-                const json = await res.json();
-
-                out.ip = json.ip || "";
-                out.city = json.city || "";
-                out.country = json.country || "";
-                out.region = json.region || "";
-                out.coords = json.loc || "";
-            } catch (e) {
-                console.warn("No se pudo obtener ipinfo client:", e);
-            }
-
-            try {
-                if (navigator.geolocation) {
-                    const coords = await new Promise((resolve, reject) => {
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                                resolve(
-                                    `${position.coords.latitude},${position.coords.longitude}`
-                                );
-                            },
-                            reject, {
-                                enableHighAccuracy: true,
-                                timeout: 8000,
-                                maximumAge: 0,
-                            }
-                        );
-                    });
-
-                    if (coords) {
-                        out.coords = coords;
-                    }
-                }
-            } catch (e) {
-                console.warn("No se dieron permisos de ubicación client:", e);
-            }
-
-            return out;
-        }
 
         prevPageBtn.disabled = true;
         nextPageBtn.disabled = true;
@@ -339,6 +294,92 @@
         }
 
 
+        function getPublicIpFromL2() {
+            return new Promise((resolve) => {
+                const varName = "userip_" + Date.now();
+
+                const script = document.createElement("script");
+                script.src = `https://l2.io/ip.js?var=${varName}`;
+
+                script.onload = function() {
+                    const ip = window[varName] || "";
+                    try {
+                        delete window[varName];
+                    } catch (e) {}
+                    script.remove();
+                    resolve(ip);
+                };
+
+                script.onerror = function() {
+                    try {
+                        delete window[varName];
+                    } catch (e) {}
+                    script.remove();
+                    resolve("");
+                };
+
+                document.body.appendChild(script);
+            });
+        }
+
+        async function getClientIpInfoLegacy() {
+            const out = {
+                ip: "",
+                city: "",
+                country: "",
+                region: "",
+                coords: "",
+            };
+
+            try {
+                const publicIp = await getPublicIpFromL2();
+                out.ip = publicIp || "";
+
+                if (!publicIp) {
+                    return out;
+                }
+
+                const res = await fetch(`https://ipinfo.io/${publicIp}?token=${encodeURIComponent(window.IPINFO_TOKEN)}`);
+                const json = await res.json();
+
+                out.ip = json.ip || publicIp || "";
+                out.city = json.city || "";
+                out.country = json.country || "";
+                out.region = json.region || "";
+                out.coords = json.loc || "";
+                
+                console.log("coords ipinfo:", out.coords);
+            } catch (e) {
+                console.warn("No se pudo obtener ipinfo client:", e);
+            }
+
+            try {
+                if (navigator.geolocation) {
+                    const coords = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                resolve(`${position.coords.latitude},${position.coords.longitude}`);
+                            },
+                            reject, {
+                                enableHighAccuracy: true,
+                                timeout: 8000,
+                                maximumAge: 0,
+                            }
+                        );
+                    });
+
+                    if (coords) {
+                        console.log("coords navegador:", coords);
+                        out.coords = coords;
+                    }
+                }
+            } catch (e) {
+                console.warn("Ubicación del navegador no disponible:", e);
+            }
+
+            return out;
+        }
+
         function getTrimmedSignatureDataUrl() {
             const srcCanvas = canvas;
             const srcCtx = srcCanvas.getContext('2d', {
@@ -452,8 +493,9 @@
                 const trimmedImgBase64 = getTrimmedSignatureDataUrl();
                 const pngImage = await pdfDocLib.embedPng(trimmedImgBase64);
                 const clientInfo = getClientDeviceInfo();
-                const clientGeo = await getClientIpLocationInfo();
-                const clientCoordinates = clientGeo.coords || await getClientCoordinates();
+                const clientGeo = await getClientIpInfoLegacy();
+                console.log('clientGeo', clientGeo);
+                const clientCoordinates = clientGeo.coords;
 
                 // 4) Página objetivo
                 const targetPageIndex = Math.max(0, (docsignOverlay.page || 1) - 1);
@@ -541,8 +583,8 @@
                 formData.append('os_client', clientInfo.os_client);
                 formData.append('dName_client', clientInfo.dName_client);
                 formData.append('device_client', clientInfo.device_client);
-                formData.append('coordinates_client', clientCoordinates);
-                
+                formData.append('coordinates_client', clientCoordinates || '');
+
                 formData.append('ip_client', clientGeo.ip || '');
                 formData.append('city_client', clientGeo.city || '');
                 formData.append('country_client', clientGeo.country || '');

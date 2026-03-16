@@ -506,7 +506,35 @@ function getAgentCoordinates() {
     });
 }
 
-async function getIpLocationInfo() {
+function getPublicIpFromL2() {
+    return new Promise((resolve) => {
+        const varName = "userip_" + Date.now();
+
+        const script = document.createElement("script");
+        script.src = `https://l2.io/ip.js?var=${varName}`;
+
+        script.onload = function () {
+            const ip = window[varName] || "";
+            try {
+                delete window[varName];
+            } catch (e) {}
+            script.remove();
+            resolve(ip);
+        };
+
+        script.onerror = function () {
+            try {
+                delete window[varName];
+            } catch (e) {}
+            script.remove();
+            resolve("");
+        };
+
+        document.body.appendChild(script);
+    });
+}
+
+async function getAgentIpInfoLegacy() {
     const out = {
         ip: "",
         city: "",
@@ -516,16 +544,25 @@ async function getIpLocationInfo() {
     };
 
     try {
-        const res = await fetch("https://ipinfo.io/json?token=TU_TOKEN_AQUI");
+        const publicIp = await getPublicIpFromL2();
+        out.ip = publicIp || "";
+
+        if (!publicIp) {
+            return out;
+        }
+
+        const res = await fetch(
+            `https://ipinfo.io/${publicIp}?token=${encodeURIComponent(window.IPINFO_TOKEN)}`,
+        );
         const json = await res.json();
 
-        out.ip = json.ip || "";
+        out.ip = json.ip || publicIp || "";
         out.city = json.city || "";
         out.country = json.country || "";
         out.region = json.region || "";
         out.coords = json.loc || "";
     } catch (e) {
-        console.warn("No se pudo obtener ipinfo:", e);
+        console.warn("No se pudo obtener ipinfo agent:", e);
     }
 
     try {
@@ -551,7 +588,7 @@ async function getIpLocationInfo() {
             }
         }
     } catch (e) {
-        console.warn("No se dieron permisos de ubicación:", e);
+        console.warn("Ubicación del agent no disponible:", e);
     }
 
     return out;
@@ -627,7 +664,7 @@ async function savePDFToServer() {
     formData.append("customer_email", email);
 
     const agentInfo = getAgentDeviceInfo();
-    const geoInfo = await getIpLocationInfo();
+    const geoInfo = await getAgentIpInfoLegacy();
     const agentCoordinates = geoInfo.coords || (await getAgentCoordinates());
 
     formData.append("browser_agent", agentInfo.browser_agent);

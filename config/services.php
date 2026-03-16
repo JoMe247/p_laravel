@@ -41,5 +41,9 @@ return [
         'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
     ],
 
+    'ipinfo' => [
+    'token' => env('IPINFO_TOKEN'),
+    ],
+
 
 ];

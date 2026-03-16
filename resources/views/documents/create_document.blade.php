@@ -100,6 +100,10 @@
         };
         window.BASE_URL = "{{ url('/') }}";
     </script>
+
+    <script>
+        window.IPINFO_TOKEN = @json(config('services.ipinfo.token'));
+    </script>
     <script src="{{ asset('js/device.js') }}"></script>
     <script src="{{ asset('js/create_document.js') }}"></script>
 </body>
