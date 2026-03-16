@@ -250,7 +250,7 @@ class SigningController extends Controller
 {
     $agentInfo = $this->resolveAgentInfo((string) ($urlRow->created_by ?? ''));
 
-    $logoPath = public_path('storage/agency_logos/agency_logo_DOC-00001.png');
+    $logoPath = public_path('img/logo.png');
     $logoBase64 = file_exists($logoPath)
         ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
         : '';
@@ -448,18 +448,10 @@ class SigningController extends Controller
             </table>
 
             <h3>Holder Agent Information</h3>
-            <table class="grid two-col">
-                <tr>
-                    <td>
-                        <div class="row">Agent Name: ' . e((string) $agentInfo['name']) . '</div>
-                    </td>
-                    <td>
-                        <div class="row">Agent Email: ' . e((string) $agentInfo['email']) . '</div>
-                    </td>
-                </tr>
-            </table>
-
+            
+            <div class="row">Agent Name: ' . e((string) $agentInfo['name']) . '</div>
             <div class="row">Agent User: ' . e((string) $signing->agent) . '</div>
+            <div class="row">Agent Email: ' . e((string) $agentInfo['email']) . '</div>
             <div class="row">Agent Country: ' . e((string) $signing->country_agent) . '</div>
             <div class="row">Agent City: ' . e((string) $signing->city_agent) . '</div>
             <div class="row">Agent Region: ' . e((string) $signing->agent_region) . '</div>
