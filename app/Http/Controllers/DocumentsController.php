@@ -197,19 +197,20 @@ class DocumentsController extends Controller
             DB::beginTransaction();
 
             $documentId = DB::table('documents')->insertGetId([
-                'type' => (int) $request->doc_type,
-                'template_id' => (int) $request->template_id,
-                'policy_number' => $request->policy_number ?? 'N/A',
-                'insured_name' => $customerName,
-                'phone' => $request->customer_phone,
-                'email' => $request->customer_email ?? '',
-                'user' => $createdBy,
-                'date' => now()->toDateString(),
-                'time' => now()->format('H:i:s'),
-                'path' => $storedPath,
-                'docsign_overlay' => $docSignOverlay ? json_encode($docSignOverlay) : null,
-                'signed' => 0,
-            ]);
+    'type' => (int) $request->doc_type,
+    'template_id' => (int) $request->template_id,
+    'policy_number' => $request->policy_number ?? 'N/A',
+    'id_customer' => $customerId,
+    'insured_name' => $customerName,
+    'phone' => $request->customer_phone,
+    'email' => $request->customer_email ?? '',
+    'user' => $createdBy,
+    'date' => now()->toDateString(),
+    'time' => now()->format('H:i:s'),
+    'path' => $storedPath,
+    'docsign_overlay' => $docSignOverlay ? json_encode($docSignOverlay) : null,
+    'signed' => 0, 
+                ]);
 
             $originalUrl = url("/sign/{$shortUrl}/{$documentId}");
 
