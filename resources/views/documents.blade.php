@@ -93,32 +93,62 @@
                             </thead>
 
                             <tbody>
-                                {{-- Por ahora vacío --}}
                                 @if (isset($documents) && $documents->count() > 0)
                                     @foreach ($documents as $doc)
+                                        @php
+                                            $isSigned = (int) ($doc->is_signed ?? 0) === 1;
+                                            $formattedDate =
+                                                !empty($doc->date) && strtotime($doc->date)
+                                                    ? date('m/d/Y', strtotime($doc->date))
+                                                    : 'N/A';
+                                        @endphp
+
                                         <tr>
                                             <td>{{ $doc->id }}</td>
-                                            <td>{{ $doc->customer_name }}</td>
-                                            <td>{{ $doc->phone }}</td>
-                                            <td>{{ $doc->type }}</td>
-                                            <td>{{ $doc->policy_number }}</td>
-                                            <td>{{ $doc->date }}</td>
+                                            <td>{{ $doc->customer_name ?: 'N/A' }}</td>
+                                            <td>{{ $doc->phone ?: 'N/A' }}</td>
+                                            <td>{{ $doc->template_name ?: 'N/A' }}</td>
+                                            <td>{{ $doc->policy_number ?: 'N/A' }}</td>
+                                            <td>{{ $formattedDate }}</td>
+
                                             <td class="td-url">
-                                                <a href="#" class="url-link">Open URL</a>
+                                                @if (!empty($doc->original_url))
+                                                    <a href="{{ $doc->original_url }}" class="url-link" target="_blank"
+                                                        rel="noopener noreferrer">
+                                                        {{ $doc->original_url }}
+                                                    </a>
+                                                @else
+                                                    <span>N/A</span>
+                                                @endif
                                             </td>
+
                                             <td>
-                                                <span class="badge-status badge-success">Active</span>
+                                                <span
+                                                    class="badge-status {{ $isSigned ? 'badge-success' : 'badge-danger' }}">
+                                                    {{ $isSigned ? 'SI' : 'NO' }}
+                                                </span>
                                             </td>
+
                                             <td class="td-tools">
-                                                <button type="button" class="tool-btn" title="View">
-                                                    <i class='bx bx-show'></i>
-                                                </button>
+                                                @if (!empty($doc->original_url))
+                                                    <a href="{{ $doc->original_url }}" class="tool-btn" title="View"
+                                                        target="_blank" rel="noopener noreferrer">
+                                                        <i class='bx bx-show'></i>
+                                                    </a>
+                                                @else
+                                                    <button type="button" class="tool-btn" title="View" disabled>
+                                                        <i class='bx bx-show'></i>
+                                                    </button>
+                                                @endif
+
                                                 <button type="button" class="tool-btn" title="Resend to phone">
                                                     <i class='bx bx-message-rounded-dots'></i>
                                                 </button>
+
                                                 <button type="button" class="tool-btn" title="Resend by email">
                                                     <i class='bx bx-envelope'></i>
                                                 </button>
+
                                                 <button type="button" class="tool-btn tool-danger" title="Delete">
                                                     <i class='bx bx-trash'></i>
                                                 </button>

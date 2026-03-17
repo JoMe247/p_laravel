@@ -10,12 +10,63 @@ use Illuminate\Support\Facades\Storage;
 class DocumentsController extends Controller
 {
     public function index()
-    {
-        $totalDocuments = 0;
-        $documents = collect();
-
-        return view('documents', compact('totalDocuments', 'documents'));
+{
+    $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+    if (!$authUser) {
+        return redirect()->route('login');
     }
+
+    // Subconsulta para extraer el document_id desde original_url:
+    // ejemplo: /sign/abc123/15  =>  15
+    $urlSub = DB::table('url')
+        ->select(
+            'original_url',
+            'hash',
+            DB::raw("CAST(SUBSTRING_INDEX(original_url, '/', -1) AS UNSIGNED) AS document_id")
+        );
+
+    // Subconsulta para saber si ese hash ya quedó firmado en signing
+    $signingSub = DB::table('signing')
+        ->select(
+            'hash_id',
+            DB::raw("
+                MAX(
+                    CASE
+                        WHEN (date_2 IS NOT NULL AND date_2 <> '')
+                             OR LOWER(COALESCE(status, '')) IN ('signed', 'completed', 'complete', 'done')
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS is_signed
+            ")
+        )
+        ->groupBy('hash_id');
+
+    $documents = DB::table('documents as d')
+        ->leftJoin('pdf_overlays as p', 'p.id', '=', 'd.template_id')
+        ->leftJoinSub($urlSub, 'u', function ($join) {
+            $join->on('u.document_id', '=', 'd.id');
+        })
+        ->leftJoinSub($signingSub, 's', function ($join) {
+            $join->on('s.hash_id', '=', 'u.hash');
+        })
+        ->select(
+            'd.id',
+            DB::raw("COALESCE(d.insured_name, '') as customer_name"),
+            DB::raw("COALESCE(d.phone, '') as phone"),
+            DB::raw("COALESCE(p.template_name, '') as template_name"),
+            DB::raw("COALESCE(d.policy_number, '') as policy_number"),
+            'd.date',
+            'u.original_url',
+            DB::raw("COALESCE(s.is_signed, 0) as is_signed")
+        )
+        ->orderByDesc('d.id')
+        ->get();
+
+    $totalDocuments = $documents->count();
+
+    return view('documents', compact('totalDocuments', 'documents'));
+}
 
     public function createDocument()
     {
