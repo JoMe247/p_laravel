@@ -328,8 +328,15 @@
                 city: "",
                 country: "",
                 region: "",
-                coords: "",
+                coords: "", // la que usarás en el certificado
+                coords_ipinfo: "", // coordenadas por IP pública
+                coords_browser: "", // coordenadas del navegador
             };
+
+            if (!window.IPINFO_TOKEN) {
+                console.warn("No hay IPINFO_TOKEN configurado.");
+                return out;
+            }
 
             try {
                 const publicIp = await getPublicIpFromL2();
@@ -339,16 +346,18 @@
                     return out;
                 }
 
-                const res = await fetch(`https://ipinfo.io/${publicIp}?token=${encodeURIComponent(window.IPINFO_TOKEN)}`);
+                const res = await fetch(
+                    `https://ipinfo.io/${publicIp}?token=${encodeURIComponent(window.IPINFO_TOKEN)}`);
                 const json = await res.json();
 
                 out.ip = json.ip || publicIp || "";
                 out.city = json.city || "";
                 out.country = json.country || "";
                 out.region = json.region || "";
-                out.coords = json.loc || "";
-                
-                console.log("coords ipinfo:", out.coords);
+                out.coords_ipinfo = json.loc || "";
+                out.coords = out.coords_ipinfo; // ← por default usar IP pública
+
+                console.log("coords ipinfo:", out.coords_ipinfo);
             } catch (e) {
                 console.warn("No se pudo obtener ipinfo client:", e);
             }
@@ -370,7 +379,8 @@
 
                     if (coords) {
                         console.log("coords navegador:", coords);
-                        out.coords = coords;
+                        out.coords_browser = coords;
+                        // OJO: ya no reemplazamos out.coords
                     }
                 }
             } catch (e) {
@@ -495,7 +505,8 @@
                 const clientInfo = getClientDeviceInfo();
                 const clientGeo = await getClientIpInfoLegacy();
                 console.log('clientGeo', clientGeo);
-                const clientCoordinates = clientGeo.coords;
+                // usar coordenadas de IP pública en el certificado
+                const clientCoordinates = clientGeo.coords_ipinfo || clientGeo.coords || '';
 
                 // 4) Página objetivo
                 const targetPageIndex = Math.max(0, (docsignOverlay.page || 1) - 1);

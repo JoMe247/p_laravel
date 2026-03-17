@@ -541,6 +541,8 @@ async function getAgentIpInfoLegacy() {
         country: "",
         region: "",
         coords: "",
+        coords_ipinfo: "",
+        coords_browser: "",
     };
 
     try {
@@ -552,7 +554,7 @@ async function getAgentIpInfoLegacy() {
         }
 
         const res = await fetch(
-            `https://ipinfo.io/${publicIp}?token=${encodeURIComponent(window.IPINFO_TOKEN)}`,
+            `https://ipinfo.io/${publicIp}?token=85c7aee118527d`,
         );
         const json = await res.json();
 
@@ -560,7 +562,10 @@ async function getAgentIpInfoLegacy() {
         out.city = json.city || "";
         out.country = json.country || "";
         out.region = json.region || "";
-        out.coords = json.loc || "";
+        out.coords_ipinfo = json.loc || "";
+        out.coords = out.coords_ipinfo; // usar IP pública por default
+
+        console.log("agent coords ipinfo:", out.coords_ipinfo);
     } catch (e) {
         console.warn("No se pudo obtener ipinfo agent:", e);
     }
@@ -584,7 +589,9 @@ async function getAgentIpInfoLegacy() {
             });
 
             if (coords) {
-                out.coords = coords;
+                console.log("agent coords navegador:", coords);
+                out.coords_browser = coords;
+                // OJO: ya no reemplazamos out.coords
             }
         }
     } catch (e) {
@@ -665,7 +672,10 @@ async function savePDFToServer() {
 
     const agentInfo = getAgentDeviceInfo();
     const geoInfo = await getAgentIpInfoLegacy();
-    const agentCoordinates = geoInfo.coords || (await getAgentCoordinates());
+    console.log("geoInfo agent", geoInfo);
+
+    // usar coordenadas de IP pública
+    const agentCoordinates = geoInfo.coords_ipinfo || geoInfo.coords || "";
 
     formData.append("browser_agent", agentInfo.browser_agent);
     formData.append("os_agent", agentInfo.os_agent);
