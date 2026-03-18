@@ -61,126 +61,126 @@ class SigningController extends Controller
         ]);
     }
 
-   public function saveSignature(Request $request, string $short, int $docId)
-{
-    try {
-        $urlRow = DB::table('url')->where('short_url', $short)->first();
-        if (!$urlRow) {
-            return response()->json(['ok' => false, 'error' => 'Not found'], 404);
-        }
+    public function saveSignature(Request $request, string $short, int $docId)
+    {
+        try {
+            $urlRow = DB::table('url')->where('short_url', $short)->first();
+            if (!$urlRow) {
+                return response()->json(['ok' => false, 'error' => 'Not found'], 404);
+            }
 
-        $doc = DB::table('documents')->where('id', $docId)->first();
-        if (!$doc) {
-            return response()->json(['ok' => false, 'error' => 'Doc not found'], 404);
-        }
+            $doc = DB::table('documents')->where('id', $docId)->first();
+            if (!$doc) {
+                return response()->json(['ok' => false, 'error' => 'Doc not found'], 404);
+            }
 
-        if (trim((string) $doc->insured_name) !== trim((string) $urlRow->name)) {
-            return response()->json(['ok' => false, 'error' => 'Forbidden'], 403);
-        }
+            if (trim((string) $doc->insured_name) !== trim((string) $urlRow->name)) {
+                return response()->json(['ok' => false, 'error' => 'Forbidden'], 403);
+            }
 
-      $request->validate([
-    'pdf' => 'required|file|mimes:pdf|max:20480',
-    'signature_data' => 'required|string',
-    'browser_client' => 'nullable|string',
-    'os_client' => 'nullable|string',
-    'dName_client' => 'nullable|string',
-    'device_client' => 'nullable|string',
-    'coordinates_client' => 'nullable|string',
-    // info ip
-    'ip_client' => 'nullable|string',
-    'city_client' => 'nullable|string',
-    'country_client' => 'nullable|string',
-    'client_region' => 'nullable|string',
-]);
-        $relativePdfPath = ltrim(str_replace('\\', '/', (string) $doc->path), '/');
+            $request->validate([
+                'pdf' => 'required|file|mimes:pdf|max:20480',
+                'signature_data' => 'required|string',
+                'browser_client' => 'nullable|string',
+                'os_client' => 'nullable|string',
+                'dName_client' => 'nullable|string',
+                'device_client' => 'nullable|string',
+                'coordinates_client' => 'nullable|string',
+                // info ip
+                'ip_client' => 'nullable|string',
+                'city_client' => 'nullable|string',
+                'country_client' => 'nullable|string',
+                'client_region' => 'nullable|string',
+            ]);
+            $relativePdfPath = ltrim(str_replace('\\', '/', (string) $doc->path), '/');
 
-        if (!Storage::disk('local')->exists($relativePdfPath)) {
-            return response()->json(['ok' => false, 'error' => 'Original PDF not found'], 404);
-        }
+            if (!Storage::disk('local')->exists($relativePdfPath)) {
+                return response()->json(['ok' => false, 'error' => 'Original PDF not found'], 404);
+            }
 
-        $newPdfContents = file_get_contents($request->file('pdf')->getRealPath());
-        Storage::disk('local')->put($relativePdfPath, $newPdfContents);
+            $newPdfContents = file_get_contents($request->file('pdf')->getRealPath());
+            Storage::disk('local')->put($relativePdfPath, $newPdfContents);
 
-        DB::table('documents')
-            ->where('id', $docId)
-            ->update([
-                'signed' => 1,
+            DB::table('documents')
+                ->where('id', $docId)
+                ->update([
+                    'signed' => 1,
+                ]);
+
+            DB::table('url')
+                ->where('short_url', $short)
+                ->update([
+                    'signed' => 'Yes',
+                ]);
+
+            $this->ensureSigningRowExists($urlRow, $doc);
+
+            $geo = $this->resolveGeoFromIp($request->ip());
+
+            DB::table('signing')
+                ->where('hash_id', $urlRow->hash)
+                ->update([
+                    'path' => $relativePdfPath,
+                    'date_2' => now()->toDateString(),
+                    'time_2' => now()->format('H:i:s'),
+
+                    'city_client' => substr((string) ($request->city_client ?? ''), 0, 50),
+                    'country_client' => substr((string) ($request->country_client ?? ''), 0, 80),
+                    'client_region' => substr((string) ($request->client_region ?? ''), 0, 120),
+                    'ip_client' => substr((string) ($request->ip_client ?? $request->ip() ?? ''), 0, 80),
+                    'device_client' => substr((string) ($request->device_client ?? ''), 0, 120),
+                    'browser_client' => substr((string) ($request->browser_client ?? ''), 0, 150),
+                    'os_client' => substr((string) ($request->os_client ?? ''), 0, 50),
+                    'dName_client' => substr((string) ($request->dName_client ?? ''), 0, 260),
+                    'coordinates_client' => substr((string) ($request->coordinates_client ?? ''), 0, 100),
+
+                    'last_seen' => now()->format('m/d/Y \a\t H:i:s'),
+                    'status' => 'Completed',
+                ]);
+
+            $signing = DB::table('signing')->where('hash_id', $urlRow->hash)->first();
+            if (!$signing) {
+                return response()->json(['ok' => false, 'error' => 'Signing row not found'], 500);
+            }
+
+            $certificatePdfBinary = $this->generateCertificatePdf($signing, $urlRow, $doc, $request->signature_data);
+
+            $tempCertificatePath = storage_path('app/temp_certificate_' . $docId . '.pdf');
+            file_put_contents($tempCertificatePath, $certificatePdfBinary);
+
+            $signedPdfFullPath = Storage::disk('local')->path($relativePdfPath);
+            $mergedPath = storage_path('app/temp_merged_' . $docId . '.pdf');
+
+            $this->mergePdfFiles([
+                $signedPdfFullPath,
+                $tempCertificatePath,
+            ], $mergedPath);
+
+            Storage::disk('local')->put($relativePdfPath, file_get_contents($mergedPath));
+
+            @unlink($tempCertificatePath);
+            @unlink($mergedPath);
+
+            return response()->json([
+                'ok' => true,
+                'message' => 'PDF firmado guardado y certificado agregado correctamente.',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SIGN SAVE ERROR', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
-        DB::table('url')
-            ->where('short_url', $short)
-            ->update([
-                'signed' => 'Yes',
-            ]);
-
-        $this->ensureSigningRowExists($urlRow, $doc);
-
-        $geo = $this->resolveGeoFromIp($request->ip());
-
-        DB::table('signing')
-            ->where('hash_id', $urlRow->hash)
-            ->update([
-                'path' => $relativePdfPath,
-                'date_2' => now()->toDateString(),
-                'time_2' => now()->format('H:i:s'),
-
-              'city_client' => substr((string) ($request->city_client ?? ''), 0, 50),
-'country_client' => substr((string) ($request->country_client ?? ''), 0, 80),
-'client_region' => substr((string) ($request->client_region ?? ''), 0, 120),
-'ip_client' => substr((string) ($request->ip_client ?? $request->ip() ?? ''), 0, 80),
-'device_client' => substr((string) ($request->device_client ?? ''), 0, 120),
-'browser_client' => substr((string) ($request->browser_client ?? ''), 0, 150),
-'os_client' => substr((string) ($request->os_client ?? ''), 0, 50),
-'dName_client' => substr((string) ($request->dName_client ?? ''), 0, 260),
-'coordinates_client' => substr((string) ($request->coordinates_client ?? ''), 0, 100),
-
-                'last_seen' => now()->format('m/d/Y \a\t H:i:s'),
-                'status' => 'Completed',
-            ]);
-
-        $signing = DB::table('signing')->where('hash_id', $urlRow->hash)->first();
-        if (!$signing) {
-            return response()->json(['ok' => false, 'error' => 'Signing row not found'], 500);
+            return response()->json([
+                'ok' => false,
+                'error' => 'Error al guardar la firma',
+                'detail' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ], 500);
         }
-
-        $certificatePdfBinary = $this->generateCertificatePdf($signing, $urlRow, $doc, $request->signature_data);
-
-        $tempCertificatePath = storage_path('app/temp_certificate_' . $docId . '.pdf');
-        file_put_contents($tempCertificatePath, $certificatePdfBinary);
-
-        $signedPdfFullPath = Storage::disk('local')->path($relativePdfPath);
-        $mergedPath = storage_path('app/temp_merged_' . $docId . '.pdf');
-
-        $this->mergePdfFiles([
-            $signedPdfFullPath,
-            $tempCertificatePath,
-        ], $mergedPath);
-
-        Storage::disk('local')->put($relativePdfPath, file_get_contents($mergedPath));
-
-@unlink($tempCertificatePath);
-@unlink($mergedPath);
-
-        return response()->json([
-            'ok' => true,
-            'message' => 'PDF firmado guardado y certificado agregado correctamente.',
-        ]);
-    } catch (\Throwable $e) {
-        Log::error('SIGN SAVE ERROR', [
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-        ]);
-
-        return response()->json([
-            'ok' => false,
-            'error' => 'Error al guardar la firma',
-            'detail' => $e->getMessage(),
-            'line' => $e->getLine(),
-            'file' => $e->getFile(),
-        ], 500);
     }
-}
 
     private function touchSigningOpen(object $urlRow, object $doc): void
     {
@@ -245,33 +245,33 @@ class SigningController extends Controller
     }
 
     private function generateCertificatePdf(object $signing, object $urlRow, object $doc, string $signatureData): string
-{
-    $agentInfo = $this->resolveAgentInfo((string) ($urlRow->created_by ?? ''));
+    {
+        $agentInfo = $this->resolveAgentInfo((string) ($urlRow->created_by ?? ''));
 
-    $logoPath = public_path('img/logo.png');
-    $logoBase64 = file_exists($logoPath)
-        ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
-        : '';
+        $logoPath = public_path('img/logo.png');
+        $logoBase64 = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : '';
 
-    $subject = $this->resolveDocumentSubject($doc);
+        $subject = $this->resolveDocumentSubject($doc);
 
-    $createdDate = $signing->date_1 ? date('m/d/Y', strtotime($signing->date_1)) : '';
-    $createdTime = $signing->time_1 ? date('H:i:s', strtotime($signing->time_1)) : '';
+        $createdDate = $signing->date_1 ? date('m/d/Y', strtotime($signing->date_1)) : '';
+        $createdTime = $signing->time_1 ? date('H:i:s', strtotime($signing->time_1)) : '';
 
-    $signedDate = $signing->date_2 ? date('m/d/Y', strtotime($signing->date_2)) : '';
-    $signedTime = $signing->time_2 ? date('H:i:s', strtotime($signing->time_2)) : '';
+        $signedDate = $signing->date_2 ? date('m/d/Y', strtotime($signing->date_2)) : '';
+        $signedTime = $signing->time_2 ? date('H:i:s', strtotime($signing->time_2)) : '';
 
-    $viewed = $signing->last_seen ?: '';
-    $clicks = (int) ($urlRow->clicks ?? 0);
-    $status = $signing->status ?: 'Completed';
+        $viewed = $signing->last_seen ?: '';
+        $clicks = (int) ($urlRow->clicks ?? 0);
+        $status = $signing->status ?: 'Completed';
 
-    $customerPhone = $this->formatUsPhone((string) ($doc->phone ?? ''));
-    $customerEmail = (string) ($doc->email ?? '');
+        $customerPhone = $this->formatUsPhone((string) ($doc->phone ?? ''));
+        $customerEmail = (string) ($doc->email ?? '');
 
-    $montserratRegular = str_replace('\\', '/', storage_path('fonts/Montserrat-Regular.ttf'));
-    $montserratBold = str_replace('\\', '/', storage_path('fonts/Montserrat-Bold.ttf'));
+        $montserratRegular = str_replace('\\', '/', storage_path('fonts/Montserrat-Regular.ttf'));
+        $montserratBold = str_replace('\\', '/', storage_path('fonts/Montserrat-Bold.ttf'));
 
-    $html = '
+        $html = '
     <html>
     <head>
         <meta charset="utf-8">
@@ -392,11 +392,11 @@ class SigningController extends Controller
     <body>
         <div class="wrap">';
 
-    if ($logoBase64 !== '') {
-        $html .= '<img src="' . $logoBase64 . '" class="logo">';
-    }
+        if ($logoBase64 !== '') {
+            $html .= '<img src="' . $logoBase64 . '" class="logo">';
+        }
 
-    $html .= '
+        $html .= '
             <h2>Certificate Of Completion</h2>
 
             <h3>Document</h3>
@@ -463,10 +463,10 @@ class SigningController extends Controller
     </body>
     </html>';
 
-    return Pdf::loadHTML($html)
-        ->setPaper('letter', 'portrait')
-        ->output();
-}
+        return Pdf::loadHTML($html)
+            ->setPaper('letter', 'portrait')
+            ->output();
+    }
 
     private function mergePdfFiles(array $files, string $outputPath): void
     {
@@ -552,5 +552,68 @@ class SigningController extends Controller
             'city' => '',
             'region' => '',
         ];
+    }
+
+    public function showByQuery(Request $request)
+    {
+        $docId = (int) $request->query('id');
+        $hash = trim((string) $request->query('hash', ''));
+        $name = trim((string) $request->query('name', ''));
+        $date = trim((string) $request->query('date', ''));
+        $time = trim((string) $request->query('time', ''));
+
+        if (!$docId || $hash === '' || $name === '' || $date === '' || $time === '') {
+            abort(404);
+        }
+
+        $urlRow = DB::table('url')
+            ->where('hash', $hash)
+            ->first();
+
+        if (!$urlRow) {
+            abort(404);
+        }
+
+        $doc = DB::table('documents')
+            ->where('id', $docId)
+            ->first();
+
+        if (!$doc) {
+            abort(404);
+        }
+
+        // Validar coincidencia exacta de todo
+        if ((int) $doc->id !== $docId) {
+            abort(403);
+        }
+
+        if (trim((string) $urlRow->hash) !== $hash) {
+            abort(403);
+        }
+
+        if (trim((string) $urlRow->name) !== $name) {
+            abort(403);
+        }
+
+        if (trim((string) $doc->insured_name) !== $name) {
+            abort(403);
+        }
+
+        if (trim((string) $doc->date) !== $date) {
+            abort(403);
+        }
+
+        if (trim((string) $doc->time) !== $time) {
+            abort(403);
+        }
+
+        $this->touchSigningOpen($urlRow, $doc);
+
+        return view('sign.sign', [
+            'short' => $urlRow->short_url,
+            'docId' => $docId,
+            'customerName' => $urlRow->name,
+            'docsignOverlay' => json_decode($doc->docsign_overlay ?? 'null', true),
+        ]);
     }
 }

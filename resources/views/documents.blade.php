@@ -112,10 +112,10 @@
                                             <td>{{ $formattedDate }}</td>
 
                                             <td class="td-url">
-                                                @if (!empty($doc->original_url))
-                                                    <a href="{{ $doc->original_url }}" class="url-link" target="_blank"
-                                                        rel="noopener noreferrer">
-                                                        {{ $doc->original_url }}
+                                                @if (!empty($doc->short_url))
+                                                    <a href="{{ url('/s/' . $doc->short_url) }}" class="url-link"
+                                                        target="_blank" rel="noopener noreferrer">
+                                                        {{ $doc->short_url }}
                                                     </a>
                                                 @else
                                                     <span>N/A</span>
@@ -130,9 +130,9 @@
                                             </td>
 
                                             <td class="td-tools">
-                                                @if (!empty($doc->original_url))
-                                                    <a href="{{ $doc->original_url }}" class="tool-btn" title="View"
-                                                        target="_blank" rel="noopener noreferrer">
+                                                @if (!empty($doc->short_url))
+                                                    <a href="{{ url('/s/' . $doc->short_url) }}" class="tool-btn"
+                                                        title="View" target="_blank" rel="noopener noreferrer">
                                                         <i class='bx bx-show'></i>
                                                     </a>
                                                 @else

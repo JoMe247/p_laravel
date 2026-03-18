@@ -10,26 +10,30 @@ use Illuminate\Support\Facades\Storage;
 class DocumentsController extends Controller
 {
     public function index()
-{
-    $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
-    if (!$authUser) {
-        return redirect()->route('login');
-    }
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
 
-    // Subconsulta para extraer el document_id desde original_url:
-    // ejemplo: /sign/abc123/15  =>  15
-    $urlSub = DB::table('url')
-        ->select(
-            'original_url',
-            'hash',
-            DB::raw("CAST(SUBSTRING_INDEX(original_url, '/', -1) AS UNSIGNED) AS document_id")
-        );
+        $urlSub = DB::table('url')
+            ->select(
+                'short_url',
+                'original_url',
+                'hash',
+                DB::raw("
+                CASE
+                    WHEN original_url LIKE '%id=%'
+                        THEN CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(original_url, 'id=', -1), '&', 1) AS UNSIGNED)
+                    ELSE CAST(SUBSTRING_INDEX(original_url, '/', -1) AS UNSIGNED)
+                END AS document_id
+            ")
+            );
 
-    // Subconsulta para saber si ese hash ya quedó firmado en signing
-    $signingSub = DB::table('signing')
-        ->select(
-            'hash_id',
-            DB::raw("
+        $signingSub = DB::table('signing')
+            ->select(
+                'hash_id',
+                DB::raw("
                 MAX(
                     CASE
                         WHEN (date_2 IS NOT NULL AND date_2 <> '')
@@ -39,34 +43,35 @@ class DocumentsController extends Controller
                     END
                 ) AS is_signed
             ")
-        )
-        ->groupBy('hash_id');
+            )
+            ->groupBy('hash_id');
 
-    $documents = DB::table('documents as d')
-        ->leftJoin('pdf_overlays as p', 'p.id', '=', 'd.template_id')
-        ->leftJoinSub($urlSub, 'u', function ($join) {
-            $join->on('u.document_id', '=', 'd.id');
-        })
-        ->leftJoinSub($signingSub, 's', function ($join) {
-            $join->on('s.hash_id', '=', 'u.hash');
-        })
-        ->select(
-            'd.id',
-            DB::raw("COALESCE(d.insured_name, '') as customer_name"),
-            DB::raw("COALESCE(d.phone, '') as phone"),
-            DB::raw("COALESCE(p.template_name, '') as template_name"),
-            DB::raw("COALESCE(d.policy_number, '') as policy_number"),
-            'd.date',
-            'u.original_url',
-            DB::raw("COALESCE(s.is_signed, 0) as is_signed")
-        )
-        ->orderByDesc('d.id')
-        ->get();
+        $documents = DB::table('documents as d')
+            ->leftJoin('pdf_overlays as p', 'p.id', '=', 'd.template_id')
+            ->leftJoinSub($urlSub, 'u', function ($join) {
+                $join->on('u.document_id', '=', 'd.id');
+            })
+            ->leftJoinSub($signingSub, 's', function ($join) {
+                $join->on('s.hash_id', '=', 'u.hash');
+            })
+            ->select(
+                'd.id',
+                DB::raw("COALESCE(d.insured_name, '') as customer_name"),
+                DB::raw("COALESCE(d.phone, '') as phone"),
+                DB::raw("COALESCE(p.template_name, '') as template_name"),
+                DB::raw("COALESCE(d.policy_number, '') as policy_number"),
+                'd.date',
+                'u.short_url',
+                'u.original_url',
+                DB::raw("COALESCE(s.is_signed, 0) as is_signed")
+            )
+            ->orderByDesc('d.id')
+            ->get();
 
-    $totalDocuments = $documents->count();
+        $totalDocuments = $documents->count();
 
-    return view('documents', compact('totalDocuments', 'documents'));
-}
+        return view('documents', compact('totalDocuments', 'documents'));
+    }
 
     public function createDocument()
     {
@@ -235,6 +240,9 @@ class DocumentsController extends Controller
         $datePart = now()->format('Ymd');
         $timePart = now()->format('His');
 
+        $docDate = now()->toDateString();
+        $docTime = now()->format('H:i:s');
+
         $fileName = "{$safeTemplateName}_{$safeCustomerName}_{$datePart}_{$timePart}.pdf";
         $storedPath = $request->file('pdf')->storeAs($baseDir, $fileName);
 
@@ -248,22 +256,28 @@ class DocumentsController extends Controller
             DB::beginTransaction();
 
             $documentId = DB::table('documents')->insertGetId([
-    'type' => (int) $request->doc_type,
-    'template_id' => (int) $request->template_id,
-    'policy_number' => $request->policy_number ?? 'N/A',
-    'id_customer' => $customerId,
-    'insured_name' => $customerName,
-    'phone' => $request->customer_phone,
-    'email' => $request->customer_email ?? '',
-    'user' => $createdBy,
-    'date' => now()->toDateString(),
-    'time' => now()->format('H:i:s'),
-    'path' => $storedPath,
-    'docsign_overlay' => $docSignOverlay ? json_encode($docSignOverlay) : null,
-    'signed' => 0, 
-                ]);
+                'type' => (int) $request->doc_type,
+                'template_id' => (int) $request->template_id,
+                'policy_number' => $request->policy_number ?? 'N/A',
+                'id_customer' => $customerId,
+                'insured_name' => $customerName,
+                'phone' => $request->customer_phone,
+                'email' => $request->customer_email ?? '',
+                'user' => $createdBy,
+                'date' => $docDate,
+                'time' => $docTime,
+                'path' => $storedPath,
+                'docsign_overlay' => $docSignOverlay ? json_encode($docSignOverlay) : null,
+                'signed' => 0,
+            ]);
 
-            $originalUrl = url("/sign/{$shortUrl}/{$documentId}");
+            $originalUrl = url('/sign')
+                . '?id=' . $documentId
+                . '&name=' . urlencode($customerName)
+                . '&hash=' . $hash
+                . '&date=' . $docDate
+                . '&time=' . $docTime;
+
 
             DB::table('url')->insert([
                 'name' => $customerName,
@@ -405,37 +419,37 @@ class DocumentsController extends Controller
     }
 
     private function extractDocSignOverlay(?string $overlayJson): ?array
-{
-    if (!$overlayJson) {
-        return null;
-    }
-
-    $items = json_decode($overlayJson, true);
-    if (!is_array($items)) {
-        return null;
-    }
-
-    foreach ($items as $item) {
-        $rawText = (string) ($item['text'] ?? '');
-
-        // Normalizar:
-        // 1) quitar saltos de línea
-        // 2) quitar llaves {}
-        // 3) quitar espacios
-        $normalized = preg_replace('/\s+/', '', $rawText);
-        $normalized = str_replace(['{', '}'], '', $normalized);
-
-        if ($normalized === 'DocSign@') {
-            return [
-                'page'   => (int) ($item['page'] ?? 1),
-                'x'      => (float) ($item['x'] ?? 0),
-                'y'      => (float) ($item['y'] ?? 0),
-                'width'  => 160,
-                'height' => 55,
-            ];
+    {
+        if (!$overlayJson) {
+            return null;
         }
-    }
 
-    return null;
-}
+        $items = json_decode($overlayJson, true);
+        if (!is_array($items)) {
+            return null;
+        }
+
+        foreach ($items as $item) {
+            $rawText = (string) ($item['text'] ?? '');
+
+            // Normalizar:
+            // 1) quitar saltos de línea
+            // 2) quitar llaves {}
+            // 3) quitar espacios
+            $normalized = preg_replace('/\s+/', '', $rawText);
+            $normalized = str_replace(['{', '}'], '', $normalized);
+
+            if ($normalized === 'DocSign@') {
+                return [
+                    'page'   => (int) ($item['page'] ?? 1),
+                    'x'      => (float) ($item['x'] ?? 0),
+                    'y'      => (float) ($item['y'] ?? 0),
+                    'width'  => 160,
+                    'height' => 55,
+                ];
+            }
+        }
+
+        return null;
+    }
 }
