@@ -657,4 +657,155 @@ class DocumentsController extends Controller
             'to' => $to,
         ];
     }
+
+    public function resendToPhone($id)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $doc = DB::table('documents')->where('id', (int) $id)->first();
+        if (!$doc) {
+            return response()->json(['ok' => false, 'message' => 'Document not found'], 404);
+        }
+
+        $urlRow = $this->getUrlRowByDocumentId((int) $doc->id);
+        if (!$urlRow) {
+            return response()->json(['ok' => false, 'message' => 'URL record not found'], 404);
+        }
+
+        $customerName = trim((string) ($doc->insured_name ?? $urlRow->name ?? 'Customer'));
+        $publicShortLink = $this->getPublicBaseUrl() . '/s/' . $urlRow->short_url;
+        $rand6 = (string) ($urlRow->rand ?? '');
+
+        $smsBody = "Hello {$customerName}, you can now sign the document\n\n"
+            . $publicShortLink . "\n\n"
+            . "Use the following code to access: {$rand6}";
+
+        try {
+            $smsResult = $this->sendDocumentShortSms((string) ($doc->phone ?? ''), $smsBody);
+
+            if (!($smsResult['ok'] ?? false)) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => $smsResult['message'] ?? 'SMS could not be sent'
+                ], 422);
+            }
+
+            return response()->json([
+                'ok' => true,
+                'message' => 'SMS resent successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'ok' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function resendByEmail($id)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $doc = DB::table('documents')->where('id', (int) $id)->first();
+        if (!$doc) {
+            return response()->json(['ok' => false, 'message' => 'Document not found'], 404);
+        }
+
+        $urlRow = $this->getUrlRowByDocumentId((int) $doc->id);
+        if (!$urlRow) {
+            return response()->json(['ok' => false, 'message' => 'URL record not found'], 404);
+        }
+
+        $customerName = trim((string) ($doc->insured_name ?? $urlRow->name ?? 'Customer'));
+        $customerEmail = trim((string) ($doc->email ?? ''));
+        $publicShortLink = $this->getPublicBaseUrl() . '/s/' . $urlRow->short_url;
+        $rand6 = (string) ($urlRow->rand ?? '');
+
+        $emailBody = "Hello {$customerName}, you can now sign the document\n\n"
+            . $publicShortLink . "\n\n"
+            . "Use the following code to access: {$rand6}";
+
+        Log::info('DOCUMENT RESEND EMAIL SIMULATION', [
+            'document_id' => (int) $doc->id,
+            'to_email' => $customerEmail,
+            'customer_name' => $customerName,
+            'subject' => 'Document signature access',
+            'body' => $emailBody,
+            'sent_by' => $authUser->username ?? $authUser->name ?? $authUser->email ?? 'unknown',
+        ]);
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Email simulated. Check laravel.log.'
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $doc = DB::table('documents')->where('id', (int) $id)->first();
+        if (!$doc) {
+            return response()->json(['ok' => false, 'message' => 'Document not found'], 404);
+        }
+
+        $urlRow = $this->getUrlRowByDocumentId((int) $doc->id);
+
+        try {
+            DB::beginTransaction();
+
+            if (!empty($doc->path) && Storage::disk('local')->exists($doc->path)) {
+                Storage::disk('local')->delete($doc->path);
+            }
+
+            if ($urlRow) {
+                DB::table('signing')
+                    ->where('hash_id', $urlRow->hash)
+                    ->delete();
+
+                DB::table('url')
+                    ->where('hash', $urlRow->hash)
+                    ->delete();
+            }
+
+            DB::table('documents')
+                ->where('id', (int) $doc->id)
+                ->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'ok' => true,
+                'message' => 'Document deleted successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Error deleting document.',
+                'detail' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function getUrlRowByDocumentId(int $documentId): ?object
+    {
+        return DB::table('url')
+            ->where(function ($q) use ($documentId) {
+                $q->where('original_url', 'like', '%id=' . $documentId . '&%')
+                    ->orWhere('original_url', 'like', '%id=' . $documentId);
+            })
+            ->orderByDesc('id')
+            ->first();
+    }
 }

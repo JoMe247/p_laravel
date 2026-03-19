@@ -141,15 +141,18 @@
                                                     </button>
                                                 @endif
 
-                                                <button type="button" class="tool-btn" title="Resend to phone">
+                                                <button type="button" class="tool-btn btn-resend-phone"
+                                                    title="Resend to phone" data-doc-id="{{ $doc->id }}">
                                                     <i class='bx bx-message-rounded-dots'></i>
                                                 </button>
 
-                                                <button type="button" class="tool-btn" title="Resend by email">
+                                                <button type="button" class="tool-btn btn-resend-email"
+                                                    title="Resend by email" data-doc-id="{{ $doc->id }}">
                                                     <i class='bx bx-envelope'></i>
                                                 </button>
 
-                                                <button type="button" class="tool-btn tool-danger" title="Delete">
+                                                <button type="button" class="tool-btn tool-danger btn-delete-document"
+                                                    title="Delete" data-doc-id="{{ $doc->id }}">
                                                     <i class='bx bx-trash'></i>
                                                 </button>
                                             </td>
@@ -342,6 +345,16 @@
     <script src=" {{ asset('js/table.js') }}"></script>
     <script src=" {{ asset('js/settings.js') }}"></script>
     <script src=" {{ asset('js/operations.js') }}"></script>
+
+    <script>
+        window.documentsRoutes = {
+            resendPhone: "{{ route('documents.resend_phone', ':id') }}",
+            resendEmail: "{{ route('documents.resend_email', ':id') }}",
+            destroy: "{{ route('documents.destroy', ':id') }}"
+        };
+
+        window.documentsCsrf = "{{ csrf_token() }}";
+    </script>
 
     <script src="{{ asset('js/documents.js') }}"></script>
 </body>

@@ -340,7 +340,14 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/documents/templates/file/{id}', [DocumentsController::class, 'streamTemplatePdf'])
             ->name('documents.templates.file');
 
+        Route::post('/documents/{id}/resend-phone', [DocumentsController::class, 'resendToPhone'])
+            ->name('documents.resend_phone');
 
+        Route::post('/documents/{id}/resend-email', [DocumentsController::class, 'resendByEmail'])
+            ->name('documents.resend_email');
+
+        Route::delete('/documents/{id}', [DocumentsController::class, 'destroy'])
+            ->name('documents.destroy');
 
 
 
