@@ -422,6 +422,35 @@ class DocumentsController extends Controller
         ]);
     }
 
+    public function viewPdf($id)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            abort(401);
+        }
+
+        $doc = DB::table('documents')
+            ->where('id', (int) $id)
+            ->first();
+
+        if (!$doc) {
+            abort(404);
+        }
+
+        $relativePath = ltrim(str_replace('\\', '/', (string) $doc->path), '/');
+
+        if (!$relativePath || !Storage::disk('local')->exists($relativePath)) {
+            abort(404);
+        }
+
+        $fullPath = Storage::disk('local')->path($relativePath);
+
+        return response()->file($fullPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($relativePath) . '"',
+        ]);
+    }
+
     private function generateRandomString(int $length = 8): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

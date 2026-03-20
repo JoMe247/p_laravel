@@ -340,6 +340,9 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/documents/templates/file/{id}', [DocumentsController::class, 'streamTemplatePdf'])
             ->name('documents.templates.file');
 
+        Route::get('/documents/{id}/pdf', [DocumentsController::class, 'viewPdf'])
+            ->name('documents.view_pdf');
+
         Route::post('/documents/{id}/resend-phone', [DocumentsController::class, 'resendToPhone'])
             ->name('documents.resend_phone');
 
@@ -349,6 +352,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::delete('/documents/{id}', [DocumentsController::class, 'destroy'])
             ->name('documents.destroy');
 
+            
 
 
         Route::get('/s/{short}', [ShortUrlController::class, 'show'])->name('short.show');

@@ -130,9 +130,10 @@
                                             </td>
 
                                             <td class="td-tools">
-                                                @if (!empty($doc->short_url))
-                                                    <a href="{{ url('/s/' . $doc->short_url) }}" class="tool-btn"
-                                                        title="View" target="_blank" rel="noopener noreferrer">
+                                                @if (!empty($doc->id))
+                                                    <a href="{{ route('documents.view_pdf', $doc->id) }}"
+                                                        class="tool-btn" title="View" target="_blank"
+                                                        rel="noopener noreferrer">
                                                         <i class='bx bx-show'></i>
                                                     </a>
                                                 @else
