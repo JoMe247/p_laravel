@@ -2,31 +2,27 @@
 <html lang="es">
 
 <head>
-
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>{{ $customer->Name }} - Profile</title>
+
+    <title>{{ $customer->Name }} - Documents</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
     <meta name="customer-id" content="{{ $customer->ID }}">
 
-
-    <!-- Archivos CSS -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dropdown.css') }}">
     <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
-    <!-- <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}"> -->
     <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer-documents.css') }}">
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-    <!-- JQuery -->
+    <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <!-- Alerts -->
@@ -39,7 +35,6 @@
 
         <section id="dash">
 
-            {{-- CONTENEDOR GENERAL DEL PROFILE --}}
             <div id="profile-wrapper" data-id="{{ $customer->ID }}">
 
                 <div class="left-column">
@@ -47,7 +42,7 @@
                     {{-- MENU LATERAL --}}
                     <aside class="profile-side-menu">
                         <nav class="profile-side-nav">
-                            <button type="button" class="profile-menu-item active"
+                            <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
                                 <i class='bx bx-id-card'></i>
                                 <span>Profile</span>
@@ -83,16 +78,13 @@
                                 <span>Files</span>
                             </button>
 
-                            <button type="button" class="profile-menu-item"
-                                onclick="window.location.href='{{ route('profile.documents', $customer->ID) }}'">
+                            <button type="button" class="profile-menu-item active">
                                 <i class='bx bx-file'></i>
                                 <span>Documents</span>
                             </button>
-
                         </nav>
                     </aside>
 
-                    {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
                     <div class="profile-notes sticky-notes">
 
                         <div class="notes-header">
@@ -107,253 +99,102 @@
 
                     </div>
 
-                </div> <!-- /.left-column -->
 
 
-                {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
-                <div id="note-overlay">
-                    <div class="note-window">
-                        <h2 style="margin-bottom:15px;">Add Note</h2>
+                    {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
+                    <div id="note-overlay">
+                        <div class="note-window">
+                            <h2 style="margin-bottom:15px;">Add Note</h2>
 
-                        <label>Policy</label>
-                        <select id="note-policy">
-                            <option value="">— Select policy —</option>
-                        </select>
+                            <label>Policy</label>
+                            <input type="text" id="note-policy">
 
+                            <label>Subject</label>
+                            <input type="text" id="note-subject">
 
-                        <label>Subject</label>
-                        <input type="text" id="note-subject">
+                            <label>Note</label>
+                            <textarea id="note-text" rows="5"></textarea>
 
-                        <label>Note</label>
-                        <textarea id="note-text" rows="5"></textarea>
-
-                        <div class="overlay-actions">
-                            <button class="btn secondary" id="note-cancel">Cancel</button>
-                            <button class="btn" id="note-save">Save</button>
+                            <div class="overlay-actions">
+                                <button class="btn secondary" id="note-cancel">Cancel</button>
+                                <button class="btn" id="note-save">Save</button>
+                            </div>
                         </div>
                     </div>
+
+
+
                 </div>
-                {{-- /.left-column --}}
 
-
-
-                {{-- CONTENIDO PRINCIPAL --}}
                 <div class="profile-main">
+                    <div class="customer-documents-card">
 
-                    <div class="profile-card-container">
+                        <div class="customer-documents-header">
+                            <div>
+                                <h2>{{ $customer->Name }} - Documents</h2>
+                                <p>{{ $documents->count() }} document(s)</p>
+                            </div>
 
-                        <div id="profile-alert-container">
-                            @if (!$customer->Alert)
-                                <button id="add-alert-btn" class="button" style="margin-bottom: 15px;">
-                                    <i class='bx bx-error'></i> Add Alert
-                                </button>
-                            @else
-                                <div id="customer-alert-box" class="alert-box">
-                                    <i class='bx bx-x alert-delete'></i>
-                                    <div id="alert-border">
-                                        <i class='bx bx-error bx-tada'></i>
-                                    </div>
-                                    <span>{{ $customer->Alert }}</span>
-                                </div>
-                            @endif
+                            <div class="customer-documents-actions">
+                                <a href="{{ route('profile', $customer->ID) }}" class="btn secondary">
+                                    <i class='bx bx-arrow-back'></i>
+                                </a>
+                            </div>
                         </div>
 
+                        @if ($documents->count())
+                            <div class="customer-documents-grid" id="customer-documents-grid">
+                                @foreach ($documents as $doc)
+                                    <div class="customer-document-item" data-id="{{ $doc->id }}">
+                                        <div class="customer-document-card">
 
-                        <div class="profile-photo-section">
-                            <div class="profile-photo-frame">
-                                <img id="customer-photo"
-                                    onclick="window.open('{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}')"
-                                    src="{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}"
-                                    alt="Profile Photo">
+                                            <a href="{{ route('documents.view_pdf', $doc->id) }}" target="_blank"
+                                                class="doc-icon-wrap">
+                                                <img src="{{ asset('img/pdf-icon.png') }}" alt="PDF">
+                                            </a>
+
+                                            <div class="doc-info">
+                                                <div class="doc-name" title="{{ $doc->display_name }}">
+                                                    {{ $doc->display_name }}
+                                                </div>
+
+                                                <div class="doc-date">
+                                                    @if (!empty($doc->created_at))
+                                                        {{ \Carbon\Carbon::parse($doc->created_at)->format('Y-m-d H:i') }}
+                                                    @elseif (!empty($doc->date))
+                                                        {{ $doc->date }} {{ $doc->time ?? '' }}
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <div class="doc-card-actions">
+
+                                                <button type="button"
+                                                    class="btn delete-btn small single-delete-doc-btn"
+                                                    data-id="{{ $doc->id }}"
+                                                    data-url="{{ route('documents.destroy', $doc->id) }}">
+                                                    Delete
+                                                </button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
-
-                            <button id="upload-photo-btn" class="btn upload-photo-btn">
-                                <i class='bx bx-image-alt'></i> Change Photo
-                            </button>
-
-                            <form id="photo-upload-form" enctype="multipart/form-data" style="display:none;">
-                                @csrf
-                                <input type="file" name="photo" id="photo-input" accept="image/*">
-                            </form>
-                        </div>
-
-                        <h2 class="profile-name" id="customer-name-edit" contenteditable="true" spellcheck="false">
-                            {{ $customer->Name }}
-                        </h2>
-
-                        {{-- *** FORMULARIO ABIERTO AQUÍ *** --}}
-                        <form id="profile-form" method="POST"
-                            action="{{ route('customers.update', $customer->ID) }}">
-                            @csrf
-                            <input type="hidden" name="Name" id="customer-name-input"
-                                value="{{ $customer->Name }}">
-                            @method('PUT')
-
-                            @php
-                                function calculateAge($dob)
-                                {
-                                    if (!$dob) {
-                                        return null;
-                                    }
-                                    return \Carbon\Carbon::parse($dob)->age;
-                                }
-                                $age = calculateAge($customer->DOB);
-                            @endphp
-
-                            <div class="profile-info-grid editable-top">
-
-                                <div class="info-row">
-                                    <label>DOB</label>
-                                    <input type="date" name="DOB" value="{{ $customer->DOB }}">
-                                </div>
-
-                                <div class="info-row">
-                                    <label>Age</label>
-                                    <span class="value age-box">{{ $age !== null ? $age : '—' }}</span>
-                                </div>
-
-                                <div class="info-row">
-                                    <label>Gender</label>
-                                    <input type="text" name="Gender" value="{{ $customer->Gender }}">
-                                </div>
-
-                                <div class="info-row">
-                                    <label>Marital</label>
-                                    <input type="text" name="Marital" value="{{ $customer->Marital }}">
-                                </div>
-
+                        @else
+                            <div class="customer-documents-empty">
+                                <i class='bx bx-file-blank'></i>
+                                <h3>No documents found</h3>
+                                <p>This customer does not have generated documents yet.</p>
                             </div>
-
-                            {{-- CONTACT INFO --}}
-                            <div class="profile-info-grid profile-contact-grid">
-
-                                <div class="info-row">
-                                    <label>Phone 1</label>
-                                    <input type="text" name="Phone" value="{{ $customer->Phone }}">
-                                </div>
-
-                                <div class="info-row">
-                                    <label>Phone 2</label>
-                                    <input type="text" name="Phone2" value="{{ $customer->Phone2 }}">
-                                </div>
-
-                                <div class="info-row">
-                                    <label>Email 1</label>
-                                    <input type="email" name="Email1" value="{{ $customer->Email1 }}">
-                                </div>
-
-                                <div class="info-row">
-                                    <label>Email 2</label>
-                                    <input type="email" name="Email2" value="{{ $customer->Email2 }}">
-                                </div>
-
-                            </div>
-
-                            {{-- DETAILS --}}
-                            <div class="profile-section-box">
-                                <h3>Details</h3>
-
-                                <div class="details-grid">
-
-                                    <div class="info-row">
-                                        <label>Address</label>
-                                        <input type="text" name="Address" value="{{ $customer->Address }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>City</label>
-                                        <input type="text" name="City" value="{{ $customer->City }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>State</label>
-                                        <input type="text" name="State" value="{{ $customer->State }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Zip Code</label>
-                                        <input type="text" name="ZIP_Code" value="{{ $customer->ZIP_Code }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Drivers License</label>
-                                        <input type="text" name="Drivers_License"
-                                            value="{{ $customer->Drivers_License }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>DL State</label>
-                                        <input type="text" name="DL_State" value="{{ $customer->DL_State }}">
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            {{-- OFFICE INFO --}}
-                            <div class="profile-section-box">
-                                <h3>Office</h3>
-
-                                <div class="details-grid">
-
-                                    <div class="info-row">
-                                        <label>Office</label>
-                                        <input type="text" name="Office" value="{{ $customer->Office }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>CID</label>
-                                        <input type="text" name="CID" value="{{ $customer->CID }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Agent of Record</label>
-                                        <span class="added-display">
-                                            {{ $customer->Agent_of_Record }}
-                                        </span>
-                                    </div>
-
-                                    <div class="info-row" style="display:block;">
-
-                                        <label>Agency</label>
-                                        <span class="added-display">
-                                            {{ $customer->Agency }}
-                                        </span>
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Source</label>
-                                        <input type="text" name="Source" value="{{ $customer->Source }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Added Date</label>
-                                        <span class="added-display">
-                                            {{ $customer->Added ? \Carbon\Carbon::parse($customer->Added)->format('Y-m-d') : '—' }}
-                                        </span>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <div class="profile-actions">
-                                <a id="profile-back" href="{{ route('customers.index') }}" class="btn secondary"><i
-                                        class='bx bx-arrow-back'></i></a>
-
-                                <button type="button" id="delete-customer-btn" class="btn delete-btn"><i
-                                        class='bx bx-trash'></i></button>
-
-                                <button id="profile-save" type="submit" class="btn profile-btn-save"><i
-                                        class='bx bxs-save'></i></button>
-                            </div>
-                        </form>
+                        @endif
 
                     </div>
-
                 </div>
 
-            </div> {{-- /#profile-wrapper --}}
-
-
+            </div>
         </section>
     </div>
 
@@ -519,17 +360,17 @@
 
     <div id="dim-screen"></div>
 
-
     <!-- Archivos JS -->
     <script src="{{ asset('js/image.js') }}"></script>
-    <!-- <script src="{{ asset('js/weather.js') }}"></script> -->
-    <!-- <script src="{{ asset('js/dropdown.js') }}"></script> -->
+    <script src="{{ asset('js/dropdown.js') }}"></script>
     <script src="{{ asset('js/menu.js') }}"></script>
-    <!-- <script src="{{ asset('js/table.js') }}"></script> -->
+    <script src="{{ asset('js/table.js') }}"></script>
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/help.js') }}"></script>
     <script src="{{ asset('js/profile.js') }}"></script>
+
+    <script src="{{ asset('js/customer-documents.js') }}"></script>
 
 </body>
 

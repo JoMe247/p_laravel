@@ -83,7 +83,8 @@
                                 <span>Files</span>
                             </button>
 
-                            <button type="button" class="profile-menu-item">
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('profile.documents', $customer->ID) }}'">
                                 <i class='bx bx-file'></i>
                                 <span>Documents</span>
                             </button>

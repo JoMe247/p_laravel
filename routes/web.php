@@ -222,6 +222,12 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
             [App\Http\Controllers\RemindersController::class, 'destroy']
         )->name('reminders.destroy');
 
+        // Documents
+        Route::get('/profile/{customerId}/documents', [DocumentsController::class, 'customerDocuments'])
+            ->name('profile.documents');
+
+        Route::delete('/profile/{customerId}/documents/delete-selected', [DocumentsController::class, 'deleteSelectedCustomerDocuments'])
+            ->name('profile.documents.deleteSelected');
 
         // Schedules
 

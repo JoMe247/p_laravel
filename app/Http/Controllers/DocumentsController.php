@@ -10,6 +10,8 @@ use App\Models\User;
 use Twilio\Rest\Client;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
+
 class DocumentsController extends Controller
 {
     public function index()
@@ -836,5 +838,95 @@ class DocumentsController extends Controller
             })
             ->orderByDesc('id')
             ->first();
+    }
+
+    public function customerDocuments($customerId)
+    {
+        $customer = DB::table('customers')->where('ID', $customerId)->first();
+
+        if (!$customer) {
+            abort(404);
+        }
+
+        $documents = DB::table('documents')
+            ->where('id_customer', $customerId)
+            ->orderByDesc('id')
+            ->get()
+            ->map(function ($doc) {
+                $doc->display_name = $doc->name
+                    ?? $doc->title
+                    ?? $doc->file_name
+                    ?? (!empty($doc->path) ? basename($doc->path) : 'Document.pdf');
+
+                return $doc;
+            });
+
+        return view('customer_documents', compact('customer', 'documents'));
+    }
+
+    public function deleteSelectedCustomerDocuments(Request $request, $customerId)
+    {
+        $request->validate([
+            'document_ids'   => ['required', 'array'],
+            'document_ids.*' => ['integer'],
+        ]);
+
+        $documents = DB::table('documents')
+            ->where('id_customer', $customerId)
+            ->whereIn('id', $request->document_ids)
+            ->get();
+
+        if ($documents->isEmpty()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'No se encontraron documentos para eliminar.'
+            ], 404);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($documents as $document) {
+                $this->deleteDocumentFromProfileModule($document);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'ok' => true,
+                'message' => 'Documentos eliminados correctamente.'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Ocurrió un error al eliminar los documentos.'
+            ], 500);
+        }
+    }
+
+    private function deleteDocumentFromProfileModule($document): void
+    {
+        $urlRow = $this->getUrlRowByDocumentId((int) $document->id);
+
+        if (!empty($document->path) && Storage::disk('local')->exists($document->path)) {
+            Storage::disk('local')->delete($document->path);
+        }
+
+        if ($urlRow) {
+            DB::table('signing')
+                ->where('hash_id', $urlRow->hash)
+                ->delete();
+
+            DB::table('url')
+                ->where('hash', $urlRow->hash)
+                ->delete();
+        }
+
+        DB::table('documents')
+            ->where('id', (int) $document->id)
+            ->delete();
     }
 }

@@ -183,9 +183,13 @@
                                                 onchange="checkboxActive()">
                                         </td>
 
-                                        <td class="customer-id"><a href="{{ url('profile/' . $c->ID) }}">{{ $c->ID }}</a></td>
-                                        <td class="table-name"><a href="{{ url('profile/' . $c->ID) }}">{{ $c->Name }}</a></td>
-                                        <td class="customer-policy"><a href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a></td>
+                                        <td class="customer-id"><a
+                                                href="{{ url('profile/' . $c->ID) }}">{{ $c->ID }}</a></td>
+                                        <td class="table-name"><a
+                                                href="{{ url('profile/' . $c->ID) }}">{{ $c->Name }}</a></td>
+                                        <td class="customer-policy"><a
+                                                href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a>
+                                        </td>
                                         <td class="customer-address">{{ $c->Address }}</td>
                                         <td class="customer-phone">{{ $c->Phone }}</td>
                                         <td class="customer-dob">{{ $c->DOB }}</td>
@@ -232,55 +236,31 @@
                         <h3 class="sub-title">Recent Documents</h3>
 
                         <div id="recent-documents">
+                            @forelse ($recentDocuments as $doc)
+                                <div class="recent-pdf">
+                                    <img src="{{ asset('img/pdf-icon.png') }}" alt="PDF">
 
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Jose Perez</a>
-                                    <p>Exclusion</p>
+                                    <div class="recent-pdf-title">
+                                        <a href="{{ route('documents.view_pdf', $doc->id) }}" target="_blank">
+                                            {{ $doc->insured_name ?: 'Unnamed Customer' }}
+                                        </a>
+                                        <p>{{ $doc->template_name ?: 'Document' }}</p>
+                                    </div>
+
+                                    <div class="recent-pdf-date">
+                                        {{ !empty($doc->date) ? \Carbon\Carbon::parse($doc->date)->format('m/d/Y') : '—' }}
+                                    </div>
                                 </div>
-                                <div class="recent-pdf-date">12/22/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Juan Rodriguez</a>
-                                    <p>Cancellation</p>
+                            @empty
+                                <div class="recent-pdf">
+                                    <img src="{{ asset('img/pdf-icon.png') }}" alt="PDF">
+                                    <div class="recent-pdf-title">
+                                        <a>No documents yet</a>
+                                        <p>—</p>
+                                    </div>
+                                    <div class="recent-pdf-date">—</div>
                                 </div>
-                                <div class="recent-pdf-date">01/10/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Maria Garcia</a>
-                                    <p>Exclusion</p>
-                                </div>
-                                <div class="recent-pdf-date">02/15/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Carlos Sanchez</a>
-                                    <p>Endorsement</p>
-                                </div>
-                                <div class="recent-pdf-date">03/05/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Hector Morales</a>
-                                    <p>Cancellation</p>
-                                </div>
-                                <div class="recent-pdf-date">12/19/2023</div>
-                            </div>
-
-                            <div class="recent-pdf">
-                                <img src="img/pdf-icon.png" alt="">
-                                <div class="recent-pdf-title"><a>Carmen Fernandez</a>
-                                    <p>Exclusion</p>
-                                </div>
-                                <div class="recent-pdf-date">12/31/2023</div>
-                            </div>
-
+                            @endforelse
                         </div>
                     </div>
 
@@ -525,7 +505,7 @@
     <script src="{{ asset('js/dashboard.js') }}"></script>
 
 
-     <!-- 🔔 REMINDERS OVERLAY  -->
+    <!-- 🔔 REMINDERS OVERLAY  -->
     <div id="reminders-overlay" class="overlay">
         <div class="overlay-box" style="max-width:520px;">
             <div class="overlay-head">

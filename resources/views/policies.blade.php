@@ -39,271 +39,273 @@
 
         <section id="dash">
 
-                <div id="profile-wrapper" data-id="{{ $customer->ID }}">
+            <div id="profile-wrapper" data-id="{{ $customer->ID }}">
 
-                    <div class="left-column">
+                <div class="left-column">
 
-                        {{-- MENU LATERAL --}}
-                        <aside class="profile-side-menu">
-                            <nav class="profile-side-nav">
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
-                                    <i class='bx bx-id-card'></i>
-                                    <span>Profile</span>
-                                </button>
-
-                                <button type="button" class="profile-menu-item active"
-                                    onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
-                                    <i class='bx bx-shield-quarter'></i>
-                                    <span>Policies</span>
-                                </button>
-
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
-                                    <i class='bx bx-credit-card'></i>
-                                    <span>Invoices (Payments)</span>
-                                </button>
-
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('estimates', $customer->ID) }}'">
-                                    <i class='bx bx-bar-chart-alt'></i>
-                                    <span>Estimates</span>
-                                </button>
-
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
-                                    <i class='bx bx-task'></i>
-                                    <span>Reminders</span>
-                                </button>
-
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
-                                    <i class='bx bx-folder'></i>
-                                    <span>Files</span>
-                                </button>
-
-                                <button type="button" class="profile-menu-item">
-                                    <i class='bx bx-file'></i>
-                                    <span>Documents</span>
-                                </button>
-
-                            </nav>
-                        </aside>
-
-                        {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
-                        <div class="profile-notes sticky-notes">
-
-                            <div class="notes-header">
-                                <h3>Notes</h3>
-                                <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i>  &nbsp;Add Note</button>
-                            </div>
-
-                            <div class="notes-scroll">
-                                <div id="notes-list"></div>
-                            </div>
-
-                        </div>
-
-
-
-                        {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
-                        <div id="note-overlay">
-                            <div class="note-window">
-                                <h2 style="margin-bottom:15px;">Add Note</h2>
-
-                                <label>Policy</label>
-                                <input type="text" id="note-policy">
-
-                                <label>Subject</label>
-                                <input type="text" id="note-subject">
-
-                                <label>Note</label>
-                                <textarea id="note-text" rows="5"></textarea>
-
-                                <div class="overlay-actions">
-                                    <button class="btn secondary" id="note-cancel">Cancel</button>
-                                    <button class="btn" id="note-save">Save</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- CONTENIDO PRINCIPAL --}}
-                    <div class="profile-main">
-
-                        <div class="policies-header">
-                            <!-- <h2>Policies</h2> -->
-
-                            <button id="new-policy-btn" class="btn policies-new-btn">
-                                <i class='bx bx-file' style="font-size:1.2em;margin-right:5px;"></i> New Policy
+                    {{-- MENU LATERAL --}}
+                    <aside class="profile-side-menu">
+                        <nav class="profile-side-nav">
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
+                                <i class='bx bx-id-card'></i>
+                                <span>Profile</span>
                             </button>
+
+                            <button type="button" class="profile-menu-item active"
+                                onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
+                                <i class='bx bx-shield-quarter'></i>
+                                <span>Policies</span>
+                            </button>
+
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
+                                <i class='bx bx-credit-card'></i>
+                                <span>Invoices (Payments)</span>
+                            </button>
+
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('estimates', $customer->ID) }}'">
+                                <i class='bx bx-bar-chart-alt'></i>
+                                <span>Estimates</span>
+                            </button>
+
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
+                                <i class='bx bx-task'></i>
+                                <span>Reminders</span>
+                            </button>
+
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
+                                <i class='bx bx-folder'></i>
+                                <span>Files</span>
+                            </button>
+
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('profile.documents', $customer->ID) }}'">
+                                <i class='bx bx-file'></i>
+                                <span>Documents</span>
+                            </button>
+
+                        </nav>
+                    </aside>
+
+                    {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
+                    <div class="profile-notes sticky-notes">
+
+                        <div class="notes-header">
+                            <h3>Notes</h3>
+                            <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i> &nbsp;Add
+                                Note</button>
                         </div>
 
-                        {{-- CONFIG PARA JS --}}
-                        <div id="policy-config" data-store-url="{{ route('policies.store', $customer->ID) }}"
-                            data-csrf="{{ csrf_token() }}">
+                        <div class="notes-scroll">
+                            <div id="notes-list"></div>
                         </div>
 
-                        {{-- TABLA --}}
-                        <table class="table policies-table">
-                            <thead style="border-top-right-radius: 12px;border-top-left-radius: 12px;">
+                    </div>
+
+
+
+                    {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
+                    <div id="note-overlay">
+                        <div class="note-window">
+                            <h2 style="margin-bottom:15px;">Add Note</h2>
+
+                            <label>Policy</label>
+                            <input type="text" id="note-policy">
+
+                            <label>Subject</label>
+                            <input type="text" id="note-subject">
+
+                            <label>Note</label>
+                            <textarea id="note-text" rows="5"></textarea>
+
+                            <div class="overlay-actions">
+                                <button class="btn secondary" id="note-cancel">Cancel</button>
+                                <button class="btn" id="note-save">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- CONTENIDO PRINCIPAL --}}
+                <div class="profile-main">
+
+                    <div class="policies-header">
+                        <!-- <h2>Policies</h2> -->
+
+                        <button id="new-policy-btn" class="btn policies-new-btn">
+                            <i class='bx bx-file' style="font-size:1.2em;margin-right:5px;"></i> New Policy
+                        </button>
+                    </div>
+
+                    {{-- CONFIG PARA JS --}}
+                    <div id="policy-config" data-store-url="{{ route('policies.store', $customer->ID) }}"
+                        data-csrf="{{ csrf_token() }}">
+                    </div>
+
+                    {{-- TABLA --}}
+                    <table class="table policies-table">
+                        <thead style="border-top-right-radius: 12px;border-top-left-radius: 12px;">
+                            <tr>
+                                <th>Carrier</th>
+                                <th>Number</th>
+                                <th>Expiration</th>
+                                <th>Status</th>
+                                <th>Vehicles</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($policies as $p)
+                                @php
+                                    // Convertir JSON a arreglo
+                                    $veh = $p->vehicules;
+
+                                    if (is_string($veh)) {
+                                        $veh = json_decode($veh, true);
+                                    }
+
+                                    $vehicleCount = is_array($veh) ? count($veh) : 0;
+                                @endphp
+
                                 <tr>
-                                    <th>Carrier</th>
-                                    <th>Number</th>
-                                    <th>Expiration</th>
-                                    <th>Status</th>
-                                    <th>Vehicles</th>
-                                    <th>Actions</th>
+                                    <td>{{ $p->pol_carrier }}</td>
+                                    <td>{{ $p->pol_number }}</td>
+                                    <td>{{ $p->pol_expiration }}</td>
+
+                                    {{--  Pol Status --}}
+                                    <td>{{ $p->pol_status ?? '-' }}</td>
+
+                                    {{--  Número de vehículos --}}
+                                    <td>
+                                        @if ($vehicleCount === 0)
+                                            0
+                                        @elseif($vehicleCount === 1)
+                                            1
+                                        @else
+                                            {{ $vehicleCount }}
+                                        @endif
+                                    </td>
+
+                                    <td style="display:flex;justify-content:center">
+
+                                        {{-- Botón INFO (i en un círculo) --}}
+                                        <button class="btn policy-info-btn" title="View / Edit" id="edit-policy-btn"
+                                            data-id="{{ $p->id }}"
+                                            data-url="{{ route('policies.show', $p->id) }}"
+                                            data-update-url="{{ route('policies.update', $p->id) }}">
+                                            <i class='bx bx-info-circle'></i>
+                                        </button>
+
+
+                                        <button class="btn delete-btn policy-delete-btn" id="delete-policy-btn"
+                                            data-url="{{ route('policies.destroy', $p->id) }}">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($policies as $p)
-                                    @php
-                                        // Convertir JSON a arreglo
-                                        $veh = $p->vehicules;
 
-                                        if (is_string($veh)) {
-                                            $veh = json_decode($veh, true);
-                                        }
-
-                                        $vehicleCount = is_array($veh) ? count($veh) : 0;
-                                    @endphp
-
-                                    <tr>
-                                        <td>{{ $p->pol_carrier }}</td>
-                                        <td>{{ $p->pol_number }}</td>
-                                        <td>{{ $p->pol_expiration }}</td>
-
-                                        {{--  Pol Status --}}
-                                        <td>{{ $p->pol_status ?? '-' }}</td>
-
-                                        {{--  Número de vehículos --}}
-                                        <td>
-                                            @if ($vehicleCount === 0)
-                                                0
-                                            @elseif($vehicleCount === 1)
-                                                1
-                                            @else
-                                                {{ $vehicleCount }}
-                                            @endif
-                                        </td>
-
-                                        <td style="display:flex;justify-content:center">
-
-                                            {{-- Botón INFO (i en un círculo) --}}
-                                            <button class="btn policy-info-btn" title="View / Edit" id="edit-policy-btn"
-                                                data-id="{{ $p->id }}"
-                                                data-url="{{ route('policies.show', $p->id) }}"
-                                                data-update-url="{{ route('policies.update', $p->id) }}">
-                                                <i class='bx bx-info-circle'></i>
-                                            </button>
+                            @empty
+                                <tr>
+                                    <td colspan="6" style="text-align:center;opacity:0.6;">
+                                        No policies yet.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
 
 
-                                            <button class="btn delete-btn policy-delete-btn" id="delete-policy-btn"
-                                                data-url="{{ route('policies.destroy', $p->id) }}">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
+                    </table>
 
-                                @empty
-                                    <tr>
-                                        <td colspan="6" style="text-align:center;opacity:0.6;">
-                                            No policies yet.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-
-
-                        </table>
-
-                    </div>
                 </div>
+            </div>
 
 
-                <div id="policy-overlay">
-                    <div class="policy-overlay-box policy-flex">
+            <div id="policy-overlay">
+                <div class="policy-overlay-box policy-flex">
 
 
-                        <div class="policy-columns">
+                    <div class="policy-columns">
 
-                            {{-- LEFT PANEL (POLICY FIELDS) --}}
-                            <div class="policy-left">
+                        {{-- LEFT PANEL (POLICY FIELDS) --}}
+                        <div class="policy-left">
 
-                                <label>Carrier</label>
-                                <input type="text" id="pol_carrier">
+                            <label>Carrier</label>
+                            <input type="text" id="pol_carrier">
 
-                                <label>Number</label>
-                                <input type="text" id="pol_number">
+                            <label>Number</label>
+                            <input type="text" id="pol_number">
 
-                                <label>URL (Company Website)</label>
-                                <input type="text" id="pol_url">
+                            <label>URL (Company Website)</label>
+                            <input type="text" id="pol_url">
 
-                                <label>Expiration Date</label>
-                                <input type="date" id="pol_expiration">
+                            <label>Expiration Date</label>
+                            <input type="date" id="pol_expiration">
 
-                                <label>Effective Date</label>
-                                <input type="date" id="pol_eff_date">
+                            <label>Effective Date</label>
+                            <input type="date" id="pol_eff_date">
 
-                                <label>Added Date</label>
-                                <input type="date" id="pol_added_date">
+                            <label>Added Date</label>
+                            <input type="date" id="pol_added_date">
 
-                                <label>Payment Due Day</label>
-                                <input type="text" id="pol_due_day">
+                            <label>Payment Due Day</label>
+                            <input type="text" id="pol_due_day">
 
-                                <label>Status</label>
-                                <input type="text" id="pol_status">
+                            <label>Status</label>
+                            <input type="text" id="pol_status">
 
-                                <label>Agent Record</label>
-                                <input type="text" id="pol_agent_record">
+                            <label>Agent Record</label>
+                            <input type="text" id="pol_agent_record">
 
-                                <div class="policy-overlay-actions">
-                                    <button id="policy-save-btn" class="btn policy-save-btn">Save</button>
-                                    <button id="policy-cancel-btn" class="btn secondary">Cancel</button>
-                                </div>
-
+                            <div class="policy-overlay-actions">
+                                <button id="policy-save-btn" class="btn policy-save-btn">Save</button>
+                                <button id="policy-cancel-btn" class="btn secondary">Cancel</button>
                             </div>
 
-                            {{-- RIGHT PANEL (VEHICLES) --}}
-                            <div class="policy-right">
+                        </div>
 
-                                <h3>New Policy</h3>
+                        {{-- RIGHT PANEL (VEHICLES) --}}
+                        <div class="policy-right">
 
-                                <button id="add-vehicle-btn" class="btn add-vehicle-btn">
-                                    <i class='bx bx-car' style="font-size:1.4em"></i>&nbsp; Añadir Vehículo
-                                </button>
+                            <h3>New Policy</h3>
 
-                                <div id="vehicle-container" class="vehicle-container">
-                                    {{-- Vehicle cards generated by JS --}}
-                                </div>
+                            <button id="add-vehicle-btn" class="btn add-vehicle-btn">
+                                <i class='bx bx-car' style="font-size:1.4em"></i>&nbsp; Añadir Vehículo
+                            </button>
 
+                            <div id="vehicle-container" class="vehicle-container">
+                                {{-- Vehicle cards generated by JS --}}
                             </div>
+
                         </div>
                     </div>
                 </div>
+            </div>
 
 
 
 
 
-                <div id="policy-edit-overlay" class="policy-edit-overlay" style="display:none;">
-                    <div class="policy-edit-box">
+            <div id="policy-edit-overlay" class="policy-edit-overlay" style="display:none;">
+                <div class="policy-edit-box">
 
-                        <div id="policy-edit-content">
-                            <h3>Policy</h3>
-                            <!-- Aquí JS insertará todos los campos -->
-                        </div>
+                    <div id="policy-edit-content">
+                        <h3>Policy</h3>
+                        <!-- Aquí JS insertará todos los campos -->
+                    </div>
 
-                        <div class="policy-edit-actions">
-                            <button id="policy-edit-save" class="btn">Save Changes</button>
-                            <button id="policy-edit-cancel" class="btn secondary">Close</button>
-                        </div>
+                    <div class="policy-edit-actions">
+                        <button id="policy-edit-save" class="btn">Save Changes</button>
+                        <button id="policy-edit-cancel" class="btn secondary">Close</button>
                     </div>
                 </div>
+            </div>
 
 
-            
+
     </div>
     </div>
     </section>
@@ -412,30 +414,30 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="{{ asset('../img/menu/thumbs/1.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(2)"><img src="{{ asset('../img/menu/thumbs/2.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(3)"><img src="{{ asset('../img/menu/thumbs/3.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(4)"><img src="{{ asset('../img/menu/thumbs/4.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(5)"><img src="{{ asset('../img/menu/thumbs/5.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(6)"><img src="{{ asset('../img/menu/thumbs/6.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(7)"><img src="{{ asset('../img/menu/thumbs/7.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(8)"><img src="{{ asset('../img/menu/thumbs/8.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(9)"><img src="{{ asset('../img/menu/thumbs/9.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(10)"><img src="{{ asset('../img/menu/thumbs/10.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(11)"><img src="{{ asset('../img/menu/thumbs/11.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(12)"><img src="{{ asset('../img/menu/thumbs/12.jpg') }}"
-                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(1)"><img
+                                src="{{ asset('../img/menu/thumbs/1.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(2)"><img
+                                src="{{ asset('../img/menu/thumbs/2.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(3)"><img
+                                src="{{ asset('../img/menu/thumbs/3.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(4)"><img
+                                src="{{ asset('../img/menu/thumbs/4.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(5)"><img
+                                src="{{ asset('../img/menu/thumbs/5.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(6)"><img
+                                src="{{ asset('../img/menu/thumbs/6.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(7)"><img
+                                src="{{ asset('../img/menu/thumbs/7.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(8)"><img
+                                src="{{ asset('../img/menu/thumbs/8.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(9)"><img
+                                src="{{ asset('../img/menu/thumbs/9.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(10)"><img
+                                src="{{ asset('../img/menu/thumbs/10.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(11)"><img
+                                src="{{ asset('../img/menu/thumbs/11.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(12)"><img
+                                src="{{ asset('../img/menu/thumbs/12.jpg') }}" alt=""></label>
 
 
                     </div>
