@@ -116,6 +116,24 @@
 
                     <!-- FEE -->
                     <div class="charge-section">
+
+                        <label class="charge-label">Payment Method</label>
+
+                        <select id="paymentMethod" class="charge-select">
+                            <option value="">Select</option>
+                            <option value="Cash" {{ ($paymentMethod ?? '') === 'Cash' ? 'selected' : '' }}>
+                                Cash
+                            </option>
+                            <option value="Credit/Debit Card"
+                                {{ ($paymentMethod ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>
+                                Credit/Debit Card
+                            </option>
+                            <option value="EFT" {{ ($paymentMethod ?? '') === 'EFT' ? 'selected' : '' }}>
+                                EFT
+                            </option>
+                        </select>
+
+
                         <label class="charge-label">Fee</label>
                         <input id="feeInput" class="charge-input" type="text" value="{{ $fee ?? '' }}"
                             placeholder="Fee">
@@ -150,7 +168,8 @@
                                 <label class="charge-label">Payment 2 Method</label>
                                 <select id="feeP2Method" class="charge-select">
                                     <option value="">Select</option>
-                                    <option value="Cash" {{ ($feeP2Method ?? '') === 'Cash' ? 'selected' : '' }}>Cash
+                                    <option value="Cash" {{ ($feeP2Method ?? '') === 'Cash' ? 'selected' : '' }}>
+                                        Cash
                                     </option>
                                     <option value="Credit/Debit Card"
                                         {{ ($feeP2Method ?? '') === 'Credit/Debit Card' ? 'selected' : '' }}>
