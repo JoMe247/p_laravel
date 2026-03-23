@@ -32,7 +32,7 @@
             <i class='bx bxs-dashboard'></i> Dashboard
         </div>
 
-        <div class="lateral-row" data="option" onclick="window.location='{{url('/account')}}'" id="account">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/account') }}'" id="account">
             <i class='bx bx-devices'></i> Account
         </div>
 
@@ -66,7 +66,7 @@
             <i class='bx bxl-whatsapp'></i> WhatsApp
         </div>
 
-        <div class="lateral-row" data="option">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/general-payments') }}'">
             <i class='bx bx-receipt'></i> Payments
         </div>
 
@@ -112,14 +112,12 @@
     </form>
 
     <script>
-
         try {
             let tab = window.location.pathname.replace("/", "");
-            document.getElementById(tab).setAttribute("tab","active");
+            document.getElementById(tab).setAttribute("tab", "active");
         } catch (error) {
             // console.log("No existe tab en el menu lateral");
         }
-        
     </script>
 
 </section>

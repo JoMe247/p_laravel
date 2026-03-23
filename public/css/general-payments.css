@@ -1,0 +1,110 @@
+body {
+    margin: 0;
+    background: #f7f7f7;
+    font-family: Arial, sans-serif;
+}
+
+.general-payments-wrapper {
+    padding: 30px;
+    margin-left: 260px;
+    margin-top: 80px;
+}
+
+.general-payments-header h1 {
+    margin: 0 0 20px 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: #222;
+}
+
+.general-payments-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.left-filters select,
+.right-filters input,
+.right-filters button {
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+    padding: 0 12px;
+    font-size: 14px;
+}
+
+.right-filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.right-filters input {
+    min-width: 260px;
+    background: #fff;
+}
+
+.right-filters button {
+    background: #111;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    padding: 0 16px;
+}
+
+.general-payments-table-box {
+    background: #fff;
+    border-radius: 14px;
+    overflow-x: auto;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.general-payments-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1300px;
+}
+
+.general-payments-table thead tr {
+    background: #f2f2f2;
+}
+
+.general-payments-table th,
+.general-payments-table td {
+    padding: 16px 14px;
+    text-align: left;
+    font-size: 14px;
+    border-bottom: 1px solid #ececec;
+    white-space: nowrap;
+}
+
+.general-payments-table th {
+    font-weight: 600;
+    color: #333;
+}
+
+.general-payments-table td {
+    color: #555;
+}
+
+.description-cell {
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty-row {
+    text-align: center !important;
+    padding: 30px !important;
+    color: #888;
+}
+
+.general-payments-pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}

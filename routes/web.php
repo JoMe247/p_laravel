@@ -358,7 +358,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::delete('/documents/{id}', [DocumentsController::class, 'destroy'])
             ->name('documents.destroy');
 
-            
+
 
 
         Route::get('/s/{short}', [ShortUrlController::class, 'show'])->name('short.show');
@@ -375,5 +375,13 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/sign/{short}/{docId}', [SigningController::class, 'show'])->name('sign.show');
         Route::get('/sign/{short}/{docId}/pdf', [SigningController::class, 'pdf'])->name('sign.pdf');
         Route::post('/sign/{short}/{docId}/signature', [SigningController::class, 'saveSignature'])->name('sign.signature');
+
+
+
+
+
+
+        Route::get('/general-payments', [PaymentsInvoicesController::class, 'generalPayments'])
+            ->name('payments.general');
     });
 });

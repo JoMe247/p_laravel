@@ -588,4 +588,86 @@ class PaymentsInvoicesController extends Controller
 
         return response()->json(['ok' => true]);
     }
+
+    // general payments (payments)
+
+    public function generalPayments(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
+
+        $agency = $authUser->agency;
+
+        $search = trim($request->get('search', ''));
+        $perPageInput = strtolower($request->get('per_page', '50'));
+
+        $allowedPerPage = ['50', '100', '200', 'all'];
+        if (!in_array($perPageInput, $allowedPerPage)) {
+            $perPageInput = '50';
+        }
+
+        $query = DB::table('invoices as i')
+            ->leftJoin('customers as c', 'c.ID', '=', 'i.customer_id')
+            ->where('i.agency', $agency)
+            ->select(
+                'i.*',
+                'c.Name as customer_name'
+            )
+            ->orderByDesc('i.id');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('c.Name', 'like', "%{$search}%")
+                    ->orWhere('i.creation_date', 'like', "%{$search}%");
+            });
+        }
+
+        if ($perPageInput === 'all') {
+            $invoices = $query->get();
+        } else {
+            $invoices = $query->paginate((int) $perPageInput)->withQueryString();
+        }
+
+        $formatInvoice = function ($invoice) {
+            $prices = json_decode($invoice->inv_prices ?? '{}', true);
+
+            $invoice->amount = 0;
+            $invoice->description_item = '—';
+
+            if (is_array($prices)) {
+                $invoice->amount = (float) ($prices['grand_total'] ?? 0);
+
+                if (!empty($prices['rows']) && is_array($prices['rows'])) {
+                    $items = collect($prices['rows'])
+                        ->map(function ($row) {
+                            return $row['item']
+                                ?? $row['description']
+                                ?? $row['name']
+                                ?? null;
+                        })
+                        ->filter()
+                        ->implode(', ');
+
+                    $invoice->description_item = $items !== '' ? $items : '—';
+                }
+            }
+
+            $invoice->fee_amount = (float) ($invoice->fee ?? 0);
+            $invoice->premium_amount = (float) ($invoice->premium ?? 0);
+
+            return $invoice;
+        };
+
+        if ($perPageInput === 'all') {
+            $invoices = $invoices->map($formatInvoice);
+        } else {
+            $invoices->setCollection(
+                $invoices->getCollection()->map($formatInvoice)
+            );
+        }
+
+        return view('general_payments', compact('invoices', 'search', 'perPageInput'));
+    }
 }
