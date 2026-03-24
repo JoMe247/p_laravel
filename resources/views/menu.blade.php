@@ -70,7 +70,7 @@
             <i class='bx bx-receipt'></i> Payments
         </div>
 
-        <div class="lateral-row" data="option">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/reports') }}'" id="reports">
             <i class='bx bx-bar-chart-alt'></i> Reports
         </div>
 

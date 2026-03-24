@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inbox WhatsApp</title>
+    <meta name="reports-invoices-url" content="{{ route('reports.invoices-data') }}">
+    <title>Reports</title>
+
     <link rel="icon" href="img/favicon.png">
 
     <!-- Styles -->
@@ -16,7 +18,8 @@
     <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/inbox.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('css/reports.css') }}">
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -33,137 +36,113 @@
         @include('menu')
 
         <section id="dash">
-            <div id="lower-table-clients" type="fullscreen" data="not-inbox">
-                <div class="inbox-container mt-10">
-                    <div class="inbox-card">
-                    
-                        <div class="inbox-actions">
-                            
-                            <form method="POST" action="{{ route('whatsapp.sync') }}">
-                                @csrf
-                                <button id="btnSync" type="submit" class="btn btn-secondary"><i class="bx bx-sync"></i></button>
-                            </form>
+            @php
+                $now = \Carbon\Carbon::now();
 
-                            <a id="btnSent" href="{{ route('whatsapp.sent') }}" class="btn btn-primary"><i class='bx bx-message-square-check'></i></a>
+                $last3From = $now->copy()->subMonthsNoOverflow(2)->startOfMonth()->format('m-d-Y');
+                $last6From = $now->copy()->subMonthsNoOverflow(5)->startOfMonth()->format('m-d-Y');
+                $last12From = $now->copy()->subMonthsNoOverflow(11)->startOfMonth()->format('m-d-Y');
+                $currentEnd = $now->copy()->endOfMonth()->format('m-d-Y');
+            @endphp
 
-                            <button type="button" class="btn btn-danger" onclick="bulkDelete()">🗑️ Eliminar
-                                seleccionados</button>
+            <div class="reports-layout">
+                @includeIf('partials.sidebar')
 
+                <main class="reports-main">
+                    <div class="reports-header">
+                        <h1>Reports</h1>
+                    </div>
 
-                            <div id="search-container" style="position:unset;margin-top:unset;margin-left:unset !important;">
-                                <label for="tableSearch"><i class='bx bx-search'></i></label>
-                                 <input type="text" id="searchInput" placeholder="Buscar por fecha, número o mensaje...">
-                            </div>
-                           
+                    <div class="reports-toolbar">
+                        <div class="report-buttons">
+                            <button type="button" class="report-tab active" data-report="invoices">INVOICES</button>
+                            <button type="button" class="report-tab" data-report="estimates">ESTIMATES</button>
+                            <button type="button" class="report-tab" data-report="customers">CUSTOMERS</button>
+                            <button type="button" class="report-tab" data-report="policies">POLICIES</button>
+                            <button type="button" class="report-tab" data-report="messages">MESSAGES</button>
                         </div>
 
-                        @if (session('ok'))
-                            <div class="alert alert-success">{{ session('ok') }}</div>
-                        @endif
-
-                        @if ($errors->any())
-                            <div class="alert alert-error">
-                                <ul>
-                                    @foreach ($errors->all() as $e)
-                                        <li>{{ $e }}</li>
-                                    @endforeach
-                                </ul>
+                        <div class="report-filters">
+                            <div class="report-filter-block">
+                                <label for="periodFilter">Period</label>
+                                <select id="periodFilter">
+                                    <option value="all">All Time</option>
+                                    <option value="this_month">This Month</option>
+                                    <option value="last_month">Last Month</option>
+                                    <option value="this_year">This Year</option>
+                                    <option value="last_year">Last Year</option>
+                                    <option value="last_3_months">Last 3 months &nbsp; {{ $last3From }} -
+                                        {{ $currentEnd }}</option>
+                                    <option value="last_6_months">Last 6 months &nbsp; {{ $last6From }} -
+                                        {{ $currentEnd }}</option>
+                                    <option value="last_12_months">Last 12 months &nbsp; {{ $last12From }} -
+                                        {{ $currentEnd }}</option>
+                                    <option value="custom">Period</option>
+                                </select>
                             </div>
-                        @endif
 
-                        <!-- Form oculto para borrado múltiple -->
-                        <form id="bulkDeleteForm" method="POST" action="{{ route('whatsapp.deleteMultiple') }}"
-                            style="display:none;">
-                            @csrf
-                            @method('DELETE')
-                            <div id="bulk-hidden-inputs"></div>
-                        </form>
+                            <div class="report-filter-block">
+                                <label for="agentFilter">Sale Agent</label>
+                                <select id="agentFilter">
+                                    <option value="">All Agents</option>
+                                    @foreach ($agentOptions as $agent)
+                                        <option value="{{ $agent }}">{{ $agent }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="overflow-x-auto">
-                            <table class="inbox-table" id="inboxTable">
+                    <div id="customRange" class="custom-range">
+                        <input type="date" id="fromDate">
+                        <span>to</span>
+                        <input type="date" id="toDate">
+                        <button type="button" id="applyCustomRange">Apply</button>
+                    </div>
+
+                    <section class="reports-card">
+                        <div class="reports-card-head">
+                            <h2 id="reportTitle">Generated Report</h2>
+                        </div>
+
+                        <div id="reportsLoading" class="reports-loading">Loading report...</div>
+
+                        <div id="reportPlaceholder" class="report-placeholder" style="display:none;">
+                            <div class="placeholder-box">
+                                This section will be enabled later.
+                            </div>
+                        </div>
+
+                        <div id="reportTableWrap" class="report-table-wrap">
+                            <table class="reports-table">
                                 <thead>
                                     <tr>
-                                        <th><input type="checkbox" id="select-all"></th>
-                                        <th>Fecha</th>
-                                        <th>De</th>
-                                        <th>Dirección</th>
-                                        <!-- <th>Estado</th>
-                                        <th>Mensaje</th> -->
-                                        <th>Responder</th>
-                                        <th>Acciones</th>
+                                        <th>Payment #</th>
+                                        <th>Date</th>
+                                        <th>Invoice #</th>
+                                        <th>Customer</th>
+                                        <th>Payment Mode</th>
+                                        <th>Fee</th>
+                                        <th>Premium</th>
+                                        <th>Policy #</th>
+                                        <th>Description / Item</th>
+                                        <th>Amount</th>
+                                        <th>Sale Agent</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @forelse($messages as $m)
-                                        <tr>
-                                            <td><input type="checkbox" class="row-check" value="{{ $m->id }}">
-                                            </td>
-                                            <td>{{ $m->date_sent?->format('Y-m-d H:i') }}</td>
-                                            <!-- <td>{{ $m->from }}</td> -->
-                                            <td>{{ str_replace('whatsapp:', '', $m->from) }}</td>
-                                            
-                                            <td class="message-body">{{ $m->body }}</td>
-
-                                            <!-- RESPONDER -->
-                                            <td class="boton-whatsapp">
-                                                @if ($m->direction_label === 'Entrante' && $m->date_sent)
-                                                    @php
-                                                        // obtener la fecha del mensaje y convertirla a la zona configurada en app.php
-                                                        $receivedAt = \Carbon\Carbon::parse($m->date_sent)->setTimezone(
-                                                            config('app.timezone'),
-                                                        );
-                                                        $diffHours = $receivedAt->diffInHours(
-                                                            \Carbon\Carbon::now(config('app.timezone')),
-                                                        );
-                                                    @endphp
-
-                                                    @if ($diffHours < 24)
-                                                        <!-- Dentro de 24 horas: mostrar formulario normal -->
-                                                        <form method="POST" action="{{ route('send.action') }}"
-                                                            class="reply-form">
-                                                            @csrf
-                                                            <input type="hidden" name="to"
-                                                                value="{{ $m->from }}">
-                                                            <textarea name="body" rows="2" placeholder="Escribe tu respuesta..." class="reply-textarea"></textarea>
-                                                            <button type="submit" class="btn btn-send">Enviar</button>
-                                                        </form>
-                                                    @else
-                                                        <!-- Después de 24 horas: mostrar botón WhatsApp Web -->
-                                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $m->from) }}"
-                                                            target="_blank" class="btn btn-whatsapp">
-                                                            <i class='bx bxl-whatsapp'></i> Responder en WhatsApp
-                                                        </a>
-                                                    @endif
-                                                @else
-                                                    <span class="no-reply">—</span>
-                                                @endif
-                                            </td>
-
-                                            <!-- ACCIONES -->
-                                            <td>
-                                                <form method="POST" action="{{ route('whatsapp.delete', $m->id) }}"
-                                                    onsubmit="return confirm('¿Seguro que quieres eliminar este mensaje?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger" data="boton-eliminar"><i class="bx bx-trash"></i></button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="text-center">No hay mensajes</td>
-                                        </tr>
-                                    @endforelse
+                                <tbody id="reportsTableBody">
+                                    <tr>
+                                        <td colspan="11" class="empty-row">Loading...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="mt-4">{{ $messages->links() }}</div>
-                    </div>
-                </div>
+                    </section>
+                </main>
             </div>
         </section>
     </div>
+
 
     <!-- UI Elements -->
     <div class="window-confirm">
@@ -334,8 +313,8 @@
     <script src="{{ asset('js/table.js') }}"></script>
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
-    <script src="{{ asset('js/whatsapp.js') }}"></script>
 
+    <script src="{{ asset('js/reports.js') }}"></script>
 </body>
 
 </html>

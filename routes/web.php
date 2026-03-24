@@ -27,6 +27,7 @@ use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\TemplatesController;
 use App\Http\Controllers\ShortUrlController;
 use App\Http\Controllers\SigningController;
+use App\Http\Controllers\ReportsController;
 
 // Página inicial
 Route::get('/', function () {
@@ -383,5 +384,10 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
 
         Route::get('/general-payments', [PaymentsInvoicesController::class, 'generalPayments'])
             ->name('payments.general');
+
+
+
+        Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+        Route::get('/reports/invoices-data', [ReportsController::class, 'invoicesData'])->name('reports.invoices-data');
     });
 });
