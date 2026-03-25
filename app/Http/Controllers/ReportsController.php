@@ -50,11 +50,19 @@ class ReportsController extends Controller
         $sequenceQuery = DB::table('invoices as i')->select('i.id');
         $this->applyAgencyFilter($sequenceQuery, 'i', $agency);
 
-        if ($dateColumn && Schema::hasColumn('invoices', $dateColumn)) {
-            $sequenceQuery->orderBy("i.$dateColumn", 'asc');
+        /*
+|--------------------------------------------------------------------------
+| PAYMENT # consecutivo:
+| El más antiguo recibe 1, y el más nuevo el número más alto.
+|--------------------------------------------------------------------------
+*/
+        if (Schema::hasColumn('invoices', 'created_at')) {
+            $sequenceQuery->orderBy('i.created_at', 'asc');
+        } elseif (Schema::hasColumn('invoices', 'creation_date')) {
+            $sequenceQuery->orderBy('i.creation_date', 'asc');
+        } elseif (Schema::hasColumn('invoices', 'payment_date')) {
+            $sequenceQuery->orderBy('i.payment_date', 'asc');
         }
-
-        $sequenceQuery->orderBy('i.id', 'asc');
 
         $sequenceMap = [];
         foreach ($sequenceQuery->get() as $index => $row) {
@@ -91,11 +99,19 @@ class ReportsController extends Controller
             $request->get('to')
         );
 
-        if ($dateColumn && Schema::hasColumn('invoices', $dateColumn)) {
-            $query->orderBy("i.$dateColumn", 'asc');
+        /*
+|--------------------------------------------------------------------------
+| Mostrar primero los más nuevos:
+| así el Payment # más alto aparece arriba.
+|--------------------------------------------------------------------------
+*/
+        if (Schema::hasColumn('invoices', 'created_at')) {
+            $query->orderBy('i.created_at', 'desc');
+        } elseif (Schema::hasColumn('invoices', 'creation_date')) {
+            $query->orderBy('i.creation_date', 'desc');
+        } elseif (Schema::hasColumn('invoices', 'payment_date')) {
+            $query->orderBy('i.payment_date', 'desc');
         }
-
-        $query->orderBy('i.id', 'asc');
 
         $invoices = $query->get();
 

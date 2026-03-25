@@ -60,9 +60,6 @@
                             <button type="button" class="report-tab" data-report="customers">CUSTOMERS</button>
                             <button type="button" class="report-tab" data-report="policies">POLICIES</button>
                             <button type="button" class="report-tab" data-report="messages">MESSAGES</button>
-                        </div>
-
-                        <div class="report-filters">
                             <div class="report-filter-block">
                                 <label for="periodFilter">Period</label>
                                 <select id="periodFilter">
@@ -78,16 +75,6 @@
                                     <option value="last_12_months">Last 12 months &nbsp; {{ $last12From }} -
                                         {{ $currentEnd }}</option>
                                     <option value="custom">Period</option>
-                                </select>
-                            </div>
-
-                            <div class="report-filter-block">
-                                <label for="agentFilter">Sale Agent</label>
-                                <select id="agentFilter">
-                                    <option value="">All Agents</option>
-                                    @foreach ($agentOptions as $agent)
-                                        <option value="{{ $agent }}">{{ $agent }}</option>
-                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -114,28 +101,59 @@
                         </div>
 
                         <div id="reportTableWrap" class="report-table-wrap">
-                            <table class="reports-table">
-                                <thead>
-                                    <tr>
-                                        <th>Payment #</th>
-                                        <th>Date</th>
-                                        <th>Invoice #</th>
-                                        <th>Customer</th>
-                                        <th>Payment Mode</th>
-                                        <th>Fee</th>
-                                        <th>Premium</th>
-                                        <th>Policy #</th>
-                                        <th>Description / Item</th>
-                                        <th>Amount</th>
-                                        <th>Sale Agent</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reportsTableBody">
-                                    <tr>
-                                        <td colspan="11" class="empty-row">Loading...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div id="reportTableControls" class="reports-table-toolbar">
+                                <div class="table-controls-left">
+                                    <select id="pageSizeSelect" class="table-select table-length-select">
+                                        <option value="50" selected>50</option>
+                                        <option value="100">100</option>
+                                        <option value="200">200</option>
+                                        <option value="all">All</option>
+                                    </select>
+
+                                    <button type="button" id="exportCsvBtn" class="export-csv-btn">
+                                        Export
+                                    </button>
+                                </div>
+
+                                <div class="table-controls-right">
+                                    <select id="agentFilter" class="table-select agent-filter-select">
+                                        <option value="">All Agents</option>
+                                        @foreach ($agentOptions as $agent)
+                                            <option value="{{ $agent }}">{{ $agent }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <div class="table-search-box">
+                                        <i class='bx bx-search'></i>
+                                        <input type="text" id="tableSearch" placeholder="Search...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="report-table-scroll">
+                                <table class="reports-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Payment #</th>
+                                            <th>Date</th>
+                                            <th>Invoice #</th>
+                                            <th>Customer</th>
+                                            <th>Payment Mode</th>
+                                            <th>Fee</th>
+                                            <th>Premium</th>
+                                            <th>Policy #</th>
+                                            <th>Description / Item</th>
+                                            <th>Amount</th>
+                                            <th>Sale Agent</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportsTableBody">
+                                        <tr>
+                                            <td colspan="11" class="empty-row">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </section>
                 </main>
