@@ -389,5 +389,6 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
 
         Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
         Route::get('/reports/invoices-data', [ReportsController::class, 'invoicesData'])->name('reports.invoices-data');
+        Route::get('/reports/estimates-data', [ReportsController::class, 'estimatesData'])->name('reports.estimates-data');
     });
 });

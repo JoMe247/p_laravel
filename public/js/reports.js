@@ -3,6 +3,15 @@ document.addEventListener("DOMContentLoaded", () => {
         .querySelector('meta[name="reports-invoices-url"]')
         .getAttribute("content");
 
+    const estimatesUrl = document
+        .querySelector('meta[name="reports-estimates-url"]')
+        .getAttribute("content");
+
+    const sequenceHeader = document.getElementById("sequenceHeader");
+    const documentNumberHeader = document.getElementById(
+        "documentNumberHeader",
+    );
+
     const reportTabs = document.querySelectorAll(".report-tab");
     const reportTitle = document.getElementById("reportTitle");
 
@@ -61,6 +70,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (exportPdfBtn) exportPdfBtn.disabled = !enabled;
         if (agentFilter) agentFilter.disabled = !enabled;
         if (tableSearch) tableSearch.disabled = !enabled;
+    }
+
+    function getActiveUrl() {
+        return activeReport === "estimates" ? estimatesUrl : invoicesUrl;
+    }
+
+    function updateTableHeaders() {
+        if (activeReport === "estimates") {
+            if (sequenceHeader) sequenceHeader.textContent = "Estimate #";
+            if (documentNumberHeader)
+                documentNumberHeader.textContent = "Estimate #";
+            return;
+        }
+
+        if (sequenceHeader) sequenceHeader.textContent = "Payment #";
+        if (documentNumberHeader)
+            documentNumberHeader.textContent = "Invoice #";
     }
 
     function getSearchableText(row) {
@@ -207,16 +233,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const totals = getTotals(rows);
-        const breakdown = getMethodBreakdown(rows);
-
-        const csvRows = [];
+        const sequenceLabel =
+            activeReport === "estimates" ? "Estimate #" : "Payment #";
+        const documentLabel =
+            activeReport === "estimates" ? "Estimate #" : "Invoice #";
 
         csvRows.push(
             [
-                "Payment #",
+                sequenceLabel,
                 "Date",
-                "Invoice #",
+                documentLabel,
                 "Customer",
                 "Payment Mode",
                 "Fee",
@@ -288,49 +314,92 @@ document.addEventListener("DOMContentLoaded", () => {
                 csvEscape(Number(breakdown.premiumCash).toFixed(2)),
             ].join(","),
         );
-        csvRows.push(
-            [
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape("Total Cash"),
-                csvEscape(Number(breakdown.totalCash).toFixed(2)),
-            ].join(","),
-        );
-        csvRows.push(
-            [
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape("Fee Credit/Debit Card"),
-                csvEscape(Number(breakdown.feeCard).toFixed(2)),
-            ].join(","),
-        );
-        csvRows.push(
-            [
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape("Premium Credit/Debit Card"),
-                csvEscape(Number(breakdown.premiumCard).toFixed(2)),
-            ].join(","),
-        );
-        csvRows.push(
-            [
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape(""),
-                csvEscape("Total Credit/Debit Card"),
-                csvEscape(Number(breakdown.totalCard).toFixed(2)),
-            ].join(","),
-        );
+        if (activeReport === "invoices") {
+            csvRows.push("");
 
-        const now = new Date();
-        const filename = `reports_invoices_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}-${String(now.getMinutes()).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}.csv`;
+            csvRows.push(
+                [
+                    csvEscape("Total (Per Page)"),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(Number(totals.fee).toFixed(2)),
+                    csvEscape(Number(totals.premium).toFixed(2)),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(Number(totals.amount).toFixed(2)),
+                    csvEscape(""),
+                ].join(","),
+            );
+
+            csvRows.push(
+                [
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape("Fee Cash"),
+                    csvEscape(Number(breakdown.feeCash).toFixed(2)),
+                ].join(","),
+            );
+            csvRows.push(
+                [
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape("Premium Cash"),
+                    csvEscape(Number(breakdown.premiumCash).toFixed(2)),
+                ].join(","),
+            );
+            csvRows.push(
+                [
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape("Total Cash"),
+                    csvEscape(Number(breakdown.totalCash).toFixed(2)),
+                ].join(","),
+            );
+            csvRows.push(
+                [
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape("Fee Credit/Debit Card"),
+                    csvEscape(Number(breakdown.feeCard).toFixed(2)),
+                ].join(","),
+            );
+            csvRows.push(
+                [
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape("Premium Credit/Debit Card"),
+                    csvEscape(Number(breakdown.premiumCard).toFixed(2)),
+                ].join(","),
+            );
+            csvRows.push(
+                [
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape(""),
+                    csvEscape("Total Credit/Debit Card"),
+                    csvEscape(Number(breakdown.totalCard).toFixed(2)),
+                ].join(","),
+            );
+        }
+
+        const prefix =
+            activeReport === "estimates"
+                ? "reports_estimates"
+                : "reports_invoices";
+        const filename = `${prefix}_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}-${String(now.getMinutes()).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}.csv`;
 
         downloadCsv(filename, csvRows.join("\n"));
     }
@@ -603,29 +672,32 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const totals = getTotals(visibleRows);
-        const breakdown = getMethodBreakdown(visibleRows);
-
         let html = "";
         html += buildNormalRows(visibleRows);
-        html += buildTotalsRow(totals);
-        html += buildBreakdownRows(breakdown);
+
+        if (activeReport === "invoices") {
+            const totals = getTotals(visibleRows);
+            const breakdown = getMethodBreakdown(visibleRows);
+
+            html += buildTotalsRow(totals);
+            html += buildBreakdownRows(breakdown);
+        }
 
         reportsTableBody.innerHTML = html;
     }
 
-    function loadInvoices() {
-        if (activeReport !== "invoices") return;
+    function loadActiveReportData() {
+        if (activeReport !== "invoices" && activeReport !== "estimates") return;
 
         const period = periodFilter.value;
 
         if (period === "custom") {
             if (!fromDate.value || !toDate.value) {
                 reportsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="11" class="empty-row">Select both dates and press Apply.</td>
-                    </tr>
-                `;
+                <tr>
+                    <td colspan="11" class="empty-row">Select both dates and press Apply.</td>
+                </tr>
+            `;
                 hideLoading();
                 return;
             }
@@ -642,7 +714,7 @@ document.addEventListener("DOMContentLoaded", () => {
             params.append("to", toDate.value);
         }
 
-        fetch(`${invoicesUrl}?${params.toString()}`, {
+        fetch(`${getActiveUrl()}?${params.toString()}`, {
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
             },
@@ -657,10 +729,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error(error);
                 allRows = [];
                 reportsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="11" class="empty-row">Error loading report.</td>
-                    </tr>
-                `;
+                <tr>
+                    <td colspan="11" class="empty-row">Error loading report.</td>
+                </tr>
+            `;
                 hideLoading();
             });
     }
@@ -672,8 +744,10 @@ document.addEventListener("DOMContentLoaded", () => {
             tab.classList.toggle("active", tab.dataset.report === report);
         });
 
-        if (report === "invoices") {
-            reportTitle.textContent = "Generated Report";
+        if (report === "invoices" || report === "estimates") {
+            reportTitle.textContent =
+                report === "invoices" ? "Invoices Report" : "Estimates Report";
+
             periodFilter.disabled = false;
             setControlsEnabled(true);
 
@@ -687,7 +761,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 customRange.classList.remove("show");
             }
 
-            loadInvoices();
+            updateTableHeaders();
+            loadActiveReportData();
             return;
         }
 
@@ -701,11 +776,11 @@ document.addEventListener("DOMContentLoaded", () => {
         reportPlaceholder.style.display = "flex";
 
         reportPlaceholder.innerHTML = `
-            <div class="placeholder-box">
-                <strong>${report.toUpperCase()}</strong><br>
-                For now, only the INVOICES report is enabled.
-            </div>
-        `;
+        <div class="placeholder-box">
+            <strong>${report.toUpperCase()}</strong><br>
+            This section will be enabled later.
+        </div>
+    `;
     }
 
     reportTabs.forEach((tab) => {
@@ -715,7 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     periodFilter.addEventListener("change", () => {
-        if (activeReport !== "invoices") return;
+        if (activeReport !== "invoices" && activeReport !== "estimates") return;
 
         if (periodFilter.value === "custom") {
             customRange.classList.add("show");
@@ -728,35 +803,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         customRange.classList.remove("show");
-        loadInvoices();
+        loadActiveReportData();
     });
 
     applyCustomRange.addEventListener("click", () => {
-        loadInvoices();
+        loadActiveReportData();
     });
 
     agentFilter.addEventListener("change", () => {
-        if (activeReport !== "invoices") return;
-        loadInvoices();
+        if (activeReport !== "invoices" && activeReport !== "estimates") return;
+        loadActiveReportData();
     });
 
     pageSizeSelect.addEventListener("change", () => {
-        if (activeReport !== "invoices") return;
+        if (activeReport !== "invoices" && activeReport !== "estimates") return;
         renderRows();
     });
 
     exportCsvBtn.addEventListener("click", () => {
-        if (activeReport !== "invoices") return;
+        if (activeReport !== "invoices" && activeReport !== "estimates") return;
         exportCurrentTableToCsv();
     });
 
     exportPdfBtn.addEventListener("click", () => {
-        if (activeReport !== "invoices") return;
+        if (activeReport !== "invoices" && activeReport !== "estimates") return;
         exportCurrentTableToPdf();
     });
 
     tableSearch.addEventListener("input", () => {
-        if (activeReport !== "invoices") return;
+        if (activeReport !== "invoices" && activeReport !== "estimates") return;
         renderRows();
     });
 

@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="reports-invoices-url" content="{{ route('reports.invoices-data') }}">
+    <meta name="reports-estimates-url" content="{{ route('reports.estimates-data') }}">
     <title>Reports</title>
 
     <link rel="icon" href="img/favicon.png">
@@ -111,7 +112,7 @@
                                     </select>
 
                                     <button type="button" id="exportCsvBtn" class="export-csv-btn">
-                                        Export
+                                        Export CSV
                                     </button>
 
                                     <button type="button" id="exportPdfBtn" class="export-pdf-btn" title="Export PDF">
@@ -138,9 +139,9 @@
                                 <table class="reports-table">
                                     <thead>
                                         <tr>
-                                            <th>Payment #</th>
+                                            <th id="sequenceHeader">Payment #</th>
                                             <th>Date</th>
-                                            <th>Invoice #</th>
+                                            <th id="documentNumberHeader">Invoice #</th>
                                             <th>Customer</th>
                                             <th>Payment Mode</th>
                                             <th>Fee</th>

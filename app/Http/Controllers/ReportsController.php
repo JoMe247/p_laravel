@@ -603,4 +603,287 @@ class ReportsController extends Controller
             $query->where("$alias.created_by_name", 'like', '%' . $agentFilter . '%');
         }
     }
+
+
+
+    // ESTIMATES
+
+    public function estimatesData(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json(['rows' => []], 401);
+        }
+
+        $agency = $authUser->agency ?? null;
+        $agentFilter = trim((string) $request->get('agent', ''));
+
+        $dateColumn = $this->resolveFirstExistingColumn('estimates', [
+            'payment_date',
+            'date',
+            'creation_date',
+            'created_at',
+        ]) ?? 'created_at';
+
+        /*
+    |--------------------------------------------------------------------------
+    | Consecutivo global para ESTIMATES
+    |--------------------------------------------------------------------------
+    */
+        $sequenceQuery = DB::table('estimates as e')->select('e.id');
+
+        if ($agency && Schema::hasColumn('estimates', 'agency')) {
+            $sequenceQuery->where('e.agency', $agency);
+        }
+
+        if (Schema::hasColumn('estimates', 'created_at')) {
+            $sequenceQuery->orderBy('e.created_at', 'asc');
+        } elseif (Schema::hasColumn('estimates', 'creation_date')) {
+            $sequenceQuery->orderBy('e.creation_date', 'asc');
+        } elseif (Schema::hasColumn('estimates', 'payment_date')) {
+            $sequenceQuery->orderBy('e.payment_date', 'asc');
+        } else {
+            $sequenceQuery->orderBy('e.id', 'asc');
+        }
+
+        $sequenceMap = [];
+        foreach ($sequenceQuery->get() as $index => $row) {
+            $sequenceMap[$row->id] = $index + 1;
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Query principal
+    |--------------------------------------------------------------------------
+    */
+        $query = DB::table('estimates as e');
+
+        if (Schema::hasColumn('estimates', 'customer_id')) {
+            $query->leftJoin('customers as c', 'c.ID', '=', 'e.customer_id')
+                ->select('e.*', DB::raw('COALESCE(c.Name, "") as customer_name'));
+        } else {
+            $query->select('e.*');
+        }
+
+        if ($agency && Schema::hasColumn('estimates', 'agency')) {
+            $query->where('e.agency', $agency);
+        }
+
+        if ($agentFilter !== '' && Schema::hasColumn('estimates', 'created_by_name')) {
+            $query->where('e.created_by_name', 'like', '%' . $agentFilter . '%');
+        }
+
+        if ($dateColumn && Schema::hasColumn('estimates', $dateColumn)) {
+            $period = $request->get('period', 'all');
+            $from = $request->get('from');
+            $to = $request->get('to');
+            $now = \Carbon\Carbon::now();
+
+            switch ($period) {
+                case 'this_month':
+                    $query->whereBetween("e.$dateColumn", [
+                        $now->copy()->startOfMonth(),
+                        $now->copy()->endOfMonth(),
+                    ]);
+                    break;
+
+                case 'last_month':
+                    $query->whereBetween("e.$dateColumn", [
+                        $now->copy()->subMonthNoOverflow()->startOfMonth(),
+                        $now->copy()->subMonthNoOverflow()->endOfMonth(),
+                    ]);
+                    break;
+
+                case 'this_year':
+                    $query->whereBetween("e.$dateColumn", [
+                        $now->copy()->startOfYear(),
+                        $now->copy()->endOfYear(),
+                    ]);
+                    break;
+
+                case 'last_year':
+                    $query->whereBetween("e.$dateColumn", [
+                        $now->copy()->subYear()->startOfYear(),
+                        $now->copy()->subYear()->endOfYear(),
+                    ]);
+                    break;
+
+                case 'last_3_months':
+                    $query->whereBetween("e.$dateColumn", [
+                        $now->copy()->subMonthsNoOverflow(2)->startOfMonth(),
+                        $now->copy()->endOfMonth(),
+                    ]);
+                    break;
+
+                case 'last_6_months':
+                    $query->whereBetween("e.$dateColumn", [
+                        $now->copy()->subMonthsNoOverflow(5)->startOfMonth(),
+                        $now->copy()->endOfMonth(),
+                    ]);
+                    break;
+
+                case 'last_12_months':
+                    $query->whereBetween("e.$dateColumn", [
+                        $now->copy()->subMonthsNoOverflow(11)->startOfMonth(),
+                        $now->copy()->endOfMonth(),
+                    ]);
+                    break;
+
+                case 'custom':
+                    if ($from && $to) {
+                        $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
+                        $toDate = \Carbon\Carbon::parse($to)->endOfDay();
+
+                        if ($fromDate->gt($toDate)) {
+                            [$fromDate, $toDate] = [$toDate, $fromDate];
+                        }
+
+                        $query->whereBetween("e.$dateColumn", [$fromDate, $toDate]);
+                    }
+                    break;
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Mostrar primero los más nuevos
+    |--------------------------------------------------------------------------
+    */
+        if (Schema::hasColumn('estimates', 'created_at')) {
+            $query->orderBy('e.created_at', 'desc');
+        } elseif (Schema::hasColumn('estimates', 'creation_date')) {
+            $query->orderBy('e.creation_date', 'desc');
+        } elseif (Schema::hasColumn('estimates', 'payment_date')) {
+            $query->orderBy('e.payment_date', 'desc');
+        } else {
+            $query->orderBy('e.id', 'desc');
+        }
+
+        $estimates = $query->get();
+        $rows = [];
+
+        foreach ($estimates as $estimate) {
+            $rows = array_merge(
+                $rows,
+                $this->transformEstimateToReportRows(
+                    $estimate,
+                    $sequenceMap[$estimate->id] ?? 0,
+                    $dateColumn
+                )
+            );
+        }
+
+        return response()->json([
+            'rows' => $rows,
+        ]);
+    }
+
+    private function transformEstimateToReportRows(object $estimate, int $paymentNumber, string $dateColumn): array
+    {
+        $row = (array) $estimate;
+
+        $dateValue = $row[$dateColumn] ?? ($row['payment_date'] ?? '');
+
+        $estimateNumber = $row['estimate_number'] ?? '';
+        $customer = $row['customer_name'] ?? '';
+        $paymentMode = $row['payment_method'] ?? '';
+
+        $feeTotal = $this->sanitizeNumber($row['fee'] ?? 0);
+        $premiumTotal = $this->sanitizeNumber($row['premium'] ?? 0);
+
+        $policyNumber = $row['policy_number'] ?? '';
+        $saleAgent = $row['created_by_name'] ?? '';
+
+        $description = $this->extractDescription($row);
+        $amount = $this->extractGrandTotal($row);
+
+        $feeSplitEnabled = $this->isTruthy($row['fee_split'] ?? false);
+        $premiumSplitEnabled = $this->isTruthy($row['premium_split'] ?? false);
+
+        if (!$feeSplitEnabled && !$premiumSplitEnabled) {
+            return [[
+                'payment_number' => $paymentNumber,
+                'date'           => $this->formatDate($dateValue),
+                'invoice_number' => $estimateNumber,
+                'customer'       => $customer,
+                'payment_mode'   => $paymentMode,
+                'fee'            => $feeTotal,
+                'premium'        => $premiumTotal,
+                'policy_number'  => $policyNumber,
+                'description'    => $description,
+                'amount'         => $amount,
+                'sale_agent'     => $saleAgent,
+            ]];
+        }
+
+        $segments = [];
+
+        if ($premiumSplitEnabled) {
+            $premiumRows = $this->extractSplitRows($row, 'premium', $paymentMode, 'premium');
+
+            if (empty($premiumRows) && $premiumTotal > 0) {
+                $premiumRows[] = [
+                    'payment_mode' => $paymentMode,
+                    'fee' => 0,
+                    'premium' => $premiumTotal,
+                ];
+            }
+
+            $segments = array_merge($segments, $premiumRows);
+        } elseif ($premiumTotal > 0) {
+            $segments[] = [
+                'payment_mode' => $paymentMode,
+                'fee' => 0,
+                'premium' => $premiumTotal,
+            ];
+        }
+
+        if ($feeSplitEnabled) {
+            $feeRows = $this->extractSplitRows($row, 'fee', $paymentMode, 'fee');
+
+            if (empty($feeRows) && $feeTotal > 0) {
+                $feeRows[] = [
+                    'payment_mode' => $paymentMode,
+                    'fee' => $feeTotal,
+                    'premium' => 0,
+                ];
+            }
+
+            $segments = array_merge($segments, $feeRows);
+        } elseif ($feeTotal > 0) {
+            $segments[] = [
+                'payment_mode' => $paymentMode,
+                'fee' => $feeTotal,
+                'premium' => 0,
+            ];
+        }
+
+        if (empty($segments)) {
+            $segments[] = [
+                'payment_mode' => $paymentMode,
+                'fee' => $feeTotal,
+                'premium' => $premiumTotal,
+            ];
+        }
+
+        $reportRows = [];
+
+        foreach ($segments as $index => $segment) {
+            $reportRows[] = [
+                'payment_number' => $paymentNumber,
+                'date'           => $this->formatDate($dateValue),
+                'invoice_number' => $estimateNumber,
+                'customer'       => $customer,
+                'payment_mode'   => $segment['payment_mode'] ?? $paymentMode,
+                'fee'            => $segment['fee'] ?? 0,
+                'premium'        => $segment['premium'] ?? 0,
+                'policy_number'  => $policyNumber,
+                'description'    => $description,
+                'amount'         => $index === 0 ? $amount : 0,
+                'sale_agent'     => $saleAgent,
+            ];
+        }
+
+        return $reportRows;
+    }
 }
