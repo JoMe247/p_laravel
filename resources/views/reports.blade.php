@@ -113,6 +113,10 @@
                                     <button type="button" id="exportCsvBtn" class="export-csv-btn">
                                         Export
                                     </button>
+
+                                    <button type="button" id="exportPdfBtn" class="export-pdf-btn" title="Export PDF">
+                                        <i class='bx bxs-file-pdf'></i>
+                                    </button>
                                 </div>
 
                                 <div class="table-controls-right">
@@ -323,7 +327,6 @@
 
     <div id="dim-screen"></div>
 
-
     <script src="{{ asset('js/image.js') }}"></script>
     <script src="{{ asset('js/weather.js') }}"></script>
     <script src="{{ asset('js/dropdown.js') }}"></script>
@@ -331,6 +334,9 @@
     <script src="{{ asset('js/table.js') }}"></script>
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
     <script src="{{ asset('js/reports.js') }}"></script>
 </body>

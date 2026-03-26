@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const pageSizeSelect = document.getElementById("pageSizeSelect");
     const exportCsvBtn = document.getElementById("exportCsvBtn");
+    const exportPdfBtn = document.getElementById("exportPdfBtn");
     const agentFilter = document.getElementById("agentFilter");
     const tableSearch = document.getElementById("tableSearch");
 
@@ -57,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function setControlsEnabled(enabled) {
         if (pageSizeSelect) pageSizeSelect.disabled = !enabled;
         if (exportCsvBtn) exportCsvBtn.disabled = !enabled;
+        if (exportPdfBtn) exportPdfBtn.disabled = !enabled;
         if (agentFilter) agentFilter.disabled = !enabled;
         if (tableSearch) tableSearch.disabled = !enabled;
     }
@@ -195,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function exportCurrentTableToCsv() {
-        // esta linea sirve para filtrar por pagina 
+        // esta linea sirve para filtrar por pagina
         // const rows = getCurrentVisibleRows();
         // esta linea sirve para filtrar todo en la tabla de invoices
         const rows = getFilteredRows();
@@ -331,6 +333,201 @@ document.addEventListener("DOMContentLoaded", () => {
         const filename = `reports_invoices_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}-${String(now.getMinutes()).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}.csv`;
 
         downloadCsv(filename, csvRows.join("\n"));
+    }
+
+    function exportCurrentTableToPdf() {
+        const { jsPDF } = window.jspdf;
+
+        if (!jsPDF || typeof window.jspdf === "undefined") {
+            alert("PDF library not loaded.");
+            return;
+        }
+
+        const doc = new jsPDF({
+            orientation: "landscape",
+            unit: "pt",
+            format: "a4",
+        });
+
+        const rows = getCurrentVisibleRows();
+
+        // Si después quieres exportar TODOS los registros filtrados en lugar de solo los visibles por página:
+        // const rows = getFilteredRows();
+
+        if (!rows.length) {
+            alert("No data to export.");
+            return;
+        }
+
+        const totals = getTotals(rows);
+        const breakdown = getMethodBreakdown(rows);
+
+        const tableHead = [
+            [
+                "Payment #",
+                "Date",
+                "Invoice #",
+                "Customer",
+                "Payment Mode",
+                "Fee",
+                "Premium",
+                "Policy #",
+                "Description / Item",
+                "Amount",
+                "Sale Agent",
+            ],
+        ];
+
+        const tableBody = rows.map((row) => [
+            row.payment_number ?? "",
+            row.date ?? "",
+            row.invoice_number ?? "",
+            row.customer ?? "",
+            row.payment_mode ?? "",
+            Number(row.fee || 0).toFixed(2),
+            Number(row.premium || 0).toFixed(2),
+            row.policy_number ?? "",
+            row.description ?? "",
+            Number(row.amount || 0).toFixed(2),
+            row.sale_agent ?? "",
+        ]);
+
+        tableBody.push([
+            "Total (Per Page)",
+            "",
+            "",
+            "",
+            "",
+            Number(totals.fee).toFixed(2),
+            Number(totals.premium).toFixed(2),
+            "",
+            "",
+            Number(totals.amount).toFixed(2),
+            "",
+        ]);
+
+        tableBody.push([
+            "",
+            "",
+            "",
+            "",
+            "Fee Cash",
+            Number(breakdown.feeCash).toFixed(2),
+            "",
+            "",
+            "",
+            "",
+            "",
+        ]);
+        tableBody.push([
+            "",
+            "",
+            "",
+            "",
+            "Premium Cash",
+            Number(breakdown.premiumCash).toFixed(2),
+            "",
+            "",
+            "",
+            "",
+            "",
+        ]);
+        tableBody.push([
+            "",
+            "",
+            "",
+            "",
+            "Total Cash",
+            Number(breakdown.totalCash).toFixed(2),
+            "",
+            "",
+            "",
+            "",
+            "",
+        ]);
+        tableBody.push([
+            "",
+            "",
+            "",
+            "",
+            "Fee Credit/Debit Card",
+            Number(breakdown.feeCard).toFixed(2),
+            "",
+            "",
+            "",
+            "",
+            "",
+        ]);
+        tableBody.push([
+            "",
+            "",
+            "",
+            "",
+            "Premium Credit/Debit Card",
+            Number(breakdown.premiumCard).toFixed(2),
+            "",
+            "",
+            "",
+            "",
+            "",
+        ]);
+        tableBody.push([
+            "",
+            "",
+            "",
+            "",
+            "Total Credit/Debit Card",
+            Number(breakdown.totalCard).toFixed(2),
+            "",
+            "",
+            "",
+            "",
+            "",
+        ]);
+
+        const periodValue = periodFilter ? periodFilter.value : "all";
+        const agentValue = agentFilter
+            ? agentFilter.value || "All Agents"
+            : "All Agents";
+        const searchValue = tableSearch ? tableSearch.value || "None" : "None";
+
+        doc.setFontSize(16);
+        doc.text("Invoices Report", 40, 35);
+
+        doc.setFontSize(10);
+        doc.text(`Period: ${periodValue}`, 40, 55);
+        doc.text(`Sale Agent: ${agentValue}`, 220, 55);
+        doc.text(`Search: ${searchValue}`, 420, 55);
+
+        doc.autoTable({
+            head: tableHead,
+            body: tableBody,
+            startY: 70,
+            theme: "grid",
+            styles: {
+                fontSize: 8,
+                cellPadding: 4,
+                overflow: "linebreak",
+                valign: "middle",
+            },
+            headStyles: {
+                fillColor: [31, 41, 55],
+                textColor: 255,
+                fontStyle: "bold",
+            },
+            bodyStyles: {
+                textColor: [55, 65, 81],
+            },
+            alternateRowStyles: {
+                fillColor: [249, 250, 251],
+            },
+            margin: { top: 70, left: 20, right: 20, bottom: 20 },
+        });
+
+        const now = new Date();
+        const filename = `reports_invoices_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}-${String(now.getMinutes()).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}.pdf`;
+
+        doc.save(filename);
     }
 
     function buildNormalRows(rows) {
@@ -551,6 +748,11 @@ document.addEventListener("DOMContentLoaded", () => {
     exportCsvBtn.addEventListener("click", () => {
         if (activeReport !== "invoices") return;
         exportCurrentTableToCsv();
+    });
+
+    exportPdfBtn.addEventListener("click", () => {
+        if (activeReport !== "invoices") return;
+        exportCurrentTableToPdf();
     });
 
     tableSearch.addEventListener("input", () => {
