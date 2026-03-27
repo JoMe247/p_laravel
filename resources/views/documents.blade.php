@@ -83,7 +83,7 @@
                                     <th style="width: 70px;">ID</th>
                                     <th style="min-width: 220px;">CUSTOMER'S NAME</th>
                                     <th style="min-width: 140px;">PHONE</th>
-                                    <th style="min-width: 120px;">TYPE</th>
+                                    <th style="min-width: 120px;">TEMPLATE</th>
                                     <th style="min-width: 120px;">POLICY #</th>
                                     <th style="min-width: 140px;">DATE</th>
                                     <th style="min-width: 220px;">URL</th>

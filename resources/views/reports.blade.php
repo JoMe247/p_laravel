@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="reports-invoices-url" content="{{ route('reports.invoices-data') }}">
     <meta name="reports-estimates-url" content="{{ route('reports.estimates-data') }}">
+    <meta name="reports-customers-url" content="{{ route('reports.customers-data') }}">
+    <meta name="reports-items-url" content="{{ route('reports.items-data') }}">
     <title>Reports</title>
 
     <link rel="icon" href="img/favicon.png">
@@ -57,6 +59,7 @@
                     <div class="reports-toolbar">
                         <div class="report-buttons">
                             <button type="button" class="report-tab active" data-report="invoices">INVOICES</button>
+                            <button type="button" class="report-tab" data-report="items">ITEMS</button>
                             <button type="button" class="report-tab" data-report="estimates">ESTIMATES</button>
                             <button type="button" class="report-tab" data-report="customers">CUSTOMERS</button>
                             <button type="button" class="report-tab" data-report="policies">POLICIES</button>
@@ -115,7 +118,8 @@
                                         Export CSV
                                     </button>
 
-                                    <button type="button" id="exportPdfBtn" class="export-pdf-btn" title="Export PDF">
+                                    <button type="button" id="exportPdfBtn" class="export-pdf-btn"
+                                        title="Export PDF">
                                         <i class='bx bxs-file-pdf'></i>
                                     </button>
                                 </div>
@@ -137,21 +141,7 @@
 
                             <div class="report-table-scroll">
                                 <table class="reports-table">
-                                    <thead>
-                                        <tr>
-                                            <th id="sequenceHeader">Payment #</th>
-                                            <th>Date</th>
-                                            <th id="documentNumberHeader">Invoice #</th>
-                                            <th>Customer</th>
-                                            <th>Payment Mode</th>
-                                            <th>Fee</th>
-                                            <th>Premium</th>
-                                            <th>Policy #</th>
-                                            <th>Description / Item</th>
-                                            <th>Amount</th>
-                                            <th>Sale Agent</th>
-                                        </tr>
-                                    </thead>
+                                    <thead id="reportsTableHead"></thead>
                                     <tbody id="reportsTableBody">
                                         <tr>
                                             <td colspan="11" class="empty-row">Loading...</td>

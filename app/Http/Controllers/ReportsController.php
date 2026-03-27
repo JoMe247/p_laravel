@@ -886,4 +886,317 @@ class ReportsController extends Controller
 
         return $reportRows;
     }
+
+    public function customersData(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json(['columns' => [], 'rows' => []], 401);
+        }
+
+        $agency = $authUser->agency ?? null;
+
+        $allColumns = Schema::getColumnListing('customers');
+
+        $visibleColumns = array_values(array_filter($allColumns, function ($column) {
+            return !in_array(strtolower($column), ['picture', 'alert'], true);
+        }));
+
+        $agencyColumn = $this->resolveFirstExistingColumn('customers', [
+            'Agency',
+            'agency',
+        ]);
+
+        $dateColumn = $this->resolveFirstExistingColumn('customers', [
+            'Added',
+            'added',
+            'created_at',
+        ]);
+
+        $query = DB::table('customers');
+
+        if ($agency && $agencyColumn) {
+            $query->where($agencyColumn, $agency);
+        }
+
+        if ($dateColumn) {
+            $this->applyGenericPeriodFilter(
+                $query,
+                $dateColumn,
+                $request->get('period', 'all'),
+                $request->get('from'),
+                $request->get('to')
+            );
+        }
+
+        if ($dateColumn) {
+            $query->orderBy($dateColumn, 'desc');
+        } elseif (in_array('ID', $allColumns, true)) {
+            $query->orderBy('ID', 'desc');
+        } elseif (in_array('id', $allColumns, true)) {
+            $query->orderBy('id', 'desc');
+        }
+
+        $rows = [];
+        foreach ($query->get() as $customer) {
+            $data = (array) $customer;
+            $row = [];
+
+            foreach ($visibleColumns as $column) {
+                $row[$column] = $data[$column] ?? '';
+            }
+
+            $rows[] = $row;
+        }
+
+        $columns = array_map(function ($column) {
+            return [
+                'key' => $column,
+                'label' => $this->humanizeColumnName($column),
+                'type' => 'text',
+            ];
+        }, $visibleColumns);
+
+        return response()->json([
+            'columns' => $columns,
+            'rows' => $rows,
+        ]);
+    }
+
+
+    public function itemsData(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json(['columns' => [], 'rows' => []], 401);
+        }
+
+        $agency = $authUser->agency ?? null;
+        $agentFilter = trim((string) $request->get('agent', ''));
+
+        $dateColumn = $this->resolveFirstExistingColumn('invoices', [
+            'payment_date',
+            'creation_date',
+            'created_at',
+        ]) ?? 'created_at';
+
+        $query = DB::table('invoices')->select([
+            'inv_prices',
+            'created_by_name',
+        ]);
+
+        if ($agency && Schema::hasColumn('invoices', 'agency')) {
+            $query->where('agency', $agency);
+        }
+
+        if ($agentFilter !== '' && Schema::hasColumn('invoices', 'created_by_name')) {
+            $query->where('created_by_name', 'like', '%' . $agentFilter . '%');
+        }
+
+        if ($dateColumn && Schema::hasColumn('invoices', $dateColumn)) {
+            $this->applyGenericPeriodFilter(
+                $query,
+                $dateColumn,
+                $request->get('period', 'all'),
+                $request->get('from'),
+                $request->get('to')
+            );
+        }
+
+        $catalog = $this->getInvoiceItemsCatalog();
+
+        $stats = [];
+        foreach ($catalog as $itemName) {
+            $stats[$itemName] = [
+                'item_name' => $itemName,
+                'item_count' => 0,
+                'item_total_amount' => 0,
+                'item_average' => 0,
+            ];
+        }
+
+        foreach ($query->get() as $invoice) {
+            if (empty($invoice->inv_prices)) {
+                continue;
+            }
+
+            $decoded = json_decode($invoice->inv_prices, true);
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+                continue;
+            }
+
+            foreach (($decoded['rows'] ?? []) as $detail) {
+                $itemName = trim((string) ($detail['item'] ?? $detail['description'] ?? ''));
+                if ($itemName === '' || !array_key_exists($itemName, $stats)) {
+                    continue;
+                }
+
+                $qty = $this->sanitizeNumber($detail['amount'] ?? $detail['qty'] ?? 1);
+                if ($qty <= 0) {
+                    $qty = 1;
+                }
+
+                $rowTotal = 0;
+                if (isset($detail['row_total'])) {
+                    $rowTotal = $this->sanitizeNumber($detail['row_total']);
+                } elseif (isset($detail['total'])) {
+                    $rowTotal = $this->sanitizeNumber($detail['total']);
+                } else {
+                    $price = $this->sanitizeNumber($detail['price'] ?? 0);
+                    $rowTotal = $qty * $price;
+                }
+
+                $stats[$itemName]['item_count'] += $qty;
+                $stats[$itemName]['item_total_amount'] += $rowTotal;
+            }
+        }
+
+        foreach ($stats as &$itemRow) {
+            $itemRow['item_average'] = $itemRow['item_count'] > 0
+                ? ($itemRow['item_total_amount'] / $itemRow['item_count'])
+                : 0;
+        }
+        unset($itemRow);
+
+        return response()->json([
+            'columns' => [
+                ['key' => 'item_name', 'label' => 'Items', 'type' => 'text'],
+                ['key' => 'item_count', 'label' => 'Amount', 'type' => 'number'],
+                ['key' => 'item_total_amount', 'label' => 'Total Amount', 'type' => 'money'],
+                ['key' => 'item_average', 'label' => 'Promedio', 'type' => 'money'],
+            ],
+            'rows' => array_values($stats),
+        ]);
+    }
+
+    private function applyGenericPeriodFilter($query, string $dateColumn, string $period, ?string $from, ?string $to): void
+    {
+        $now = \Carbon\Carbon::now();
+
+        switch ($period) {
+            case 'this_month':
+                $query->whereBetween($dateColumn, [
+                    $now->copy()->startOfMonth(),
+                    $now->copy()->endOfMonth(),
+                ]);
+                break;
+
+            case 'last_month':
+                $query->whereBetween($dateColumn, [
+                    $now->copy()->subMonthNoOverflow()->startOfMonth(),
+                    $now->copy()->subMonthNoOverflow()->endOfMonth(),
+                ]);
+                break;
+
+            case 'this_year':
+                $query->whereBetween($dateColumn, [
+                    $now->copy()->startOfYear(),
+                    $now->copy()->endOfYear(),
+                ]);
+                break;
+
+            case 'last_year':
+                $query->whereBetween($dateColumn, [
+                    $now->copy()->subYear()->startOfYear(),
+                    $now->copy()->subYear()->endOfYear(),
+                ]);
+                break;
+
+            case 'last_3_months':
+                $query->whereBetween($dateColumn, [
+                    $now->copy()->subMonthsNoOverflow(2)->startOfMonth(),
+                    $now->copy()->endOfMonth(),
+                ]);
+                break;
+
+            case 'last_6_months':
+                $query->whereBetween($dateColumn, [
+                    $now->copy()->subMonthsNoOverflow(5)->startOfMonth(),
+                    $now->copy()->endOfMonth(),
+                ]);
+                break;
+
+            case 'last_12_months':
+                $query->whereBetween($dateColumn, [
+                    $now->copy()->subMonthsNoOverflow(11)->startOfMonth(),
+                    $now->copy()->endOfMonth(),
+                ]);
+                break;
+
+            case 'custom':
+                if ($from && $to) {
+                    $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
+                    $toDate = \Carbon\Carbon::parse($to)->endOfDay();
+
+                    if ($fromDate->gt($toDate)) {
+                        [$fromDate, $toDate] = [$toDate, $fromDate];
+                    }
+
+                    $query->whereBetween($dateColumn, [$fromDate, $toDate]);
+                }
+                break;
+        }
+    }
+
+    private function humanizeColumnName(string $column): string
+    {
+        $label = preg_replace('/([a-zA-Z])(\d)/', '$1 $2', $column);
+        $label = preg_replace('/([a-z])([A-Z])/', '$1 $2', $label);
+        $label = str_replace(['_', '-'], ' ', $label);
+        $label = preg_replace('/\s+/', ' ', trim($label));
+        $label = ucwords(strtolower($label));
+
+        $replacements = [
+            'Id' => 'ID',
+            'Zip Code' => 'ZIP Code',
+            'Dob' => 'DOB',
+            'Dl' => 'DL',
+            'Dl State' => 'DL State',
+            'Cid' => 'CID',
+        ];
+
+        return $replacements[$label] ?? $label;
+    }
+
+    private function getInvoiceItemsCatalog(): array
+    {
+        return [
+            'Add Coverage - Comp & Collision Or Umbi/umpd',
+            'Add Driver',
+            'Add Vehicle W/comp & Collision Or Umbi/umpd',
+            'Add Vehicle W/liability',
+            'Address Change',
+            'Certificate Of Insurance',
+            'Credit Card Fee',
+            'Delete Vehicle',
+            'Exclude Driver',
+            'Installment',
+            'Installment Fee',
+            'Late Fee',
+            'New Business Commercial',
+            'New Business Comp & Collision Or Umbi/umpd W/dl',
+            'New Business Comp & Collision Or Umbi/umpd W/out Dl',
+            'New Business General Liability',
+            'New Business Homeowners',
+            'New Business Liability W/dl',
+            'New Business Liability W/out Dl',
+            'New Business Motorcycle',
+            'New Business Renters W/lemonade',
+            'New Business Renters W/progressive',
+            'New Business Sr22 Suspended Dl',
+            'Notary',
+            'Nsf Fee',
+            'Other',
+            'Reinstate',
+            'Renewal Fee - 12 Months',
+            'Renewal Fee - 2 Months',
+            'Renewal Fee - 3 Months',
+            'Renewal Fee - 6 Months',
+            'Rewrite Comp & Collision Or Umbi/umpd',
+            'Rewrite Liability',
+            'Sr-22',
+            'Swap Drivers',
+            'Swap Vehicle',
+        ];
+    }
 }
