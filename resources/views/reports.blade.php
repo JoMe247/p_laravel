@@ -9,6 +9,7 @@
     <meta name="reports-estimates-url" content="{{ route('reports.estimates-data') }}">
     <meta name="reports-customers-url" content="{{ route('reports.customers-data') }}">
     <meta name="reports-items-url" content="{{ route('reports.items-data') }}">
+    <meta name="reports-policies-url" content="{{ route('reports.policies-data') }}">
     <title>Reports</title>
 
     <link rel="icon" href="img/favicon.png">
@@ -63,6 +64,7 @@
                             <button type="button" class="report-tab" data-report="estimates">ESTIMATES</button>
                             <button type="button" class="report-tab" data-report="customers">CUSTOMERS</button>
                             <button type="button" class="report-tab" data-report="policies">POLICIES</button>
+                            <button type="button" class="report-tab" data-report="documents">DOCUMENTS</button>
                             <button type="button" class="report-tab" data-report="messages">MESSAGES</button>
                             <div class="report-filter-block">
                                 <label for="periodFilter">Period</label>

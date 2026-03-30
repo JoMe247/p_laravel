@@ -1199,4 +1199,414 @@ class ReportsController extends Controller
             'Swap Vehicle',
         ];
     }
+
+    public function policiesData(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json(['columns' => [], 'rows' => []], 401);
+        }
+
+        $agency = $authUser->agency ?? null;
+
+        /*
+    |--------------------------------------------------------------------------
+    | Actualiza remaining_time y last_payment cada vez que se carga el reporte
+    |--------------------------------------------------------------------------
+    */
+        $this->syncPoliciesDerivedFields($agency);
+
+        $allColumns = Schema::getColumnListing('policies');
+
+        $dateColumn = $this->resolveFirstExistingColumn('policies', [
+            'pol_added_date',
+            'created_at',
+            'pol_eff_date',
+            'pol_expiration',
+        ]);
+
+        $agencyColumn = $this->resolveFirstExistingColumn('policies', [
+            'agency',
+            'Agency',
+        ]);
+
+        $query = DB::table('policies as p');
+
+        if (in_array('customer_id', $allColumns, true)) {
+            $query->leftJoin('customers as c', 'c.ID', '=', 'p.customer_id')
+                ->select('p.*', DB::raw('COALESCE(c.Name, "") as customer_name'));
+        } else {
+            $query->select('p.*');
+        }
+
+        if ($agency && $agencyColumn) {
+            $query->where("p.$agencyColumn", $agency);
+        }
+
+        if ($dateColumn) {
+            $this->applyGenericPeriodFilter(
+                $query,
+                "p.$dateColumn",
+                $request->get('period', 'all'),
+                $request->get('from'),
+                $request->get('to')
+            );
+        }
+
+        if ($dateColumn) {
+            $query->orderBy("p.$dateColumn", 'desc');
+        } elseif (in_array('id', $allColumns, true)) {
+            $query->orderBy('p.id', 'desc');
+        } elseif (in_array('ID', $allColumns, true)) {
+            $query->orderBy('p.ID', 'desc');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Definición de columnas visibles
+    | - customer_id -> Customer
+    | - vehicules   -> Vehicles
+    |--------------------------------------------------------------------------
+    */
+        $columns = [];
+        foreach ($allColumns as $column) {
+            $lower = strtolower($column);
+
+            if (in_array($lower, ['created_at', 'updated_at', 'last_payment'], true)) {
+                continue;
+            }
+
+            if ($lower === 'customer_id') {
+                $columns[] = [
+                    'key' => 'customer_name',
+                    'label' => 'Customer',
+                    'type' => 'text',
+                ];
+                continue;
+            }
+
+            if ($lower === 'vehicules') {
+                $columns[] = [
+                    'key' => 'vehicles_count',
+                    'label' => 'Vehicles',
+                    'type' => 'number',
+                ];
+                continue;
+            }
+
+            $columns[] = [
+                'key' => $column,
+                'label' => $this->getPoliciesColumnLabel($column),
+                'type' => 'text',
+            ];
+        }
+
+        $rows = [];
+        foreach ($query->get() as $policy) {
+            $data = (array) $policy;
+            $data['vehicles_count'] = $this->countVehiclesFromJson($data['vehicules'] ?? null);
+
+            $row = [];
+            foreach ($columns as $column) {
+                $row[$column['key']] = $data[$column['key']] ?? '';
+            }
+
+            $rows[] = $row;
+        }
+
+        return response()->json([
+            'columns' => $columns,
+            'rows' => $rows,
+        ]);
+    }
+
+    private function syncPoliciesDerivedFields(?string $agency): void
+    {
+        if (!Schema::hasTable('policies')) {
+            return;
+        }
+
+        $policyIdColumn = $this->resolveFirstExistingColumn('policies', ['id', 'ID']);
+        $policyNumberColumn = $this->resolveFirstExistingColumn('policies', ['pol_number', 'policy_number']);
+        $agencyColumn = $this->resolveFirstExistingColumn('policies', ['agency', 'Agency']);
+        $expirationColumn = $this->resolveFirstExistingColumn('policies', ['pol_expiration']);
+        $customerIdColumn = $this->resolveFirstExistingColumn('policies', ['customer_id']);
+
+        if (!$policyIdColumn || !$policyNumberColumn) {
+            return;
+        }
+
+        $policiesQuery = DB::table('policies')->select([
+            $policyIdColumn . ' as policy_pk',
+            $policyNumberColumn . ' as policy_number',
+        ]);
+
+        if ($expirationColumn) {
+            $policiesQuery->addSelect($expirationColumn . ' as policy_expiration');
+        }
+
+        if ($customerIdColumn) {
+            $policiesQuery->addSelect($customerIdColumn . ' as policy_customer_id');
+        }
+
+        if (Schema::hasColumn('policies', 'remaining_time')) {
+            $policiesQuery->addSelect('remaining_time as current_remaining_time');
+        }
+
+        if (Schema::hasColumn('policies', 'last_payment')) {
+            $policiesQuery->addSelect('last_payment as current_last_payment');
+        }
+
+        if ($agency && $agencyColumn) {
+            $policiesQuery->where($agencyColumn, $agency);
+        }
+
+        $policies = $policiesQuery->get();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Mapa del último pago por policy_number (+ customer_id cuando exista)
+    |--------------------------------------------------------------------------
+    */
+        $invoiceQuery = DB::table('invoices')->select([
+            'policy_number',
+            'customer_id',
+            'inv_prices',
+        ]);
+
+        if ($agency && Schema::hasColumn('invoices', 'agency')) {
+            $invoiceQuery->where('agency', $agency);
+        }
+
+        if (Schema::hasColumn('invoices', 'created_at')) {
+            $invoiceQuery->orderBy('created_at', 'desc');
+        } elseif (Schema::hasColumn('invoices', 'creation_date')) {
+            $invoiceQuery->orderBy('creation_date', 'desc');
+        } elseif (Schema::hasColumn('invoices', 'payment_date')) {
+            $invoiceQuery->orderBy('payment_date', 'desc');
+        } else {
+            $invoiceQuery->orderBy('id', 'desc');
+        }
+
+        $latestPayments = [];
+
+        foreach ($invoiceQuery->get() as $invoice) {
+            $policyNumber = trim((string) ($invoice->policy_number ?? ''));
+            if ($policyNumber === '') {
+                continue;
+            }
+
+            $grandTotal = $this->extractGrandTotal([
+                'inv_prices' => $invoice->inv_prices,
+            ]);
+
+            $customerId = trim((string) ($invoice->customer_id ?? ''));
+            $keyByPolicyAndCustomer = $policyNumber . '|' . $customerId;
+            $keyByPolicyOnly = $policyNumber;
+
+            if (!array_key_exists($keyByPolicyAndCustomer, $latestPayments)) {
+                $latestPayments[$keyByPolicyAndCustomer] = $grandTotal;
+            }
+
+            if (!array_key_exists($keyByPolicyOnly, $latestPayments)) {
+                $latestPayments[$keyByPolicyOnly] = $grandTotal;
+            }
+        }
+
+        foreach ($policies as $policy) {
+            $updates = [];
+
+            if (Schema::hasColumn('policies', 'remaining_time')) {
+                $newRemainingTime = $this->getRemainingTimeLabel($policy->policy_expiration ?? null);
+                $currentRemainingTime = (string) ($policy->current_remaining_time ?? '');
+
+                if ($newRemainingTime !== $currentRemainingTime) {
+                    $updates['remaining_time'] = $newRemainingTime;
+                }
+            }
+
+            if (Schema::hasColumn('policies', 'last_payment')) {
+                $policyNumber = trim((string) ($policy->policy_number ?? ''));
+                $policyCustomerId = trim((string) ($policy->policy_customer_id ?? ''));
+
+                $paymentKey1 = $policyNumber . '|' . $policyCustomerId;
+                $paymentKey2 = $policyNumber;
+
+                $newLastPayment = null;
+                if (array_key_exists($paymentKey1, $latestPayments)) {
+                    $newLastPayment = $latestPayments[$paymentKey1];
+                } elseif (array_key_exists($paymentKey2, $latestPayments)) {
+                    $newLastPayment = $latestPayments[$paymentKey2];
+                }
+
+                $newLastPaymentValue = $newLastPayment !== null ? number_format((float) $newLastPayment, 2, '.', '') : null;
+                $currentLastPayment = $policy->current_last_payment ?? null;
+
+                if ((string) $newLastPaymentValue !== (string) $currentLastPayment) {
+                    $updates['last_payment'] = $newLastPaymentValue;
+                }
+            }
+
+            if (!empty($updates)) {
+                DB::table('policies')
+                    ->where($policyIdColumn, $policy->policy_pk)
+                    ->update($updates);
+            }
+        }
+    }
+
+    private function getRemainingTimeLabel($expirationDate): string
+    {
+        $expiration = $this->parseFlexibleDate($expirationDate);
+
+        if (!$expiration) {
+            return '';
+        }
+
+        $today = Carbon::today();
+        $expiration = $expiration->copy()->startOfDay();
+
+        if ($expiration->lt($today)) {
+            return 'Expired';
+        }
+
+        if ($expiration->equalTo($today)) {
+            return 'Expires today';
+        }
+
+        $cursor = $today->copy();
+
+        $years = 0;
+        while ($cursor->copy()->addYear()->lte($expiration)) {
+            $cursor->addYear();
+            $years++;
+        }
+
+        $months = 0;
+        while ($cursor->copy()->addMonth()->lte($expiration)) {
+            $cursor->addMonth();
+            $months++;
+        }
+
+        $days = $cursor->diffInDays($expiration);
+
+        if ($years > 0) {
+            $parts = [];
+            $parts[] = $years . ' ' . ($years === 1 ? 'year' : 'years');
+
+            if ($months > 0) {
+                $parts[] = $months . ' ' . ($months === 1 ? 'month' : 'months');
+            }
+
+            return implode(' ', $parts) . ' remaining';
+        }
+
+        if ($months > 0) {
+            return $months . ' ' . ($months === 1 ? 'month' : 'months') . ' remaining';
+        }
+
+        if ($days >= 7) {
+            $weeks = intdiv($days, 7);
+            $remainingDays = $days % 7;
+
+            $parts = [];
+            $parts[] = $weeks . ' ' . ($weeks === 1 ? 'week' : 'weeks');
+
+            if ($remainingDays > 0) {
+                $parts[] = $remainingDays . ' ' . ($remainingDays === 1 ? 'day' : 'days');
+            }
+
+            return implode(' ', $parts) . ' remaining';
+        }
+
+        return $days . ' ' . ($days === 1 ? 'day' : 'days') . ' remaining';
+    }
+
+    private function parseFlexibleDate($value): ?Carbon
+    {
+        if (!$value) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        $formats = [
+            'd/m/Y',
+            'd-m-Y',
+            'Y-m-d',
+            'Y/m/d',
+            'm/d/Y',
+            'm-d-Y',
+            'd/m/Y H:i:s',
+            'd-m-Y H:i:s',
+            'Y-m-d H:i:s',
+            'Y/m/d H:i:s',
+            'm/d/Y H:i:s',
+            'm-d-Y H:i:s',
+        ];
+
+        foreach ($formats as $format) {
+            try {
+                return Carbon::createFromFormat($format, $value);
+            } catch (\Throwable $e) {
+            }
+        }
+
+        try {
+            return Carbon::parse($value);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function countVehiclesFromJson($value): int
+    {
+        if (!$value) {
+            return 0;
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            return 0;
+        }
+
+        if (array_is_list($decoded)) {
+            return count($decoded);
+        }
+
+        foreach (['vehicles', 'vehicules', 'items', 'data'] as $key) {
+            if (isset($decoded[$key]) && is_array($decoded[$key])) {
+                return count($decoded[$key]);
+            }
+        }
+
+        return !empty($decoded) ? 1 : 0;
+    }
+
+    private function getPoliciesColumnLabel(string $column): string
+    {
+        $map = [
+            'id' => 'ID',
+            'customer_id' => 'Customer',
+            'pol_number' => 'Policy #',
+            'pol_carrier' => 'Carrier',
+            'pol_expiration' => 'Expiration',
+            'remaining_time' => 'Remaining Time',
+            'last_payment' => 'Last Payment',
+            'pol_status' => 'Status',
+            'pol_url' => 'Policy URL',
+            'pol_eff_date' => 'Effective Date',
+            'pol_added_date' => 'Added Date',
+            'pol_due_day' => 'Due Day',
+            'pol_agent_record' => 'Agent Of Record',
+            'vehicules' => 'Vehicles',
+        ];
+
+        if (isset($map[$column])) {
+            return $map[$column];
+        }
+
+        return $this->humanizeColumnName($column);
+    }
 }

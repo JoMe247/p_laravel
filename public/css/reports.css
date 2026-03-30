@@ -415,3 +415,8 @@ body {
     background: #fef2f2;
     border-color: #fca5a5;
 }
+
+.expired-cell {
+    color: #dc2626 !important;
+    font-weight: 700;
+}

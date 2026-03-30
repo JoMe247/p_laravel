@@ -1,12 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
     const getMetaContent = (name) =>
-        document.querySelector(`meta[name="${name}"]`)?.getAttribute("content") || "";
+        document
+            .querySelector(`meta[name="${name}"]`)
+            ?.getAttribute("content") || "";
 
     const reportUrls = {
         invoices: getMetaContent("reports-invoices-url"),
         items: getMetaContent("reports-items-url"),
         estimates: getMetaContent("reports-estimates-url"),
         customers: getMetaContent("reports-customers-url"),
+        policies: getMetaContent("reports-policies-url"),
     };
 
     const reportConfigs = {
@@ -26,7 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 { key: "fee", label: "Fee", type: "money" },
                 { key: "premium", label: "Premium", type: "money" },
                 { key: "policy_number", label: "Policy #", type: "text" },
-                { key: "description", label: "Description / Item", type: "text" },
+                {
+                    key: "description",
+                    label: "Description / Item",
+                    type: "text",
+                },
                 { key: "amount", label: "Amount", type: "money" },
                 { key: "sale_agent", label: "Sale Agent", type: "text" },
             ],
@@ -41,7 +48,11 @@ document.addEventListener("DOMContentLoaded", () => {
             columns: [
                 { key: "item_name", label: "Items", type: "text" },
                 { key: "item_count", label: "Amount", type: "number" },
-                { key: "item_total_amount", label: "Total Amount", type: "money" },
+                {
+                    key: "item_total_amount",
+                    label: "Total Amount",
+                    type: "money",
+                },
                 { key: "item_average", label: "Promedio", type: "money" },
             ],
         },
@@ -61,7 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 { key: "fee", label: "Fee", type: "money" },
                 { key: "premium", label: "Premium", type: "money" },
                 { key: "policy_number", label: "Policy #", type: "text" },
-                { key: "description", label: "Description / Item", type: "text" },
+                {
+                    key: "description",
+                    label: "Description / Item",
+                    type: "text",
+                },
                 { key: "amount", label: "Amount", type: "money" },
                 { key: "sale_agent", label: "Sale Agent", type: "text" },
             ],
@@ -73,6 +88,15 @@ document.addEventListener("DOMContentLoaded", () => {
             useAgentFilter: false,
             includeTotals: false,
             filePrefix: "reports_customers",
+            columns: [],
+        },
+        policies: {
+            title: "Policies Report",
+            url: reportUrls.policies,
+            usePeriodFilter: true,
+            useAgentFilter: false,
+            includeTotals: false,
+            filePrefix: "reports_policies",
             columns: [],
         },
     };
@@ -99,7 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const reportsTableHead = document.getElementById("reportsTableHead");
     const reportsTableBody = document.getElementById("reportsTableBody");
 
-    const agentFilterBlock = agentFilter ? agentFilter.closest(".report-filter-block") : null;
+    const agentFilterBlock = agentFilter
+        ? agentFilter.closest(".report-filter-block")
+        : null;
 
     let activeReport = "invoices";
     let allRows = [];
@@ -126,7 +152,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatColumnValue(column, value, exportMode = false) {
         if (column.type === "money") {
-            return exportMode ? Number(value || 0).toFixed(2) : formatMoney(value);
+            return exportMode
+                ? Number(value || 0).toFixed(2)
+                : formatMoney(value);
         }
 
         if (column.type === "number") {
@@ -171,14 +199,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         reportsTableHead.innerHTML = `
             <tr>
-                ${activeColumns.map(column => `<th>${escapeHtml(column.label)}</th>`).join("")}
+                ${activeColumns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")}
             </tr>
         `;
     }
 
     function getSearchableText(row) {
         return activeColumns
-            .map(column => row[column.key] ?? "")
+            .map((column) => row[column.key] ?? "")
             .join(" ")
             .toLowerCase();
     }
@@ -190,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return [...allRows];
         }
 
-        return allRows.filter(row => getSearchableText(row).includes(query));
+        return allRows.filter((row) => getSearchableText(row).includes(query));
     }
 
     function getVisibleRows(rows) {
@@ -209,21 +237,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getTotals(rows) {
-        return rows.reduce((acc, row) => {
-            acc.fee += Number(row.fee || 0);
-            acc.premium += Number(row.premium || 0);
-            acc.amount += Number(row.amount || 0);
-            return acc;
-        }, { fee: 0, premium: 0, amount: 0 });
+        return rows.reduce(
+            (acc, row) => {
+                acc.fee += Number(row.fee || 0);
+                acc.premium += Number(row.premium || 0);
+                acc.amount += Number(row.amount || 0);
+                return acc;
+            },
+            { fee: 0, premium: 0, amount: 0 },
+        );
     }
 
     function isCashMode(mode) {
-        const value = String(mode || "").trim().toLowerCase();
+        const value = String(mode || "")
+            .trim()
+            .toLowerCase();
         return value === "cash";
     }
 
     function isCardMode(mode) {
-        const value = String(mode || "").trim().toLowerCase();
+        const value = String(mode || "")
+            .trim()
+            .toLowerCase();
         return (
             value.includes("credit/debit card") ||
             value.includes("credit debit card") ||
@@ -239,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let feeCard = 0;
         let premiumCard = 0;
 
-        rows.forEach(row => {
+        rows.forEach((row) => {
             const fee = Number(row.fee || 0);
             const premium = Number(row.premium || 0);
             const mode = row.payment_mode || "";
@@ -266,46 +301,75 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function buildNormalRows(rows) {
-        return rows.map(row => `
-            <tr>
-                ${activeColumns.map(column => {
-                    const value = formatColumnValue(column, row[column.key], false);
-                    const moneyClass = column.type === "money" ? "money-cell" : "";
-                    return `<td class="${moneyClass}">${escapeHtml(value)}</td>`;
-                }).join("")}
-            </tr>
-        `).join("");
-    }
+    return rows.map(row => `
+        <tr>
+            ${activeColumns.map(column => {
+                const rawValue = row[column.key];
+                const value = formatColumnValue(column, rawValue, false);
+
+                const classes = [];
+                if (column.type === "money") {
+                    classes.push("money-cell");
+                }
+
+                if (
+                    activeReport === "policies" &&
+                    column.key === "remaining_time" &&
+                    String(rawValue || "").trim().toLowerCase() === "expired"
+                ) {
+                    classes.push("expired-cell");
+                }
+
+                return `<td class="${classes.join(" ")}">${escapeHtml(value)}</td>`;
+            }).join("")}
+        </tr>
+    `).join("");
+}
 
     function buildTotalsRow(totals) {
-        const feeIndex = activeColumns.findIndex(col => col.key === "fee");
-        const premiumIndex = activeColumns.findIndex(col => col.key === "premium");
-        const amountIndex = activeColumns.findIndex(col => col.key === "amount");
+        const feeIndex = activeColumns.findIndex((col) => col.key === "fee");
+        const premiumIndex = activeColumns.findIndex(
+            (col) => col.key === "premium",
+        );
+        const amountIndex = activeColumns.findIndex(
+            (col) => col.key === "amount",
+        );
 
         const cells = activeColumns.map(() => "");
         if (cells.length > 0) cells[0] = "Total (Per Page)";
         if (feeIndex > -1) cells[feeIndex] = formatMoney(totals.fee);
-        if (premiumIndex > -1) cells[premiumIndex] = formatMoney(totals.premium);
+        if (premiumIndex > -1)
+            cells[premiumIndex] = formatMoney(totals.premium);
         if (amountIndex > -1) cells[amountIndex] = formatMoney(totals.amount);
 
         return `
             <tr class="totals-row">
-                ${cells.map((cell, index) => {
-                    const isMoney = [feeIndex, premiumIndex, amountIndex].includes(index);
-                    const classes = [
-                        isMoney ? "money-cell" : "",
-                        index === 0 ? "summary-title-cell" : ""
-                    ].join(" ").trim();
+                ${cells
+                    .map((cell, index) => {
+                        const isMoney = [
+                            feeIndex,
+                            premiumIndex,
+                            amountIndex,
+                        ].includes(index);
+                        const classes = [
+                            isMoney ? "money-cell" : "",
+                            index === 0 ? "summary-title-cell" : "",
+                        ]
+                            .join(" ")
+                            .trim();
 
-                    return `<td class="${classes}">${escapeHtml(cell)}</td>`;
-                }).join("")}
+                        return `<td class="${classes}">${escapeHtml(cell)}</td>`;
+                    })
+                    .join("")}
             </tr>
         `;
     }
 
     function buildBreakdownRows(breakdown) {
-        const labelIndex = activeColumns.findIndex(col => col.key === "payment_mode");
-        const valueIndex = activeColumns.findIndex(col => col.key === "fee");
+        const labelIndex = activeColumns.findIndex(
+            (col) => col.key === "payment_mode",
+        );
+        const valueIndex = activeColumns.findIndex((col) => col.key === "fee");
 
         if (labelIndex === -1 || valueIndex === -1) {
             return "";
@@ -320,25 +384,33 @@ document.addEventListener("DOMContentLoaded", () => {
             ["Total Credit/Debit Card", breakdown.totalCard],
         ];
 
-        return items.map(([label, value]) => {
-            const cells = activeColumns.map(() => "");
-            cells[labelIndex] = label;
-            cells[valueIndex] = formatMoney(value);
+        return items
+            .map(([label, value]) => {
+                const cells = activeColumns.map(() => "");
+                cells[labelIndex] = label;
+                cells[valueIndex] = formatMoney(value);
 
-            return `
+                return `
                 <tr class="summary-breakdown-row">
-                    ${cells.map((cell, index) => {
-                        const classes = [
-                            index === labelIndex ? "breakdown-label" : "",
-                            index === valueIndex ? "money-cell breakdown-value" : "",
-                            cell === "" ? "summary-spacer" : ""
-                        ].join(" ").trim();
+                    ${cells
+                        .map((cell, index) => {
+                            const classes = [
+                                index === labelIndex ? "breakdown-label" : "",
+                                index === valueIndex
+                                    ? "money-cell breakdown-value"
+                                    : "",
+                                cell === "" ? "summary-spacer" : "",
+                            ]
+                                .join(" ")
+                                .trim();
 
-                        return `<td class="${classes}">${escapeHtml(cell)}</td>`;
-                    }).join("")}
+                            return `<td class="${classes}">${escapeHtml(cell)}</td>`;
+                        })
+                        .join("")}
                 </tr>
             `;
-        }).join("");
+            })
+            .join("");
     }
 
     function renderRows() {
@@ -394,13 +466,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         fetch(`${config.url}?${params.toString()}`, {
-            headers: { "X-Requested-With": "XMLHttpRequest" }
+            headers: { "X-Requested-With": "XMLHttpRequest" },
         })
-            .then(response => response.json())
-            .then(data => {
-                activeColumns = Array.isArray(data.columns) && data.columns.length
-                    ? data.columns
-                    : [...(config.columns || [])];
+            .then((response) => response.json())
+            .then((data) => {
+                activeColumns =
+                    Array.isArray(data.columns) && data.columns.length
+                        ? data.columns
+                        : [...(config.columns || [])];
 
                 buildTableHead();
 
@@ -408,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderRows();
                 hideLoading();
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error(error);
                 allRows = [];
                 setEmptyState("Error loading report.");
@@ -423,7 +496,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function downloadCsv(filename, content) {
-        const blob = new Blob(["\uFEFF" + content], { type: "text/csv;charset=utf-8;" });
+        const blob = new Blob(["\uFEFF" + content], {
+            type: "text/csv;charset=utf-8;",
+        });
         const url = URL.createObjectURL(blob);
 
         const link = document.createElement("a");
@@ -451,14 +526,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const csvRows = [];
 
         csvRows.push(
-            activeColumns.map(column => csvEscape(column.label)).join(",")
+            activeColumns.map((column) => csvEscape(column.label)).join(","),
         );
 
-        rows.forEach(row => {
+        rows.forEach((row) => {
             csvRows.push(
                 activeColumns
-                    .map(column => csvEscape(formatColumnValue(column, row[column.key], true)))
-                    .join(",")
+                    .map((column) =>
+                        csvEscape(
+                            formatColumnValue(column, row[column.key], true),
+                        ),
+                    )
+                    .join(","),
             );
         });
 
@@ -466,17 +545,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const totals = getTotals(rows);
             const breakdown = getMethodBreakdown(rows);
 
-            const feeIndex = activeColumns.findIndex(col => col.key === "fee");
-            const premiumIndex = activeColumns.findIndex(col => col.key === "premium");
-            const amountIndex = activeColumns.findIndex(col => col.key === "amount");
-            const labelIndex = activeColumns.findIndex(col => col.key === "payment_mode");
-            const valueIndex = activeColumns.findIndex(col => col.key === "fee");
+            const feeIndex = activeColumns.findIndex(
+                (col) => col.key === "fee",
+            );
+            const premiumIndex = activeColumns.findIndex(
+                (col) => col.key === "premium",
+            );
+            const amountIndex = activeColumns.findIndex(
+                (col) => col.key === "amount",
+            );
+            const labelIndex = activeColumns.findIndex(
+                (col) => col.key === "payment_mode",
+            );
+            const valueIndex = activeColumns.findIndex(
+                (col) => col.key === "fee",
+            );
 
             const totalRow = activeColumns.map(() => "");
             if (totalRow.length > 0) totalRow[0] = "Total (Per Page)";
-            if (feeIndex > -1) totalRow[feeIndex] = Number(totals.fee).toFixed(2);
-            if (premiumIndex > -1) totalRow[premiumIndex] = Number(totals.premium).toFixed(2);
-            if (amountIndex > -1) totalRow[amountIndex] = Number(totals.amount).toFixed(2);
+            if (feeIndex > -1)
+                totalRow[feeIndex] = Number(totals.fee).toFixed(2);
+            if (premiumIndex > -1)
+                totalRow[premiumIndex] = Number(totals.premium).toFixed(2);
+            if (amountIndex > -1)
+                totalRow[amountIndex] = Number(totals.amount).toFixed(2);
 
             csvRows.push("");
             csvRows.push(totalRow.map(csvEscape).join(","));
@@ -523,29 +615,44 @@ document.addEventListener("DOMContentLoaded", () => {
         const doc = new jsPDF({
             orientation: "landscape",
             unit: "pt",
-            format: "a4"
+            format: "a4",
         });
 
-        const tableHead = [activeColumns.map(column => column.label)];
-        const tableBody = rows.map(row =>
-            activeColumns.map(column => formatColumnValue(column, row[column.key], true))
+        const tableHead = [activeColumns.map((column) => column.label)];
+        const tableBody = rows.map((row) =>
+            activeColumns.map((column) =>
+                formatColumnValue(column, row[column.key], true),
+            ),
         );
 
         if (activeReport === "invoices") {
             const totals = getTotals(rows);
             const breakdown = getMethodBreakdown(rows);
 
-            const feeIndex = activeColumns.findIndex(col => col.key === "fee");
-            const premiumIndex = activeColumns.findIndex(col => col.key === "premium");
-            const amountIndex = activeColumns.findIndex(col => col.key === "amount");
-            const labelIndex = activeColumns.findIndex(col => col.key === "payment_mode");
-            const valueIndex = activeColumns.findIndex(col => col.key === "fee");
+            const feeIndex = activeColumns.findIndex(
+                (col) => col.key === "fee",
+            );
+            const premiumIndex = activeColumns.findIndex(
+                (col) => col.key === "premium",
+            );
+            const amountIndex = activeColumns.findIndex(
+                (col) => col.key === "amount",
+            );
+            const labelIndex = activeColumns.findIndex(
+                (col) => col.key === "payment_mode",
+            );
+            const valueIndex = activeColumns.findIndex(
+                (col) => col.key === "fee",
+            );
 
             const totalRow = activeColumns.map(() => "");
             if (totalRow.length > 0) totalRow[0] = "Total (Per Page)";
-            if (feeIndex > -1) totalRow[feeIndex] = Number(totals.fee).toFixed(2);
-            if (premiumIndex > -1) totalRow[premiumIndex] = Number(totals.premium).toFixed(2);
-            if (amountIndex > -1) totalRow[amountIndex] = Number(totals.amount).toFixed(2);
+            if (feeIndex > -1)
+                totalRow[feeIndex] = Number(totals.fee).toFixed(2);
+            if (premiumIndex > -1)
+                totalRow[premiumIndex] = Number(totals.premium).toFixed(2);
+            if (amountIndex > -1)
+                totalRow[amountIndex] = Number(totals.amount).toFixed(2);
             tableBody.push(totalRow);
 
             [
@@ -580,20 +687,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 fontSize: 8,
                 cellPadding: 4,
                 overflow: "linebreak",
-                valign: "middle"
+                valign: "middle",
             },
             headStyles: {
                 fillColor: [31, 41, 55],
                 textColor: 255,
-                fontStyle: "bold"
+                fontStyle: "bold",
             },
             bodyStyles: {
-                textColor: [55, 65, 81]
+                textColor: [55, 65, 81],
             },
             alternateRowStyles: {
-                fillColor: [249, 250, 251]
+                fillColor: [249, 250, 251],
             },
-            margin: { top: 70, left: 20, right: 20, bottom: 20 }
+            margin: { top: 70, left: 20, right: 20, bottom: 20 },
         });
 
         const now = new Date();
@@ -605,7 +712,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function activateTab(report) {
         activeReport = report;
 
-        reportTabs.forEach(tab => {
+        reportTabs.forEach((tab) => {
             tab.classList.toggle("active", tab.dataset.report === report);
         });
 
@@ -618,7 +725,9 @@ document.addEventListener("DOMContentLoaded", () => {
             periodFilter.disabled = !config.usePeriodFilter;
 
             if (agentFilterBlock) {
-                agentFilterBlock.style.display = config.useAgentFilter ? "" : "none";
+                agentFilterBlock.style.display = config.useAgentFilter
+                    ? ""
+                    : "none";
             }
 
             if (agentFilter) {
@@ -665,7 +774,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-    reportTabs.forEach(tab => {
+    reportTabs.forEach((tab) => {
         tab.addEventListener("click", () => {
             activateTab(tab.dataset.report);
         });
