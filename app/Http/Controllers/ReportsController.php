@@ -1272,7 +1272,7 @@ class ReportsController extends Controller
         foreach ($allColumns as $column) {
             $lower = strtolower($column);
 
-            if (in_array($lower, ['created_at', 'updated_at', 'last_payment'], true)) {
+            if (in_array($lower, ['created_at', 'updated_at'], true)) {
                 continue;
             }
 
@@ -1294,10 +1294,15 @@ class ReportsController extends Controller
                 continue;
             }
 
+            $type = 'text';
+            if ($lower === 'last_payment') {
+                $type = 'money';
+            }
+
             $columns[] = [
                 'key' => $column,
                 'label' => $this->getPoliciesColumnLabel($column),
-                'type' => 'text',
+                'type' => $type,
             ];
         }
 

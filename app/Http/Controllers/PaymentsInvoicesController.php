@@ -428,6 +428,19 @@ class PaymentsInvoicesController extends Controller
         $invoice->updated_at = now()->format('Y-m-d H:i:s');
         $invoice->save();
 
+        if (!empty($policyNumber)) {
+            $lastPayment = is_numeric($grandTotal)
+                ? (float) $grandTotal
+                : (float) preg_replace('/[^\d.\-]/', '', (string) $grandTotal);
+
+            DB::table('policies')
+                ->where('customer_id', (string)$customerId)
+                ->where('pol_number', (string)$policyNumber)
+                ->update([
+                    'last_payment' => $lastPayment,
+                ]);
+        }
+
         return response()->json([
             'ok' => true,
             'invoice_id' => $invoice->id,
