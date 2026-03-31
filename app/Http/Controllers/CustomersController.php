@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\CustomerNote;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 
 class CustomersController extends Controller
@@ -14,15 +15,27 @@ class CustomersController extends Controller
     // Listado simple
     public function index()
     {
-
         $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
         // En caso de no estar autenticado, redirige al login
         if (!$user) {
             return redirect()->route('login');
         }
+
         $customers = Customer::orderBy('ID', 'desc')->paginate(50);
-        return view('customers', compact('customers'));
+
+        // Obtener los IDs de los customers que están en esta página
+        $customerIds = $customers->pluck('ID')->toArray();
+
+        // Contar cuántas policies tiene cada customer
+        $policyCounts = DB::table('policies')
+            ->select('customer_id', DB::raw('COUNT(*) as total'))
+            ->whereIn('customer_id', $customerIds)
+            ->groupBy('customer_id')
+            ->pluck('total', 'customer_id')
+            ->toArray();
+
+        return view('customers', compact('customers', 'policyCounts'));
     }
 
     public function store(Request $request)
