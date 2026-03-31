@@ -1614,4 +1614,254 @@ class ReportsController extends Controller
 
         return $this->humanizeColumnName($column);
     }
+
+    public function messagesData(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json([
+                'sms_month_years' => [],
+                'selected_sms_month_year' => '',
+                'sms_month_rows' => [],
+                'sms_lifetime_years' => [],
+                'selected_sms_lifetime_year' => '',
+                'sms_lifetime_rows' => [],
+            ], 401);
+        }
+
+        $context = $this->getSmsAgencyContext($authUser);
+
+        $smsMonth = $this->buildSmsMonthReport(
+            $context,
+            $request->get('sms_month_year')
+        );
+
+        $smsLifetime = $this->buildSmsLifetimeReport(
+            $context,
+            $request->get('sms_lifetime_year')
+        );
+
+        return response()->json([
+            'sms_month_years' => $smsMonth['years'],
+            'selected_sms_month_year' => $smsMonth['selected_year'],
+            'sms_month_rows' => $smsMonth['rows'],
+
+            'sms_lifetime_years' => $smsLifetime['years'],
+            'selected_sms_lifetime_year' => $smsLifetime['selected_year'],
+            'sms_lifetime_rows' => $smsLifetime['rows'],
+        ]);
+    }
+
+    private function getSmsAgencyContext($authUser): array
+    {
+        $agency = $authUser->agency ?? null;
+        $twilioNumbers = [];
+
+        if (!empty($authUser->twilio_number)) {
+            $twilioNumbers[] = trim((string) $authUser->twilio_number);
+        }
+
+        if ($agency && Schema::hasTable('users') && Schema::hasColumn('users', 'agency') && Schema::hasColumn('users', 'twilio_number')) {
+            $userTwilios = DB::table('users')
+                ->where('agency', $agency)
+                ->whereNotNull('twilio_number')
+                ->pluck('twilio_number')
+                ->toArray();
+
+            $twilioNumbers = array_merge($twilioNumbers, $userTwilios);
+        }
+
+        $twilioNumbers = array_values(array_unique(array_filter(array_map(function ($value) {
+            return trim((string) $value);
+        }, $twilioNumbers))));
+
+        return [
+            'agency' => $agency,
+            'twilio_numbers' => $twilioNumbers,
+        ];
+    }
+
+    private function buildSmsMonthReport(array $context, $requestedYear): array
+    {
+        if (!Schema::connection('doc_config')->hasTable('sms_monthly_counters')) {
+            return [
+                'years' => [],
+                'selected_year' => '',
+                'rows' => [],
+            ];
+        }
+
+        $query = DB::connection('doc_config')->table('sms_monthly_counters');
+
+        if (!empty($context['agency'])) {
+            $query->where('agency_code', $context['agency']);
+        } elseif (!empty($context['twilio_numbers'])) {
+            $query->whereIn('twilio_number', $context['twilio_numbers']);
+        }
+
+        $grouped = [];
+
+        foreach ($query->orderBy('anio', 'asc')->orderBy('mes', 'asc')->get() as $row) {
+            $year = (int) ($row->anio ?? 0);
+            $month = (int) ($row->mes ?? 0);
+            $count = (int) $this->sanitizeNumber($row->cantidad ?? 0);
+
+            if ($year <= 0 || $month < 1 || $month > 12) {
+                continue;
+            }
+
+            if (!isset($grouped[$year])) {
+                $grouped[$year] = [];
+            }
+
+            if (!isset($grouped[$year][$month])) {
+                $grouped[$year][$month] = 0;
+            }
+
+            $grouped[$year][$month] += $count;
+        }
+
+        ksort($grouped);
+
+        $years = array_map('strval', array_keys($grouped));
+        $selectedYear = in_array((string) $requestedYear, $years, true)
+            ? (string) $requestedYear
+            : ($years[0] ?? '');
+
+        $rows = [];
+
+        if ($selectedYear !== '' && isset($grouped[(int) $selectedYear])) {
+            ksort($grouped[(int) $selectedYear]);
+
+            foreach ($grouped[(int) $selectedYear] as $month => $count) {
+                $rows[] = [
+                    'month_label' => $this->getSpanishMonthName((int) $month) . ' ' . $selectedYear,
+                    'sms_count' => $count,
+                ];
+            }
+        }
+
+        return [
+            'years' => $years,
+            'selected_year' => $selectedYear,
+            'rows' => $rows,
+        ];
+    }
+
+    private function buildSmsLifetimeReport(array $context, $requestedYear): array
+    {
+        if (!Schema::hasTable('sms') || !Schema::hasColumn('sms', 'date_sent')) {
+            return [
+                'years' => [],
+                'selected_year' => '',
+                'rows' => [],
+            ];
+        }
+
+        $baseQuery = DB::table('sms')->whereNotNull('date_sent');
+
+        /*
+    |--------------------------------------------------------------------------
+    | Filtrar por los números Twilio de la misma agency
+    |--------------------------------------------------------------------------
+    */
+        if (!empty($context['twilio_numbers'])) {
+            $baseQuery->whereIn('from', $context['twilio_numbers']);
+        } elseif (!empty($context['agency']) && Schema::hasColumn('sms', 'agency')) {
+            $baseQuery->where('agency', $context['agency']);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Evitar eliminados si manejas deleted = Yes
+    |--------------------------------------------------------------------------
+    */
+        if (Schema::hasColumn('sms', 'deleted')) {
+            $baseQuery->where(function ($q) {
+                $q->whereNull('deleted')
+                    ->orWhere('deleted', '!=', 'Yes');
+            });
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Años disponibles desde date_sent
+    |--------------------------------------------------------------------------
+    */
+        $years = (clone $baseQuery)
+            ->selectRaw('DISTINCT YEAR(date_sent) as sms_year')
+            ->orderBy('sms_year', 'asc')
+            ->pluck('sms_year')
+            ->filter(fn($year) => !is_null($year) && $year !== '')
+            ->map(fn($year) => (string) $year)
+            ->values()
+            ->all();
+
+        $selectedYear = in_array((string) $requestedYear, $years, true)
+            ? (string) $requestedYear
+            : ($years[0] ?? '');
+
+        $rows = [];
+
+        if ($selectedYear !== '') {
+            $records = (clone $baseQuery)
+                ->selectRaw('
+                date_sent,
+                `from` as phone_sent_value,
+                CAST(sent_by_id AS CHAR) as sent_by_id_value,
+                sid as sid_value
+            ')
+                ->whereYear('date_sent', (int) $selectedYear)
+                ->orderBy('date_sent', 'desc')
+                ->get();
+
+            $rows = $records->map(function ($row) {
+                return [
+                    'date_sent'   => $row->date_sent
+                        ? Carbon::parse($row->date_sent)->format('Y-m-d H:i:s')
+                        : '',
+                    'phone_sent'  => $row->phone_sent_value ?? '',
+                    'sent_by_id'  => isset($row->sent_by_id_value) ? (string) $row->sent_by_id_value : '',
+                    'sid'         => $row->sid_value ?? '',
+                ];
+            })->values()->all();
+        }
+
+        return [
+            'years' => $years,
+            'selected_year' => $selectedYear,
+            'rows' => $rows,
+        ];
+    }
+
+    private function resolveFirstExistingColumnOnConnection(string $connection, string $table, array $columns): ?string
+    {
+        foreach ($columns as $column) {
+            if (Schema::connection($connection)->hasColumn($table, $column)) {
+                return $column;
+            }
+        }
+
+        return null;
+    }
+
+    private function getSpanishMonthName(int $month): string
+    {
+        $months = [
+            1 => 'Enero',
+            2 => 'Febrero',
+            3 => 'Marzo',
+            4 => 'Abril',
+            5 => 'Mayo',
+            6 => 'Junio',
+            7 => 'Julio',
+            8 => 'Agosto',
+            9 => 'Septiembre',
+            10 => 'Octubre',
+            11 => 'Noviembre',
+            12 => 'Diciembre',
+        ];
+
+        return $months[$month] ?? '';
+    }
 }

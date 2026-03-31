@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         estimates: getMetaContent("reports-estimates-url"),
         customers: getMetaContent("reports-customers-url"),
         policies: getMetaContent("reports-policies-url"),
+        messages: getMetaContent("reports-messages-url"),
     };
 
     const reportConfigs = {
@@ -123,6 +124,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const reportsTableHead = document.getElementById("reportsTableHead");
     const reportsTableBody = document.getElementById("reportsTableBody");
 
+    const messagesReportsWrap = document.getElementById("messagesReportsWrap");
+    const smsMonthYearSelect = document.getElementById("smsMonthYearSelect");
+    const smsLifetimeYearSelect = document.getElementById(
+        "smsLifetimeYearSelect",
+    );
+    const smsMonthTableBody = document.getElementById("smsMonthTableBody");
+    const smsLifetimeTableBody = document.getElementById(
+        "smsLifetimeTableBody",
+    );
+
     const agentFilterBlock = agentFilter
         ? agentFilter.closest(".report-filter-block")
         : null;
@@ -178,6 +189,138 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td colspan="${colspan}" class="empty-row">${escapeHtml(message)}</td>
             </tr>
         `;
+    }
+
+    function setMessagesEmptyState() {
+        if (smsMonthTableBody) {
+            smsMonthTableBody.innerHTML = `
+                <tr>
+                    <td colspan="2" class="empty-row">No records found.</td>
+                </tr>
+            `;
+        }
+
+        if (smsLifetimeTableBody) {
+            smsLifetimeTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-row">No records found.</td>
+                </tr>
+            `;
+        }
+    }
+
+    function renderYearOptions(select, years, selectedYear) {
+        if (!select) return;
+
+        if (!Array.isArray(years) || !years.length) {
+            select.innerHTML = `<option value="">No years</option>`;
+            return;
+        }
+
+        select.innerHTML = years
+            .map(
+                (year) => `
+                <option value="${escapeHtml(year)}" ${String(year) === String(selectedYear) ? "selected" : ""}>
+                    ${escapeHtml(year)}
+                </option>
+            `,
+            )
+            .join("");
+    }
+
+    function renderSmsMonthRows(rows) {
+        if (!smsMonthTableBody) return;
+
+        if (!Array.isArray(rows) || !rows.length) {
+            smsMonthTableBody.innerHTML = `
+                <tr>
+                    <td colspan="2" class="empty-row">No records found.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        smsMonthTableBody.innerHTML = rows
+            .map(
+                (row) => `
+                <tr>
+                    <td>${escapeHtml(row.month_label ?? "")}</td>
+                    <td>${escapeHtml(row.sms_count ?? 0)}</td>
+                </tr>
+            `,
+            )
+            .join("");
+    }
+
+    function renderSmsLifetimeRows(rows) {
+        if (!smsLifetimeTableBody) return;
+
+        if (!Array.isArray(rows) || !rows.length) {
+            smsLifetimeTableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-row">No records found.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        smsLifetimeTableBody.innerHTML = rows
+            .map(
+                (row) => `
+                <tr>
+                    <td>${escapeHtml(row.date_sent ?? "")}</td>
+                    <td>${escapeHtml(row.phone_sent ?? "")}</td>
+                    <td>${escapeHtml(row.sent_by_id ?? "")}</td>
+                    <td>${escapeHtml(row.sid ?? "")}</td>
+                </tr>
+            `,
+            )
+            .join("");
+    }
+
+    function loadMessagesData() {
+        if (!reportUrls.messages) return;
+
+        reportsLoading.style.display = "block";
+        setMessagesEmptyState();
+
+        const params = new URLSearchParams();
+
+        if (smsMonthYearSelect && smsMonthYearSelect.value) {
+            params.append("sms_month_year", smsMonthYearSelect.value);
+        }
+
+        if (smsLifetimeYearSelect && smsLifetimeYearSelect.value) {
+            params.append("sms_lifetime_year", smsLifetimeYearSelect.value);
+        }
+
+        fetch(`${reportUrls.messages}?${params.toString()}`, {
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                renderYearOptions(
+                    smsMonthYearSelect,
+                    data.sms_month_years || [],
+                    data.selected_sms_month_year || "",
+                );
+
+                renderYearOptions(
+                    smsLifetimeYearSelect,
+                    data.sms_lifetime_years || [],
+                    data.selected_sms_lifetime_year || "",
+                );
+
+                renderSmsMonthRows(data.sms_month_rows || []);
+                renderSmsLifetimeRows(data.sms_lifetime_rows || []);
+
+                reportsLoading.style.display = "none";
+            })
+            .catch((error) => {
+                console.error(error);
+                setMessagesEmptyState();
+                reportsLoading.style.display = "none";
+            });
     }
 
     function showLoading() {
@@ -301,30 +444,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function buildNormalRows(rows) {
-    return rows.map(row => `
-        <tr>
-            ${activeColumns.map(column => {
-                const rawValue = row[column.key];
-                const value = formatColumnValue(column, rawValue, false);
+        return rows
+            .map(
+                (row) => `
+                <tr>
+                    ${activeColumns
+                        .map((column) => {
+                            const rawValue = row[column.key];
+                            const value = formatColumnValue(
+                                column,
+                                rawValue,
+                                false,
+                            );
 
-                const classes = [];
-                if (column.type === "money") {
-                    classes.push("money-cell");
-                }
+                            const classes = [];
+                            if (column.type === "money") {
+                                classes.push("money-cell");
+                            }
 
-                if (
-                    activeReport === "policies" &&
-                    column.key === "remaining_time" &&
-                    String(rawValue || "").trim().toLowerCase() === "expired"
-                ) {
-                    classes.push("expired-cell");
-                }
+                            if (
+                                activeReport === "policies" &&
+                                column.key === "remaining_time" &&
+                                String(rawValue || "")
+                                    .trim()
+                                    .toLowerCase() === "expired"
+                            ) {
+                                classes.push("expired-cell");
+                            }
 
-                return `<td class="${classes.join(" ")}">${escapeHtml(value)}</td>`;
-            }).join("")}
-        </tr>
-    `).join("");
-}
+                            return `<td class="${classes.join(" ")}">${escapeHtml(value)}</td>`;
+                        })
+                        .join("")}
+                </tr>
+            `,
+            )
+            .join("");
+    }
 
     function buildTotalsRow(totals) {
         const feeIndex = activeColumns.findIndex((col) => col.key === "fee");
@@ -391,24 +546,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 cells[valueIndex] = formatMoney(value);
 
                 return `
-                <tr class="summary-breakdown-row">
-                    ${cells
-                        .map((cell, index) => {
-                            const classes = [
-                                index === labelIndex ? "breakdown-label" : "",
-                                index === valueIndex
-                                    ? "money-cell breakdown-value"
-                                    : "",
-                                cell === "" ? "summary-spacer" : "",
-                            ]
-                                .join(" ")
-                                .trim();
+                    <tr class="summary-breakdown-row">
+                        ${cells
+                            .map((cell, index) => {
+                                const classes = [
+                                    index === labelIndex
+                                        ? "breakdown-label"
+                                        : "",
+                                    index === valueIndex
+                                        ? "money-cell breakdown-value"
+                                        : "",
+                                    cell === "" ? "summary-spacer" : "",
+                                ]
+                                    .join(" ")
+                                    .trim();
 
-                            return `<td class="${classes}">${escapeHtml(cell)}</td>`;
-                        })
-                        .join("")}
-                </tr>
-            `;
+                                return `<td class="${classes}">${escapeHtml(cell)}</td>`;
+                            })
+                            .join("")}
+                    </tr>
+                `;
             })
             .join("");
     }
@@ -516,7 +673,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!config) return;
 
         const rows = getCurrentVisibleRows();
-        // const rows = getFilteredRows();
 
         if (!rows.length) {
             alert("No data to export.");
@@ -605,7 +761,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const rows = getCurrentVisibleRows();
-        // const rows = getFilteredRows();
 
         if (!rows.length) {
             alert("No data to export.");
@@ -716,6 +871,29 @@ document.addEventListener("DOMContentLoaded", () => {
             tab.classList.toggle("active", tab.dataset.report === report);
         });
 
+        if (report === "messages") {
+            reportTitle.textContent = "Messages Report";
+
+            setControlsEnabled(false);
+            periodFilter.disabled = true;
+            customRange.classList.remove("show");
+
+            if (agentFilterBlock) {
+                agentFilterBlock.style.display = "none";
+            }
+
+            reportPlaceholder.style.display = "none";
+            reportTableWrap.style.display = "none";
+            reportTableControls.style.display = "none";
+
+            if (messagesReportsWrap) {
+                messagesReportsWrap.style.display = "flex";
+            }
+
+            loadMessagesData();
+            return;
+        }
+
         const config = getActiveConfig();
 
         if (config && config.url) {
@@ -749,6 +927,10 @@ document.addEventListener("DOMContentLoaded", () => {
             reportTableWrap.style.display = "block";
             reportTableControls.style.display = "flex";
 
+            if (messagesReportsWrap) {
+                messagesReportsWrap.style.display = "none";
+            }
+
             loadActiveReportData();
             return;
         }
@@ -757,6 +939,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setControlsEnabled(false);
         periodFilter.disabled = true;
         customRange.classList.remove("show");
+
+        if (messagesReportsWrap) {
+            messagesReportsWrap.style.display = "none";
+        }
 
         if (agentFilterBlock) {
             agentFilterBlock.style.display = "";
@@ -831,6 +1017,20 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!config || !config.url) return;
         exportCurrentTableToPdf();
     });
+
+    if (smsMonthYearSelect) {
+        smsMonthYearSelect.addEventListener("change", () => {
+            if (activeReport !== "messages") return;
+            loadMessagesData();
+        });
+    }
+
+    if (smsLifetimeYearSelect) {
+        smsLifetimeYearSelect.addEventListener("change", () => {
+            if (activeReport !== "messages") return;
+            loadMessagesData();
+        });
+    }
 
     activateTab("invoices");
 });

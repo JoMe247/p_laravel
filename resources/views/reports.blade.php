@@ -10,6 +10,7 @@
     <meta name="reports-customers-url" content="{{ route('reports.customers-data') }}">
     <meta name="reports-items-url" content="{{ route('reports.items-data') }}">
     <meta name="reports-policies-url" content="{{ route('reports.policies-data') }}">
+    <meta name="reports-messages-url" content="{{ route('reports.messages-data') }}">
     <title>Reports</title>
 
     <link rel="icon" href="img/favicon.png">
@@ -103,6 +104,66 @@
                         <div id="reportPlaceholder" class="report-placeholder" style="display:none;">
                             <div class="placeholder-box">
                                 This section will be enabled later.
+                            </div>
+                        </div>
+
+                        <div id="messagesReportsWrap" class="messages-reports-wrap" style="display:none;">
+                            <div class="messages-report-block">
+                                <div class="messages-report-head">
+                                    <h3>SMS Month</h3>
+
+                                    <div class="messages-report-controls">
+                                        <label for="smsMonthYearSelect">Year</label>
+                                        <select id="smsMonthYearSelect"
+                                            class="table-select messages-year-select"></select>
+                                    </div>
+                                </div>
+
+                                <div class="report-table-scroll messages-table-scroll">
+                                    <table class="reports-table messages-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Month</th>
+                                                <th>SMS Sent</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="smsMonthTableBody">
+                                            <tr>
+                                                <td colspan="2" class="empty-row">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="messages-report-block">
+                                <div class="messages-report-head">
+                                    <h3>SMS Lifetime</h3>
+
+                                    <div class="messages-report-controls">
+                                        <label for="smsLifetimeYearSelect">Year</label>
+                                        <select id="smsLifetimeYearSelect"
+                                            class="table-select messages-year-select"></select>
+                                    </div>
+                                </div>
+
+                                <div class="report-table-scroll messages-table-scroll">
+                                    <table class="reports-table messages-lifetime-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Phone Sent</th>
+                                                <th>ID</th>
+                                                <th>SID</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="smsLifetimeTableBody">
+                                            <tr>
+                                                <td colspan="4" class="empty-row">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
