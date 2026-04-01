@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\CustomerNote;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 
 class CustomersController extends Controller
@@ -19,24 +20,27 @@ class CustomersController extends Controller
         // ids de customers
         $customerIds = $customers->pluck('ID')->filter()->values()->all();
 
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // 🔹 Obtener los últimos 50 customers (SIN tocar tu lógica)
+        $customers = Customer::orderBy('ID', 'desc')
+            ->take(50)
+            ->get();
+            
+         // ids de customers
+        $customerIds = $customers->pluck('ID')->filter()->values()->all();
+
         // Consulta independiente (NO depende de relaciones)
         $policyCounts = $this->getPolicyCountsByCustomerId($customerIds);
-
-        return view('customers', compact('customers', 'policyCounts'));
+        
+        $customers = Customer::orderBy('ID', 'desc')->paginate(50);
+        return view('customers', compact('customers'))->with('policyCounts', $policyCounts);
     }
 
-    private function getPolicyCountsByCustomerId(array $customerIds): array
-    {
-        if (empty($customerIds)) return [];
-
-        // OJO: cambia 'policies' si tu tabla se llama diferente
-        return DB::table('policies')
-            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
-            ->selectRaw('customer_id, COUNT(*) as total')
-            ->groupBy('customer_id')
-            ->pluck('total', 'customer_id')
-            ->toArray();
-    }
+    
 
     // store: guarda los 4 campos rápidos (recibe JSON o form)
     public function store(Request $request)
@@ -205,5 +209,18 @@ class CustomersController extends Controller
         CustomerNote::where('id', $noteId)->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    private function getPolicyCountsByCustomerId(array $customerIds): array
+    {
+        if (empty($customerIds)) return [];
+
+        // OJO: cambia 'policies' si tu tabla se llama diferente
+        return DB::table('policies')
+            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
+            ->selectRaw('customer_id, COUNT(*) as total')
+            ->groupBy('customer_id')
+            ->pluck('total', 'customer_id')
+            ->toArray();
     }
 }

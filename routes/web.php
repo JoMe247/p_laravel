@@ -130,12 +130,12 @@ Route::middleware(['auth:web,sub'])->group(function () {
         ->name('account.show');
 });
 
-// Company Routes
-Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
-Route::post('/companies/store', [CompanyController::class, 'store']);
-Route::get('/companies/edit/{id}', [CompanyController::class, 'edit']);
-Route::post('/companies/update/{id}', [CompanyController::class, 'update']);
-Route::post('/companies/delete/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
+    // Company Routes
+    Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
+    Route::post('/companies/store', [CompanyController::class, 'store']);
+    Route::get('/companies/edit/{id}', [CompanyController::class, 'edit']);
+    Route::post('/companies/update/{id}', [CompanyController::class, 'update']);
+    Route::post('/companies/delete/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
 
 // Help Routes
 Route::get('/help', [HelpController::class, 'index'])->name('help');
@@ -242,6 +242,135 @@ Route::middleware(['auth.multi'])->group(function () {
     Route::delete('/schedules/assign', [SchedulesController::class, 'removeAssignment'])->name('schedules.assign.delete');
     Route::get('/schedules/pdf', [SchedulesController::class, 'downloadWeekPdf'])
         ->name('schedules.pdf');
+<<<<<<< HEAD
+=======
+
+
+    // invoices
+
+    Route::get('/customers/{customerId}/payments', [PaymentsInvoicesController::class, 'payments'])
+        ->name('payments');
+
+    Route::get('/customers/{customerId}/invoices', [PaymentsInvoicesController::class, 'invoices'])
+        ->name('invoices');
+
+    Route::post('/customers/{customerId}/invoices/rows', [PaymentsInvoicesController::class, 'storeRow'])
+        ->name('invoices.rows.store');
+
+    Route::post('/customers/{customerId}/invoices/dates', [PaymentsInvoicesController::class, 'saveDates'])
+        ->name('invoices.dates.save');
+
+    Route::post('/customers/{customerId}/invoices/charges', [PaymentsInvoicesController::class, 'saveCharges'])
+        ->name('invoices.charges.save');
+
+    Route::post('/customers/{customerId}/invoices/save-table', [PaymentsInvoicesController::class, 'saveInvoiceTable'])
+        ->name('invoices.table.save');
+
+    Route::delete('/invoices/{invoiceId}', [PaymentsInvoicesController::class, 'destroy'])
+        ->name('invoices.destroy');
+
+    Route::get('/invoices/{invoiceId}/pdf', [PaymentsInvoicesController::class, 'downloadPdf'])
+        ->name('invoices.pdf');
+
+    Route::post('/payments/invoice-footer-image', [PaymentsInvoicesController::class, 'uploadInvoiceFooterImage'])
+        ->name('payments.invoice_footer_image.upload');
+
+    Route::post('/payments/invoice-footer-image/enabled', [PaymentsInvoicesController::class, 'setInvoiceFooterEnabled'])
+        ->name('payments.invoice_footer_image.enabled');
+
+    Route::post('/payments/invoice-footer-image/delete', [PaymentsInvoicesController::class, 'deleteInvoiceFooterImage'])
+        ->name('payments.invoice_footer_image.delete');
+
+    // SMS MONTHLY COUNTER
+    Route::post('/sms/monthly-counter/store', [SmsMonthlyCounterController::class, 'store'])
+        ->name('sms.monthlyCounter.store');
+
+    Route::post('/sms/monthly-counter/backfill', [SmsMonthlyCounterController::class, 'backfill'])
+        ->name('sms.monthlyCounter.backfill');
+
+
+    Route::get('/estimates/{customerId}', [EstimatesController::class, 'estimates'])->name('estimates');
+
+    Route::get('/estimate/register/{customerId}', [EstimatesController::class, 'register'])->name('estimate.register');
+
+    Route::post('/estimates/table/save/{customerId}', [EstimatesController::class, 'saveEstimateTable'])->name('estimates.table.save');
+
+    Route::post('/estimates/dates/save/{customerId}', [EstimatesController::class, 'saveDates'])->name('estimates.dates.save');
+
+    Route::post('/estimates/charges/save/{customerId}', [EstimatesController::class, 'saveCharges'])->name('estimates.charges.save');
+
+    Route::delete('/estimates/{estimateId}', [EstimatesController::class, 'destroy'])->name('estimates.destroy');
+
+    // Footer image estimates (independiente)
+    Route::post('/estimates/estimate-footer-image', [EstimatesController::class, 'uploadEstimateFooterImage']);
+    Route::post('/estimates/estimate-footer-image/enabled', [EstimatesController::class, 'setEstimateFooterEnabled']);
+    Route::post('/estimates/estimate-footer-image/delete', [EstimatesController::class, 'deleteEstimateFooterImage']);
+    Route::get('/estimates/pdf/{customerId}/{estimateId}', [EstimatesController::class, 'pdf'])->name('estimates.pdf');
+
+
+
+    // Documents
+    Route::get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
+
+
+
+    Route::get('/templates/create', [TemplatesController::class, 'create'])->name('templates.create');
+    Route::post('/templates/save', [TemplatesController::class, 'store'])->name('templates.store');
+
+    Route::get('/documents/create-document', [DocumentsController::class, 'createDocument'])
+        ->name('documents.create_document');
+
+    Route::get('/documents/templates/options', [DocumentsController::class, 'templateOptions'])
+        ->name('documents.templates.options');
+
+    Route::get('/documents/templates/{id}', [DocumentsController::class, 'templateData'])
+        ->name('documents.templates.data');
+
+    Route::get('/documents/customers/search', [DocumentsController::class, 'searchCustomers'])
+        ->name('documents.customers.search');
+
+    Route::get('/documents/customers/{customerId}/policies', [DocumentsController::class, 'customerPolicies'])
+        ->name('documents.customers.policies');
+
+    Route::post('/documents/save-generated', [DocumentsController::class, 'saveGeneratedPdf'])
+        ->name('documents.save_generated');
+
+    Route::get('/documents/templates/file/{id}', [DocumentsController::class, 'streamTemplatePdf'])
+        ->name('documents.templates.file');
+
+
+        
+
+    Route::get('/s/{short}', [ShortUrlController::class, 'show'])->name('short.show');
+    Route::post('/s/{short}', [ShortUrlController::class, 'verify'])->name('short.verify');
+
+    // (luego) pages estáticas
+    Route::view('/signed', 'short.signed')->name('short.signed');
+    Route::view('/error', 'short.error')->name('short.error');
+    Route::view('/success', 'short.success')->name('short.success');
+
+
+
+
+    Route::get('/sign/{short}/{docId}', [SigningController::class, 'show'])->name('sign.show');
+    Route::get('/sign/{short}/{docId}/pdf', [SigningController::class, 'pdf'])->name('sign.pdf');
+    Route::post('/sign/{short}/{docId}/signature', [SigningController::class, 'saveSignature'])->name('sign.signature');
+
+    
+
+    //Rutas para la visualización y descarga de files en customer files
+    Route::get('/customers/files/{id}', [CustomerFilesController::class, 'index'])->name('files.customer');
+    Route::post('/customers/files/{id}/store', [CustomerFilesController::class, 'store'])->name('files.store');
+    Route::put('/customers/files/{id}/update', [CustomerFilesController::class, 'update'])->name('files.update');
+    Route::delete('/customers/files/{id}', [CustomerFilesController::class, 'destroy'])->name('files.delete');
+
+    Route::get('/customers/file/{id}/view', [CustomerFilesController::class, 'view'])->name('files.view');
+    Route::get('/customers/file/{id}/download', [CustomerFilesController::class, 'download'])->name('files.download');
+
+
+    //FIN DE FUNCIÓN MIDDLEWARE
+});
+>>>>>>> f6eb76d (Estilos para polizas, reminders, files, whatsapp)
 });
 
 // invoices

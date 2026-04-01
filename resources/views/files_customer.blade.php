@@ -97,7 +97,7 @@
 
                             <div class="notes-header">
                                 <h3>Notes</h3>
-                                <button id="add-note-btn" class="btn small">+ Add Note</button>
+                                <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i>  &nbsp;Add Note</button>
                             </div>
 
                             <div class="notes-scroll">
@@ -157,10 +157,10 @@
 
                             <div class="files-header-actions">
                                 <button id="open-upload" class="btn-primary">
-                                    <i class="bx bx-plus"></i>
+                                    <i class='bx bx-cloud-upload' ></i> &nbsp;Upload
                                 </button>
 
-                                <select id="files-filter">
+                                <select id="files-filter" style="display:none">
                                     <option value="all">All files</option>
                                     <option value="name">File name</option>
                                     <option value="date">Date</option>
@@ -190,50 +190,96 @@
                                     @foreach ($files as $file)
                                         @php
                                             $ext = strtolower(pathinfo($file->file_name, PATHINFO_EXTENSION));
-                                            $icon = match ($ext) {
-                                                'pdf' => 'bxs-file-pdf',
-                                                'doc', 'docx' => 'bxs-file-doc',
-                                                'xls', 'xlsx' => 'bxs-spreadsheet',
-                                                'png', 'jpg', 'jpeg', 'gif', 'webp' => 'bxs-image',
-                                                default => 'bxs-file',
-                                            };
+
+                                            $iconMap = [
+                                                'avi'  => 'avi.png',
+                                                'css'  => 'css.png',
+                                                'csv'  => 'csv.png',
+                                                'dll'  => 'dll.png',
+                                                'doc'  => 'doc.png',
+                                                'docx' => 'docx.png',
+                                                'eps'  => 'eps.png',
+                                                'exe'  => 'exe.png',
+                                                'gif'  => 'gif.png',
+                                                'html' => 'html.png',
+                                                'htm'  => 'html.png',
+                                                'jpg'  => 'jpg.png',
+                                                'jpeg' => 'jpg.png',
+                                                'js'   => 'js.png',
+                                                'mov'  => 'mov.png',
+                                                'mp3'  => 'mp3.png',
+                                                'pdf'  => 'pdf.png',
+                                                'php'  => 'php.png',
+                                                'png'  => 'png.png',
+                                                'ppt'  => 'ppt.png',
+                                                'pptx' => 'ppt.png',
+                                                'psd'  => 'psd.png',
+                                                'rar'  => 'rar.png',
+                                                'svg'  => 'svg.png',
+                                                'txt'  => 'txt.png',
+                                                'wav'  => 'wav.png',
+                                                'xls'  => 'xls.png',
+                                                'xlsx' => 'xlsx.png',
+                                                'zip'  => 'zip.png',
+                                            ];
+
+                                            $iconFile = $iconMap[$ext] ?? 'file.png';
+                                            $iconPath = asset('img/file_icons/' . $iconFile);
+
+                                            $isImage = in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']);
+                                            $uploadedBy = null;
+
+                                            if ($file->uploaded_by_type === 'user') {
+                                                $uploadedBy = \App\Models\User::find($file->uploaded_by_id)?->name;
+                                            } else {
+                                                $uploadedBy = \App\Models\SubUser::find($file->uploaded_by_id)?->name;
+                                            }
                                         @endphp
 
                                         <tr data-type="{{ $ext }}">
                                             <td>
                                                 <div class="file-info">
-                                                    <i
-                                                        class="bx {{ $icon }} file-icon {{ $ext }}"></i>
-                                                    <div class="file-meta">
-                                                        <strong>{{ $file->file_name }}</strong>
-                                                        <small>{{ number_format($file->file_size / 1024, 2) }}
-                                                            KB</small>
-                                                    </div>
+                                                    @if($isImage)
+                                                        <a href="{{ route('files.view', $file->id) }}" target="_blank">
+                                                            <img class="customer-file-img" src="{{ route('files.view', $file->id) }}" alt="{{ $file->file_name }}">
+                                                            <small class="meta-img-info">{{ number_format($file->file_size / 1024, 2) }} KB</small>
+                                                        </a>
+                                                    @else
+                                                        <img src="{{ $iconPath }}" alt="{{ $ext }}" class="file-icon-img">
+
+                                                        <div class="file-meta">
+                                                            <a href="{{ route('files.view', $file->id) }}" target="_blank">
+                                                                {{ $file->file_name }}
+                                                            </a>
+                                                            <small>{{ number_format($file->file_size / 1024, 2) }} KB</small>
+                                                        </div>
+                                                    @endif
+
+                                                    <!-- <img src="{{ $iconPath }}" alt="{{ $ext }}" class="file-icon-img"> -->
+
+                                                    
                                                 </div>
                                             </td>
 
-                                            <td>{{ ($file->updated_at ?? $file->created_at)->format('Y-m-d H:i') }}
-                                            </td>
+                                            <td>{{ ($file->updated_at ?? $file->created_at)->format('Y-m-d H:i') }}</td>
 
-                                            <td>
-                                                {{ $file->uploaded_by_type === 'user'
-                                                    ? \App\Models\User::find($file->uploaded_by_id)->name
-                                                    : \App\Models\SubUser::find($file->uploaded_by_id)->name }}
-                                            </td>
+                                            <td>{{ $uploadedBy ?? 'Unknown' }}</td>
 
                                             <td class="files-actions">
-                                                <form method="POST"
-                                                    action="{{ route('files.store', $customer->ID) }}"
-                                                    enctype="multipart/form-data">
-                                                    @csrf
-                                                    <input type="file" name="file" required>
-                                                    <button type="submit">Upload</button>
-                                                </form>
+                                                <a href="{{ route('files.view', $file->id) }}" target="_blank" class="icon-btn show-file">
+                                                    <i class='bx bx-show-alt'></i>
+                                                </a>
 
-                                                <form method="POST" action="{{ route('files.delete', $file->id) }}">
+                                                <a href="{{ route('files.download', $file->id) }}" class="icon-btn download-file">
+                                                    <i class='bx bxs-download' ></i>
+                                                </a>
+
+                                                <form method="POST" action="{{ route('files.delete', $file->id) }}"
+                                                    onsubmit="return confirm('Are you sure you want to delete this file?')"
+                                                    style="display:inline-block;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="icon-btn danger">
+                                                    <button type="submit" class="icon-btn danger">
                                                         <i class="bx bx-trash"></i>
                                                     </button>
                                                 </form>
@@ -254,15 +300,24 @@
     <!-- Upload Overlay -->
     <div id="upload-overlay">
         <div class="upload-modal">
-            <h3>Upload file</h3>
+            <h3>Upload customer file</h3>
 
-            <form method="POST" action="{{ route('files.store', $customer->ID) }}" enctype="multipart/form-data">
+            <form id="upload-form" method="POST" action="{{ route('files.store', $customer->ID) }}" enctype="multipart/form-data">
                 @csrf
-                <input type="file" name="file" required>
+
+                <div id="drop-zone" class="drop-zone">
+                    <input type="file" name="file" id="upload-file-input" required hidden>
+
+                    <div class="drop-zone-content">
+                        <i class='bx bxs-file-image upload-drop-icon'></i>
+                        <p id="subtext-drag-file" class="drop-zone-text">Drop your file here or Click to browse</p>
+                        <small id="selected-file-name" class="selected-file-name"></small>
+                    </div>
+                </div>
 
                 <div class="modal-actions">
+                    <button type="submit" class="btn-primary" id="upload-file-button" style="display:none;">Upload</button>
                     <button type="button" id="close-upload">Cancel</button>
-                    <button type="submit" class="btn-primary">Upload</button>
                 </div>
             </form>
         </div>
@@ -369,29 +424,29 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="../../img/menu/thumbs/1.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
+                        <label class="thumb-options" onclick="selectImage(2)"><img src="../../img/menu/thumbs/2.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg"
+                        <label class="thumb-options" onclick="selectImage(3)"><img src="../../img/menu/thumbs/3.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(4)"><img src="img/menu/thumbs/4.jpg"
+                        <label class="thumb-options" onclick="selectImage(4)"><img src="../../img/menu/thumbs/4.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(5)"><img src="img/menu/thumbs/5.jpg"
+                        <label class="thumb-options" onclick="selectImage(5)"><img src="../../img/menu/thumbs/5.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(6)"><img src="img/menu/thumbs/6.jpg"
+                        <label class="thumb-options" onclick="selectImage(6)"><img src="../../img/menu/thumbs/6.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(7)"><img src="img/menu/thumbs/7.jpg"
+                        <label class="thumb-options" onclick="selectImage(7)"><img src="../../img/menu/thumbs/7.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(8)"><img src="img/menu/thumbs/8.jpg"
+                        <label class="thumb-options" onclick="selectImage(8)"><img src="../../img/menu/thumbs/8.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(9)"><img src="img/menu/thumbs/9.jpg"
+                        <label class="thumb-options" onclick="selectImage(9)"><img src="../../img/menu/thumbs/9.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(10)"><img src="img/menu/thumbs/10.jpg"
+                        <label class="thumb-options" onclick="selectImage(10)"><img src="../../img/menu/thumbs/10.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(11)"><img src="img/menu/thumbs/11.jpg"
+                        <label class="thumb-options" onclick="selectImage(11)"><img src="../../img/menu/thumbs/11.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(12)"><img src="img/menu/thumbs/12.jpg"
+                        <label class="thumb-options" onclick="selectImage(12)"><img src="../../img/menu/thumbs/12.jpg"
                                 alt=""></label>
 
 

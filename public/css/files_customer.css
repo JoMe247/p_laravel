@@ -48,9 +48,10 @@
     gap: 6px;
     background: #eef2ff;
     color: #4f46e5;
-    padding: 4px 10px;
+    padding: 10px 15px;
     border-radius: 20px;
-    font-size: 13px;
+    font-size: 16px;
+    font-family: var(--montserrat);
 }
 
 /* =========================
@@ -61,24 +62,54 @@
     background: #fff;
     border-radius: 14px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    overflow: hidden;
 }
 
 .files-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px;
+    border-collapse: collapse;
+    /* margin-top: 10px; */
+    /* min-height: 420px; */
+    font-family: var(--montserrat);
+    /* overflow-y: auto; */
+    overflow: hidden;
+    border-radius: 12px;
+    background: #fff;
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); */
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    position: relative;
+}
+
+.files-table thead{
+    background: #ebeef5;
+    color: #333;
+    text-align: center;
 }
 
 .files-table thead th {
-    padding: 14px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #6b7280;
+    font-family: var(--montserrat);
+    text-transform: uppercase;
+    font-weight: bolder;
+    top: 0;
+    padding: 12px 18px;
+    text-align: center;
+    
 }
+
 
 .files-table tbody tr {
     background: #fff;
+    border-bottom: 1px solid #f2f2f2;
 }
+
+/* .files-table tr::after {
+    position: absolute;
+    content: '';
+    width: 100%;
+    height: 1px;
+    background-color: #f2f2f2;
+    left: 0;
+} */
 
 .files-table tbody td {
     padding: 14px 16px;
@@ -109,8 +140,23 @@
 }
 
 .file-meta small {
+    font-family: var(--montserrat);
     font-size: 12px;
-    color: #6b7280;
+    color: #c1c1c1;
+    text-align: left;
+}
+
+.meta-img-info {
+    font-family: var(--montserrat);
+    font-size: 12px;
+    color: #c1c1c1;
+    text-align: left;
+    text-decoration: none;
+    cursor:default;
+    position: absolute;
+    width: 100px;
+    bottom: -13px;
+    left: 60px;
 }
 
 /* =========================
@@ -121,35 +167,14 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    justify-content: center;
 }
 
 .files-actions input[type="file"] {
     display: none;
 }
 
-.files-actions button {
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 8px;
-    border: 1px solid #c7d2fe;
-    background: #eef2ff;
-    color: #1e40af;
-    cursor: pointer;
-}
 
-.files-actions button:hover {
-    background: #e0e7ff;
-}
-
-.files-actions .danger {
-    background: #fee2e2;
-    color: #b91c1c;
-    border-color: #fecaca;
-}
-
-.files-actions .danger:hover {
-    background: #fecaca;
-}
 
 #upload-overlay {
     display: none;
@@ -158,6 +183,7 @@
     background: rgba(0,0,0,0.55);
     align-items: center;
     justify-content: center;
+    font-family: var(--montserrat);
     z-index: 99999; /* por si algo lo tapa */
 }
 
@@ -182,7 +208,7 @@
 
 .file-type-btn {
     border: none;
-    padding: 4px 10px;
+    padding: 10px 15px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 500;
@@ -190,6 +216,7 @@
     background: #f1f5f9;
     color: #334155;
     transition: all .2s ease;
+    font-family: var(--montserrat);
 }
 
 /* Active */
@@ -220,4 +247,275 @@
 .file-type-btn.zip {
     background: #fff7ed;
     color: #c2410c;
+}
+
+.customer-file-img{
+    width:170px;
+    height:100px;
+    object-fit:cover;
+    border-radius:8px;
+    margin-right:10px;
+    transition: 0.3s;
+}
+
+.file-icon-img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.customer-file-img:hover{
+    transform: scale(1.05);
+    transition: 0.3s;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    margin-left: 30px;
+}
+
+.file-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-meta a, .file-info a{
+    color: #334155;
+    text-decoration: none;
+    font-family: var(--montserrat);
+    position: relative;
+}
+
+.file-meta a:hover{
+    text-decoration: underline;
+}
+
+.icon-btn{
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 8px;
+    font-size: 1.2em;
+    background: #ddd;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    text-decoration: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+
+.show-file{
+    background-color: #728ea3;
+}
+
+.show-file:hover{
+    background-color: #536675;
+}
+
+.download-file{
+    background-color: #0b6ede;
+}
+
+.download-file:hover{
+    background-color: #0651a7;
+}
+
+.danger{
+    background-color: var(--red1);
+}
+
+.danger:hover{
+    background-color: var(--red2);
+}
+
+.files-header-actions{
+    display: flex;
+    flex-flow: wrap;
+}
+
+#open-upload{
+    width: 140px;
+    background: var(--red1);
+    font-weight: bold;
+    font-size: 1em;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+}
+
+#open-upload:hover{
+    background: var(--red2);
+}
+
+#open-upload i {
+    font-size: 1.5em;
+}
+
+
+/* DRAG OVERLAY */
+#upload-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 24, 38, 0.28);
+    backdrop-filter: blur(3px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.upload-modal {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    /* border: 2px solid #ff0f6d; */
+    border-radius: 28px;
+    padding: 32px;
+    box-sizing: border-box;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.upload-modal h3 {
+    font-family: var(--montserrat);
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 500;
+    margin-bottom: 0.3125rem;
+    margin: 0 0 28px;
+    color: #111;
+}
+
+.drop-zone {
+    border: 2px dashed var(--red1);
+    border-radius: 22px;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 30px 20px;
+    text-align: center;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.drop-zone:hover {
+    background: #fff7fb;
+}
+
+.drop-zone.dragover {
+    background: #fff0f7;
+    border-color: var(--red1);
+    transform: scale(1.01);
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.upload-drop-icon {
+    font-size: 64px;
+    color: var(--red1);
+}
+
+.drop-zone-text {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #9a9a9a;
+}
+
+.drop-zone-text span {
+    color: #6f6f6f;
+    font-weight: 500;
+}
+
+.selected-file-name {
+    display: block;
+    color: #444;
+    font-size: 1.2rem;
+    word-break: break-word;
+    max-width: 100%;
+    position: relative;
+}
+
+.modal-actions {
+    display: flex;
+    flex-flow: wrap;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+#upload-file-button{
+    background-color: var(--red1);
+    color: white;
+    border: 1px solid var(--red1);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--montserrat);
+    cursor: pointer;
+    text-align: center;
+    width: 320px;
+}
+
+#upload-file-button:hover{
+    background-color: var(--red2);
+    border: 1px solid var(--red2);
+}
+
+#close-upload{
+    width: 320px;
+    background-color: #fdfdfd;
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--montserrat);
+    cursor: pointer;
+    text-align: center;
+}
+
+#close-upload:hover{
+    background-color: #d8d8d8;
+    border: 1px solid #d8d8d8;
+}
+
+.files-table {
+    transition: box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.files-table.table-dragover {
+    background: rgba(255, 15, 109, 0.04);
+    box-shadow: 0 0 0 2px #ff0f6d inset;
+}
+
+#selected-file-name i{
+    position: absolute;
+    left: -26px;
+    top: -2px;
+    font-size: 1.4em;
+    font-weight: bold;
+    color: var(--red1);
 }
