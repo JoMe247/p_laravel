@@ -1210,10 +1210,10 @@ class ReportsController extends Controller
         $agency = $authUser->agency ?? null;
 
         /*
-    |--------------------------------------------------------------------------
-    | Actualiza remaining_time y last_payment cada vez que se carga el reporte
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| Actualiza solo last_payment cada vez que se carga el reporte
+|--------------------------------------------------------------------------
+*/
         $this->syncPoliciesDerivedFields($agency);
 
         $allColumns = Schema::getColumnListing('policies');
@@ -1272,7 +1272,7 @@ class ReportsController extends Controller
         foreach ($allColumns as $column) {
             $lower = strtolower($column);
 
-            if (in_array($lower, ['created_at', 'updated_at'], true)) {
+            if (in_array($lower, ['created_at', 'updated_at', 'remaining_time'], true)) {
                 continue;
             }
 
@@ -1304,12 +1304,27 @@ class ReportsController extends Controller
                 'label' => $this->getPoliciesColumnLabel($column),
                 'type' => $type,
             ];
+
+            /*
+    |--------------------------------------------------------------------------
+    | Insertar Remaining Time justo después de Expiration
+    |--------------------------------------------------------------------------
+    */
+            if ($lower === 'pol_expiration') {
+                $columns[] = [
+                    'key' => 'remaining_time',
+                    'label' => 'Remaining Time',
+                    'type' => 'text',
+                ];
+            }
         }
 
         $rows = [];
         foreach ($query->get() as $policy) {
             $data = (array) $policy;
+
             $data['vehicles_count'] = $this->countVehiclesFromJson($data['vehicules'] ?? null);
+            $data['remaining_time'] = $this->getRemainingTimeLabel($data['pol_expiration'] ?? null);
 
             $row = [];
             foreach ($columns as $column) {
@@ -1352,10 +1367,6 @@ class ReportsController extends Controller
 
         if ($customerIdColumn) {
             $policiesQuery->addSelect($customerIdColumn . ' as policy_customer_id');
-        }
-
-        if (Schema::hasColumn('policies', 'remaining_time')) {
-            $policiesQuery->addSelect('remaining_time as current_remaining_time');
         }
 
         if (Schema::hasColumn('policies', 'last_payment')) {
@@ -1420,15 +1431,6 @@ class ReportsController extends Controller
 
         foreach ($policies as $policy) {
             $updates = [];
-
-            if (Schema::hasColumn('policies', 'remaining_time')) {
-                $newRemainingTime = $this->getRemainingTimeLabel($policy->policy_expiration ?? null);
-                $currentRemainingTime = (string) ($policy->current_remaining_time ?? '');
-
-                if ($newRemainingTime !== $currentRemainingTime) {
-                    $updates['remaining_time'] = $newRemainingTime;
-                }
-            }
 
             if (Schema::hasColumn('policies', 'last_payment')) {
                 $policyNumber = trim((string) ($policy->policy_number ?? ''));

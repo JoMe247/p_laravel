@@ -494,3 +494,14 @@ body {
         width: 100%;
     }
 }
+
+.messages-report-title-group{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.messages-export-btn{
+    min-width: 120px;
+}

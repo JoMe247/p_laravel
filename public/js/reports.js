@@ -106,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const reportTitle = document.getElementById("reportTitle");
 
     const periodFilter = document.getElementById("periodFilter");
+    const periodFilterBlock = document.getElementById("periodFilterBlock");
     const customRange = document.getElementById("customRange");
     const fromDate = document.getElementById("fromDate");
     const toDate = document.getElementById("toDate");
@@ -133,6 +134,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const smsLifetimeTableBody = document.getElementById(
         "smsLifetimeTableBody",
     );
+    const exportSmsLifetimeCsvBtn = document.getElementById(
+        "exportSmsLifetimeCsvBtn",
+    );
 
     const agentFilterBlock = agentFilter
         ? agentFilter.closest(".report-filter-block")
@@ -141,6 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeReport = "invoices";
     let allRows = [];
     let activeColumns = [...(reportConfigs.invoices.columns || [])];
+    let smsMonthRowsState = [];
+    let smsLifetimeRowsState = [];
 
     function getActiveConfig() {
         return reportConfigs[activeReport] || null;
@@ -311,13 +317,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     data.selected_sms_lifetime_year || "",
                 );
 
-                renderSmsMonthRows(data.sms_month_rows || []);
-                renderSmsLifetimeRows(data.sms_lifetime_rows || []);
+                smsMonthRowsState = Array.isArray(data.sms_month_rows)
+                    ? data.sms_month_rows
+                    : [];
+
+                smsLifetimeRowsState = Array.isArray(data.sms_lifetime_rows)
+                    ? data.sms_lifetime_rows
+                    : [];
+
+                renderSmsMonthRows(smsMonthRowsState);
+                renderSmsLifetimeRows(smsLifetimeRowsState);
 
                 reportsLoading.style.display = "none";
             })
             .catch((error) => {
                 console.error(error);
+                smsMonthRowsState = [];
+                smsLifetimeRowsState = [];
                 setMessagesEmptyState();
                 reportsLoading.style.display = "none";
             });
@@ -750,6 +766,56 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCsv(filename, csvRows.join("\n"));
     }
 
+    function exportSmsLifetimeToCsv() {
+        const rows = Array.isArray(smsLifetimeRowsState)
+            ? smsLifetimeRowsState
+            : [];
+
+        if (!rows.length) {
+            alert("No data to export.");
+            return;
+        }
+
+        const csvRows = [];
+
+        csvRows.push(
+            [
+                csvEscape("Date"),
+                csvEscape("Phone Sent"),
+                csvEscape("ID"),
+                csvEscape("SID"),
+            ].join(","),
+        );
+
+        rows.forEach((row) => {
+            csvRows.push(
+                [
+                    csvEscape(row.date_sent ?? ""),
+                    csvEscape(row.phone_sent ?? ""),
+                    csvEscape(row.sent_by_id ?? ""),
+                    csvEscape(row.sid ?? ""),
+                ].join(","),
+            );
+        });
+
+        const now = new Date();
+        const selectedYear =
+            (smsLifetimeYearSelect && smsLifetimeYearSelect.value) || "all";
+
+        const filename = `reports_sms_lifetime_${selectedYear}_${now.getFullYear()}-${String(
+            now.getMonth() + 1,
+        ).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(
+            now.getHours(),
+        ).padStart(
+            2,
+            "0",
+        )}-${String(now.getMinutes()).padStart(2, "0")}-${String(
+            now.getSeconds(),
+        ).padStart(2, "0")}.csv`;
+
+        downloadCsv(filename, csvRows.join("\n"));
+    }
+
     function exportCurrentTableToPdf() {
         const config = getActiveConfig();
         if (!config) return;
@@ -878,6 +944,10 @@ document.addEventListener("DOMContentLoaded", () => {
             periodFilter.disabled = true;
             customRange.classList.remove("show");
 
+            if (periodFilterBlock) {
+                periodFilterBlock.style.display = "none";
+            }
+
             if (agentFilterBlock) {
                 agentFilterBlock.style.display = "none";
             }
@@ -901,6 +971,12 @@ document.addEventListener("DOMContentLoaded", () => {
             setControlsEnabled(true);
 
             periodFilter.disabled = !config.usePeriodFilter;
+
+            if (periodFilterBlock) {
+                periodFilterBlock.style.display = config.usePeriodFilter
+                    ? ""
+                    : "none";
+            }
 
             if (agentFilterBlock) {
                 agentFilterBlock.style.display = config.useAgentFilter
@@ -958,6 +1034,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 This section will be enabled later.
             </div>
         `;
+
+        if (periodFilterBlock) {
+            periodFilterBlock.style.display = "none";
+        }
     }
 
     reportTabs.forEach((tab) => {
@@ -1029,6 +1109,13 @@ document.addEventListener("DOMContentLoaded", () => {
         smsLifetimeYearSelect.addEventListener("change", () => {
             if (activeReport !== "messages") return;
             loadMessagesData();
+        });
+    }
+
+    if (exportSmsLifetimeCsvBtn) {
+        exportSmsLifetimeCsvBtn.addEventListener("click", () => {
+            if (activeReport !== "messages") return;
+            exportSmsLifetimeToCsv();
         });
     }
 

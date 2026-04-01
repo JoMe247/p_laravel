@@ -67,7 +67,7 @@
                             <button type="button" class="report-tab" data-report="policies">POLICIES</button>
                             <button type="button" class="report-tab" data-report="documents">DOCUMENTS</button>
                             <button type="button" class="report-tab" data-report="messages">MESSAGES</button>
-                            <div class="report-filter-block">
+                            <div class="report-filter-block" id="periodFilterBlock">
                                 <label for="periodFilter">Period</label>
                                 <select id="periodFilter">
                                     <option value="all">All Time</option>
@@ -138,7 +138,13 @@
 
                             <div class="messages-report-block">
                                 <div class="messages-report-head">
-                                    <h3>SMS Lifetime</h3>
+                                    <div class="messages-report-title-group">
+                                        <h3>SMS Lifetime</h3>
+                                        <button type="button" id="exportSmsLifetimeCsvBtn"
+                                            class="export-csv-btn messages-export-btn">
+                                            Export CSV
+                                        </button>
+                                    </div>
 
                                     <div class="messages-report-controls">
                                         <label for="smsLifetimeYearSelect">Year</label>
