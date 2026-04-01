@@ -1836,7 +1836,7 @@ class ReportsController extends Controller
         ];
     }
 
-    private function resolveFirstExistingColumnOnConnection(string $connection, string $table, array $columns): ?string
+    /* private function resolveFirstExistingColumnOnConnection(string $connection, string $table, array $columns): ?string
     {
         foreach ($columns as $column) {
             if (Schema::connection($connection)->hasColumn($table, $column)) {
@@ -1845,7 +1845,7 @@ class ReportsController extends Controller
         }
 
         return null;
-    }
+    }*/
 
     private function getSpanishMonthName(int $month): string
     {
