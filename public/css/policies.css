@@ -36,7 +36,8 @@
     margin-top: 10px;
     /* min-height: 420px; */
     font-family: var(--montserrat);
-    overflow-y: auto;
+    /* overflow-y: auto; */
+    overflow: hidden;
     border-radius: 12px;
     background: #fff;
     /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); */
@@ -91,7 +92,28 @@
     margin-top: -30px;
 }
 
+.policy-overlay-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px 24px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    margin-top: -30px;
+}
+
 .policy-overlay-box h3 {
+    margin-bottom: 12px;
+    font-family: var(--montserrat);
+    text-transform: uppercase;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.edit-right h3 {
     margin-bottom: 12px;
     font-family: var(--montserrat);
     text-transform: uppercase;
@@ -124,7 +146,7 @@
     border-top: 1px solid #e0e0e0;
 }
 
-.policy-overlay-actions {
+.policy-overlay-actions, .policy-edit-actions {
     margin-top: 16px;
     display: flex;
     gap: 10px;
@@ -132,6 +154,12 @@
 }
 
 .policy-overlay-actions button{
+    min-width: 110px;
+    justify-content: center;
+    font-size: 1em;
+}
+
+.policy-edit-actions button{
     min-width: 110px;
     justify-content: center;
     font-size: 1em;
@@ -171,6 +199,23 @@
     background: #d8d8d8;
 }
 
+
+#policy-edit-cancel{
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    align-items: center;
+    display: flex;
+}
+
+#policy-edit-cancel:hover{
+    background: #d8d8d8;
+}
+
 /* Centrado responsivo */
 @media (max-width: 768px) {
     .policy-overlay-box {
@@ -181,32 +226,32 @@
 
 /* === NEW LAYOUT FOR POLICY OVERLAY === */
 
-.policy-flex {
+.policy-flex, #policy-edit-content{
     width: 95%;
     max-width: 1200px;      /* ancho grande */
 }
 
-.policy-columns {
+.policy-columns, .edit-grid {
     display: grid;
     grid-template-columns: 320px auto;
     gap: 25px;
 }
 
 /* LEFT PANEL */
-.policy-left {
+.policy-left, .edit-left {
     display: flex;
     flex-direction: column;
     font-family: var(--montserrat);
 }
 
-.policy-left label{
+.policy-left label, .edit-left label{
     text-align: left;
     padding-left: 5px;
     margin-top: 15px;
     font-size: 1.2em;
 }
 
-.policy-left input {
+.policy-left input, .edit-left input {
     padding: 8px;
     border-radius: 6px;
     border: 1px solid #ccc;
@@ -232,7 +277,7 @@
     display: flex;
     background: var(--red1);
     margin-bottom: 10px;
-    margin-left: 10px;
+    margin-left: 50px;
     user-select: none;
     font-size: 1em;
 }
@@ -243,17 +288,18 @@
 }
 
 
-.vehicle-container {
+.vehicle-container, .edit-vehicles-grid {
     display: flex;
     flex-flow: wrap;
     overflow-y: scroll;
     height: 700px;
+    width: 100%;
     justify-content: flex-start;
     padding-left: 30px;
 }
 
 /* VEHICLE CARD */
-.vehicle-card {
+.vehicle-card, .vehicle-edit-card {
     background: #f7f7f7;
     border-radius: 14px;
     padding: 14px;
@@ -262,9 +308,10 @@
     width: 320px;
     margin: 15px;
     height: 430px;
+    text-align: left;
 }
 
-.vehicle-thumb {
+.vehicle-thumb, .vehicle-edit-thumb {
     width: 100%;
     height: 150px;
     background: #fff;
@@ -288,6 +335,15 @@
     padding: 6px;
 }
 
+
+.vehicle-edit-card select,
+.vehicle-edit-card input {
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 6px;
+    width: 100%;
+}
+
 /* DELETE BUTTON */
 .vehicle-delete-btn {
     background: var(--red1);
@@ -298,6 +354,7 @@
     margin-top: 6px;
     border-radius: 6px;
     cursor: pointer;
+    user-select: none;
 }
 
 .vehicle-delete-btn:hover{
@@ -328,7 +385,6 @@
 .policy-edit-box {
     background: #ffffff;
     width: 90%;
-    max-width: 1400px;      /* <-- ANCHO GRANDE */
     padding: 28px;
     border-radius: 18px;
     box-shadow: 0 8px 22px rgba(0,0,0,0.25);
@@ -337,94 +393,9 @@
     overflow-x: hidden !important; /* <-- PROHIBIMOS SCROLL HORIZONTAL */
 }
 
-.vehicle-edit-card {
-    background:#f1f1f1;
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:10px;
-}
 
-.vehicle-edit-card {
-    background: #f1f1f1;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-}
-
-.vehicle-edit-thumb {
-    width: 100%;
-    height: 140px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
 
 /* MAIN GRID FOR OVERLAY */
-.edit-grid {
-    display: grid;
-    grid-template-columns: 380px auto; /* <-- más espacio para vehículos */
-    gap: 32px;
-}
-
-/* Left Panel */
-.edit-left label {
-    margin-top: 8px;
-    font-size: 13px;
-}
-
-.edit-left input {
-    width: 100%;
-    padding: 9px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
-
-
-/* Right Panel */
-.edit-right h4 {
-    margin-bottom: 12px;
-    font-size: 17px;
-}
-
-.edit-vehicles-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* <-- Dos columnas */
-    gap: 18px;
-}
-
-
-.vehicle-edit-card {
-    background: #fafafa;
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.16);
-    transition: 0.2s ease;
-}
-
-.vehicle-edit-card:hover {
-    transform: translateY(-3px);
-}
-
-
-.vehicle-edit-thumb {
-    width: 100%;
-    height: 140px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-.vehicle-edit-card input {
-    width: 100%;
-    padding: 7px;
-    margin-bottom: 8px;
-    border-radius: 6px;
-    border: 1px solid #bbb;
-}
 
 
 /* =============================== */
@@ -460,4 +431,46 @@
 
 #edit-policy-btn:hover{
     background: #0651a7;
+}
+
+#company-website-button{
+    display: none;
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    /* display: flex; */
+    align-items: center;
+    justify-content: center;
+    top: 23px;
+    right: -38px;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    user-select: none;
+}
+
+#company-website-button:hover{
+    background-color: #d5d5d5;
+}
+
+#edit-company-website-button{
+    display: none;
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    /* display: flex; */
+    align-items: center;
+    justify-content: center;
+    top: 23px;
+    right: -38px;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    user-select: none;
+}
+
+#edit-company-website-button:hover{
+    background-color: #d5d5d5;
 }

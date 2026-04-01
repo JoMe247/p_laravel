@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 
+
 class CustomersController extends Controller
 {
     // Listado simple
@@ -224,5 +225,18 @@ class CustomersController extends Controller
         CustomerNote::where('id', $noteId)->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    private function getPolicyCountsByCustomerId(array $customerIds): array
+    {
+        if (empty($customerIds)) return [];
+
+        // OJO: cambia 'policies' si tu tabla se llama diferente
+        return DB::table('policies')
+            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
+            ->selectRaw('customer_id, COUNT(*) as total')
+            ->groupBy('customer_id')
+            ->pluck('total', 'customer_id')
+            ->toArray();
     }
 }

@@ -26,7 +26,7 @@ class DashboardController extends Controller
             ->take(50)
             ->get();
 
-            // ids de customers
+        // ids de customers
         $customerIds = $customers->pluck('ID')->filter()->values()->all();
 
         // Consulta independiente (NO depende de relaciones)

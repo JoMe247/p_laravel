@@ -40,7 +40,7 @@
 
         <section id="dash">
 
-            <div class="payments-layout">
+            <div id="profile-wrapper" class="payments-layout">
 
                 <div class="left-column">
 
@@ -97,7 +97,7 @@
 
                         <div class="notes-header">
                             <h3>Notes</h3>
-                            <button id="add-note-btn" class="btn small">+ Add Note</button>
+                            <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i>  &nbsp;Add Note</button>
                         </div>
 
                         <div class="notes-scroll">
