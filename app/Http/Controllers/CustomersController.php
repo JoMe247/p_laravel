@@ -20,6 +20,8 @@ class CustomersController extends Controller
         // ids de customers
         $customerIds = $customers->pluck('ID')->filter()->values()->all();
 
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
         // En caso de no estar autenticado, redirige al login
         if (!$user) {
             return redirect()->route('login');
@@ -40,7 +42,18 @@ class CustomersController extends Controller
         return view('customers', compact('customers'))->with('policyCounts', $policyCounts);
     }
 
-    
+    // private function getPolicyCountsByCustomerId(array $customerIds): array
+    // {
+    //     if (empty($customerIds)) return [];
+
+    //     // OJO: cambia 'policies' si tu tabla se llama diferente
+    //     return DB::table('policies')
+    //         ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
+    //         ->selectRaw('customer_id, COUNT(*) as total')
+    //         ->groupBy('customer_id')
+    //         ->pluck('total', 'customer_id')
+    //         ->toArray();
+    // }
 
     // store: guarda los 4 campos rápidos (recibe JSON o form)
     public function store(Request $request)
