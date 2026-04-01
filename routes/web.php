@@ -242,8 +242,6 @@ Route::middleware(['auth.multi'])->group(function () {
     Route::delete('/schedules/assign', [SchedulesController::class, 'removeAssignment'])->name('schedules.assign.delete');
     Route::get('/schedules/pdf', [SchedulesController::class, 'downloadWeekPdf'])
         ->name('schedules.pdf');
-<<<<<<< HEAD
-=======
 
 
     // invoices
@@ -370,8 +368,7 @@ Route::middleware(['auth.multi'])->group(function () {
 
     //FIN DE FUNCIÓN MIDDLEWARE
 });
->>>>>>> f6eb76d (Estilos para polizas, reminders, files, whatsapp)
-});
+
 
 // invoices
 
