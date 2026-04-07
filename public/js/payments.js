@@ -12,12 +12,11 @@
 
   const previewBox = document.getElementById("footerPreview");
   const previewImg = document.getElementById("footerPreviewImg");
+  const selectedFileName = document.getElementById("footerSelectedFileName");
 
   let selectedFile = null;
-
   let uploadedThisSession = false;
-  const hadImageInitially = (openOverlayBtn && openOverlayBtn.dataset.hasImage === "1");
-
+  let hadImageInitially = (openOverlayBtn && openOverlayBtn.dataset.hasImage === "1");
 
   const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "";
   const baseUrl = document.querySelector('meta[name="base-url"]')?.getAttribute("content") || "";
@@ -27,18 +26,24 @@
     if (overlay) overlay.style.display = "flex";
   }
 
+  function resetDropZone() {
+    if (input) input.value = "";
+    if (addBtn) addBtn.classList.remove("dragover", "has-file");
+    if (selectedFileName) selectedFileName.textContent = "No file selected";
+  }
+
   function closeOverlay() {
     if (overlay) overlay.style.display = "none";
+
     selectedFile = null;
-    if (input) input.value = "";
+
     if (previewBox) previewBox.style.display = "none";
     if (previewImg) previewImg.src = "";
 
-    // ✅ Si NO había imagen antes y NO se subió nada -> switch vuelve OFF
+    resetDropZone();
+
     if (!hadImageInitially && !uploadedThisSession) {
       if (toggle) toggle.checked = false;
-      // (opcional) también podemos desactivar en BD, pero como no se subió nada, no hace falta.
-      // Si ya llamaste setEnabled(true) al encender, y quieres revertirlo, dime y lo dejamos perfecto.
     }
   }
 
@@ -64,7 +69,66 @@
     });
   }
 
-  // ✅ Update Image button -> abre overlay
+  function setSingleFileToInput(fileInput, file) {
+    if (!fileInput || !file) return;
+
+    try {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+    } catch (err) {
+      console.error("Could not assign dropped file to input:", err);
+    }
+  }
+
+  function isValidImage(file) {
+    return file && file.type && file.type.startsWith("image/");
+  }
+
+  function showPreview(file) {
+    selectedFile = file || null;
+
+    if (!file) {
+      if (previewBox) previewBox.style.display = "none";
+      if (previewImg) previewImg.src = "";
+      if (selectedFileName) selectedFileName.textContent = "No file selected";
+      if (addBtn) addBtn.classList.remove("has-file");
+      return;
+    }
+
+    if (selectedFileName) {
+      selectedFileName.textContent = file.name;
+    }
+
+    if (addBtn) {
+      addBtn.classList.add("has-file");
+    }
+
+    const url = URL.createObjectURL(file);
+
+    if (previewImg) previewImg.src = url;
+    if (previewBox) previewBox.style.display = "block";
+  }
+
+  function handleImageFile(file) {
+    if (!file) return;
+
+    if (!isValidImage(file)) {
+      Swal.fire({
+        icon: "warning",
+        title: "Invalid file",
+        text: "Please drop an image file only."
+      });
+      return;
+    }
+
+    if (input) {
+      setSingleFileToInput(input, file);
+    }
+
+    showPreview(file);
+  }
+
   if (openOverlayBtn) {
     openOverlayBtn.addEventListener("click", openOverlay);
   }
@@ -72,29 +136,60 @@
   if (closeBtn) closeBtn.addEventListener("click", closeOverlay);
   if (cancelBtn) cancelBtn.addEventListener("click", closeOverlay);
 
-  if (addBtn && input) addBtn.addEventListener("click", () => input.click());
+  if (addBtn && input) {
+    addBtn.addEventListener("click", () => input.click());
+
+    addBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        input.click();
+      }
+    });
+  }
 
   if (input) {
     input.addEventListener("change", () => {
       const file = input.files && input.files[0] ? input.files[0] : null;
-      selectedFile = file;
-
-      if (!file) {
-        if (previewBox) previewBox.style.display = "none";
-        return;
-      }
-
-      const url = URL.createObjectURL(file);
-      if (previewImg) previewImg.src = url;
-      if (previewBox) previewBox.style.display = "block";
+      handleImageFile(file);
     });
   }
 
-  // ✅ Save upload -> si se subió, muestra Update Image button
+  if (addBtn) {
+    ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+      addBtn.addEventListener(eventName, function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
+    ["dragenter", "dragover"].forEach(eventName => {
+      addBtn.addEventListener(eventName, function () {
+        addBtn.classList.add("dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach(eventName => {
+      addBtn.addEventListener(eventName, function () {
+        addBtn.classList.remove("dragover");
+      });
+    });
+
+    addBtn.addEventListener("drop", function (e) {
+      const files = e.dataTransfer.files;
+      if (!files || !files.length) return;
+
+      handleImageFile(files[0]);
+    });
+  }
+
   if (saveBtn) {
     saveBtn.addEventListener("click", async () => {
       if (!selectedFile) {
-        Swal.fire({ icon: "warning", title: "Select an image", text: "Please choose an image first." });
+        Swal.fire({
+          icon: "warning",
+          title: "Select an image",
+          text: "Please choose an image first."
+        });
         return;
       }
 
@@ -104,16 +199,24 @@
       try {
         const res = await fetch(`${baseUrl}/payments/invoice-footer-image`, {
           method: "POST",
-          headers: { "X-CSRF-TOKEN": csrf, "Accept": "application/json" },
+          headers: {
+            "X-CSRF-TOKEN": csrf,
+            "Accept": "application/json"
+          },
           body: form,
         });
 
         if (!res.ok) throw new Error("Upload failed");
         await res.json();
 
-        // Asegurar switch ON + mostrar Update Image
+        uploadedThisSession = true;
+        hadImageInitially = true;
+
         if (toggle) toggle.checked = true;
-        if (openOverlayBtn) openOverlayBtn.style.display = "inline-block";
+        if (openOverlayBtn) {
+          openOverlayBtn.style.display = "inline-block";
+          openOverlayBtn.dataset.hasImage = "1";
+        }
 
         Swal.fire({
           icon: "success",
@@ -126,24 +229,23 @@
         closeOverlay();
       } catch (e) {
         console.error(e);
-        Swal.fire({ icon: "error", title: "Error", text: "Could not upload the image." });
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Could not upload the image."
+        });
       }
     });
   }
 
-  // ✅ Switch behavior:
-  // ON -> habilita y abre overlay
-  // OFF -> confirma y borra imagen + oculta Update button
   if (toggle) {
     toggle.addEventListener("change", async () => {
       if (toggle.checked) {
-        try { await setEnabled(true); } catch (e) { }
+        try {
+          await setEnabled(true);
+        } catch (e) {}
 
-        // 🔥 ahora SIEMPRE abre overlay al activar
         openOverlay();
-
-        // el botón Update SOLO se muestra después de que exista imagen
-        // (si ya existía imagen, el botón ya está visible por blade)
       } else {
         const r = await Swal.fire({
           icon: "warning",
@@ -159,10 +261,22 @@
           return;
         }
 
-        try { await deleteImage(); } catch (e) { }
+        try {
+          await deleteImage();
+        } catch (e) {}
 
-        // ocultar Update button
-        if (openOverlayBtn) openOverlayBtn.style.display = "none";
+        if (openOverlayBtn) {
+          openOverlayBtn.style.display = "none";
+          openOverlayBtn.dataset.hasImage = "0";
+        }
+
+        hadImageInitially = false;
+        selectedFile = null;
+
+        if (previewBox) previewBox.style.display = "none";
+        if (previewImg) previewImg.src = "";
+
+        resetDropZone();
 
         Swal.fire({
           icon: "success",

@@ -61,8 +61,8 @@
 
                             <button type="button" class="profile-menu-item active"
                                 onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
-                                <i class='bx bx-credit-card'></i>
-                                <span>Invoices (Payments)</span>
+                                <i class='bx bx-file'></i>
+                                <span>Invoices</span>
                             </button>
 
                             <button type="button" class="profile-menu-item"
@@ -136,7 +136,7 @@
 
                         <a class="btn-invoices"
                             href="{{ route('invoices', ['customerId' => $customerId, 'new' => 1]) }}">
-                            Invoices
+                            <i class='bx bxs-file-plus' ></i> &nbsp;Create Invoice
                         </a>
 
                         <div class="footer-image-controls">
@@ -154,13 +154,13 @@
 
                         </div>
 
+                        <h2></h2>
 
                     </div>
 
 
                     <div class="payments-card">
-                        <h2>Payments</h2>
-
+                        
                         <div class="invoices-table-wrap">
                             <table class="invoices-table">
                                 <thead>
@@ -210,14 +210,14 @@
                                                 {{-- EDIT: abre invoices en modo edición (mismo invoice) --}}
                                                 <a class="icon-btn" title="Edit"
                                                     href="{{ route('invoices', ['customerId' => $customerId, 'invoiceId' => $inv->id]) }}">
-                                                    <i class='bx bx-edit-alt'></i>
+                                                    <i class='bx bxs-pencil' ></i>
                                                 </a>
 
                                                 {{-- PDF: por ahora placeholder --}}
                                                 <button class="icon-btn" type="button" title="Download PDF">
                                                     <a class="icon-btn" title="Download PDF"
                                                         href="{{ route('invoices.pdf', ['invoiceId' => $inv->id]) }}">
-                                                        <i class='bx bxs-file-pdf'></i>
+                                                        <i class='bx bxs-file' ></i>
                                                     </a>
                                                 </button>
 
@@ -228,7 +228,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="icon-btn danger" type="submit" title="Delete">
-                                                        <i class='bx bxs-trash'></i>
+                                                        <i class='bx bx-trash' ></i>
                                                     </button>
                                                 </form>
                                             </td>
@@ -254,7 +254,7 @@
                 <div class="overlay-box">
                     <div class="overlay-head">
                         <h3>Invoice PDF Footer Image</h3>
-                        <button type="button" class="overlay-close" id="closeFooterOverlay">
+                        <button type="button" class="overlay-close" id="closeFooterOverlay" style="display:none">
                             <i class='bx bx-x'></i>
                         </button>
                     </div>
@@ -263,19 +263,25 @@
                         Upload an image that will appear at the bottom of every invoice PDF for this agency.
                     </p>
 
-                    <button type="button" class="btn-upload" id="btnAddFooterImage">
-                        + Add Image
-                    </button>
+                    <div id="btnAddFooterImage" class="footer-drop-zone" role="button" tabindex="0">
+                        <input type="file" id="footerImageInput" accept="image/*" style="display:none;">
 
-                    <input type="file" id="footerImageInput" accept="image/*" style="display:none;">
+                        <div class="footer-drop-zone-content">
+                            <i class='bx bxs-file-image footer-drop-icon'></i>
+                            <p class="footer-drop-text">
+                                Drop your file here or Click to browse
+                            </p>
+                            <small id="footerSelectedFileName" class="footer-selected-file-name">No file selected</small>
+                        </div>
+                    </div>
 
                     <div class="overlay-preview" id="footerPreview" style="display:none;">
                         <img id="footerPreviewImg" alt="Preview">
                     </div>
 
                     <div class="overlay-actions">
-                        <button type="button" class="btn secondary" id="cancelFooterUpload">Cancel</button>
                         <button type="button" class="btn" id="saveFooterUpload">Save</button>
+                        <button type="button" class="btn secondary" id="cancelFooterUpload">Cancel</button>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,14 @@
 .invoices-page{
-    padding: 20px;
+    /* padding: 20px; */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: var(--montserrat);
+    /* background: #f9f9f9; */
+    /* border-radius: 20px; */
 }
 
 /* Header layout */
@@ -16,6 +25,8 @@
     border-radius: 14px;
     padding: 16px;
     box-shadow: 0 10px 25px rgba(0,0,0,.06);
+    width: 100%;
+    display: flex;
 }
 
 
@@ -24,18 +35,23 @@
     min-width: 220px;
     background: #fff;
     border-radius: 14px;
-    padding: 14px;
-    box-shadow: 0 10px 25px rgba(0,0,0,.06);
+    padding: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.01);
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-right: 20px;
 }
 
 .agency-logo{
-    width: 100%;
-    height: 160px;
+    width: 250px;
+    max-height: 200px;
     object-fit: contain;
-    border-radius: 10px;
+    /* border-radius: 10px; */
+    margin-left: auto;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    margin-top: 20px;
 }
 
 .agency-logo.placeholder{
@@ -52,39 +68,50 @@
 
 /* agency arriba derecha */
 .agency-top{
-    text-align: right;
+    text-align: left;
+    margin-left: 20px;
+    margin-top: 20px;
 }
 
 .agency-title{
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 800;
     color: #111827;
+    font-family: var(--montserrat);
 }
 
 .agency-line{
     margin-top: 4px;
     color: #374151;
     font-weight: 600;
+    font-family: var(--montserrat);
+    margin-top: 8px;
 }
 
 /* Customer block */
 .customer-box{
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #e5e7eb;
+    /* margin-top: 14px; */
+    /* padding-top: 12px; */
+    /* border-top: 1px solid #e5e7eb; */
     text-align: left; /* para que el cliente no quede alineado a la derecha */
+    margin-left: auto;
+    margin-right: 60px;
+    margin-top: 80px;
 }
 
-.customer-title{
+.customer-title, .customer-line{
     font-size: 16px;
     font-weight: 800;
     color: #111827;
+    font-family: var(--montserrat);
+    margin: 10px auto;
 }
 
 .customer-line{
     margin-top: 3px;
     color: #374151;
     font-weight: 600;
+    font-family: var(--montserrat);
 }
 
 
@@ -99,9 +126,16 @@
     padding: 16px;
     box-shadow: 0 10px 25px rgba(0,0,0,.06);
     max-height: 705px;          /* ajusta este valor a tu gusto */
-    overflow-y: auto;           /* scroll vertical */
+    overflow-y: scroll;           /* scroll vertical */
     overflow-x: hidden;
     padding-right: 6px; 
+
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+    display: flex;
+    flex-flow: wrap;
+    padding-bottom: 100px;
 }
 
 .table-card::-webkit-scrollbar{
@@ -118,8 +152,9 @@
 }
 
 .table-topbar{
+    width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: left;
     align-items: center;
     gap: 12px;
     margin-bottom: 12px;
@@ -133,6 +168,7 @@
     color: #fff;
     font-weight: 800;
     cursor: pointer;
+    font-family: var(--montserrat);
 }
 
 .btn-add-row:hover{
@@ -145,6 +181,7 @@
     background: #f3f4f6;
     padding: 10px 12px;
     border-radius: 12px;
+    font-family: var(--montserrat);
 }
 
 /* Scroll interno de tabla */
@@ -153,12 +190,15 @@
     overflow: auto;
     border-radius: 12px;
     border: 1px solid #e5e7eb;
+    margin-bottom: 180px;
+    width: 100%;
 }
 
 .invoice-table{
     width: 100%;
     border-collapse: collapse;
     min-width: 720px;
+    font-family: var(--montserrat);
 }
 
 .invoice-table thead th{
@@ -186,6 +226,7 @@
     padding: 10px 10px;
     outline: none;
     font-weight: 600;
+    font-family: var(--montserrat);
 }
 
 .row-total{
@@ -203,15 +244,19 @@
 
 /* Policy select */
 .policy-select-wrap{
-    margin-top: 10px;
+    margin-top: 80px;
     display: inline-flex;
     flex-direction: column;
     gap: 6px;
+    margin-left: auto;
+    margin-right: auto;
 }
+
 
 .policy-label{
     font-weight: 800;
     color: #111827;
+    font-family: var(--montserrat);
 }
 
 .policy-select{
@@ -222,12 +267,14 @@
     font-weight: 700;
     outline: none;
     background: #fff;
+    font-family: var(--montserrat);
 }
 
 .policy-small{
     font-size: 12px;
     color: #6b7280;
     font-weight: 700;
+    font-family: var(--montserrat);
 }
 
 /* Trash */
@@ -237,16 +284,26 @@
 }
 
 .btn-trash{
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 8px;
+    font-size: 1.2em;
+
+    background: var(--red1);
+    color: #fff;
     border: none;
-    background: #f3f4f6;
-    border-radius: 10px;
-    padding: 8px 10px;
+    padding: 8px 14px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 16px;
+    transition: background 0.25s ease;
 }
 
+
 .btn-trash:hover{
-    opacity: .9;
+    background: var(--red2);
 }
 
 .item-input{
@@ -255,24 +312,34 @@
 
 .invoice-dates{
     display: flex;
-    flex-direction: column;
+    flex-flow: wrap;
+    justify-content: left;
+    align-items: flex-start;
+    align-content: flex-start;
     gap: 10px;
     margin-bottom: 14px;
     background: #fff;
     border-radius: 14px;
     padding: 14px;
-    box-shadow: 0 10px 25px rgba(0,0,0,.06);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .06);
+    width: 100%;
+    max-height: 300px;
 }
 
 .date-row{
+    /* width: 100%; */
     display: flex;
     flex-direction: column;
     gap: 6px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .date-label{
     font-weight: 800;
     color: #111827;
+    text-align: left;
+    font-family: var(--montserrat);
 }
 
 .date-select{
@@ -292,7 +359,7 @@
 }
 
 .date-input{
-    width: 100%;
+    /* width: 100%; */
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 10px 40px 10px 12px;
@@ -300,6 +367,7 @@
     outline: none;
     background: #fff;
     cursor: pointer;
+    font-family: var(--montserrat);
 }
 
 /* Icon */
@@ -369,8 +437,10 @@ input[list] {
     box-shadow: 0 10px 25px rgba(0,0,0,.06);
     margin-bottom: 14px;
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     gap: 14px;
+    width: 100%;
+    margin-right: 30px;
 }
 
 .charge-section{
@@ -379,6 +449,8 @@ input[list] {
     gap: 8px;
     padding-bottom: 12px;
     border-bottom: 1px solid #eef2f7;
+    font-family: var(--montserrat);
+    margin-right: 20px;
 }
 
 .charge-section:last-child{
@@ -389,24 +461,58 @@ input[list] {
 .charge-label{
     font-weight: 800;
     color: #111827;
+    position: relative;
 }
 
 .charge-input, .charge-select{
-    max-width: 320px;
+    width: 300px;
+    /* max-width: 320px; */
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 10px 12px;
     font-weight: 700;
     outline: none;
     background: #fff;
+    font-family: var(--montserrat);
+}
+
+.charge-input:not(#paymentMethod){
+    padding-left: 30px;
+    position: relative;
+}
+
+.charge-section:not([data="metododepago"]) .charge-label::before{
+    content: '$';
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    left: 10px;
+    margin-top: 37px;
+    display: block;
+    z-index: 5;
+}
+.charge-section:not([data="metododepago"]) [data="sub-label"]::before{
+    content: '$';
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    left: 10px;
+    margin-top: 85px;
+    display: block;
+    z-index: 5;
+}
+
+#paymentMethod{
+    width: 300px;
 }
 
 .check-row{
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    font-weight: 800;
+    font-weight: 400;
     color: #111827;
+    cursor: pointer;
 }
 
 .split-fields{
@@ -415,7 +521,7 @@ input[list] {
     flex-direction: column;
     gap: 12px;
     padding-left: 10px;
-    border-left: 3px solid #eef2f7;
+    border-left: 3px solid var(--red1);
 }
 
 .split-block{
@@ -438,6 +544,9 @@ input[list] {
     color: #fff;
     font-weight: 900;
     cursor: pointer;
+    font-family: var(--montserrat);
+    /* position: absolute; */
+    margin-top: 30px;
 }
 
 .btn-save-table:hover{
@@ -449,12 +558,16 @@ input[list] {
     display: inline-flex;
     flex-direction: column;
     gap: 6px;
+    margin-left: -3px;
 }
 
 .invoice-number-label{
-    font-weight: 800;
-    color: #111827;
-    font-size: 12px;
+    color: #464646;
+    margin-left: 5px;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-family: var(--montserrat);
+    font-weight: 500;
 }
 
 .invoice-number-box{
