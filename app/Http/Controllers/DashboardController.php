@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use App\Models\Customer;
 use App\Models\Reminder;
-
 
 class DashboardController extends Controller
 {
@@ -21,18 +21,18 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
 
-        // 🔹 Obtener los últimos 50 customers (SIN tocar tu lógica)
+        $agency = $user->agency;
+
+        // 🔹 Obtener los últimos 50 customers
         $customers = Customer::orderBy('ID', 'desc')
             ->take(50)
             ->get();
 
-            // ids de customers
+        // ids de customers
         $customerIds = $customers->pluck('ID')->filter()->values()->all();
 
-        // Consulta independiente (NO depende de relaciones)
+        // Consulta independiente
         $policyCounts = $this->getPolicyCountsByCustomerId($customerIds);
-
-        
 
         // 🔹 OBTENER REMINDERS SEGÚN SESIÓN
         $webUser = Auth::guard('web')->user();
@@ -69,14 +69,70 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
+        /*
+        |--------------------------------------------------------------------------
+        | WEEKLY INCOME REAL PARA LA GRÁFICA
+        |--------------------------------------------------------------------------
+        */
+        $weekStart = now()->startOfWeek(Carbon::MONDAY);
+        $weekEnd   = now()->endOfWeek(Carbon::SUNDAY);
+
+        $weeklyBase = [
+            'Monday'    => 0,
+            'Tuesday'   => 0,
+            'Wednesday' => 0,
+            'Thursday'  => 0,
+            'Friday'    => 0,
+            'Saturday'  => 0,
+            'Sunday'    => 0,
+        ];
+
+        $weeklyInvoices = DB::table('invoices')
+            ->where('agency', $agency)
+            ->whereNotNull('creation_date')
+            ->whereDate('creation_date', '>=', $weekStart->toDateString())
+            ->whereDate('creation_date', '<=', $weekEnd->toDateString())
+            ->select('creation_date', 'inv_prices')
+            ->get();
+
+        foreach ($weeklyInvoices as $invoice) {
+            try {
+                $dayName = Carbon::parse($invoice->creation_date)->englishDayOfWeek;
+            } catch (\Exception $e) {
+                continue;
+            }
+
+            if (!array_key_exists($dayName, $weeklyBase)) {
+                continue;
+            }
+
+            $prices = json_decode($invoice->inv_prices ?? '{}', true);
+            $amount = (float) ($prices['grand_total'] ?? 0);
+
+            $weeklyBase[$dayName] += $amount;
+        }
+
+        $maxAmount = !empty($weeklyBase) ? max($weeklyBase) : 0;
+
+        $weeklyIncome = collect($weeklyBase)->map(function ($amount, $day) use ($maxAmount) {
+            $percentage = $maxAmount > 0 ? round(($amount / $maxAmount) * 100, 2) : 0;
+
+            return [
+                'day' => $day,
+                'amount' => $amount,
+                'percentage' => $percentage,
+            ];
+        })->values();
+
         // 🔹 AHORA SÍ, TODO EXISTE
         return view('dashboard', [
-            'username'  => $user->name ?? $user->username,
-            'customers' => $customers,
-            'reminders' => $reminders,
+            'username'        => $user->name ?? $user->username,
+            'customers'       => $customers,
+            'reminders'       => $reminders,
             'remindersCount'  => $remindersCount,
-            'policyCounts' => $policyCounts,
-            'recentDocuments' => $recentDocuments, 
+            'policyCounts'    => $policyCounts,
+            'recentDocuments' => $recentDocuments,
+            'weeklyIncome'    => $weeklyIncome,
         ]);
     }
 
@@ -84,9 +140,8 @@ class DashboardController extends Controller
     {
         if (empty($customerIds)) return [];
 
-        // OJO: cambia 'policies' si tu tabla se llama diferente
         return DB::table('policies')
-            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
+            ->whereIn('customer_id', $customerIds)
             ->selectRaw('customer_id, COUNT(*) as total')
             ->groupBy('customer_id')
             ->pluck('total', 'customer_id')

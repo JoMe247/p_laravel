@@ -278,43 +278,12 @@
                             </div>
 
                             <div class="graph-bars-containers">
-
-                                <label class="graph-bar-height" style="height: 100%;">
-                                    <p class="graph-bar-text">Monday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 25%;">
-                                    <p class="graph-bar-text">Thursday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 50%;">
-                                    <p class="graph-bar-text">Wednesday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 90%;">
-                                    <p class="graph-bar-text">Tuesday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 10%;">
-                                    <p class="graph-bar-text">Friday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 62%;">
-                                    <p class="graph-bar-text">Saturday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 100%;">
-                                    <p class="graph-bar-text">Sunday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-
+                                @foreach ($weeklyIncome as $day)
+                                    <label class="graph-bar-height" style="height: {{ $day['percentage'] }}%;">
+                                        <p class="graph-bar-text">{{ $day['day'] }}</p>
+                                        <e class="graph-amount">${{ number_format($day['amount'], 2) }}</e>
+                                    </label>
+                                @endforeach
                             </div>
                         </div>
 
