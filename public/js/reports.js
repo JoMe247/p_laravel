@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         estimates: getMetaContent("reports-estimates-url"),
         customers: getMetaContent("reports-customers-url"),
         policies: getMetaContent("reports-policies-url"),
+        documents: getMetaContent("reports-documents-url"),
         messages: getMetaContent("reports-messages-url"),
     };
 
@@ -98,6 +99,15 @@ document.addEventListener("DOMContentLoaded", () => {
             useAgentFilter: false,
             includeTotals: false,
             filePrefix: "reports_policies",
+            columns: [],
+        },
+        documents: {
+            title: "Documents Report",
+            url: reportUrls.documents,
+            usePeriodFilter: true,
+            useAgentFilter: true,
+            includeTotals: false,
+            filePrefix: "reports_documents",
             columns: [],
         },
     };

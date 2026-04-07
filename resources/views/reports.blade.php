@@ -11,6 +11,7 @@
     <meta name="reports-items-url" content="{{ route('reports.items-data') }}">
     <meta name="reports-policies-url" content="{{ route('reports.policies-data') }}">
     <meta name="reports-messages-url" content="{{ route('reports.messages-data') }}">
+    <meta name="reports-documents-url" content="{{ route('reports.documents-data') }}">
     <title>Reports</title>
 
     <link rel="icon" href="img/favicon.png">

@@ -394,6 +394,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/reports/items-data', [ReportsController::class, 'itemsData'])->name('reports.items-data');
         Route::get('/reports/policies-data', [ReportsController::class, 'policiesData'])->name('reports.policies-data');
         Route::get('/reports/messages-data', [ReportsController::class, 'messagesData'])->name('reports.messages-data');
+        Route::get('/reports/documents-data', [ReportsController::class, 'documentsData'])->name('reports.documents-data');
         
     });
 });

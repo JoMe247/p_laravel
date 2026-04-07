@@ -1866,4 +1866,189 @@ class ReportsController extends Controller
 
         return $months[$month] ?? '';
     }
+
+    // documentos
+
+    public function documentsData(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return response()->json(['columns' => [], 'rows' => []], 401);
+        }
+
+        $agency = $authUser->agency ?? null;
+        $agentFilter = trim((string) $request->get('agent', ''));
+        $period = (string) $request->get('period', 'all');
+        $from = $request->get('from');
+        $to = $request->get('to');
+
+        $query = DB::table('documents as d')
+            ->leftJoin('pdf_overlays as po', 'po.id', '=', 'd.template_id')
+            ->leftJoin('users as u', 'u.username', '=', 'd.user')
+            ->leftJoin('sub_users as su', 'su.username', '=', 'd.user')
+            ->selectRaw("
+            d.id,
+            COALESCE(d.insured_name, '') as customer_name,
+            COALESCE(d.phone, '') as phone,
+            COALESCE(po.template_name, '') as template_name,
+            COALESCE(d.policy_number, '') as policy_number,
+            COALESCE(d.date, '') as document_date,
+            COALESCE(
+                NULLIF(u.name, ''),
+                NULLIF(su.name, ''),
+                NULLIF(u.username, ''),
+                NULLIF(su.username, ''),
+                COALESCE(d.user, '')
+            ) as registered_by
+        ");
+
+        /*
+    |--------------------------------------------------------------------------
+    | Filtrar por agency
+    |--------------------------------------------------------------------------
+    */
+        if ($agency) {
+            if (Schema::hasColumn('documents', 'agency')) {
+                $query->where('d.agency', $agency);
+            } else {
+                $query->where(function ($q) use ($agency) {
+                    $q->where('u.agency', $agency)
+                        ->orWhere('su.agency', $agency);
+                });
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Filtro por Sale Agent
+    |--------------------------------------------------------------------------
+    */
+        if ($agentFilter !== '') {
+            $query->where(function ($q) use ($agentFilter) {
+                $q->where('u.name', 'like', '%' . $agentFilter . '%')
+                    ->orWhere('su.name', 'like', '%' . $agentFilter . '%')
+                    ->orWhere('u.username', 'like', '%' . $agentFilter . '%')
+                    ->orWhere('su.username', 'like', '%' . $agentFilter . '%')
+                    ->orWhere('d.user', 'like', '%' . $agentFilter . '%');
+            });
+        }
+
+        $documents = $query->get();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Filtro por periodo usando la fecha visible del documento
+    |--------------------------------------------------------------------------
+    */
+        $rows = $documents->map(function ($doc) {
+            return [
+                'id' => $doc->id,
+                'customer_name' => $doc->customer_name,
+                'phone' => $doc->phone,
+                'template_name' => $doc->template_name,
+                'policy_number' => $doc->policy_number,
+                'document_date' => $doc->document_date,
+                'registered_by' => $doc->registered_by,
+            ];
+        })->filter(function ($row) use ($period, $from, $to) {
+            return $this->matchesReportPeriodFromValue($row['document_date'] ?? null, $period, $from, $to);
+        })->values()->all();
+
+        usort($rows, function ($a, $b) {
+            $dateA = $this->parseFlexibleDate($a['document_date'] ?? null);
+            $dateB = $this->parseFlexibleDate($b['document_date'] ?? null);
+
+            $timeA = $dateA ? $dateA->timestamp : 0;
+            $timeB = $dateB ? $dateB->timestamp : 0;
+
+            if ($timeA === $timeB) {
+                return (int)($b['id'] ?? 0) <=> (int)($a['id'] ?? 0);
+            }
+
+            return $timeB <=> $timeA;
+        });
+
+        return response()->json([
+            'columns' => [
+                ['key' => 'id', 'label' => 'ID', 'type' => 'number'],
+                ['key' => 'customer_name', 'label' => "CUSTOMER'S NAME", 'type' => 'text'],
+                ['key' => 'phone', 'label' => 'PHONE', 'type' => 'text'],
+                ['key' => 'template_name', 'label' => 'TEMPLATE', 'type' => 'text'],
+                ['key' => 'policy_number', 'label' => 'POLICY #', 'type' => 'text'],
+                ['key' => 'document_date', 'label' => 'DATE', 'type' => 'text'],
+                ['key' => 'registered_by', 'label' => 'REGISTERED BY', 'type' => 'text'],
+            ],
+            'rows' => $rows,
+        ]);
+    }
+
+    private function matchesReportPeriodFromValue($value, string $period, ?string $from, ?string $to): bool
+    {
+        if ($period === 'all') {
+            return true;
+        }
+
+        $date = $this->parseFlexibleDate($value);
+        if (!$date) {
+            return false;
+        }
+
+        $date = $date->copy()->startOfDay();
+        $now = Carbon::now();
+
+        switch ($period) {
+            case 'this_month':
+                return $date->between($now->copy()->startOfMonth(), $now->copy()->endOfMonth());
+
+            case 'last_month':
+                return $date->between(
+                    $now->copy()->subMonthNoOverflow()->startOfMonth(),
+                    $now->copy()->subMonthNoOverflow()->endOfMonth()
+                );
+
+            case 'this_year':
+                return $date->between($now->copy()->startOfYear(), $now->copy()->endOfYear());
+
+            case 'last_year':
+                return $date->between(
+                    $now->copy()->subYear()->startOfYear(),
+                    $now->copy()->subYear()->endOfYear()
+                );
+
+            case 'last_3_months':
+                return $date->between(
+                    $now->copy()->subMonthsNoOverflow(2)->startOfMonth(),
+                    $now->copy()->endOfMonth()
+                );
+
+            case 'last_6_months':
+                return $date->between(
+                    $now->copy()->subMonthsNoOverflow(5)->startOfMonth(),
+                    $now->copy()->endOfMonth()
+                );
+
+            case 'last_12_months':
+                return $date->between(
+                    $now->copy()->subMonthsNoOverflow(11)->startOfMonth(),
+                    $now->copy()->endOfMonth()
+                );
+
+            case 'custom':
+                if ($from && $to) {
+                    $fromDate = Carbon::parse($from)->startOfDay();
+                    $toDate = Carbon::parse($to)->endOfDay();
+
+                    if ($fromDate->gt($toDate)) {
+                        [$fromDate, $toDate] = [$toDate, $fromDate];
+                    }
+
+                    return $date->between($fromDate, $toDate);
+                }
+
+                return true;
+
+            default:
+                return true;
+        }
+    }
 }
