@@ -224,8 +224,8 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         )->name('reminders.destroy');
 
         // Documents en profile
-        
-        Route::get('/documents_c/{customerId}', [DocumentsController::class, 'customerDocuments'])
+
+        Route::get('/esign/{customerId}', [DocumentsController::class, 'customerDocuments'])
             ->name('profile.documents');
 
         Route::delete('/documents_c/{customerId}/delete-selected', [DocumentsController::class, 'deleteSelectedCustomerDocuments'])
