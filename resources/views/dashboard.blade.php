@@ -69,43 +69,37 @@
                 <div class="quick-item">
                     <p>Total Customers</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bxs-user-badge'></i><text>1234</text>
+                    <i class='bx bxs-user-badge'></i><text>{{ $totalCustomers }}</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Commercial Insurance</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-buildings'></i><text>12</text>
+                    <i class='bx bx-buildings'></i><text>{{ $commercialCount }}</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Personal Insurance</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-building-house'></i><text>38</text>
+                    <i class='bx bx-building-house'></i><text>{{ $personalCount }}</text>
                 </div>
 
                 <div class="quick-item">
-                    <p>To Do List</p>
+                    <p>Tasks</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-list-check'></i><text>8</text>
+                    <i class='bx bx-list-check'></i><text>{{ $tasksCount }}</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Today Messages</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-mail-send'></i><text>12</text>
+                    <i class='bx bx-mail-send'></i><text>{{ $todayMessagesCount }}</text>
                 </div>
 
                 <div class="quick-item" id="open-reminders">
                     <p>Reminders</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bxs-megaphone'></i><text>{{ $remindersCount }}</text>
-                </div>
-
-                <div class="quick-item" data="last-quick-item">
-                    <p>Comments</p>
-                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-message-rounded-dots'></i><text style="font-size: 1.6em">20 New</text>
                 </div>
 
             </div>

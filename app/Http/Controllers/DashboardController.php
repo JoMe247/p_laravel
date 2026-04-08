@@ -24,7 +24,8 @@ class DashboardController extends Controller
         $agency = $user->agency;
 
         // 🔹 Obtener los últimos 50 customers
-        $customers = Customer::orderBy('ID', 'desc')
+        $customers = Customer::where('agency', $agency)
+            ->orderBy('ID', 'desc')
             ->take(50)
             ->get();
 
@@ -55,6 +56,50 @@ class DashboardController extends Controller
         }
 
         $remindersCount = $reminders->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | QUICK ACCESS COUNTS
+        |--------------------------------------------------------------------------
+        */
+
+        $totalCustomers = DB::table('customers')
+            ->where('agency', $agency)
+            ->count();
+
+        $commercialCount = DB::table('company')
+            ->whereRaw('LOWER(type) = ?', ['commercial'])
+            ->count();
+
+        $personalCount = DB::table('company')
+            ->whereRaw('LOWER(type) = ?', ['personal'])
+            ->count();
+
+        $tasksCount = DB::table('tasks')
+            ->where('agency', $agency)
+            ->count();
+
+        // Obtener twilio_number desde doc_config.sms_monthly_counters usando agency_code
+        $twilioNumber = DB::connection('doc_config')
+            ->table('sms_monthly_counters')
+            ->where('agency_code', $agency)
+            ->whereNotNull('twilio_number')
+            ->orderByDesc('anio')
+            ->orderByDesc('mes')
+            ->value('twilio_number');
+
+        $todayMessagesCount = 0;
+
+        if (!empty($twilioNumber)) {
+            $todayMessagesCount = DB::table('sms')
+                ->where('from', $twilioNumber)
+                ->where('direction', 'outbound-api')
+                ->whereDate('date_created', Carbon::today()->toDateString())
+                ->count();
+        }
+
+        $documentsCount = DB::table('documents')
+            ->count();
 
         $recentDocuments = DB::table('documents as d')
             ->leftJoin('pdf_overlays as p', 'p.id', '=', 'd.template_id')
@@ -124,15 +169,22 @@ class DashboardController extends Controller
             ];
         })->values();
 
-        // 🔹 AHORA SÍ, TODO EXISTE
         return view('dashboard', [
-            'username'        => $user->name ?? $user->username,
-            'customers'       => $customers,
-            'reminders'       => $reminders,
-            'remindersCount'  => $remindersCount,
-            'policyCounts'    => $policyCounts,
-            'recentDocuments' => $recentDocuments,
-            'weeklyIncome'    => $weeklyIncome,
+            'username'           => $user->name ?? $user->username,
+            'customers'          => $customers,
+            'reminders'          => $reminders,
+            'remindersCount'     => $remindersCount,
+            'policyCounts'       => $policyCounts,
+            'recentDocuments'    => $recentDocuments,
+            'weeklyIncome'       => $weeklyIncome,
+
+            // Quick access
+            'totalCustomers'     => $totalCustomers,
+            'commercialCount'    => $commercialCount,
+            'personalCount'      => $personalCount,
+            'tasksCount'         => $tasksCount,
+            'todayMessagesCount' => $todayMessagesCount,
+            'documentsCount'     => $documentsCount,
         ]);
     }
 

@@ -223,16 +223,15 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
             [App\Http\Controllers\RemindersController::class, 'destroy']
         )->name('reminders.destroy');
 
-        // Documents
-        Route::get('/profile/{customerId}/documents', [DocumentsController::class, 'customerDocuments'])
+        // Documents en profile
+        
+        Route::get('/documents_c/{customerId}', [DocumentsController::class, 'customerDocuments'])
             ->name('profile.documents');
 
-        Route::delete('/profile/{customerId}/documents/delete-selected', [DocumentsController::class, 'deleteSelectedCustomerDocuments'])
+        Route::delete('/documents_c/{customerId}/delete-selected', [DocumentsController::class, 'deleteSelectedCustomerDocuments'])
             ->name('profile.documents.deleteSelected');
 
         // Schedules
-
-
 
         Route::get('/schedules', [SchedulesController::class, 'index'])->name('schedules.index');
 
@@ -253,7 +252,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
 
         // invoices
 
-        Route::get('/customers/{customerId}/payments', [PaymentsInvoicesController::class, 'payments'])
+        Route::get('/payments/{customerId}', [PaymentsInvoicesController::class, 'payments'])
             ->name('payments');
 
         Route::get('/customers/{customerId}/invoices', [PaymentsInvoicesController::class, 'invoices'])
