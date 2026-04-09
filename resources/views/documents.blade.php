@@ -47,23 +47,47 @@
 
                 <div class="documents-topbar">
                     <div class="documents-actions">
-                        <!-- Botón Nuevo Documento (sin funcionamiento por ahora) -->
-                        <a href="{{ route('documents.create_document') }}" class="btn btn-primary" id="newDocumentBtn">
-                            New Document
-                        </a>
+                        @if ($isDocsOverLimit)
+                            <button type="button" class="btn btn-primary is-disabled" id="newDocumentBtn" disabled
+                                title="Document limit reached">
+                                New Document
+                            </button>
 
-                        <a href="{{ route('templates.create') }}" class="btn-template" id="btn-new-template">
-                            <i class='bx bx-plus'></i>
-                            New Template
-                        </a>
+                            <button type="button" class="btn-template is-disabled" id="btn-new-template" disabled
+                                title="Document limit reached">
+                                <i class='bx bx-plus'></i>
+                                New Template
+                            </button>
+                        @else
+                            <a href="{{ route('documents.create_document') }}" class="btn btn-primary"
+                                id="newDocumentBtn">
+                                New Document
+                            </a>
 
+                            <a href="{{ route('templates.create') }}" class="btn-template" id="btn-new-template">
+                                <i class='bx bx-plus'></i>
+                                New Template
+                            </a>
+                        @endif
 
-                        <!-- Botón Imprimir (sin funcionamiento por ahora) -->
                         <button type="button" class="btn-secondary" id="btn-print-documents">
                             <i class='bx bx-printer'></i>
                             Print
                         </button>
                     </div>
+
+                    @if (session('doc_limit_error'))
+                        <div class="documents-limit-alert">
+                            ⚠ {{ session('doc_limit_error') }}
+                        </div>
+                    @endif
+
+                    @if ($isDocsOverLimit)
+                        <div class="documents-limit-alert">
+                            ⚠ Has alcanzado el límite mensual de documentos: {{ $monthlyDocCount }} /
+                            {{ $docLimit }}.
+                        </div>
+                    @endif
                 </div>
 
                 <section class="documents-card">
