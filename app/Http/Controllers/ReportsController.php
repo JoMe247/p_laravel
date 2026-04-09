@@ -1810,6 +1810,7 @@ class ReportsController extends Controller
                 ->selectRaw('
                 date_sent,
                 `from` as phone_sent_value,
+                `to` as phone_received_value,
                 CAST(sent_by_id AS CHAR) as sent_by_id_value,
                 sid as sid_value
             ')
@@ -1823,6 +1824,7 @@ class ReportsController extends Controller
                         ? Carbon::parse($row->date_sent)->format('Y-m-d H:i:s')
                         : '',
                     'phone_sent'  => $row->phone_sent_value ?? '',
+                    'phone_received'  => $row->phone_received_value ?? '',
                     'sent_by_id'  => isset($row->sent_by_id_value) ? (string) $row->sent_by_id_value : '',
                     'sid'         => $row->sid_value ?? '',
                 ];
@@ -1869,11 +1871,70 @@ class ReportsController extends Controller
 
     // documentos
 
+    private function buildDocumentsMonthReport($documents, $requestedYear): array
+    {
+        $grouped = [];
+
+        foreach ($documents as $doc) {
+            $date = $this->parseFlexibleDate($doc->document_date ?? null);
+
+            if (!$date) {
+                continue;
+            }
+
+            $year = (int) $date->format('Y');
+            $month = (int) $date->format('n');
+
+            if (!isset($grouped[$year])) {
+                $grouped[$year] = [];
+            }
+
+            if (!isset($grouped[$year][$month])) {
+                $grouped[$year][$month] = 0;
+            }
+
+            $grouped[$year][$month]++;
+        }
+
+        ksort($grouped);
+
+        $years = array_map('strval', array_keys($grouped));
+
+        $selectedYear = in_array((string) $requestedYear, $years, true)
+            ? (string) $requestedYear
+            : ($years[0] ?? '');
+
+        $rows = [];
+
+        if ($selectedYear !== '' && isset($grouped[(int) $selectedYear])) {
+            ksort($grouped[(int) $selectedYear]);
+
+            foreach ($grouped[(int) $selectedYear] as $month => $count) {
+                $rows[] = [
+                    'month_label' => $this->getSpanishMonthName((int) $month) . ' ' . $selectedYear,
+                    'documents_count' => $count,
+                ];
+            }
+        }
+
+        return [
+            'years' => $years,
+            'selected_year' => $selectedYear,
+            'rows' => $rows,
+        ];
+    }
+
     public function documentsData(Request $request)
     {
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
         if (!$authUser) {
-            return response()->json(['columns' => [], 'rows' => []], 401);
+            return response()->json([
+                'documents_month_years' => [],
+                'selected_documents_month_year' => '',
+                'documents_month_rows' => [],
+                'columns' => [],
+                'rows' => [],
+            ], 401);
         }
 
         $agency = $authUser->agency ?? null;
@@ -1881,6 +1942,7 @@ class ReportsController extends Controller
         $period = (string) $request->get('period', 'all');
         $from = $request->get('from');
         $to = $request->get('to');
+        $requestedDocumentsMonthYear = $request->get('docs_month_year');
 
         $query = DB::table('documents as d')
             ->leftJoin('pdf_overlays as po', 'po.id', '=', 'd.template_id')
@@ -1937,7 +1999,19 @@ class ReportsController extends Controller
 
         /*
     |--------------------------------------------------------------------------
-    | Filtro por periodo usando la fecha visible del documento
+    | Tabla superior: Documents Month
+    | Usa todos los documentos del agency/agent y agrupa por año/mes
+    |--------------------------------------------------------------------------
+    */
+        $documentsMonth = $this->buildDocumentsMonthReport(
+            $documents,
+            $requestedDocumentsMonthYear
+        );
+
+        /*
+    |--------------------------------------------------------------------------
+    | Tabla inferior: detalle de documents
+    | Sigue usando el filtro de Period
     |--------------------------------------------------------------------------
     */
         $rows = $documents->map(function ($doc) {
@@ -1969,6 +2043,10 @@ class ReportsController extends Controller
         });
 
         return response()->json([
+            'documents_month_years' => $documentsMonth['years'],
+            'selected_documents_month_year' => $documentsMonth['selected_year'],
+            'documents_month_rows' => $documentsMonth['rows'],
+
             'columns' => [
                 ['key' => 'id', 'label' => 'ID', 'type' => 'number'],
                 ['key' => 'customer_name', 'label' => "CUSTOMER'S NAME", 'type' => 'text'],
