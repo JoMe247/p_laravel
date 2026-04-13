@@ -260,7 +260,7 @@
 
                     <div id="recent-2">
 
-                        <h3 class="sub-title">Weekly Income</h3>
+                        <h3 class="sub-title" data-i18n="dashboard.weekly_income">Weekly Income</h3>
 
                         <div class="graph-container">
                             <div class="graph-levels-container">
@@ -325,16 +325,16 @@
             <i class='bx bx-x' id="close-settings" onclick="closeSettings();"></i>
             <h2>Settings</h2>
 
-            <div class="settings-sub-title">Language</div>
+            <div class="settings-sub-title" data-i18n="settings.language">Language</div>
 
             <div id="language-settings">
                 <p>
-                    <input type="radio" id="test1" name="radio-group" checked>
-                    <label for="test1">English</label>
+                    <input type="radio" id="lang-en" name="app-language" value="en">
+                    <label for="lang-en" data-i18n="language.english">English</label>
                 </p>
                 <p>
-                    <input type="radio" id="test2" name="radio-group">
-                    <label for="test2">Spanish</label>
+                    <input type="radio" id="lang-es" name="app-language" value="es">
+                    <label for="lang-es" data-i18n="language.spanish">Spanish</label>
                 </p>
             </div>
 
@@ -348,7 +348,7 @@
                 <p>Dark Mode</p>
             </div> -->
 
-            <div class='settings-sub-title'>Action Color</div>
+            <div class='settings-sub-title' data-i18n="settings.action_color">Action Color</div>
 
             <div class="color-pick-container" id="action-color-container">
                 <div class="color-pick" color="default" onclick="selectActionColor(this)"></div>
@@ -367,12 +367,12 @@
                 <div class="color-pick" color="white" onclick="selectActionColor(this)"></div>
             </div>
 
-            <div class="settings-sub-title" style="margin-top:50px;">Side Panel Background</div>
+            <div class="settings-sub-title" style="margin-top:50px;" data-i18n="settings.side_panel_background">Side Panel Background</div>
 
             <div id="background-side-settings">
                 <div id="background-color-option-container">
 
-                    <div class='settings-sub-title'>Select Color</div>
+                    <div class='settings-sub-title' data-i18n="settings.select_color">Select Color</div>
 
                     <div class="color-pick-container">
                         <div class="color-pick" color="default" onclick="selectColor(this)"></div>
@@ -396,7 +396,8 @@
 
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
-                        <div class='settings-sub-title'>Select Image</div>
+                        <div class='settings-sub-title' data-i18n="settings.select_image">Select Image</div>
+                        
                         <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
                                 alt=""></label>
                         <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
@@ -428,7 +429,7 @@
 
                 <div id="sideBlur-slider">
                     <div class="slider-wrap" id="side-image-slider">
-                        <label for="frac" style="display:block;margin-bottom:8px;">Side Image Blur</label>
+                        <label for="frac" style="display:block;margin-bottom:8px;" data-i18n="settings.side_image_blur">Side Image Blur</label>
                         <div class="row">
                             <input id="frac" type="range" min="0" max="1" step="0.01"
                                 value="0.00" />
@@ -439,7 +440,7 @@
                     </div>
 
                     <div class="slider-wrap" id="home-image-slider">
-                        <label for="frac2" style="display:block;margin-bottom:8px;">Home Image Blur</label>
+                        <label for="frac2" style="display:block;margin-bottom:8px;" data-i18n="settings.home_image_blur">Home Image Blur</label>
                         <div class="row">
                             <input id="frac2" type="range" min="0" max="1" step="0.01"
                                 value="0.00" />
