@@ -415,6 +415,26 @@ $(document).ready(function () {
 
             if (!Array.isArray(veh)) veh = [];
 
+            initialPolicySnapshot = {
+                pol_carrier: p.pol_carrier ?? "",
+                pol_number: p.pol_number ?? "",
+                pol_url: p.pol_url ?? "",
+                pol_expiration: p.pol_expiration ?? "",
+                pol_eff_date: p.pol_eff_date ?? "",
+                pol_added_date: p.pol_added_date ?? "",
+                pol_due_day: p.pol_due_day ?? "",
+                pol_status: p.pol_status ?? "",
+                pol_agent_record: p.pol_agent_record ?? "",
+                vehicules: JSON.stringify(
+                    veh.map((v) => ({
+                        vin: v.vin ?? "",
+                        year: v.year ?? "",
+                        make: v.make ?? "",
+                        model: v.model ?? "",
+                    })),
+                ),
+            };
+
             let html = `
 <div class="edit-grid">   
     <div class="edit-left">
@@ -514,28 +534,57 @@ $(document).ready(function () {
 
                 $(".vehicle-edit-card").each(function () {
                     updatedVeh.push({
-                        vin: $(this).find(".edit_vin").val(),
-                        year: $(this).find(".edit_year").val(),
-                        make: $(this).find(".edit_make").val(),
-                        model: $(this).find(".edit_model").val(),
+                        vin: ($(this).find(".edit_vin").val() || "").trim(),
+                        year: ($(this).find(".edit_year").val() || "").trim(),
+                        make: ($(this).find(".edit_make").val() || "").trim(),
+                        model: ($(this).find(".edit_model").val() || "").trim(),
                     });
                 });
+
+                const currentPolicySnapshot = {
+                    pol_carrier: ($("#edit_pol_carrier").val() || "").trim(),
+                    pol_number: ($("#edit_pol_number").val() || "").trim(),
+                    pol_url: ($("#edit_pol_url").val() || "").trim(),
+                    pol_expiration: (
+                        $("#edit_pol_expiration").val() || ""
+                    ).trim(),
+                    pol_eff_date: ($("#edit_pol_eff_date").val() || "").trim(),
+                    pol_added_date: (
+                        $("#edit_pol_added_date").val() || ""
+                    ).trim(),
+                    pol_due_day: ($("#edit_pol_due_day").val() || "").trim(),
+                    pol_status: ($("#edit_pol_status").val() || "").trim(),
+                    pol_agent_record: (
+                        $("#edit_pol_agent_record").val() || ""
+                    ).trim(),
+                    vehicules: JSON.stringify(updatedVeh),
+                };
+
+                if (
+                    initialPolicySnapshot &&
+                    JSON.stringify(currentPolicySnapshot) ===
+                        JSON.stringify(initialPolicySnapshot)
+                ) {
+                    alert("No changes to save.");
+                    return;
+                }
 
                 $.ajax({
                     url: updateUrl,
                     type: "POST",
                     data: {
                         _token: csrf,
-                        pol_carrier: $("#edit_pol_carrier").val(),
-                        pol_number: $("#edit_pol_number").val(),
-                        pol_url: $("#edit_pol_url").val(),
-                        pol_expiration: $("#edit_pol_expiration").val(),
-                        pol_eff_date: $("#edit_pol_eff_date").val(),
-                        pol_added_date: $("#edit_pol_added_date").val(),
-                        pol_due_day: $("#edit_pol_due_day").val(),
-                        pol_status: $("#edit_pol_status").val(),
-                        pol_agent_record: $("#edit_pol_agent_record").val(),
-                        vehicules: JSON.stringify(updatedVeh),
+                        pol_carrier: currentPolicySnapshot.pol_carrier,
+                        pol_number: currentPolicySnapshot.pol_number,
+                        pol_url: currentPolicySnapshot.pol_url,
+                        pol_expiration: currentPolicySnapshot.pol_expiration,
+                        pol_eff_date: currentPolicySnapshot.pol_eff_date,
+                        pol_added_date: currentPolicySnapshot.pol_added_date,
+                        pol_due_day: currentPolicySnapshot.pol_due_day,
+                        pol_status: currentPolicySnapshot.pol_status,
+                        pol_agent_record:
+                            currentPolicySnapshot.pol_agent_record,
+                        vehicules: currentPolicySnapshot.vehicules,
                     },
                     success: function (r) {
                         if (r.success) {
