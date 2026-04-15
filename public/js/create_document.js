@@ -146,15 +146,35 @@ async function fetchTemplateData(id) {
     }
 }
 
+function clearDocSignPlaceholder(items = []) {
+    return items.map((overlay) => {
+        const normalized = String(overlay?.text || "")
+            .replace(/{{|}}/g, "")
+            .replace(/\s+/g, "")
+            .trim();
+
+        // Solo vaciar DocSign@
+        if (normalized === "DocSign@") {
+            return {
+                ...overlay,
+                text: "{{}}", // conserva posición, página, x, y, etc.
+            };
+        }
+
+        return { ...overlay };
+    });
+}
 // ---------------------------
 // PDF Viewer + Inputs overlay
 // ---------------------------
 async function loadPDF(templateData) {
     const pdfjsLib = window["pdfjs-dist/build/pdf"];
 
-    overlayData = Array.isArray(templateData.overlay_data)
-        ? templateData.overlay_data
-        : [];
+    overlayData = clearDocSignPlaceholder(
+        Array.isArray(templateData.overlay_data)
+            ? templateData.overlay_data
+            : [],
+    );
 
     try {
         // Ajusta aquí si tu PDF está en otra ruta.
@@ -629,7 +649,6 @@ async function savePDFToServer() {
             .replace(/{{|}}/g, "")
             .trim();
 
-        // ✅ DocCDate@ -> fecha actual automática
         let textToDraw = placeholder;
 
         if (placeholder === "DocCDate@") {
@@ -639,6 +658,9 @@ async function savePDFToServer() {
             const dd = String(now.getDate()).padStart(2, "0");
             textToDraw = `${yyyy}-${mm}-${dd}`;
         }
+
+        // No dibujar texto vacío
+        if (!textToDraw) return;
 
         page.drawText(textToDraw, {
             x: overlay.x,
