@@ -239,29 +239,55 @@ $(document).ready(function () {
 
                 if (year) {
                     if ($yearSel.find(`option[value="${year}"]`).length === 0) {
-                        $yearSel.append(`<option value="${year}">${year}</option>`);
+                        $yearSel.append(
+                            `<option value="${year}">${year}</option>`,
+                        );
                     }
                     $yearSel.val(year);
                 }
 
                 if (make) {
-                    $makeSel.empty().append(`<option value="${make}">${make}</option>`);
+                    $makeSel
+                        .empty()
+                        .append(`<option value="${make}">${make}</option>`);
                 }
 
                 if (model) {
-                    $modelSel.empty().append(`<option value="${model}">${model}</option>`);
+                    $modelSel
+                        .empty()
+                        .append(`<option value="${model}">${model}</option>`);
                 }
 
                 updateImageForCard($card, make, model, year);
-            }
+            },
         );
     });
 
     const COMMON_MAKES = [
-        "Toyota", "Honda", "Ford", "Chevrolet", "Nissan", "Hyundai", "Kia",
-        "Jeep", "RAM", "GMC", "Subaru", "Mazda", "Volkswagen", "BMW",
-        "Mercedes-Benz", "Audi", "Lexus", "Tesla", "Dodge", "Chrysler",
-        "Buick", "Cadillac", "Volvo", "Mitsubishi",
+        "Toyota",
+        "Honda",
+        "Ford",
+        "Chevrolet",
+        "Nissan",
+        "Hyundai",
+        "Kia",
+        "Jeep",
+        "RAM",
+        "GMC",
+        "Subaru",
+        "Mazda",
+        "Volkswagen",
+        "BMW",
+        "Mercedes-Benz",
+        "Audi",
+        "Lexus",
+        "Tesla",
+        "Dodge",
+        "Chrysler",
+        "Buick",
+        "Cadillac",
+        "Volvo",
+        "Mitsubishi",
     ];
 
     function fillMakeSelect($makeSel) {
@@ -294,7 +320,9 @@ $(document).ready(function () {
         const $card = $(this).closest(".vehicle-card");
         const $modelSel = $card.find(".model-select");
 
-        $modelSel.empty().append('<option value="">Cargando modelos...</option>');
+        $modelSel
+            .empty()
+            .append('<option value="">Cargando modelos...</option>');
 
         if (make === "other") {
             $(this).hide();
@@ -305,21 +333,31 @@ $(document).ready(function () {
         $.get(
             `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${encodeURIComponent(make)}?format=json`,
             function (res) {
-                $modelSel.empty().append('<option value="">Seleccione modelo</option>');
+                $modelSel
+                    .empty()
+                    .append('<option value="">Seleccione modelo</option>');
 
                 if (!res.Results?.length) {
-                    $modelSel.append('<option value="">No hay modelos</option>');
+                    $modelSel.append(
+                        '<option value="">No hay modelos</option>',
+                    );
                     return;
                 }
 
-                const models = [...new Set(res.Results.map((x) => x.Model_Name).filter(Boolean))].sort();
+                const models = [
+                    ...new Set(
+                        res.Results.map((x) => x.Model_Name).filter(Boolean),
+                    ),
+                ].sort();
 
                 models.forEach((model) => {
-                    $modelSel.append(`<option value="${model}">${model}</option>`);
+                    $modelSel.append(
+                        `<option value="${model}">${model}</option>`,
+                    );
                 });
 
                 $modelSel.append('<option value="other">Other</option>');
-            }
+            },
         );
     });
 
@@ -401,16 +439,30 @@ $(document).ready(function () {
         <label>Due Day</label>
         <input type="text" id="edit_pol_due_day" value="${p.pol_due_day ?? ""}">
 
-        <label>Status</label>
-        <input type="text" id="edit_pol_status" value="${p.pol_status ?? ""}">
+       <label>Status</label>
+<input type="text" id="edit_pol_status" value="${p.pol_status ?? ""}" readonly>
 
-        <label>Agent Record</label>
-        <input type="text" id="edit_pol_agent_record" value="${p.pol_agent_record ?? ""}">
+<label>Agent Record</label>
+<input type="text" id="edit_pol_agent_record" value="${p.pol_agent_record ?? ""}">
     </div>
 
     <div class="edit-right">
-        <h4>Vehicles</h4>
-        <div class="edit-vehicles-grid">
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin:0 0 14px 0;">
+        <button type="button" class="btn add-vehicle-btn edit-status-btn" data-status="Expired" style="margin:0;">
+            Expire Policy
+        </button>
+
+        <button type="button" class="btn add-vehicle-btn edit-status-btn" data-status="Renewed" style="margin:0;">
+            Renew Policy
+        </button>
+
+        <button type="button" class="btn add-vehicle-btn edit-status-btn" data-status="Canceled" style="margin:0;">
+            Cancel Policy
+        </button>
+    </div>
+
+    <h4>Vehicles</h4>
+    <div class="edit-vehicles-grid">
 `;
 
             veh.forEach((v, index) => {
@@ -493,7 +545,10 @@ $(document).ready(function () {
                         }
                     },
                     error: function (xhr) {
-                        console.error("Error updating policy:", xhr.responseText);
+                        console.error(
+                            "Error updating policy:",
+                            xhr.responseText,
+                        );
                         alert("Error updating policy");
                     },
                 });
@@ -505,10 +560,23 @@ $(document).ready(function () {
         $overlayEdit.fadeOut(150);
     });
 
-    // Eliminar vehículo SOLO en edición
-    $(document).on("click", ".vehicle-edit-card .vehicle-delete-btn", function () {
-        $(this).closest(".vehicle-edit-card").remove();
+    $(document).on("click", ".edit-status-btn", function () {
+        const newStatus = $(this).data("status");
+
+        $("#edit_pol_status").val(newStatus);
+
+        // Guarda inmediatamente usando el mismo botón Save Changes
+        // $("#policy-edit-save").trigger("click");
     });
+
+    // Eliminar vehículo SOLO en edición
+    $(document).on(
+        "click",
+        ".vehicle-edit-card .vehicle-delete-btn",
+        function () {
+            $(this).closest(".vehicle-edit-card").remove();
+        },
+    );
 
     function updateEditImage(index) {
         const $card = $(`.vehicle-edit-card[data-index="${index}"]`);
@@ -523,7 +591,10 @@ $(document).ready(function () {
             `&modelFamily=${encodeURIComponent(model)}&modelYear=${year}` +
             `&paintdescription=white&angle=28&zoomtype=fullscreen`;
 
-        $(`#vehicle_edit_thumb_${index}`).css("background-image", `url('${imgUrl}')`);
+        $(`#vehicle_edit_thumb_${index}`).css(
+            "background-image",
+            `url('${imgUrl}')`,
+        );
     }
 
     $(document).on("blur", ".edit_vin", function () {
@@ -545,14 +616,18 @@ $(document).ready(function () {
                 if (v.Model) $card.find(".edit_model").val(v.Model);
 
                 updateEditImage(index);
-            }
+            },
         );
     });
 
-    $(document).on("change keyup", ".edit_year, .edit_make, .edit_model", function () {
-        const index = $(this).closest(".vehicle-edit-card").data("index");
-        updateEditImage(index);
-    });
+    $(document).on(
+        "change keyup",
+        ".edit_year, .edit_make, .edit_model",
+        function () {
+            const index = $(this).closest(".vehicle-edit-card").data("index");
+            updateEditImage(index);
+        },
+    );
 
     $(document).on("click", "#add-vehicle-btn-edit", function () {
         const $grid = $("#policy-edit-content").find(".edit-vehicles-grid");

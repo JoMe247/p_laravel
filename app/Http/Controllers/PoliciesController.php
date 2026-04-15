@@ -22,6 +22,7 @@ class PoliciesController extends Controller
             ->limit(10)
             ->get([
                 'pol_number',
+                'pol_status',
                 'pol_eff_date',
                 'pol_expiration',
                 'pol_due_day',
@@ -102,11 +103,13 @@ class PoliciesController extends Controller
             $data['pol_status'] = 'Active';
         }
 
-        if (!empty($data['vehicules'])) {
-            $decoded = json_decode($data['vehicules'], true);
-            $data['vehicules'] = is_array($decoded) ? $decoded : [];
-        } else {
-            $data['vehicules'] = [];
+        if (array_key_exists('vehicules', $data)) {
+            if (!empty($data['vehicules'])) {
+                $decoded = json_decode($data['vehicules'], true);
+                $data['vehicules'] = is_array($decoded) ? $decoded : [];
+            } else {
+                $data['vehicules'] = [];
+            }
         }
 
         $policy->update($data);

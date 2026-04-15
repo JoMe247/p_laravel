@@ -282,22 +282,7 @@
                                     <button id="add-vehicle-btn" class="btn add-vehicle-btn" type="button"
                                         style="margin:0;">
                                         <i class='bx bx-car' style="font-size:1.4em"></i>&nbsp; Añadir Vehículo
-                                    </button>
-
-                                    <button id="expire-policy-btn" class="btn add-vehicle-btn" type="button"
-                                        style="margin:0;">
-                                        Expire Policy
-                                    </button>
-
-                                    <button id="renew-policy-btn" class="btn add-vehicle-btn" type="button"
-                                        style="margin:0;">
-                                        Renew Policy
-                                    </button>
-
-                                    <button id="cancel-policy-btn" class="btn add-vehicle-btn" type="button"
-                                        style="margin:0;">
-                                        Cancel Policy
-                                    </button>
+                                    </button>                                  
                                 </div>
 
                                 <div id="vehicle-container" class="vehicle-container">
@@ -333,7 +318,7 @@
 
                         <textarea id="policy-log-text" readonly>
                            @forelse($policyLog as $log)
-Policy: {{ $log->pol_number ?? '-' }}, Status: Active, EffDate: {{ $log->pol_eff_date ?? '-' }}, ExpDate: {{ $log->pol_expiration ?? '-' }}, PayDate: {{ $log->pol_due_day ?? '-' }}, Carrier: {{ $log->pol_carrier ?? '-' }}, URL: {{ $log->pol_url ?? '-' }}
+Policy: {{ $log->pol_number ?? '-' }}, Status: {{ $log->pol_status ?? 'Active' }}, EffDate: {{ $log->pol_eff_date ?? '-' }}, ExpDate: {{ $log->pol_expiration ?? '-' }}, PayDate: {{ $log->pol_due_day ?? '-' }}, Carrier: {{ $log->pol_carrier ?? '-' }}, URL: {{ $log->pol_url ?? '-' }}
 
                                   @empty
                              No policies found.
@@ -520,33 +505,6 @@ Policy: {{ $log->pol_number ?? '-' }}, Status: Active, EffDate: {{ $log->pol_eff
         <script src="{{ asset('js/profile.js') }}"></script>
         <script src="{{ asset('js/policies.js') }}"></script>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const policyLogBtn = document.getElementById('policy-log-btn');
-                const policyLogOverlay = document.getElementById('policy-log-overlay');
-                const policyLogClose = document.getElementById('policy-log-close');
-
-                if (policyLogBtn && policyLogOverlay) {
-                    policyLogBtn.addEventListener('click', function() {
-                        policyLogOverlay.style.display = 'flex';
-                    });
-                }
-
-                if (policyLogClose && policyLogOverlay) {
-                    policyLogClose.addEventListener('click', function() {
-                        policyLogOverlay.style.display = 'none';
-                    });
-                }
-
-                if (policyLogOverlay) {
-                    policyLogOverlay.addEventListener('click', function(e) {
-                        if (e.target === policyLogOverlay) {
-                            policyLogOverlay.style.display = 'none';
-                        }
-                    });
-                }
-            });
-        </script>
     </body>
 
 </html>
