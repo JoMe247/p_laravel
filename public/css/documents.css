@@ -203,3 +203,51 @@ button[disabled]{
     cursor: not-allowed !important;
     pointer-events: none;
 }
+
+.print-dropdown{
+    position: relative;
+    display: inline-block;
+}
+
+.print-documents-menu{
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+    z-index: 9999;
+    overflow: hidden;
+    padding: 6px 0;
+}
+
+.print-documents-menu.hidden{
+    display: none;
+}
+
+.print-documents-item{
+    width: 100%;
+    border: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    font-size: 15px;
+    color: #444;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.print-documents-item:hover{
+    background: #f3f3f3;
+}
+
+.print-documents-item i{
+    font-size: 18px;
+    color: #555;
+    flex: 0 0 18px;
+}

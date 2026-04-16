@@ -93,6 +93,10 @@
         <!-- Upload Area -->
         <div id="uploadArea" class="upload-area">
             <div class="upload-area__header">
+                <a href="{{ route('documents.index') }}" class="back-to-documents-btn">
+                    <i class='bx bx-arrow-back'></i>
+                    Back to Documents
+                </a>
                 <h1 class="upload-area__title">Upload your file</h1>
                 <p class="upload-area__paragraph" style="display:none">
                     File should be an image
