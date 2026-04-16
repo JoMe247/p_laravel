@@ -454,11 +454,11 @@ class SigningController extends Controller
             <div class="row">Agent City: ' . e((string) $signing->city_agent) . '</div>
             <div class="row">Agent Region: ' . e((string) $signing->agent_region) . '</div>
             <div class="row">Agent IP: ' . e((string) $signing->ip_agent) . '</div>
+            <div class="row">Agent Coordinates: ' . e((string) $signing->coordinates_agent) . '</div>
             <div class="row">Agent Device: ' . e((string) $signing->device_agent) . '</div>
             <div class="row">Agent Operative System: ' . e((string) $signing->os_agent) . '</div>
             <div class="row">Agent Browser: ' . e((string) $signing->browser_agent) . '</div>
-            <div class="row ua">Agent Device Name and Version: ' . e((string) $signing->dName_agent) . '</div>
-            <div class="row">Agent Coordinates: ' . e((string) $signing->coordinates_agent) . '</div>
+            <div class="row ua">Agent Device Name and Version: ' . e((string) $signing->dName_agent) . '</div>           
         </div>
     </body>
     </html>';
