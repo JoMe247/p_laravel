@@ -85,10 +85,33 @@
         <script>
             const pdfUrlBase = @json(route('sign.pdf', ['short' => $short, 'docId' => $docId]));
             const docsignOverlay = @json($docsignOverlay);
+            const docdtimeOverlay = @json($docdtimeOverlay);
 
             function buildPdfUrl() {
                 return pdfUrlBase + '?t=' + Date.now();
             }
+
+            function getSignedDateTimeLabel() {
+                const now = new Date();
+
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, "0");
+                const dd = String(now.getDate()).padStart(2, "0");
+
+                const hh = String(now.getHours()).padStart(2, "0");
+                const mi = String(now.getMinutes()).padStart(2, "0");
+                const ss = String(now.getSeconds()).padStart(2, "0");
+
+                const signedDate = `${yyyy}-${mm}-${dd}`;
+                const signedTime = `${hh}:${mi}:${ss}`;
+
+                return {
+                    signedDate,
+                    signedTime,
+                    label: `Signature ${signedDate} at ${signedTime}`,
+                };
+            }
+
             let pdfDoc = null;
             let currentPageNumber = 1;
             let totalPages = 0;
@@ -561,6 +584,27 @@
                         width: drawWidth,
                         height: drawHeight,
                     });
+
+                    // Dibujar fecha/hora de firma en la posición de DocDTime@
+                    if (docdtimeOverlay && docdtimeOverlay.page) {
+                        const signedMeta = getSignedDateTimeLabel();
+
+                        const dtTargetPageIndex = Math.max(0, (Number(docdtimeOverlay.page || 1) - 1));
+                        const dtPage = pages[dtTargetPageIndex];
+
+                        if (dtPage) {
+                            const dtPageHeight = dtPage.getHeight();
+                            const dtX = Number(docdtimeOverlay.x || 0);
+                            const dtY = Number(docdtimeOverlay.y || 0);
+
+                            dtPage.drawText(signedMeta.label, {
+                                x: dtX,
+                                y: dtPageHeight - dtY - 20,
+                                size: 12,
+                                color: PDFLib.rgb(0, 0, 0),
+                            });
+                        }
+                    }
 
                     // 6) Generar PDF final
                     const signedPdfBytes = await pdfDocLib.save({

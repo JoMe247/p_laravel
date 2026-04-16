@@ -505,6 +505,7 @@ class DocumentsController extends Controller
         return random_int(100000, 999999);
     }
 
+
     private function extractDocSignOverlay(?string $overlayJson): ?array
     {
         if (!$overlayJson) {
@@ -519,10 +520,6 @@ class DocumentsController extends Controller
         foreach ($items as $item) {
             $rawText = (string) ($item['text'] ?? '');
 
-            // Normalizar:
-            // 1) quitar saltos de línea
-            // 2) quitar llaves {}
-            // 3) quitar espacios
             $normalized = preg_replace('/\s+/', '', $rawText);
             $normalized = str_replace(['{', '}'], '', $normalized);
 
@@ -539,7 +536,6 @@ class DocumentsController extends Controller
 
         return null;
     }
-
     private function getPublicBaseUrl(): string
     {
         return rtrim(env('SHORT_PUBLIC_BASE_URL', config('app.url')), '/');

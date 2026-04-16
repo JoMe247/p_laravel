@@ -23,6 +23,12 @@ class SigningController extends Controller
             abort(403);
         }
 
+        $templateOverlayJson = DB::table('pdf_overlays')
+            ->where('id', (int) ($doc->template_id ?? 0))
+            ->value('overlay_data');
+
+        $docdtimeOverlay = $this->extractDocDTimeOverlay($templateOverlayJson);
+
         // ✅ Registrar apertura real de la vista sign
         $this->touchSigningOpen($urlRow, $doc);
 
@@ -31,6 +37,7 @@ class SigningController extends Controller
             'docId' => $docId,
             'customerName' => $urlRow->name,
             'docsignOverlay' => json_decode($doc->docsign_overlay ?? 'null', true),
+            'docdtimeOverlay' => $docdtimeOverlay, // ✅ AQUÍ TAMBIÉN
         ]);
     }
 
@@ -444,7 +451,6 @@ class SigningController extends Controller
                     </td>
                 </tr>
             </table>
-
             <h3>Holder Agent Information</h3>
             
             <div class="row">Agent Name: ' . e((string) $agentInfo['name']) . '</div>
@@ -486,6 +492,45 @@ class SigningController extends Controller
         }
 
         $pdf->Output('F', $outputPath);
+    }
+
+    private function extractOverlayByToken(?string $overlayJson, string $token, array $defaults = []): ?array
+    {
+        if (!$overlayJson) {
+            return null;
+        }
+
+        $items = json_decode($overlayJson, true);
+        if (!is_array($items)) {
+            return null;
+        }
+
+        foreach ($items as $item) {
+            $rawText = (string) ($item['text'] ?? '');
+
+            $normalized = preg_replace('/\s+/', '', $rawText);
+            $normalized = str_replace(['{', '}'], '', $normalized);
+
+            if ($normalized === $token) {
+                return [
+                    'page'   => (int) ($item['page'] ?? 1),
+                    'x'      => (float) ($item['x'] ?? 0),
+                    'y'      => (float) ($item['y'] ?? 0),
+                    'width'  => (float) ($item['width'] ?? ($defaults['width'] ?? 160)),
+                    'height' => (float) ($item['height'] ?? ($defaults['height'] ?? 20)),
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    private function extractDocDTimeOverlay(?string $overlayJson): ?array
+    {
+        return $this->extractOverlayByToken($overlayJson, 'DocDTime@', [
+            'width' => 240,
+            'height' => 20,
+        ]);
     }
 
     private function resolveAgentInfo(string $createdBy): array
@@ -607,6 +652,13 @@ class SigningController extends Controller
             abort(403);
         }
 
+        // ✅ AQUÍ VA
+        $templateOverlayJson = DB::table('pdf_overlays')
+            ->where('id', (int) ($doc->template_id ?? 0))
+            ->value('overlay_data');
+
+        $docdtimeOverlay = $this->extractDocDTimeOverlay($templateOverlayJson);
+
         $this->touchSigningOpen($urlRow, $doc);
 
         return view('sign.sign', [
@@ -614,6 +666,7 @@ class SigningController extends Controller
             'docId' => $docId,
             'customerName' => $urlRow->name,
             'docsignOverlay' => json_decode($doc->docsign_overlay ?? 'null', true),
+            'docdtimeOverlay' => $docdtimeOverlay, // ✅ AQUÍ TAMBIÉN
         ]);
     }
 }
