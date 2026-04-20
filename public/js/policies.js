@@ -387,6 +387,8 @@ $(document).ready(function () {
     // =========================================================================
     //   OVERLAY VER / EDITAR POLICY
     // =========================================================================
+    let initialPolicySnapshot = null;
+    
     const $overlayEdit = $("#policy-edit-overlay");
     const $overlayContent = $("#policy-edit-content");
     const $overlaySave = $("#policy-edit-save");

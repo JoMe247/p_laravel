@@ -282,7 +282,7 @@
                                     <button id="add-vehicle-btn" class="btn add-vehicle-btn" type="button"
                                         style="margin:0;">
                                         <i class='bx bx-car' style="font-size:1.4em"></i>&nbsp; Añadir Vehículo
-                                    </button>                                  
+                                    </button>
                                 </div>
 
                                 <div id="vehicle-container" class="vehicle-container">
@@ -317,13 +317,25 @@
                         </div>
 
                         <textarea id="policy-log-text" readonly>
-                           @forelse($policyLog as $log)
-Policy: {{ $log->pol_number ?? '-' }}, Status: {{ $log->pol_status ?? 'Active' }}, EffDate: {{ $log->pol_eff_date ?? '-' }}, ExpDate: {{ $log->pol_expiration ?? '-' }}, PayDate: {{ $log->pol_due_day ?? '-' }}, Carrier: {{ $log->pol_carrier ?? '-' }}, URL: {{ $log->pol_url ?? '-' }}
+@forelse($policyLog as $log)
+@php($snapshot = $log['snapshot'] ?? [])
 
-                                  @empty
-                             No policies found.
+[{{ $log['created_at'] ?? '-' }}] {{ $log['action_text'] ?? 'Updated' }}
+By: {{ $log['changed_by'] ?? 'System' }}
+Policy: {{ $snapshot['pol_number'] ?? '-' }}
+Status: {{ $snapshot['pol_status'] ?? 'Active' }}
+EffDate: {{ $snapshot['pol_eff_date'] ?? '-' }}
+ExpDate: {{ $snapshot['pol_expiration'] ?? '-' }}
+PayDate: {{ $snapshot['pol_due_day'] ?? '-' }}
+Carrier: {{ $snapshot['pol_carrier'] ?? '-' }}
+URL: {{ $snapshot['pol_url'] ?? '-' }}
+Agent Record: {{ $snapshot['pol_agent_record'] ?? '-' }}
+Changed Fields: {{ $log['changed_fields_text'] ?? '-' }}
+
+@empty
+No policy logs found.
 @endforelse
-                                   </textarea>
+</textarea>
 
                     </div>
                 </div>

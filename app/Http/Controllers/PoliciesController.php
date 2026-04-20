@@ -5,30 +5,49 @@ namespace App\Http\Controllers;
 use App\Models\Policy;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class PoliciesController extends Controller
 {
     public function index($customer_id)
     {
         $customer = Customer::findOrFail($customer_id);
+
         $policies = Policy::where('customer_id', $customer_id)
             ->orderBy('id', 'desc')
             ->get();
 
-        $policyLog = DB::table('policies')
-            ->where('customer_id', $customer->ID)
-            ->orderByDesc('id')
-            ->limit(10)
-            ->get([
-                'pol_number',
-                'pol_status',
-                'pol_eff_date',
-                'pol_expiration',
-                'pol_due_day',
-                'pol_carrier',
-                'pol_url',
-            ]);
+        $fieldLabels = $this->policyFieldLabels();
+
+        $policyLog = $policies
+            ->flatMap(function ($policy) use ($fieldLabels) {
+                $logs = is_array($policy->policy_log) ? $policy->policy_log : [];
+
+                return collect($logs)->map(function ($entry) use ($fieldLabels) {
+                    $changedFields = collect($entry['changed_fields'] ?? [])
+                        ->map(fn($field) => $fieldLabels[$field] ?? $field)
+                        ->values()
+                        ->all();
+
+                    return [
+                        'created_at'          => $entry['created_at'] ?? null,
+                        'action'              => $entry['action'] ?? 'updated',
+                        'action_text'         => match ($entry['action'] ?? 'updated') {
+                            'created' => 'Created',
+                            'updated' => 'Updated',
+                            default   => ucfirst((string) ($entry['action'] ?? 'updated')),
+                        },
+                        'changed_by'          => $entry['changed_by'] ?? 'System',
+                        'changed_fields'      => $changedFields,
+                        'changed_fields_text' => !empty($changedFields) ? implode(', ', $changedFields) : '-',
+                        'snapshot'            => is_array($entry['snapshot'] ?? null) ? $entry['snapshot'] : [],
+                    ];
+                });
+            })
+            ->sortByDesc(function ($log) {
+                return strtotime($log['created_at'] ?? '') ?: 0;
+            })
+            ->values();
 
         return view('policies', compact('customer', 'policies', 'policyLog'));
     }
@@ -49,8 +68,6 @@ class PoliciesController extends Controller
         ]);
 
         $data['customer_id'] = $customer_id;
-
-        // Default status solo para nueva policy
         $data['pol_status'] = !empty($data['pol_status']) ? $data['pol_status'] : 'Active';
 
         if (!empty($data['vehicules'])) {
@@ -60,7 +77,17 @@ class PoliciesController extends Controller
             $data['vehicules'] = [];
         }
 
-        Policy::create($data);
+        $policy = Policy::create($data);
+
+        $policy->policy_log = [
+            $this->buildPolicyLogEntry(
+                $this->makePolicySnapshot($policy),
+                'created',
+                $this->trackedPolicyFields()
+            ),
+        ];
+
+        $policy->save();
 
         return response()->json(['success' => true]);
     }
@@ -85,6 +112,8 @@ class PoliciesController extends Controller
     public function update(Request $request, $id)
     {
         $policy = Policy::findOrFail($id);
+
+        $beforeSnapshot = $this->makePolicySnapshot($policy);
 
         $data = $request->validate([
             'pol_carrier'      => 'nullable|string',
@@ -113,7 +142,93 @@ class PoliciesController extends Controller
         }
 
         $policy->update($data);
+        $policy->refresh();
+
+        $afterSnapshot = $this->makePolicySnapshot($policy);
+
+        $changedFields = [];
+        foreach ($this->trackedPolicyFields() as $field) {
+            if (($beforeSnapshot[$field] ?? null) !== ($afterSnapshot[$field] ?? null)) {
+                $changedFields[] = $field;
+            }
+        }
+
+        if (!empty($changedFields)) {
+            $currentLog = is_array($policy->policy_log) ? $policy->policy_log : [];
+
+            $currentLog[] = $this->buildPolicyLogEntry(
+                $afterSnapshot,
+                'updated',
+                $changedFields
+            );
+
+            $policy->policy_log = array_values($currentLog);
+            $policy->save();
+        }
 
         return response()->json(['success' => true]);
+    }
+
+    protected function trackedPolicyFields(): array
+    {
+        return [
+            'pol_carrier',
+            'pol_number',
+            'pol_url',
+            'pol_expiration',
+            'pol_eff_date',
+            'pol_added_date',
+            'pol_due_day',
+            'pol_status',
+            'pol_agent_record',
+        ];
+    }
+
+    protected function policyFieldLabels(): array
+    {
+        return [
+            'pol_carrier'      => 'Carrier',
+            'pol_number'       => 'Number',
+            'pol_url'          => 'URL',
+            'pol_expiration'   => 'Expiration Date',
+            'pol_eff_date'     => 'Effective Date',
+            'pol_added_date'   => 'Added Date',
+            'pol_due_day'      => 'Payment Due Day',
+            'pol_status'       => 'Status',
+            'pol_agent_record' => 'Agent Record',
+        ];
+    }
+
+    protected function makePolicySnapshot(Policy $policy): array
+    {
+        return [
+            'pol_carrier'      => $policy->pol_carrier ?? '',
+            'pol_number'       => $policy->pol_number ?? '',
+            'pol_url'          => $policy->pol_url ?? '',
+            'pol_expiration'   => $policy->pol_expiration ?? '',
+            'pol_eff_date'     => $policy->pol_eff_date ?? '',
+            'pol_added_date'   => $policy->pol_added_date ?? '',
+            'pol_due_day'      => $policy->pol_due_day ?? '',
+            'pol_status'       => $policy->pol_status ?? 'Active',
+            'pol_agent_record' => $policy->pol_agent_record ?? '',
+        ];
+    }
+
+    protected function buildPolicyLogEntry(array $snapshot, string $action, array $changedFields = []): array
+    {
+        $actor = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        $changedBy = 'System';
+        if ($actor) {
+            $changedBy = $actor->name ?? $actor->username ?? $actor->email ?? 'System';
+        }
+
+        return [
+            'created_at'     => now()->format('Y-m-d H:i:s'),
+            'action'         => $action,
+            'changed_by'     => $changedBy,
+            'changed_fields' => array_values($changedFields),
+            'snapshot'       => $snapshot,
+        ];
     }
 }
