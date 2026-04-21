@@ -18,6 +18,7 @@ $(document).ready(function () {
     const $policyLogBtn = $("#policy-log-btn");
     const $policyLogOverlay = $("#policy-log-overlay");
     const $policyLogClose = $("#policy-log-close");
+    const $policyLogPrint = $("#policy-log-print");
 
     $policyLogBtn.on("click", function () {
         $policyLogOverlay.css("display", "flex").hide().fadeIn(150);
@@ -31,6 +32,66 @@ $(document).ready(function () {
         if (e.target === this) {
             $policyLogOverlay.fadeOut(150);
         }
+    });
+
+    function escapeHtml(text) {
+        return String(text || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    $policyLogPrint.on("click", function () {
+        const logText = ($("#policy-log-text").val() || "").trim();
+
+        const printWindow = window.open("", "_blank", "width=900,height=700");
+        if (!printWindow) {
+            alert("Pop-up blocked. Please allow pop-ups to print the Policy Log.");
+            return;
+        }
+
+        printWindow.document.write(`
+        <html>
+        <head>
+            <title>Policy Log</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 30px;
+                    color: #222;
+                }
+
+                h1 {
+                    margin: 0 0 20px 0;
+                    font-size: 24px;
+                }
+
+                pre {
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    font-family: Consolas, monospace;
+                    font-size: 13px;
+                    line-height: 1.5;
+                    border: 1px solid #ccc;
+                    padding: 16px;
+                    border-radius: 8px;
+                    background: #fff;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Policy Log</h1>
+            <pre>${escapeHtml(logText || "No policy logs found.")}</pre>
+        </body>
+        </html>
+    `);
+
+        printWindow.document.close();
+        printWindow.focus();
+
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
     });
 
     // =========================================================================
@@ -388,7 +449,7 @@ $(document).ready(function () {
     //   OVERLAY VER / EDITAR POLICY
     // =========================================================================
     let initialPolicySnapshot = null;
-    
+
     const $overlayEdit = $("#policy-edit-overlay");
     const $overlayContent = $("#policy-edit-content");
     const $overlaySave = $("#policy-edit-save");
@@ -565,7 +626,7 @@ $(document).ready(function () {
                 if (
                     initialPolicySnapshot &&
                     JSON.stringify(currentPolicySnapshot) ===
-                        JSON.stringify(initialPolicySnapshot)
+                    JSON.stringify(initialPolicySnapshot)
                 ) {
                     alert("No changes to save.");
                     return;

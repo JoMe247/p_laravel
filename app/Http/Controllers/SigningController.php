@@ -411,7 +411,7 @@ class SigningController extends Controller
             .sig-label {
                 font-size: 10px;
                 font-weight: 700;
-                color: #555;
+                color: #dddddd;
                 margin-bottom: 6px;
             }
 

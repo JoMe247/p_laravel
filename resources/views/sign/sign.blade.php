@@ -601,7 +601,7 @@
                             x: dtX,
                             y: dtPageHeight - dtY - 20,
                             size: 12,
-                            color: PDFLib.rgb(0, 0, 0),
+                            color: PDFLib.rgb(221 / 255, 221 / 255, 221 / 255),
                         });
                     }
                 }

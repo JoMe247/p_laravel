@@ -26,9 +26,9 @@ try {
             }
         });
     });
-    
+
 } catch (error) {
-    
+
 }
 
 
@@ -338,6 +338,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const openBtn = document.getElementById("view-profile-log-btn");
     const overlay = document.getElementById("customer-views-overlay");
     const closeBtn = document.getElementById("customer-views-close");
+    const printBtn = document.getElementById("customer-views-print");
 
     if (openBtn && overlay) {
         openBtn.addEventListener("click", function () {
@@ -358,7 +359,90 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    function openPrintWindowForCustomerViews() {
+        const items = Array.from(document.querySelectorAll("#customer-views-list .customer-view-item"));
+
+        let contentHtml = "";
+
+        if (items.length) {
+            contentHtml = items.map(item => `
+            <div class="print-view-item">
+                ${item.innerHTML}
+            </div>
+        `).join("");
+        } else {
+            contentHtml = `<div class="print-empty">No views found.</div>`;
+        }
+
+        const printWindow = window.open("", "_blank", "width=900,height=700");
+        if (!printWindow) {
+            alert("Pop-up blocked. Please allow pop-ups to print the Customer View Log.");
+            return;
+        }
+
+        printWindow.document.write(`
+        <html>
+        <head>
+            <title>Customer View Log</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 30px;
+                    color: #222;
+                    background: #fff;
+                }
+
+                h1 {
+                    margin: 0 0 20px 0;
+                    font-size: 24px;
+                }
+
+                .print-view-item {
+                    border: 1px solid #ccc;
+                    border-radius: 8px;
+                    padding: 14px 16px;
+                    margin-bottom: 14px;
+                    page-break-inside: avoid;
+                }
+
+                .customer-view-meta {
+                    margin-bottom: 10px;
+                    line-height: 1.6;
+                }
+
+                .customer-view-text {
+                    white-space: pre-wrap;
+                    line-height: 1.6;
+                }
+
+                .print-empty {
+                    font-size: 14px;
+                    color: #666;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Customer View Log</h1>
+            ${contentHtml}
+        </body>
+        </html>
+    `);
+
+        printWindow.document.close();
+        printWindow.focus();
+
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    }
+
+    if (printBtn) {
+        printBtn.addEventListener("click", openPrintWindowForCustomerViews);
+    }
 });
+
+
 
 // ===============================
 // PROFILE – REGISTER VIEW ONLY ON ENTRY, NOT ON RELOAD
