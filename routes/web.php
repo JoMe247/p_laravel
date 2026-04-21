@@ -99,6 +99,8 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/customers', [CustomersController::class, 'index'])->name('customers.index');
         Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store'); // guarda los 4 campos (AJAX)
         Route::get('/profile/{id}', [CustomersController::class, 'profile'])->name('profile');
+        Route::post('/customers/{id}/profile-view-log', [CustomersController::class, 'logProfileView'])
+            ->name('customers.profile.view.log');
         Route::put('/profile/{id}', [CustomersController::class, 'update'])->name('customers.update'); // guarda el resto del perfil
         Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMultiple']);
         Route::post('/customers/{id}/upload-photo', [CustomersController::class, 'uploadPhoto'])
@@ -198,6 +200,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         // Eliminar policy
         Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])
             ->name('policies.destroy');
+            
 
         // =======================
         // 📁 Customer Files

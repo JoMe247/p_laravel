@@ -95,12 +95,14 @@
     text-align: center;
     margin-bottom: 10px;
     display: flex;
-    flex-flow: wrap;
-    justify-content: center;
-    width: 200px;
+    flex-direction: column;
+    align-items: center;
+    width: 170px;
     margin-left: auto;
     margin-right: auto;
+    position: relative;
 }
+
 
 .profile-photo-frame {
     width: 170px;
@@ -762,4 +764,119 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):ho
 div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-cancel):hover{
     background-color: #d8d8d8 !important;
     border: 1px solid #d8d8d8 !important;
+}
+
+/* =========================== */
+/*   PROFILE VIEW LOG BUTTON   */
+/* =========================== */
+
+.profile-photo-top {
+    position: relative;
+    width: 170px;
+    display: block;
+}
+
+.profile-view-log-btn {
+    background-color: #333;
+    color: #fff;
+    border-radius: 6px;
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s ease;
+    height: 37px;
+    width: max-content;
+    margin-top: 0;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 0;
+    margin: 0;
+    white-space: nowrap;
+    z-index: 5;
+}
+
+.profile-view-log-btn:hover {
+    background-color: #222;
+}
+
+/* =========================== */
+/*   CUSTOMER VIEWS OVERLAY    */
+/* =========================== */
+
+.customer-views-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.customer-views-box {
+    width: 1120px;
+    max-width: 90vw;
+    max-height: 86vh;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.customer-views-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.customer-views-header h2 {
+    margin: 0;
+    font-family: var(--montserrat);
+}
+
+.customer-views-list {
+    padding: 18px;
+    overflow-y: auto;
+}
+
+.customer-view-item {
+    border: 1px solid #d9d9d9;
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    background: #fff;
+}
+
+.customer-view-meta {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1.2fr;
+    gap: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ededed;
+    font-family: var(--montserrat);
+    font-size: 14px;
+}
+
+.customer-view-text {
+    padding-top: 12px;
+    font-family: var(--montserrat);
+    font-size: 14px;
+}
+
+.customer-view-empty {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-family: var(--montserrat);
 }

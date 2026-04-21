@@ -32,7 +32,12 @@ class Customer extends Model
         'Agent_of_Record',
         'Alert',
         'Picture',
-        'Agency'
+        'Agency',
+        'views',
+    ];
+
+    protected $casts = [
+        'views' => 'array',
     ];
 
     public function notes()

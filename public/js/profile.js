@@ -330,3 +330,108 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+// ===============================
+// PROFILE – CUSTOMER VIEW LOG
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+    const openBtn = document.getElementById("view-profile-log-btn");
+    const overlay = document.getElementById("customer-views-overlay");
+    const closeBtn = document.getElementById("customer-views-close");
+
+    if (openBtn && overlay) {
+        openBtn.addEventListener("click", function () {
+            overlay.style.display = "flex";
+        });
+    }
+
+    if (closeBtn && overlay) {
+        closeBtn.addEventListener("click", function () {
+            overlay.style.display = "none";
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener("click", function (e) {
+            if (e.target === overlay) {
+                overlay.style.display = "none";
+            }
+        });
+    }
+});
+
+// ===============================
+// PROFILE – REGISTER VIEW ONLY ON ENTRY, NOT ON RELOAD
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+    const logUrl = document.querySelector('meta[name="customer-view-log-url"]')?.content;
+
+    if (!csrf || !logUrl) return;
+
+    function getNavigationType() {
+        const navEntries = performance.getEntriesByType("navigation");
+        if (navEntries && navEntries.length > 0) {
+            return navEntries[0].type; // navigate | reload | back_forward
+        }
+
+        // fallback navegadores viejos
+        if (performance.navigation) {
+            if (performance.navigation.type === 1) return "reload";
+            if (performance.navigation.type === 2) return "back_forward";
+        }
+
+        return "navigate";
+    }
+
+    const navType = getNavigationType();
+
+    // No registrar si fue recarga manual
+    if (navType === "reload") {
+        return;
+    }
+
+    fetch(logUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrf,
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: JSON.stringify({})
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success || !data.entry) return;
+
+            prependCustomerViewLog(data.entry);
+        })
+        .catch(err => {
+            console.error("Error logging customer view:", err);
+        });
+
+    function prependCustomerViewLog(entry) {
+        const list = document.getElementById("customer-views-list");
+        if (!list) return;
+
+        const empty = document.getElementById("customer-view-empty");
+        if (empty) empty.remove();
+
+        const item = document.createElement("div");
+        item.className = "customer-view-item";
+
+        item.innerHTML = `
+            <div class="customer-view-meta">
+                <div><strong>Date:</strong> ${entry.full_date ?? "-"}</div>
+                <div><strong>Note Type:</strong> ${entry.type ?? "CUSTOMER VIEW"}</div>
+                <div><strong>By:</strong> ${entry.by ?? "-"}</div>
+            </div>
+
+            <div class="customer-view-text">
+                ${entry.message ?? ""}
+            </div>
+        `;
+
+        list.prepend(item);
+    }
+});
