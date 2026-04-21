@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 class ShortUrlController extends Controller
 {
+    private function isAlreadySigned(object $row): bool
+    {
+        return strtolower(trim((string) ($row->signed ?? 'No'))) === 'yes';
+    }
+
     public function show(string $short)
     {
         $row = DB::table('url')->where('short_url', $short)->first();
@@ -15,12 +20,14 @@ class ShortUrlController extends Controller
             return redirect()->route('short.error');
         }
 
-        // Si ya está firmado => pantalla "Already Signed"
-        if (($row->signed ?? 'No') === 'Yes') {
-            return redirect()->route('short.signed');
+        // Si ya está firmado => mostrar vista signed_ready
+        if ($this->isAlreadySigned($row)) {
+            return view('sign.signed_ready', [
+                'customerName' => $row->name ?? 'Customer',
+            ]);
         }
 
-        // +1 click (solo en GET)
+        // +1 click solo al entrar al short link
         DB::table('url')->where('id', $row->id)->increment('clicks');
 
         return view('short.form', [
@@ -36,26 +43,28 @@ class ShortUrlController extends Controller
             return redirect()->route('short.error');
         }
 
-        if (($row->signed ?? 'No') === 'Yes') {
-            return redirect()->route('short.signed');
+        // Si ya está firmado => mostrar vista signed_ready
+        if ($this->isAlreadySigned($row)) {
+            return view('sign.signed_ready', [
+                'customerName' => $row->name ?? 'Customer',
+            ]);
         }
 
-        // tu formulario manda "codigo" (string de 6)
         $request->validate([
-            'codigo' => ['required','digits:6'],
+            'codigo' => ['required', 'digits:6'],
         ]);
 
-        if ((string)$request->codigo !== (string)$row->rand) {
-            return back()->withErrors(['codigo' => 'Wrong Access Code.'])->withInput();
+        if ((string) $request->codigo !== (string) $row->rand) {
+            return back()->withErrors([
+                'codigo' => 'Wrong Access Code.'
+            ])->withInput();
         }
 
-        // Si aún no tienes original_url, manda a error por ahora
-        $dest = trim($row->original_url ?? '');
+        $dest = trim((string) ($row->original_url ?? ''));
         if ($dest === '') {
             return redirect()->route('short.error');
         }
 
-        // Redirige al URL guardado en tabla (tal cual)
         return redirect()->to($dest);
     }
 }

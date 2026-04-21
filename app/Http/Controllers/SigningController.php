@@ -23,13 +23,18 @@ class SigningController extends Controller
             abort(403);
         }
 
+        // ✅ Si ya fue firmado, mostrar vista de documento ya firmado
+        if ($this->isDocumentAlreadySigned($doc, $urlRow)) {
+            return $this->signedReadyResponse($urlRow, $doc);
+        }
+
         $templateOverlayJson = DB::table('pdf_overlays')
             ->where('id', (int) ($doc->template_id ?? 0))
             ->value('overlay_data');
 
         $docdtimeOverlay = $this->extractDocDTimeOverlay($templateOverlayJson);
 
-        // ✅ Registrar apertura real de la vista sign
+        // ✅ Registrar apertura real solo si aún NO está firmado
         $this->touchSigningOpen($urlRow, $doc);
 
         return view('sign.sign', [
@@ -37,7 +42,7 @@ class SigningController extends Controller
             'docId' => $docId,
             'customerName' => $urlRow->name,
             'docsignOverlay' => json_decode($doc->docsign_overlay ?? 'null', true),
-            'docdtimeOverlay' => $docdtimeOverlay, // ✅ AQUÍ TAMBIÉN
+            'docdtimeOverlay' => $docdtimeOverlay,
         ]);
     }
 
@@ -50,6 +55,11 @@ class SigningController extends Controller
         if (!$doc) abort(404);
 
         if (trim((string) $doc->insured_name) !== trim((string) $urlRow->name)) {
+            abort(403);
+        }
+
+        // ✅ No permitir cargar PDF público de firma si ya fue firmado
+        if ($this->isDocumentAlreadySigned($doc, $urlRow)) {
             abort(403);
         }
 
@@ -83,6 +93,25 @@ class SigningController extends Controller
 
             if (trim((string) $doc->insured_name) !== trim((string) $urlRow->name)) {
                 return response()->json(['ok' => false, 'error' => 'Forbidden'], 403);
+            }
+
+            $alreadySigned =
+                (int) ($doc->signed ?? 0) === 1 ||
+                strtolower(trim((string) ($urlRow->signed ?? 'No'))) === 'yes';
+
+            if ($alreadySigned) {
+                return response()->json([
+                    'ok' => false,
+                    'error' => 'This document has already been signed.',
+                    'redirect_url' => url('/s/' . $short),
+                ], 409);
+            }
+
+            if ($this->isDocumentAlreadySigned($doc, $urlRow)) {
+                return response()->json([
+                    'ok' => false,
+                    'error' => 'This document has already been signed and can no longer be signed again.',
+                ], 409);
             }
 
             $request->validate([
@@ -171,6 +200,7 @@ class SigningController extends Controller
             return response()->json([
                 'ok' => true,
                 'message' => 'PDF firmado guardado y certificado agregado correctamente.',
+                'redirect_url' => url('/s/' . $short),
             ]);
         } catch (\Throwable $e) {
             Log::error('SIGN SAVE ERROR', [
@@ -394,6 +424,8 @@ class SigningController extends Controller
                 width: 50%;
                 vertical-align: top;
             }
+
+            
         </style>
     </head>
     <body>
@@ -627,7 +659,6 @@ class SigningController extends Controller
             abort(404);
         }
 
-        // Validar coincidencia exacta de todo
         if ((int) $doc->id !== $docId) {
             abort(403);
         }
@@ -652,7 +683,11 @@ class SigningController extends Controller
             abort(403);
         }
 
-        // ✅ AQUÍ VA
+        // ✅ Si ya fue firmado, mostrar vista de documento ya firmado
+        if ($this->isDocumentAlreadySigned($doc, $urlRow)) {
+            return $this->signedReadyResponse($urlRow, $doc);
+        }
+
         $templateOverlayJson = DB::table('pdf_overlays')
             ->where('id', (int) ($doc->template_id ?? 0))
             ->value('overlay_data');
@@ -666,7 +701,22 @@ class SigningController extends Controller
             'docId' => $docId,
             'customerName' => $urlRow->name,
             'docsignOverlay' => json_decode($doc->docsign_overlay ?? 'null', true),
-            'docdtimeOverlay' => $docdtimeOverlay, // ✅ AQUÍ TAMBIÉN
+            'docdtimeOverlay' => $docdtimeOverlay,
+        ]);
+    }
+
+    private function isDocumentAlreadySigned(object $doc, object $urlRow): bool
+    {
+        $docSigned = (int) ($doc->signed ?? 0) === 1;
+        $urlSigned = strtolower(trim((string) ($urlRow->signed ?? ''))) === 'yes';
+
+        return $docSigned || $urlSigned;
+    }
+
+    private function signedReadyResponse(object $urlRow, object $doc)
+    {
+        return response()->view('sign.signed_ready', [
+            'customerName' => $urlRow->name ?? $doc->insured_name ?? 'Customer',
         ]);
     }
 }
