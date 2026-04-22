@@ -18,29 +18,36 @@ class PoliciesController extends Controller
             ->get();
 
         $fieldLabels = $this->policyFieldLabels();
+        $self = $this;
 
         $policyLog = $policies
-            ->flatMap(function ($policy) use ($fieldLabels) {
+            ->flatMap(function ($policy) use ($fieldLabels, $self) {
                 $logs = is_array($policy->policy_log) ? $policy->policy_log : [];
 
-                return collect($logs)->map(function ($entry) use ($fieldLabels) {
+                return collect($logs)->map(function ($entry) use ($fieldLabels, $self) {
+                    $snapshot = is_array($entry['snapshot'] ?? null) ? $entry['snapshot'] : [];
+                    $vehicles = $self->normalizeVehiclesArray($snapshot['vehicules'] ?? []);
+                    $snapshot['vehicules'] = $vehicles;
+
                     $changedFields = collect($entry['changed_fields'] ?? [])
                         ->map(fn($field) => $fieldLabels[$field] ?? $field)
                         ->values()
                         ->all();
 
                     return [
-                        'created_at'          => $entry['created_at'] ?? null,
-                        'action'              => $entry['action'] ?? 'updated',
-                        'action_text'         => match ($entry['action'] ?? 'updated') {
+                        'created_at'           => $entry['created_at'] ?? null,
+                        'action'               => $entry['action'] ?? 'updated',
+                        'action_text'          => match ($entry['action'] ?? 'updated') {
                             'created' => 'Created',
                             'updated' => 'Updated',
                             default   => ucfirst((string) ($entry['action'] ?? 'updated')),
                         },
-                        'changed_by'          => $entry['changed_by'] ?? 'System',
-                        'changed_fields'      => $changedFields,
-                        'changed_fields_text' => !empty($changedFields) ? implode(', ', $changedFields) : '-',
-                        'snapshot'            => is_array($entry['snapshot'] ?? null) ? $entry['snapshot'] : [],
+                        'changed_by'           => $entry['changed_by'] ?? 'System',
+                        'changed_fields'       => $changedFields,
+                        'changed_fields_text'  => !empty($changedFields) ? implode(', ', $changedFields) : '-',
+                        'vehicle_changes_text' => $entry['vehicle_changes_text'] ?? '-',
+                        'vehicles_text'        => $self->formatVehiclesForLog($vehicles),
+                        'snapshot'             => $snapshot,
                     ];
                 });
             })
@@ -72,18 +79,21 @@ class PoliciesController extends Controller
 
         if (!empty($data['vehicules'])) {
             $decoded = json_decode($data['vehicules'], true);
-            $data['vehicules'] = is_array($decoded) ? $decoded : [];
+            $data['vehicules'] = $this->normalizeVehiclesArray(is_array($decoded) ? $decoded : []);
         } else {
             $data['vehicules'] = [];
         }
 
         $policy = Policy::create($data);
 
+        $createdSnapshot = $this->makePolicySnapshot($policy);
+
         $policy->policy_log = [
             $this->buildPolicyLogEntry(
-                $this->makePolicySnapshot($policy),
+                $createdSnapshot,
                 'created',
-                $this->trackedPolicyFields()
+                $this->trackedPolicyFields(),
+                $this->buildVehicleChangeSummary([], $createdSnapshot['vehicules'] ?? [])
             ),
         ];
 
@@ -135,7 +145,7 @@ class PoliciesController extends Controller
         if (array_key_exists('vehicules', $data)) {
             if (!empty($data['vehicules'])) {
                 $decoded = json_decode($data['vehicules'], true);
-                $data['vehicules'] = is_array($decoded) ? $decoded : [];
+                $data['vehicules'] = $this->normalizeVehiclesArray(is_array($decoded) ? $decoded : []);
             } else {
                 $data['vehicules'] = [];
             }
@@ -159,7 +169,11 @@ class PoliciesController extends Controller
             $currentLog[] = $this->buildPolicyLogEntry(
                 $afterSnapshot,
                 'updated',
-                $changedFields
+                $changedFields,
+                $this->buildVehicleChangeSummary(
+                    $beforeSnapshot['vehicules'] ?? [],
+                    $afterSnapshot['vehicules'] ?? []
+                )
             );
 
             $policy->policy_log = array_values($currentLog);
@@ -181,6 +195,7 @@ class PoliciesController extends Controller
             'pol_due_day',
             'pol_status',
             'pol_agent_record',
+            'vehicules',
         ];
     }
 
@@ -196,6 +211,7 @@ class PoliciesController extends Controller
             'pol_due_day'      => 'Payment Due Day',
             'pol_status'       => 'Status',
             'pol_agent_record' => 'Agent Record',
+            'vehicules'        => 'Vehicles',
         ];
     }
 
@@ -211,11 +227,16 @@ class PoliciesController extends Controller
             'pol_due_day'      => $policy->pol_due_day ?? '',
             'pol_status'       => $policy->pol_status ?? 'Active',
             'pol_agent_record' => $policy->pol_agent_record ?? '',
+            'vehicules'        => $this->normalizeVehiclesArray($policy->vehicules ?? []),
         ];
     }
 
-    protected function buildPolicyLogEntry(array $snapshot, string $action, array $changedFields = []): array
-    {
+    protected function buildPolicyLogEntry(
+        array $snapshot,
+        string $action,
+        array $changedFields = [],
+        string $vehicleChangesText = '-'
+    ): array {
         $actor = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
         $changedBy = 'System';
@@ -224,11 +245,137 @@ class PoliciesController extends Controller
         }
 
         return [
-            'created_at'     => now()->format('Y-m-d H:i:s'),
-            'action'         => $action,
-            'changed_by'     => $changedBy,
-            'changed_fields' => array_values($changedFields),
-            'snapshot'       => $snapshot,
+            'created_at'           => now()->format('Y-m-d H:i:s'),
+            'action'               => $action,
+            'changed_by'           => $changedBy,
+            'changed_fields'       => array_values($changedFields),
+            'vehicle_changes_text' => $vehicleChangesText,
+            'snapshot'             => $snapshot,
         ];
+    }
+
+    protected function normalizeVehiclesArray($vehicles): array
+    {
+        if (is_string($vehicles)) {
+            $decoded = json_decode($vehicles, true);
+            $vehicles = is_array($decoded) ? $decoded : [];
+        }
+
+        if (!is_array($vehicles)) {
+            return [];
+        }
+
+        return collect($vehicles)
+            ->map(function ($vehicle) {
+                $vehicle = is_array($vehicle) ? $vehicle : [];
+
+                return [
+                    'vin'   => trim((string) ($vehicle['vin'] ?? '')),
+                    'year'  => trim((string) ($vehicle['year'] ?? '')),
+                    'make'  => trim((string) ($vehicle['make'] ?? '')),
+                    'model' => trim((string) ($vehicle['model'] ?? '')),
+                ];
+            })
+            ->filter(function ($vehicle) {
+                return $vehicle['vin'] !== ''
+                    || $vehicle['year'] !== ''
+                    || $vehicle['make'] !== ''
+                    || $vehicle['model'] !== '';
+            })
+            ->values()
+            ->all();
+    }
+
+    protected function formatSingleVehicleForLog(array $vehicle, ?int $number = null): string
+    {
+        $prefix = $number ? "Vehicle {$number}" : "Vehicle";
+
+        return $prefix . " (VIN: " . ($vehicle['vin'] ?: '-') .
+            " / Year: " . ($vehicle['year'] ?: '-') .
+            " / Make: " . ($vehicle['make'] ?: '-') .
+            " / Model: " . ($vehicle['model'] ?: '-') . ")";
+    }
+
+    protected function formatVehiclesForLog(array $vehicles): string
+    {
+        $vehicles = $this->normalizeVehiclesArray($vehicles);
+
+        if (empty($vehicles)) {
+            return '-';
+        }
+
+        return collect($vehicles)
+            ->values()
+            ->map(function ($vehicle, $index) {
+                return $this->formatSingleVehicleForLog($vehicle, $index + 1);
+            })
+            ->implode('; ');
+    }
+
+    protected function buildVehicleKey(array $vehicle, int $index): string
+    {
+        $vin = strtolower(trim((string) ($vehicle['vin'] ?? '')));
+
+        if ($vin !== '') {
+            return 'vin:' . $vin;
+        }
+
+        return 'idx:' . $index;
+    }
+
+    protected function buildVehicleChangeSummary(array $beforeVehicles = [], array $afterVehicles = []): string
+    {
+        $beforeVehicles = $this->normalizeVehiclesArray($beforeVehicles);
+        $afterVehicles = $this->normalizeVehiclesArray($afterVehicles);
+
+        $beforeMap = [];
+        foreach (array_values($beforeVehicles) as $index => $vehicle) {
+            $beforeMap[$this->buildVehicleKey($vehicle, $index)] = $vehicle;
+        }
+
+        $afterMap = [];
+        foreach (array_values($afterVehicles) as $index => $vehicle) {
+            $afterMap[$this->buildVehicleKey($vehicle, $index)] = $vehicle;
+        }
+
+        $added = [];
+        $removed = [];
+        $updated = [];
+
+        foreach ($beforeMap as $key => $vehicle) {
+            if (!array_key_exists($key, $afterMap)) {
+                $removed[] = $this->formatSingleVehicleForLog($vehicle);
+                continue;
+            }
+
+            if ($beforeMap[$key] != $afterMap[$key]) {
+                $updated[] = 'From ' .
+                    $this->formatSingleVehicleForLog($beforeMap[$key]) .
+                    ' to ' .
+                    $this->formatSingleVehicleForLog($afterMap[$key]);
+            }
+        }
+
+        foreach ($afterMap as $key => $vehicle) {
+            if (!array_key_exists($key, $beforeMap)) {
+                $added[] = $this->formatSingleVehicleForLog($vehicle);
+            }
+        }
+
+        $parts = [];
+
+        if (!empty($added)) {
+            $parts[] = 'Added: ' . implode('; ', $added);
+        }
+
+        if (!empty($removed)) {
+            $parts[] = 'Removed: ' . implode('; ', $removed);
+        }
+
+        if (!empty($updated)) {
+            $parts[] = 'Updated: ' . implode('; ', $updated);
+        }
+
+        return !empty($parts) ? implode(' | ', $parts) : '-';
     }
 }

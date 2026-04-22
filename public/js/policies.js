@@ -34,19 +34,14 @@ $(document).ready(function () {
         }
     });
 
-    function escapeHtml(text) {
-        return String(text || "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
-    }
-
     $policyLogPrint.on("click", function () {
-        const logText = ($("#policy-log-text").val() || "").trim();
+        const logHtml = ($("#policy-log-text").html() || "").trim();
 
         const printWindow = window.open("", "_blank", "width=900,height=700");
         if (!printWindow) {
-            alert("Pop-up blocked. Please allow pop-ups to print the Policy Log.");
+            alert(
+                "Pop-up blocked. Please allow pop-ups to print the Policy Log.",
+            );
             return;
         }
 
@@ -66,22 +61,32 @@ $(document).ready(function () {
                     font-size: 24px;
                 }
 
-                pre {
-                    white-space: pre-wrap;
-                    word-wrap: break-word;
-                    font-family: Consolas, monospace;
-                    font-size: 13px;
-                    line-height: 1.5;
+                .print-log-wrapper {
+                    width: 100%;
+                }
+
+                .policy-log-entry {
                     border: 1px solid #ccc;
-                    padding: 16px;
                     border-radius: 8px;
+                    padding: 14px 16px;
+                    margin-bottom: 12px;
                     background: #fff;
+                    font-size: 13px;
+                    line-height: 1.7;
+                    text-align: justify;
+                    word-break: break-word;
+                }
+
+                .policy-log-entry strong {
+                    font-weight: 700;
                 }
             </style>
         </head>
         <body>
             <h1>Policy Log</h1>
-            <pre>${escapeHtml(logText || "No policy logs found.")}</pre>
+            <div class="print-log-wrapper">
+                ${logHtml || '<div class="policy-log-entry">No policy logs found.</div>'}
+            </div>
         </body>
         </html>
     `);
@@ -529,7 +534,7 @@ $(document).ready(function () {
 <input type="text" id="edit_pol_agent_record" value="${p.pol_agent_record ?? ""}">
     </div>
 
-    <div class="edit-right">
+        <div class="edit-right">
     <div style="display:flex; flex-wrap:wrap; gap:10px; margin:0 0 14px 0;">
         <button type="button" class="btn add-vehicle-btn edit-status-btn" data-status="Expired" style="margin:0;">
             Expire Policy
@@ -541,6 +546,10 @@ $(document).ready(function () {
 
         <button type="button" class="btn add-vehicle-btn edit-status-btn" data-status="Canceled" style="margin:0;">
             Cancel Policy
+        </button>
+
+        <button type="button" id="add-vehicle-btn-edit" class="btn add-vehicle-btn" style="margin:0;">
+            <i class='bx bx-car' style="font-size:1.4em"></i>&nbsp; Añadir Vehículo
         </button>
     </div>
 
@@ -562,25 +571,43 @@ $(document).ready(function () {
                 }
 
                 html += `
-            <div class="vehicle-edit-card" data-index="${index}">
-                <div class="vehicle-edit-thumb"
-                     id="vehicle_edit_thumb_${index}"
-                     style="background-image:url('${imgUrl}');"></div>
+    <div class="vehicle-edit-card" data-index="${index}">
+        <div class="vehicle-edit-thumb"
+             id="vehicle_edit_thumb_${index}"
+             style="background-image:url('${imgUrl}');"></div>
 
-                <label>VIN</label>
-                <input type="text" class="edit_vin" value="${v.vin || ""}">
+        <div class="vehicle-field">
+            <label>VIN (opcional)</label>
+            <input type="text" class="edit_vin" value="${v.vin || ""}">
+        </div>
 
-                <label>Year</label>
-                <input type="text" class="edit_year" value="${year}">
+        <div class="vehicle-field">
+            <label>Año</label>
+            <select class="edit_year_select">
+                <option value="">Seleccione</option>
+            </select>
+            <input type="text" class="edit_year_other" style="display:none;" placeholder="Otro año">
+        </div>
 
-                <label>Make</label>
-                <input type="text" class="edit_make" value="${make}">
+        <div class="vehicle-field">
+            <label>Make</label>
+            <select class="edit_make_select">
+                <option value="">Seleccione</option>
+            </select>
+            <input type="text" class="edit_make_other" style="display:none;" placeholder="Otra marca">
+        </div>
 
-                <label>Model</label>
-                <input type="text" class="edit_model" value="${model}">
-                <div class="vehicle-delete-btn">Eliminar Vehículo</div>
-            </div>
-        `;
+        <div class="vehicle-field">
+            <label>Model</label>
+            <select class="edit_model_select">
+                <option value="">Seleccione</option>
+            </select>
+            <input type="text" class="edit_model_other" style="display:none;" placeholder="Otro modelo">
+        </div>
+
+        <div class="vehicle-delete-btn">Eliminar Vehículo</div>
+    </div>
+`;
             });
 
             html += `
@@ -592,16 +619,42 @@ $(document).ready(function () {
             $overlayContent.html(html);
             $overlayEdit.fadeIn(150);
 
+            $("#policy-edit-content .vehicle-edit-card").each(function (i) {
+                initEditVehicleCard($(this), veh[i] || {});
+            });
+
             $overlaySave.off().on("click", function () {
                 let updatedVeh = [];
 
                 $(".vehicle-edit-card").each(function () {
-                    updatedVeh.push({
-                        vin: ($(this).find(".edit_vin").val() || "").trim(),
-                        year: ($(this).find(".edit_year").val() || "").trim(),
-                        make: ($(this).find(".edit_make").val() || "").trim(),
-                        model: ($(this).find(".edit_model").val() || "").trim(),
-                    });
+                    const $card = $(this);
+
+                    const vin = ($card.find(".edit_vin").val() || "").trim();
+
+                    let year = $card.find(".edit_year_select").val();
+                    if (!year || year === "other") {
+                        year = (
+                            $card.find(".edit_year_other").val() || ""
+                        ).trim();
+                    }
+
+                    let make = $card.find(".edit_make_select").val();
+                    if (!make || make === "other") {
+                        make = (
+                            $card.find(".edit_make_other").val() || ""
+                        ).trim();
+                    }
+
+                    let model = $card.find(".edit_model_select").val();
+                    if (!model || model === "other") {
+                        model = (
+                            $card.find(".edit_model_other").val() || ""
+                        ).trim();
+                    }
+
+                    if (!vin && !year && !make && !model) return;
+
+                    updatedVeh.push({ vin, year, make, model });
                 });
 
                 const currentPolicySnapshot = {
@@ -626,7 +679,7 @@ $(document).ready(function () {
                 if (
                     initialPolicySnapshot &&
                     JSON.stringify(currentPolicySnapshot) ===
-                    JSON.stringify(initialPolicySnapshot)
+                        JSON.stringify(initialPolicySnapshot)
                 ) {
                     alert("No changes to save.");
                     return;
@@ -690,14 +743,135 @@ $(document).ready(function () {
         },
     );
 
-    function updateEditImage(index) {
-        const $card = $(`.vehicle-edit-card[data-index="${index}"]`);
-        const year = $card.find(".edit_year").val();
-        const make = $card.find(".edit_make").val();
-        const model = $card.find(".edit_model").val();
+    function initYearsForEditCard($card, selectedYear = "") {
+        const $yearSel = $card.find(".edit_year_select");
+        const $yearOther = $card.find(".edit_year_other");
+        const currentYear = new Date().getFullYear();
 
-        if (!year || !make || !model) return;
+        $yearSel.empty().append('<option value="">Seleccione</option>');
+        for (let y = currentYear; y >= 1980; y--) {
+            $yearSel.append(`<option value="${y}">${y}</option>`);
+        }
+        $yearSel.append('<option value="other">Other</option>');
 
+        if (selectedYear) {
+            const exists =
+                $yearSel.find(`option[value="${selectedYear}"]`).length > 0;
+            if (exists) {
+                $yearSel.val(String(selectedYear));
+                $yearOther.hide().val("");
+                $yearSel.show();
+            } else {
+                $yearSel.val("other");
+                $yearOther.val(selectedYear).show();
+            }
+        }
+    }
+
+    function fillEditMakeSelect($makeSel, selectedMake = "") {
+        $makeSel.empty().append('<option value="">Seleccione marca</option>');
+        COMMON_MAKES.forEach((make) => {
+            $makeSel.append(`<option value="${make}">${make}</option>`);
+        });
+        $makeSel.append('<option value="other">Other</option>');
+
+        if (selectedMake) {
+            const exists =
+                $makeSel.find(`option[value="${selectedMake}"]`).length > 0;
+            $makeSel.val(exists ? selectedMake : "other");
+        }
+    }
+
+    function loadEditModelsForCard($card, make, selectedModel = "") {
+        const $modelSel = $card.find(".edit_model_select");
+        const $modelOther = $card.find(".edit_model_other");
+
+        $modelSel
+            .empty()
+            .append('<option value="">Cargando modelos...</option>');
+
+        if (!make || make === "other") {
+            $modelSel
+                .empty()
+                .append('<option value="">Seleccione modelo</option>');
+            if (selectedModel) {
+                $modelSel.val("other");
+                $modelOther.val(selectedModel).show();
+            }
+            updateEditImageByCard($card);
+            return;
+        }
+
+        $.get(
+            `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${encodeURIComponent(make)}?format=json`,
+            function (res) {
+                $modelSel
+                    .empty()
+                    .append('<option value="">Seleccione modelo</option>');
+
+                if (!res.Results?.length) {
+                    $modelSel.append('<option value="other">Other</option>');
+                    if (selectedModel) {
+                        $modelSel.val("other");
+                        $modelOther.val(selectedModel).show();
+                    }
+                    updateEditImageByCard($card);
+                    return;
+                }
+
+                const models = [
+                    ...new Set(
+                        res.Results.map((x) => x.Model_Name).filter(Boolean),
+                    ),
+                ].sort();
+
+                models.forEach((model) => {
+                    $modelSel.append(
+                        `<option value="${model}">${model}</option>`,
+                    );
+                });
+
+                $modelSel.append('<option value="other">Other</option>');
+
+                if (selectedModel) {
+                    const exists =
+                        $modelSel.find(`option[value="${selectedModel}"]`)
+                            .length > 0;
+                    if (exists) {
+                        $modelSel.val(selectedModel);
+                        $modelOther.hide().val("");
+                    } else {
+                        $modelSel.val("other");
+                        $modelOther.val(selectedModel).show();
+                    }
+                }
+
+                updateEditImageByCard($card);
+            },
+        ).fail(function () {
+            updateEditImageByCard($card);
+        });
+    }
+
+    function updateEditImageByCard($card) {
+        let year = $card.find(".edit_year_select").val();
+        if (!year || year === "other") {
+            year = ($card.find(".edit_year_other").val() || "").trim();
+        }
+
+        let make = $card.find(".edit_make_select").val();
+        if (!make || make === "other") {
+            make = ($card.find(".edit_make_other").val() || "").trim();
+        }
+
+        let model = $card.find(".edit_model_select").val();
+        if (!model || model === "other") {
+            model = ($card.find(".edit_model_other").val() || "").trim();
+        }
+
+        if (!make || !model || !year) return;
+
+        const index = $card.data("index");
         const imgUrl =
             `https://cdn.imagin.studio/getImage?customer=img&make=${encodeURIComponent(make)}` +
             `&modelFamily=${encodeURIComponent(model)}&modelYear=${year}` +
@@ -709,11 +883,47 @@ $(document).ready(function () {
         );
     }
 
-    $(document).on("blur", ".edit_vin", function () {
-        const vin = $(this).val();
-        const index = $(this).closest(".vehicle-edit-card").data("index");
+    function initEditVehicleCard($card, vehicle = {}) {
+        const vin = vehicle.vin || "";
+        const year = vehicle.year || "";
+        const make = vehicle.make || "";
+        const model = vehicle.model || "";
 
-        if (!vin) return;
+        $card.find(".edit_vin").val(vin);
+
+        initYearsForEditCard($card, year);
+
+        const $makeSel = $card.find(".edit_make_select");
+        const $makeOther = $card.find(".edit_make_other");
+        fillEditMakeSelect($makeSel, make);
+
+        if (make) {
+            const exists = $makeSel.find(`option[value="${make}"]`).length > 0;
+            if (exists) {
+                $makeSel.val(make).show();
+                $makeOther.hide().val("");
+            } else {
+                $makeSel.val("other").show();
+                $makeOther.val(make).show();
+            }
+        }
+
+        if (make && make !== "other") {
+            loadEditModelsForCard($card, make, model);
+        } else if (model) {
+            $card.find(".edit_model_select").val("other");
+            $card.find(".edit_model_other").val(model).show();
+            updateEditImageByCard($card);
+        } else {
+            updateEditImageByCard($card);
+        }
+    }
+
+    $(document).on("blur", ".vehicle-edit-card .edit_vin", function () {
+        const vin = ($(this).val() || "").trim();
+        const $card = $(this).closest(".vehicle-edit-card");
+
+        if (!vin || vin.length < 5) return;
 
         $.get(
             `https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`,
@@ -721,23 +931,104 @@ $(document).ready(function () {
                 if (!res?.Results?.[0]) return;
 
                 const v = res.Results[0];
-                const $card = $(`.vehicle-edit-card[data-index="${index}"]`);
+                const year = v.ModelYear || "";
+                const make = v.Make || "";
+                const model = v.Model || "";
 
-                if (v.ModelYear) $card.find(".edit_year").val(v.ModelYear);
-                if (v.Make) $card.find(".edit_make").val(v.Make);
-                if (v.Model) $card.find(".edit_model").val(v.Model);
+                if (year) {
+                    initYearsForEditCard($card, year);
+                }
 
-                updateEditImage(index);
+                if (make) {
+                    const $makeSel = $card.find(".edit_make_select");
+                    const $makeOther = $card.find(".edit_make_other");
+                    fillEditMakeSelect($makeSel, make);
+
+                    const exists =
+                        $makeSel.find(`option[value="${make}"]`).length > 0;
+                    if (exists) {
+                        $makeSel.val(make).show();
+                        $makeOther.hide().val("");
+                    } else {
+                        $makeSel.val("other").show();
+                        $makeOther.val(make).show();
+                    }
+
+                    loadEditModelsForCard($card, make, model);
+                }
+
+                setTimeout(() => {
+                    updateEditImageByCard($card);
+                }, 150);
             },
         );
     });
 
     $(document).on(
-        "change keyup",
-        ".edit_year, .edit_make, .edit_model",
+        "change",
+        ".vehicle-edit-card .edit_year_select",
         function () {
-            const index = $(this).closest(".vehicle-edit-card").data("index");
-            updateEditImage(index);
+            const $card = $(this).closest(".vehicle-edit-card");
+
+            if ($(this).val() === "other") {
+                $(this).hide();
+                $card.find(".edit_year_other").show().focus();
+                return;
+            }
+
+            $card.find(".edit_year_other").hide().val("");
+            updateEditImageByCard($card);
+        },
+    );
+
+    $(document).on(
+        "change",
+        ".vehicle-edit-card .edit_make_select",
+        function () {
+            const $card = $(this).closest(".vehicle-edit-card");
+            const make = $(this).val();
+            const $modelSel = $card.find(".edit_model_select");
+            const $modelOther = $card.find(".edit_model_other");
+
+            $modelSel
+                .empty()
+                .append('<option value="">Seleccione modelo</option>');
+            $modelOther.hide().val("");
+
+            if (make === "other") {
+                $(this).hide();
+                $card.find(".edit_make_other").show().focus();
+                return;
+            }
+
+            $card.find(".edit_make_other").hide().val("");
+            loadEditModelsForCard($card, make, "");
+        },
+    );
+
+    $(document).on(
+        "change",
+        ".vehicle-edit-card .edit_model_select",
+        function () {
+            const $card = $(this).closest(".vehicle-edit-card");
+
+            if ($(this).val() === "other") {
+                $(this).hide();
+                $card.find(".edit_model_other").show().focus();
+                return;
+            }
+
+            $card.find(".edit_model_other").hide().val("");
+            updateEditImageByCard($card);
+        },
+    );
+
+    $(document).on(
+        "keyup change",
+        ".vehicle-edit-card .edit_year_other, .vehicle-edit-card .edit_make_other, .vehicle-edit-card .edit_model_other",
+        function () {
+            const $card = $(this).closest(".vehicle-edit-card");
+            updateEditImageByCard($card);
         },
     );
 
@@ -754,25 +1045,45 @@ $(document).ready(function () {
         const index = Date.now();
 
         $grid.append(`
-            <div class="vehicle-edit-card" data-index="${index}">
-                <div class="vehicle-edit-thumb"
-                     id="vehicle_edit_thumb_${index}"
-                     style="background-image:url('');"></div>
+        <div class="vehicle-edit-card" data-index="${index}">
+            <div class="vehicle-edit-thumb" id="vehicle_edit_thumb_${index}"></div>
 
-                <label>VIN</label>
+            <div class="vehicle-field">
+                <label>VIN (opcional)</label>
                 <input type="text" class="edit_vin" value="">
-
-                <label>Year</label>
-                <input type="text" class="edit_year" value="">
-
-                <label>Make</label>
-                <input type="text" class="edit_make" value="">
-
-                <label>Model</label>
-                <input type="text" class="edit_model" value="">
-
-                <div class="vehicle-delete-btn">Eliminar Vehículo</div>
             </div>
-        `);
+
+            <div class="vehicle-field">
+                <label>Año</label>
+                <select class="edit_year_select">
+                    <option value="">Seleccione</option>
+                </select>
+                <input type="text" class="edit_year_other" style="display:none;" placeholder="Otro año">
+            </div>
+
+            <div class="vehicle-field">
+                <label>Make</label>
+                <select class="edit_make_select">
+                    <option value="">Seleccione</option>
+                </select>
+                <input type="text" class="edit_make_other" style="display:none;" placeholder="Otra marca">
+            </div>
+
+            <div class="vehicle-field">
+                <label>Model</label>
+                <select class="edit_model_select">
+                    <option value="">Seleccione</option>
+                </select>
+                <input type="text" class="edit_model_other" style="display:none;" placeholder="Otro modelo">
+            </div>
+
+            <div class="vehicle-delete-btn">Eliminar Vehículo</div>
+        </div>
+    `);
+
+        initEditVehicleCard(
+            $grid.find(`.vehicle-edit-card[data-index="${index}"]`),
+            {},
+        );
     });
 });
