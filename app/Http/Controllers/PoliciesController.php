@@ -312,15 +312,22 @@ class PoliciesController extends Controller
             ->implode('; ');
     }
 
-    protected function buildVehicleKey(array $vehicle, int $index): string
+    protected function buildVehicleSignature(array $vehicle): string
     {
-        $vin = strtolower(trim((string) ($vehicle['vin'] ?? '')));
+        return strtolower(implode('|', [
+            trim((string) ($vehicle['vin'] ?? '')),
+            trim((string) ($vehicle['year'] ?? '')),
+            trim((string) ($vehicle['make'] ?? '')),
+            trim((string) ($vehicle['model'] ?? '')),
+        ]));
+    }
 
-        if ($vin !== '') {
-            return 'vin:' . $vin;
-        }
-
-        return 'idx:' . $index;
+    protected function formatVehicleInline(array $vehicle): string
+    {
+        return '(VIN: ' . (($vehicle['vin'] ?? '') !== '' ? $vehicle['vin'] : '-') .
+            ' / Year: ' . (($vehicle['year'] ?? '') !== '' ? $vehicle['year'] : '-') .
+            ' / Make: ' . (($vehicle['make'] ?? '') !== '' ? $vehicle['make'] : '-') .
+            ' / Model: ' . (($vehicle['model'] ?? '') !== '' ? $vehicle['model'] : '-') . ')';
     }
 
     protected function buildVehicleChangeSummary(array $beforeVehicles = [], array $afterVehicles = []): string
@@ -328,52 +335,88 @@ class PoliciesController extends Controller
         $beforeVehicles = $this->normalizeVehiclesArray($beforeVehicles);
         $afterVehicles = $this->normalizeVehiclesArray($afterVehicles);
 
-        $beforeMap = [];
-        foreach (array_values($beforeVehicles) as $index => $vehicle) {
-            $beforeMap[$this->buildVehicleKey($vehicle, $index)] = $vehicle;
-        }
-
-        $afterMap = [];
-        foreach (array_values($afterVehicles) as $index => $vehicle) {
-            $afterMap[$this->buildVehicleKey($vehicle, $index)] = $vehicle;
-        }
-
-        $added = [];
-        $removed = [];
-        $updated = [];
-
-        foreach ($beforeMap as $key => $vehicle) {
-            if (!array_key_exists($key, $afterMap)) {
-                $removed[] = $this->formatSingleVehicleForLog($vehicle);
-                continue;
-            }
-
-            if ($beforeMap[$key] != $afterMap[$key]) {
-                $updated[] = 'From ' .
-                    $this->formatSingleVehicleForLog($beforeMap[$key]) .
-                    ' to ' .
-                    $this->formatSingleVehicleForLog($afterMap[$key]);
-            }
-        }
-
-        foreach ($afterMap as $key => $vehicle) {
-            if (!array_key_exists($key, $beforeMap)) {
-                $added[] = $this->formatSingleVehicleForLog($vehicle);
-            }
-        }
-
         $parts = [];
 
-        if (!empty($added)) {
-            $parts[] = 'Added: ' . implode('; ', $added);
+        // =========================================================
+        // 1) Detectar updates reales solo por VIN
+        // =========================================================
+        $beforeByVin = [];
+        foreach ($beforeVehicles as $vehicle) {
+            $vin = strtolower(trim((string) ($vehicle['vin'] ?? '')));
+            if ($vin !== '') {
+                $beforeByVin[$vin] = $vehicle;
+            }
         }
 
-        if (!empty($removed)) {
-            $parts[] = 'Removed: ' . implode('; ', $removed);
+        $afterByVin = [];
+        foreach ($afterVehicles as $vehicle) {
+            $vin = strtolower(trim((string) ($vehicle['vin'] ?? '')));
+            if ($vin !== '') {
+                $afterByVin[$vin] = $vehicle;
+            }
         }
 
-        if (!empty($updated)) {
-            $parts[] = 'Updated: ' . implode('; ', $updated);
+        foreach ($beforeByVin as $vin => $beforeVehicle) {
+            if (isset($afterByVin[$vin]) && $beforeVehicle != $afterByVin[$vin]) {
+                $parts[] = 'Vehicle Updated: ' .
+                    $this->formatVehicleInline($beforeVehicle) .
+                    ' -> ' .
+                    $this->formatVehicleInline($afterByVin[$vin]);
+            }
+        }
+
+        // =========================================================
+        // 2) Detectar removidos/agregados por firma completa
+        //    evitando falsos "updated" por cambio de índice
+        // =========================================================
+        $beforeCounts = [];
+        foreach ($beforeVehicles as $vehicle) {
+            $sig = $this->buildVehicleSignature($vehicle);
+            if (!isset($beforeCounts[$sig])) {
+                $beforeCounts[$sig] = [
+                    'count' => 0,
+                    'vehicle' => $vehicle,
+                ];
+            }
+            $beforeCounts[$sig]['count']++;
+        }
+
+        $afterCounts = [];
+        foreach ($afterVehicles as $vehicle) {
+            $sig = $this->buildVehicleSignature($vehicle);
+            if (!isset($afterCounts[$sig])) {
+                $afterCounts[$sig] = [
+                    'count' => 0,
+                    'vehicle' => $vehicle,
+                ];
+            }
+            $afterCounts[$sig]['count']++;
+        }
+
+        // removidos
+        foreach ($beforeCounts as $sig => $info) {
+            $beforeCount = $info['count'];
+            $afterCount = $afterCounts[$sig]['count'] ?? 0;
+
+            if ($beforeCount > $afterCount) {
+                $diff = $beforeCount - $afterCount;
+                for ($i = 0; $i < $diff; $i++) {
+                    $parts[] = 'Vehicle Removed: ' . $this->formatVehicleInline($info['vehicle']);
+                }
+            }
+        }
+
+        // agregados
+        foreach ($afterCounts as $sig => $info) {
+            $afterCount = $info['count'];
+            $beforeCount = $beforeCounts[$sig]['count'] ?? 0;
+
+            if ($afterCount > $beforeCount) {
+                $diff = $afterCount - $beforeCount;
+                for ($i = 0; $i < $diff; $i++) {
+                    $parts[] = 'Vehicle Added: ' . $this->formatVehicleInline($info['vehicle']);
+                }
+            }
         }
 
         return !empty($parts) ? implode(' | ', $parts) : '-';

@@ -66,16 +66,21 @@ $(document).ready(function () {
                 }
 
                 .policy-log-entry {
-                    border: 1px solid #ccc;
-                    border-radius: 8px;
-                    padding: 14px 16px;
-                    margin-bottom: 12px;
-                    background: #fff;
-                    font-size: 13px;
-                    line-height: 1.7;
-                    text-align: justify;
-                    word-break: break-word;
-                }
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    background: #fff;
+    font-size: 13px;
+    line-height: 1.7;
+    text-align: left;
+    word-break: break-word;
+    position: relative;
+}
+
+.policy-log-entry div {
+    margin-bottom: 4px;
+}
 
                 .policy-log-entry strong {
                     font-weight: 700;
@@ -679,7 +684,7 @@ $(document).ready(function () {
                 if (
                     initialPolicySnapshot &&
                     JSON.stringify(currentPolicySnapshot) ===
-                        JSON.stringify(initialPolicySnapshot)
+                    JSON.stringify(initialPolicySnapshot)
                 ) {
                     alert("No changes to save.");
                     return;

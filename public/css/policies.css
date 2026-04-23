@@ -503,12 +503,26 @@
     color:#333;
 }
 
-.policy-log-entry{
-    text-align: justify;
-    word-break: break-word;
+.policy-log-entry {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 14px 16px;
     margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #ececec;
+    background: #fff;
+    font-size: 13px;
+    line-height: 1.7;
+    text-align: left;
+    word-break: break-word;
+    position: relative;
+}
+
+.policy-log-entry div {
+    margin-bottom: 4px;
+}
+
+.policy-log-entry strong {
+    font-weight: 700;
+    margin-right: 4px;
 }
 
 .policy-log-entry:last-child{

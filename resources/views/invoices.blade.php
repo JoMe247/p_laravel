@@ -83,6 +83,14 @@
                                 @endif
                             </select>
 
+                            <div id="deleteVehicleWrap" style="display:none; margin-top:10px;">
+                                <label class="policy-label">Vehicle to Delete</label>
+
+                                <select id="deleteVehicleSelect" class="policy-select" style="border:1px solid red;">
+                                    <option value="">Select vehicle</option>
+                                </select>
+                            </div>
+
                             <div class="policy-small">
                                 Total Policies: <span>{{ $policiesCount }}</span>
                             </div>
@@ -357,7 +365,7 @@
 
                                         <td>
                                             <input class="cell-input qty-input" type="text"
-                                                value="{{ $r['amount'] ?? '' }}">
+                                                value="{{ isset($r['amount']) && $r['amount'] !== '' ? $r['amount'] : '1' }}">
                                         </td>
 
                                         <td>
@@ -559,6 +567,11 @@
     <script src="{{ asset('js/help.js') }}"></script>
     <script src="{{ asset('js/profile.js') }}"></script>
     <script src="{{ asset('js/policies.js') }}"></script>
+
+    <script>
+        window.policyVehiclesMap = @json($policyVehiclesMap ?? []);
+        window.savedDeleteVehicleKey = @json($savedDeleteVehicleKey ?? '');
+    </script>
     <script src="{{ asset('js/invoices.js') }}"></script>
 </body>
 
