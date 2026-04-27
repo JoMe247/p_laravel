@@ -28,7 +28,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-
         #cust-outer-box {
             transition: transform 0.35s ease, opacity 0.25s ease;
         }
@@ -82,32 +81,38 @@
 
                                     <td><a href="{{ url('profile/' . $c->ID) }}">{{ $c->ID }}</a></td>
                                     <td><a href="{{ url('profile/' . $c->ID) }}">{{ $c->Name }}</a></td>
-                                    <td><a href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a></td>
+                                    <td><a href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a>
+                                    </td>
                                     <td>{{ $c->Address }}</td>
                                     <td>{{ $c->Phone }}</td>
                                     <td>{{ $c->DOB }}</td>
 
                                     <td class="customer-drop">
-                                            <i class='bx bx-dots-horizontal-rounded'></i>
+                                        <i class='bx bx-dots-horizontal-rounded'></i>
 
-                                            <label class="table-panel-options">
-                                                <p onclick="window.location.href='profile/{{ $c->ID }}'"><i class='bx bx-id-card'></i>
-                                                    <a>Open</a>
-                                                </p>
+                                        <label class="table-panel-options">
+                                            <p onclick="window.location.href='profile/{{ $c->ID }}'"><i
+                                                    class='bx bx-id-card'></i>
+                                                <a>Open</a>
+                                            </p>
 
-                                                <p><i class='bx bx-trash'></i>
-                                                    <a href="{{ url('delete-customer/' . $c->ID) }}">Delete</a>
-                                                </p>
+                                            <p><i class='bx bx-trash'></i>
+                                                <a href="{{ url('delete-customer/' . $c->ID) }}">Delete</a>
+                                            </p>
 
-                                                <p><i class='bx bxs-message'></i>
-                                                    <a href="{{ url('sms/?contact=1' . $c->Phone) }}">SMS</a>
-                                                </p>
+                                            <p><i class='bx bxs-message'></i>
+                                                <a href="{{ url('sms/?contact=1' . $c->Phone) }}">SMS</a>
+                                            </p>
 
-                                                <p><i class='bx bx-file'></i>
-                                                    <a href="#">Invoice</a>
-                                                </p>
-                                            </label>
-                                        </td>
+                                            <p>
+                                                <i class='bx bx-file'></i>
+                                                <a
+                                                    href="{{ route('invoices', ['customerId' => $c->ID, 'new' => 1]) }}">
+                                                    Invoice
+                                                </a>
+                                            </p>
+                                        </label>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
