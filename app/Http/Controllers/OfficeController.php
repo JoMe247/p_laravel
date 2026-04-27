@@ -167,25 +167,50 @@ class OfficeController extends Controller
     public function uploadLogo(Request $request)
     {
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
-        if (!$authUser) return redirect()->route('login');
+
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
 
         $request->validate([
-            'agency_logo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
+            'agency_logo'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'cropped_logo' => 'required|string',
         ]);
 
         $agencyCode = $authUser->agency;
 
         $agency = Agency::where('agency_code', $agencyCode)->first();
+
         if (!$agency) {
             return back()->withErrors(['error' => 'Agencia no encontrada.']);
         }
 
-        // Guardar archivo
-        $file = $request->file('agency_logo');
-        $name = 'agency_logo_' . $agencyCode . '.' . $file->extension();
-        $path = $file->storeAs('agency_logos', $name, 'public');
+        $croppedLogo = $request->input('cropped_logo');
 
-        // Guardar ruta en base de datos
+        if (!preg_match('/^data:image\/(png|jpg|jpeg|webp);base64,/', $croppedLogo, $matches)) {
+            return back()->withErrors(['error' => 'Formato de imagen inválido.']);
+        }
+
+        $extension = $matches[1] === 'jpeg' ? 'jpg' : $matches[1];
+
+        $imageData = substr($croppedLogo, strpos($croppedLogo, ',') + 1);
+        $imageData = base64_decode($imageData, true);
+
+        if ($imageData === false) {
+            return back()->withErrors(['error' => 'No se pudo procesar la imagen.']);
+        }
+
+        $safeAgencyCode = preg_replace('/[^A-Za-z0-9_-]/', '_', $agencyCode);
+
+        $name = 'agency_logo_' . $safeAgencyCode . '.' . $extension;
+        $path = 'agency_logos/' . $name;
+
+        if ($agency->agency_logo && $agency->agency_logo !== $path && Storage::disk('public')->exists($agency->agency_logo)) {
+            Storage::disk('public')->delete($agency->agency_logo);
+        }
+
+        Storage::disk('public')->put($path, $imageData);
+
         $agency->agency_logo = $path;
         $agency->save();
 

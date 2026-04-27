@@ -209,7 +209,7 @@
                                                 </p>
 
                                                 <p><i class='bx bx-file'></i>
-                                                    <a href="#">Invoice</a>
+                                                    <a href="{{ route('invoices', ['customerId' => $c->ID, 'new' => 1]) }}">Invoice</a>
                                                 </p>
                                             </label>
                                         </td>

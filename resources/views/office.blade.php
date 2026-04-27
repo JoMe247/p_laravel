@@ -22,6 +22,9 @@
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -53,14 +56,16 @@
                             </div>
 
                             <div class="office-logo-actions">
-                                <form action="{{ route('office.uploadLogo') }}" method="POST"
-                                    enctype="multipart/form-data">
+                                <form id="agency-logo-upload-form" action="{{ route('office.uploadLogo') }}"
+                                    method="POST" enctype="multipart/form-data">
                                     @csrf
+
+                                    <input type="hidden" name="cropped_logo" id="cropped_agency_logo">
 
                                     <label class="btn secondary upload-btn">
                                         <i class='bx bx-image-alt'></i> &nbsp;Actualizar Logo
-                                        <input type="file" name="agency_logo" accept="image/*"
-                                            onchange="this.form.submit()">
+                                        <input type="file" name="agency_logo" id="agency_logo_input" accept="image/*"
+                                            onchange="openAgencyLogoCropper(this)">
                                     </label>
                                 </form>
 
@@ -413,8 +418,27 @@
 
     <div id="dim-screen"></div>
 
+    <div id="agency-logo-crop-overlay">
+        <div class="agency-logo-crop-content">
+            <h2>Recortar Logo</h2>
 
-    <script src="js/image.js"></script>
+            <div class="agency-logo-crop-preview">
+                <img id="agency-logo-crop-image" src="" alt="Logo Preview">
+            </div>
+
+            <div class="agency-logo-crop-actions">
+                <button type="button" class="btn primary" id="agency-logo-crop-save">
+                    <i class='bx bx-check'></i> Crop & Save
+                </button>
+
+                <button type="button" class="btn secondary upload-btn" id="agency-logo-crop-cancel">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <script src="js/dropdown.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/table.js"></script>
@@ -612,6 +636,116 @@
                     }
                 });
             });
+        });
+    </script>
+
+    <script>
+        let agencyLogoCropper = null;
+
+        function openAgencyLogoCropper(input) {
+            if (!input.files || !input.files[0]) return;
+
+            const file = input.files[0];
+
+            if (!file.type.startsWith('image/')) {
+                Swal.fire({
+                    title: 'Archivo inválido',
+                    text: 'Selecciona una imagen válida.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const overlay = document.getElementById('agency-logo-crop-overlay');
+                const image = document.getElementById('agency-logo-crop-image');
+
+                image.src = e.target.result;
+                overlay.classList.add('show');
+
+                image.onload = function() {
+                    if (agencyLogoCropper) {
+                        agencyLogoCropper.destroy();
+                        agencyLogoCropper = null;
+                    }
+
+                    agencyLogoCropper = new Cropper(image, {
+                        aspectRatio: 20 / 9,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        responsive: true,
+                        background: false,
+                        movable: true,
+                        zoomable: true,
+                        rotatable: false,
+                        scalable: false
+                    });
+                };
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function closeAgencyLogoCropper() {
+            const overlay = document.getElementById('agency-logo-crop-overlay');
+            const image = document.getElementById('agency-logo-crop-image');
+            const input = document.getElementById('agency_logo_input');
+
+            overlay.classList.remove('show');
+
+            if (agencyLogoCropper) {
+                agencyLogoCropper.destroy();
+                agencyLogoCropper = null;
+            }
+
+            image.src = '';
+
+            if (input) {
+                input.value = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveBtn = document.getElementById('agency-logo-crop-save');
+            const cancelBtn = document.getElementById('agency-logo-crop-cancel');
+            const uploadForm = document.getElementById('agency-logo-upload-form');
+            const croppedInput = document.getElementById('cropped_agency_logo');
+
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', closeAgencyLogoCropper);
+            }
+
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    if (!agencyLogoCropper) return;
+
+                    const canvas = agencyLogoCropper.getCroppedCanvas({
+                        width: 1000,
+                        height: 450,
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high'
+                    });
+
+                    croppedInput.value = canvas.toDataURL('image/png');
+
+                    uploadForm.submit();
+                });
+            }
+
+            const overlay = document.getElementById('agency-logo-crop-overlay');
+
+            if (overlay) {
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) {
+                        closeAgencyLogoCropper();
+                    }
+                });
+            }
         });
     </script>
 
