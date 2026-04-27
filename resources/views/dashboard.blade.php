@@ -184,7 +184,20 @@
                                         <td class="customer-policy"><a
                                                 href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a>
                                         </td>
-                                        <td class="customer-address">{{ $c->Address }}</td>
+                                        <td class="customer-address">
+                                            @if (!empty($c->Address))
+                                                @php
+                                                    $mapsAddress = preg_replace('/\s+/', '+', trim($c->Address));
+                                                @endphp
+
+                                                <a href="https://www.google.com/maps/search/{{ $mapsAddress }}"
+                                                    target="_blank">
+                                                    {{ $c->Address }}
+                                                </a>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
                                         <td class="customer-phone">{{ $c->Phone }}</td>
                                         <td class="customer-dob">{{ $c->DOB }}</td>
 
@@ -209,7 +222,8 @@
                                                 </p>
 
                                                 <p><i class='bx bx-file'></i>
-                                                    <a href="{{ route('invoices', ['customerId' => $c->ID, 'new' => 1]) }}">Invoice</a>
+                                                    <a
+                                                        href="{{ route('invoices', ['customerId' => $c->ID, 'new' => 1]) }}">Invoice</a>
                                                 </p>
                                             </label>
                                         </td>
@@ -367,7 +381,8 @@
                 <div class="color-pick" color="white" onclick="selectActionColor(this)"></div>
             </div>
 
-            <div class="settings-sub-title" style="margin-top:50px;" data-i18n="settings.side_panel_background">Side Panel Background</div>
+            <div class="settings-sub-title" style="margin-top:50px;" data-i18n="settings.side_panel_background">Side
+                Panel Background</div>
 
             <div id="background-side-settings">
                 <div id="background-color-option-container">
@@ -397,7 +412,7 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title' data-i18n="settings.select_image">Select Image</div>
-                        
+
                         <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
                                 alt=""></label>
                         <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
@@ -429,7 +444,8 @@
 
                 <div id="sideBlur-slider">
                     <div class="slider-wrap" id="side-image-slider">
-                        <label for="frac" style="display:block;margin-bottom:8px;" data-i18n="settings.side_image_blur">Side Image Blur</label>
+                        <label for="frac" style="display:block;margin-bottom:8px;"
+                            data-i18n="settings.side_image_blur">Side Image Blur</label>
                         <div class="row">
                             <input id="frac" type="range" min="0" max="1" step="0.01"
                                 value="0.00" />
@@ -440,7 +456,8 @@
                     </div>
 
                     <div class="slider-wrap" id="home-image-slider">
-                        <label for="frac2" style="display:block;margin-bottom:8px;" data-i18n="settings.home_image_blur">Home Image Blur</label>
+                        <label for="frac2" style="display:block;margin-bottom:8px;"
+                            data-i18n="settings.home_image_blur">Home Image Blur</label>
                         <div class="row">
                             <input id="frac2" type="range" min="0" max="1" step="0.01"
                                 value="0.00" />
