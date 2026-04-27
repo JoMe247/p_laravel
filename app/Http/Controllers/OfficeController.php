@@ -10,6 +10,7 @@ use App\Models\SubUser;
 use App\Models\Agency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -189,6 +190,32 @@ class OfficeController extends Controller
         $agency->save();
 
         return back()->with('success', 'Logo actualizado correctamente.');
+    }
+
+    public function deleteLogo(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
+
+        $agencyCode = $authUser->agency;
+
+        $agency = Agency::where('agency_code', $agencyCode)->first();
+
+        if (!$agency) {
+            return back()->withErrors(['error' => 'Agencia no encontrada.']);
+        }
+
+        if ($agency->agency_logo && Storage::disk('public')->exists($agency->agency_logo)) {
+            Storage::disk('public')->delete($agency->agency_logo);
+        }
+
+        $agency->agency_logo = null;
+        $agency->save();
+
+        return back()->with('success', 'Logo eliminado correctamente.');
     }
 
     public function update(Request $request, $id)

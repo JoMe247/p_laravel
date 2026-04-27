@@ -129,6 +129,8 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         // Logo upload
 
         Route::post('/office/upload-logo', [OfficeController::class, 'uploadLogo'])->name('office.uploadLogo');
+        Route::delete('/office/logo/delete', [OfficeController::class, 'deleteLogo'])
+            ->name('office.deleteLogo');
 
         Route::get('/account', [AccountController::class, 'show'])
             ->name('account.show');
@@ -200,7 +202,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         // Eliminar policy
         Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])
             ->name('policies.destroy');
-            
+
 
         // =======================
         // 📁 Customer Files
@@ -397,6 +399,5 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/reports/policies-data', [ReportsController::class, 'policiesData'])->name('reports.policies-data');
         Route::get('/reports/messages-data', [ReportsController::class, 'messagesData'])->name('reports.messages-data');
         Route::get('/reports/documents-data', [ReportsController::class, 'documentsData'])->name('reports.documents-data');
-        
     });
 });
