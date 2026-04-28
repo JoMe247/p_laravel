@@ -157,7 +157,12 @@
                             <tbody>
                                 @foreach ($members as $member)
                                     <tr>
-                                        <td><b>{{ $member->username }}</b></td>
+                                        <td>
+                                            <span class="session-dot {{ $member->is_online ? 'online' : 'offline' }}"
+                                                title="{{ $member->is_online ? 'Sesión activa' : 'Sesión inactiva' }}"></span>
+
+                                            <b>{{ $member->username }}</b>
+                                        </td>
                                         <td>{{ $member->name }}</td>
                                         <td>{{ $member->email }}</td>
                                         <td>{{ $member->tipo }}</td>

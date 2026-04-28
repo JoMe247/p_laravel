@@ -83,7 +83,20 @@
                                     <td><a href="{{ url('profile/' . $c->ID) }}">{{ $c->Name }}</a></td>
                                     <td><a href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a>
                                     </td>
-                                    <td>{{ $c->Address }}</td>
+                                    <td class="customer-address">
+                                        @if (!empty($c->Address))
+                                            @php
+                                                $mapsAddress = preg_replace('/\s+/', '+', trim($c->Address));
+                                            @endphp
+
+                                            <a href="https://www.google.com/maps/search/{{ $mapsAddress }}"
+                                                target="_blank">
+                                                {{ $c->Address }}
+                                            </a>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
                                     <td>{{ $c->Phone }}</td>
                                     <td>{{ $c->DOB }}</td>
 

@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // ✅ Alias correcto (protege de verdad)
         $middleware->alias([
             'auth.multi' => \App\Http\Middleware\RequireAuthMulti::class,
+            'last.seen' => \App\Http\Middleware\UpdateUserLastSeen::class,
         ]);
 
         // ✅ Web middlewares globales (orden importa)

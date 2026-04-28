@@ -11,6 +11,7 @@ use App\Models\Agency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 
 
@@ -19,7 +20,10 @@ class OfficeController extends Controller
     public function index()
     {
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
-        if (!$authUser) return redirect()->route('login');
+
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
 
         $agency = $authUser->agency;
 
@@ -28,19 +32,23 @@ class OfficeController extends Controller
 
         $twilioNumber = $authUser->twilio_number ?? '';
 
+        $onlineLimit = now()->subMinutes(5);
+
         $users = User::where('agency', $agency)
-            ->select('id', 'username', 'name', 'email')
+            ->select('id', 'username', 'name', 'email', 'last_seen_at')
             ->get()
-            ->map(function ($u) {
+            ->map(function ($u) use ($onlineLimit) {
                 $u->tipo = 'Administrador';
+                $u->is_online = $u->last_seen_at && Carbon::parse($u->last_seen_at)->greaterThanOrEqualTo($onlineLimit);
                 return $u;
             });
 
         $subs = SubUser::where('agency', $agency)
-            ->select('id', 'username', 'name', 'email')
+            ->select('id', 'username', 'name', 'email', 'last_seen_at')
             ->get()
-            ->map(function ($s) {
+            ->map(function ($s) use ($onlineLimit) {
                 $s->tipo = 'Usuario';
+                $s->is_online = $s->last_seen_at && Carbon::parse($s->last_seen_at)->greaterThanOrEqualTo($onlineLimit);
                 return $s;
             });
 

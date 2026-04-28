@@ -166,7 +166,6 @@
             @if ($logoBase64)
                 <img src="{{ $logoBase64 }}" class="agency-logo" style="width:200px;object-fit:contain;margin-top:40px;margin-left:30px">
             @endif
-
         </div>
 
         <div class="range-box">

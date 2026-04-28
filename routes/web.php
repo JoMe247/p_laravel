@@ -63,7 +63,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
     // =======================
     // 🏠 Dashboard y módulos protegidos
     // =======================
-    Route::middleware('auth.multi')->group(function () {
+    Route::middleware('auth.multi', 'last.seen')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
 
         // WhatsApp
@@ -399,5 +399,8 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/reports/policies-data', [ReportsController::class, 'policiesData'])->name('reports.policies-data');
         Route::get('/reports/messages-data', [ReportsController::class, 'messagesData'])->name('reports.messages-data');
         Route::get('/reports/documents-data', [ReportsController::class, 'documentsData'])->name('reports.documents-data');
+
+
+        Route::get('/office', [OfficeController::class, 'index'])->name('office');
     });
 });

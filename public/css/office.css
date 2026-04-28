@@ -572,3 +572,20 @@
     background-color: #d8d8d8;
     border: 1px solid #d8d8d8;
 }
+
+.session-dot {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.session-dot.online {
+    background-color: #22c55e;
+}
+
+.session-dot.offline {
+    background-color: #ef4444;
+}
