@@ -54,7 +54,7 @@
             <i class='bx bxs-buildings'></i> Companies
         </div>
 
-        <div class="lateral-row" data="option" onclick="window.location='{{ url('/documents') }}'">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/documents') }}'" id="documents">
             <i class='bx bx-file'></i> Documents
         </div>
 
@@ -66,7 +66,7 @@
             <i class='bx bxl-whatsapp'></i> WhatsApp
         </div>
 
-        <div class="lateral-row" data="option" onclick="window.location='{{ url('/general-payments') }}'">
+        <div class="lateral-row" data="option" onclick="window.location='{{ url('/payments') }}'" id="payments">
             <i class='bx bx-receipt'></i> Payments
         </div>
 
@@ -88,9 +88,9 @@
         </div>
 
         <!-- Opciones de sistema -->
-        <div class="lateral-row" data="option">
+        <!-- <div class="lateral-row" data="option">
             <i class='bx bx-category'></i> Tools
-        </div>
+        </div> -->
 
         <div class="lateral-row" data="option" onclick="window.location='{{ url('/help') }}'" id="help">
             <i class='bx bx-help-circle'></i> Help
@@ -118,6 +118,29 @@
         } catch (error) {
             // console.log("No existe tab en el menu lateral");
         }
+    </script>
+
+    <script>
+        document.getElementById('dash-options').addEventListener('mousedown', function(e) {
+            const option = e.target.closest('[data="option"]');
+            if (!option) return;
+
+            // Detectar click central
+            if (e.button === 1) {
+                e.preventDefault();
+
+                // Extraer la URL del onclick
+                const onclickAttr = option.getAttribute('onclick');
+
+                if (onclickAttr && onclickAttr.includes('window.location')) {
+                    const match = onclickAttr.match(/window\.location\s*=\s*['"]([^'"]+)['"]/);
+                    
+                    if (match && match[1]) {
+                        window.open(match[1], '_blank');
+                    }
+                }
+            }
+        });
     </script>
 
 </section>

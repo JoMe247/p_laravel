@@ -56,8 +56,8 @@
 
                             <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
-                                <i class='bx bx-credit-card'></i>
-                                <span>Invoices (Payments)</span>
+                                <i class='bx bx-file'></i>
+                                <span>Invoices</span>
                             </button>
 
                             <button type="button" class="profile-menu-item"
@@ -135,11 +135,11 @@
                                 <p>{{ $documents->count() }} document(s)</p>
                             </div>
 
-                            <div class="customer-documents-actions">
+                            <!-- <div class="customer-documents-actions">
                                 <a href="{{ route('profile', $customer->ID) }}" class="btn secondary">
                                     <i class='bx bx-arrow-back'></i>
                                 </a>
-                            </div>
+                            </div> -->
                         </div>
 
                         @if ($documents->count())
@@ -171,11 +171,11 @@
 
                                             <div class="doc-card-actions">
 
-                                                <button type="button"
+                                                <button type="button" data="customer-docs-delete"
                                                     class="btn delete-btn small single-delete-doc-btn"
                                                     data-id="{{ $doc->id }}"
                                                     data-url="{{ route('documents.destroy', $doc->id) }}">
-                                                    Delete
+                                                    <i class="bx bx-trash"></i>
                                                 </button>
 
                                             </div>

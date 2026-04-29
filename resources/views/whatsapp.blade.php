@@ -44,7 +44,7 @@
                                 <button id="btnSync" type="submit" class="btn btn-secondary"><i class="bx bx-sync"></i></button>
                             </form>
 
-                            <a id="btnSent" href="{{ route('whatsapp.sent') }}" class="btn btn-primary"><i class='bx bx-message-square-check'></i></a>
+                            <a id="btnSent" href="{{ route('whatsapp.sent') }}" class="btn btn-primary"><i class='bx bxs-send' ></i></a>
 
                             <button type="button" class="btn btn-danger" onclick="bulkDelete()">🗑️ Eliminar
                                 seleccionados</button>

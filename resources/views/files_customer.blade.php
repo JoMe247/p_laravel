@@ -64,8 +64,8 @@
                                 </button>
 
                                 <button type="button" class="profile-menu-item">
-                                    <i class='bx bx-credit-card'></i>
-                                    <span>Invoices (Payments)</span>
+                                    <i class='bx bx-file'></i>
+                                    <span>Invoices</span>
                                 </button>
 
                                 <button type="button" class="profile-menu-item"
@@ -140,12 +140,32 @@
                     <div class="files-container">
 
                         <div class="files-header">
-                            <h2>
+                           
                                 {{ $customer->name }}
+
+                                <div class="files-header-actions">
+                                    <button id="open-upload" class="btn-primary">
+                                        <i class='bx bx-cloud-upload' ></i> &nbsp;Upload
+                                    </button>
+
+                                    <select id="files-filter" style="display:none">
+                                        <option value="all">All files</option>
+                                        <option value="name">File name</option>
+                                        <option value="date">Date</option>
+                                        <option value="user">Uploaded by</option>
+                                        <option value="pdf">PDF</option>
+                                        <option value="doc">DOC</option>
+                                        <option value="docx">DOCX</option>
+                                        <option value="png">PNG</option>
+                                        <option value="jpg">JPG</option>
+                                    </select>
+
+                                </div>
 
                                 <span class="files-count">
                                     <i class="bx bx-folder"></i>{{ $files->count() }}
                                 </span>
+                                
 
                                 <!-- 🔹 FILE TYPE FILTER BUTTONS -->
                                 <div class="files-type-filters">
@@ -155,27 +175,7 @@
                                     <button class="file-type-btn image" data-type="image">IMG</button>
                                     <button class="file-type-btn zip" data-type="zip">ZIP</button>
                                 </div>
-                            </h2>
-
-
-                            <div class="files-header-actions">
-                                <button id="open-upload" class="btn-primary">
-                                    <i class='bx bx-cloud-upload' ></i> &nbsp;Upload
-                                </button>
-
-                                <select id="files-filter" style="display:none">
-                                    <option value="all">All files</option>
-                                    <option value="name">File name</option>
-                                    <option value="date">Date</option>
-                                    <option value="user">Uploaded by</option>
-                                    <option value="pdf">PDF</option>
-                                    <option value="doc">DOC</option>
-                                    <option value="docx">DOCX</option>
-                                    <option value="png">PNG</option>
-                                    <option value="jpg">JPG</option>
-                                </select>
-
-                            </div>
+                            
                         </div>
 
                         <div class="files-table-wrapper">

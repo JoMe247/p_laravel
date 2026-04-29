@@ -38,10 +38,10 @@
         <section id="dash">
 
 
-            <div class="general-payments-wrapper">
-                <div class="general-payments-header">
+            <div id="lower-table-clients" type="fullscreen" class="general-payments-wrapper">
+                <!-- <div class="general-payments-header">
                     <h1>Payments</h1>
-                </div>
+                </div> -->
 
                 <form method="GET" action="{{ route('payments.general') }}" class="general-payments-filters"
                     id="generalPaymentsForm">
@@ -62,8 +62,8 @@
                 </form>
 
                 <div class="general-payments-table-box">
-                    <table class="general-payments-table">
-                        <thead>
+                    <table class="base-table">
+                        <thead id="table-header">
                             <tr>
                                 <th>INVOICE #</th>
                                 <th>AMOUNT</th>
@@ -76,7 +76,7 @@
                                 <th>PREMIUM</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="clients-list">
                             @forelse($invoices as $invoice)
                                 <tr>
                                     <td>{{ $invoice->invoice_number ?? '—' }}</td>

@@ -60,8 +60,8 @@
 
                             <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
-                                <i class='bx bx-credit-card'></i>
-                                <span>Invoices (Payments)</span>
+                                <i class='bx bx-file'></i>
+                                <span>Invoices</span>
                             </button>
 
                             <button type="button" class="profile-menu-item"

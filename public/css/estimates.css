@@ -1,34 +1,70 @@
-.estimates-wrapper{ padding:20px; }
+.estimates-wrapper{ 
+    padding:20px; 
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+    padding-right: 6px;
+  }
 
 .btn-estimates{
-  display:inline-flex; align-items:center; gap:10px;
-  padding:10px 14px; border-radius:12px; text-decoration:none;
-  background:#111827; color:#fff; font-weight:600;
+    background-color: var(--red1);
+    color: white;
+    border: 1px solid var(--red1);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--montserrat);
+    cursor: pointer;
+    text-align: center;
+    transition: 0.4s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
 
 .estimates-card{
-  background:#fff; border-radius:14px; padding:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,.06);
+  background: #fff;
+  border-radius: 14px;
 }
 
-.estimates-table-wrap{
+/* .estimates-table-wrap{
   margin-top:12px; border:1px solid #e5e7eb; border-radius:12px;
   overflow:auto; max-height:420px;
-}
+} */
 
 .estimates-table{
-  width:100%; border-collapse:collapse; min-width:1150px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    /* min-height: 420px; */
+    font-family: var(--montserrat);
+    /* overflow-y: auto; */
+    overflow: hidden;
+    border-radius: 12px;
+    background: #fff;
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); */
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    position: relative;
 }
 
-.estimates-table thead th{
-  position:sticky; top:0; background:#f9fafb; z-index:2;
-  text-align:left; padding:12px; font-weight:900;
-  border-bottom:1px solid #e5e7eb; color:#111827;
+.estimates-table thead {
+    background: #ebeef5;
+    color: #333;
+    text-align: center;
+}
+
+.estimates-table thead th {
+    font-family: var(--montserrat);
+    text-transform: uppercase;
+    font-weight: bolder;
+    top: 0;
+    padding: 12px 18px;
+    text-align: center;
 }
 
 .estimates-table tbody td{
-  padding:10px 12px; border-bottom:1px solid #eef2f7;
-  font-weight:700; color:#111827; vertical-align:middle;
+  padding: 8px 10px;
 }
 
 .td-strong{ font-weight:900; }
@@ -42,12 +78,46 @@
 .inline-form{ display:inline; margin:0; }
 
 .icon-btn{
-  border:none; background:#f3f4f6; border-radius:10px;
-  padding:8px 10px; cursor:pointer; font-size:18px;
-  display:inline-flex; align-items:center; justify-content:center;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 8px;
+    font-size: 1.2em;
+    background: #0b6ede;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.3s;
 }
-.icon-btn:hover{ opacity:.9; }
-.icon-btn.danger{ background:#fee2e2; }
+
+.icon-btn[title="Edit"]{
+    background-color: #efefef;
+    color: #333;
+}
+
+.icon-btn[title="Edit"]:hover{
+    background-color: #a3a3a3;
+    transition: 0.3s;
+}
+
+.icon-btn[title="Download PDF"]:hover{
+    background-color: #0651a7;
+    transition: 0.3s;
+}
+
+.icon-btn.danger{
+    background:var(--red1);
+}
+
+.icon-btn.danger:hover{
+    background:var(--red2);
+    transition: 0.3s;    
+}
+
 .icon-btn:disabled{ opacity:.45; cursor:not-allowed; }
 
 .td-empty{
@@ -57,13 +127,24 @@
 .estimates-pagination{ margin-top:12px; }
 
 .estimates-layout{
-  display:flex; align-items:flex-start; gap:24px; width:100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 20px 30px;
+    box-sizing: border-box;
+    width: 100%;
 }
-.estimates-layout .left-column{ width:240px; min-width:240px; }
-.estimates-layout .estimates-wrapper{ flex:1; min-width:0; }
+
+.estimates-layout .estimates-wrapper{ 
+  flex:1; min-width:0; 
+}
 
 .estimates-actions{
-  display:flex; align-items:center; gap:14px; margin-bottom:12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: 20px;
+  margin-bottom: 18px;
 }
 
 .footer-image-controls{ display:flex; align-items:center; gap:10px; }

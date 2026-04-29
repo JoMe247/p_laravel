@@ -46,7 +46,8 @@
 
                             <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
-                                <i class='bx bx-credit-card'></i><span>Invoices (Payments)</span>
+                                <i class='bx bx-file'></i>
+                                <span>Invoices</span>
                             </button>
 
                             <button type="button" class="profile-menu-item active"
@@ -73,15 +74,18 @@
                         </nav>
                     </aside>
 
-                    {{-- NOTES (igual que payments) --}}
+                    {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
                     <div class="profile-notes sticky-notes">
+
                         <div class="notes-header">
                             <h3>Notes</h3>
-                            <button id="add-note-btn" class="btn small">+ Add Note</button>
+                            <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i>  &nbsp;Add Note</button>
                         </div>
+
                         <div class="notes-scroll">
                             <div id="notes-list"></div>
                         </div>
+
                     </div>
                 </div>
 
@@ -121,10 +125,12 @@
                                 Update Image
                             </button>
                         </div>
+
+                        <h2></h2>
                     </div>
 
                     <div class="estimates-card">
-                        <h2>Estimates</h2>
+                        
 
                         <div class="estimates-table-wrap">
                             <table class="estimates-table">
@@ -171,15 +177,14 @@
 
                                             <td class="td-actions">
 
-                                                <a class="icon-btn" title="PDF"
-                                                    href="{{ route('estimates.pdf', ['customerId' => $customerId, 'estimateId' => $est->id]) }}">
-                                                    <i class='bx bxs-file-pdf'></i>
-                                                </a>
-
-
                                                 <a class="icon-btn" title="Edit"
                                                     href="{{ route('estimate.register', ['customerId' => $customerId, 'estimateId' => $est->id]) }}">
-                                                    <i class='bx bx-edit-alt'></i>
+                                                    <i class="bx bxs-pencil"></i>
+                                                </a>
+
+                                                <a class="icon-btn" title="PDF"
+                                                    href="{{ route('estimates.pdf', ['customerId' => $customerId, 'estimateId' => $est->id]) }}">
+                                                    <i class="bx bxs-file"></i>
                                                 </a>
 
                                                 <form class="inline-form" method="POST"
@@ -188,7 +193,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="icon-btn danger" type="submit" title="Delete">
-                                                        <i class='bx bxs-trash'></i>
+                                                        <i class="bx bx-trash"></i>
                                                     </button>
                                                 </form>
                                             </td>

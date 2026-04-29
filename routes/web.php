@@ -382,7 +382,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
 
 
 
-        Route::get('/general-payments', [PaymentsInvoicesController::class, 'generalPayments'])
+        Route::get('/payments', [PaymentsInvoicesController::class, 'generalPayments'])
             ->name('payments.general');
 
 
