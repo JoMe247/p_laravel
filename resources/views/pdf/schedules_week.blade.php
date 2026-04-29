@@ -168,8 +168,8 @@
                     style="width:200px;object-fit:contain;margin-top:40px;margin-left:30px">
             @else
                 <div class="agency-name-logo"
-                    style="width:200px;margin-top:40px;margin-left:30px;font-size:22px;font-weight:bold;text-align:center;line-height:1.2;color:#333;">
-                    {{ strtoupper($agencyName ?? 'Agency') }}
+                    style="width:200px;margin-top:40px;margin-left:30px;font-size:22px;font-weight:bold;text-align:center;line-height:1.2;color:#333; text-transform:uppercase;">
+                    {{ $agencyName ?? 'Agency' }}
                 </div>
             @endif
         </div>
