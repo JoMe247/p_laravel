@@ -21,6 +21,8 @@ class DocumentsController extends Controller
             return redirect()->route('login');
         }
 
+        $limitData = $this->getDocsLimitData();
+
         $urlSub = DB::table('url')
             ->select(
                 'short_url',
@@ -52,6 +54,8 @@ class DocumentsController extends Controller
             ->groupBy('hash_id');
 
         $documents = DB::table('documents as d')
+            ->join('customers as c', 'c.ID', '=', 'd.id_customer')
+            ->where('c.agency', $limitData['agencyCode'])
             ->leftJoin('pdf_overlays as p', 'p.id', '=', 'd.template_id')
             ->leftJoinSub($urlSub, 'u', function ($join) {
                 $join->on('u.document_id', '=', 'd.id');
@@ -75,11 +79,21 @@ class DocumentsController extends Controller
 
         $totalDocuments = $documents->count();
 
-        return view('documents', compact('totalDocuments', 'documents'));
+        return view('documents', array_merge(
+            compact('totalDocuments', 'documents'),
+            $limitData
+        ));
     }
 
     public function createDocument()
     {
+        $limitData = $this->getDocsLimitData();
+
+        if ($limitData['isDocsOverLimit']) {
+            return redirect()->route('documents.index')
+                ->with('doc_limit_error', 'Has alcanzado el límite mensual de documentos de tu plan.');
+        }
+
         return view('documents.create_document');
     }
 
@@ -192,6 +206,16 @@ class DocumentsController extends Controller
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
         if (!$authUser) {
             return response()->json(['ok' => false], 401);
+        }
+
+        $limitData = $this->getDocsLimitData();
+
+        if ($limitData['isDocsOverLimit']) {
+            return response()->json([
+                'ok' => false,
+                'limit_error' => true,
+                'message' => 'Has alcanzado el límite mensual de documentos de tu plan.',
+            ], 422);
         }
 
         $request->validate([
@@ -481,6 +505,7 @@ class DocumentsController extends Controller
         return random_int(100000, 999999);
     }
 
+
     private function extractDocSignOverlay(?string $overlayJson): ?array
     {
         if (!$overlayJson) {
@@ -495,10 +520,6 @@ class DocumentsController extends Controller
         foreach ($items as $item) {
             $rawText = (string) ($item['text'] ?? '');
 
-            // Normalizar:
-            // 1) quitar saltos de línea
-            // 2) quitar llaves {}
-            // 3) quitar espacios
             $normalized = preg_replace('/\s+/', '', $rawText);
             $normalized = str_replace(['{', '}'], '', $normalized);
 
@@ -515,7 +536,6 @@ class DocumentsController extends Controller
 
         return null;
     }
-
     private function getPublicBaseUrl(): string
     {
         return rtrim(env('SHORT_PUBLIC_BASE_URL', config('app.url')), '/');
@@ -838,6 +858,59 @@ class DocumentsController extends Controller
             })
             ->orderByDesc('id')
             ->first();
+    }
+
+    private function getDocsLimitData(): array
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        if (!$authUser) {
+            return [
+                'agencyCode' => null,
+                'docLimit' => 0,
+                'monthlyDocCount' => 0,
+                'isDocsOverLimit' => false,
+            ];
+        }
+
+        $agencyCode = $authUser->agency ?? null;
+
+        $agency = $agencyCode
+            ? DB::table('agency')->where('agency_code', $agencyCode)->first()
+            : null;
+
+        $plan = null;
+
+        if ($agency) {
+            $plan = DB::connection('doc_config')
+                ->table('limits')
+                ->where('account_type', $agency->account_type)
+                ->first();
+        }
+
+        $docLimit = (int) ($plan->doc_limit ?? 0);
+
+        $monthlyDocCount = 0;
+
+        if ($agencyCode) {
+            $monthlyDocCount = DB::table('documents as d')
+                ->join('customers as c', 'c.ID', '=', 'd.id_customer')
+                ->where('c.agency', $agencyCode)
+                ->whereBetween('d.date', [
+                    now()->startOfMonth()->toDateString(),
+                    now()->endOfMonth()->toDateString(),
+                ])
+                ->count();
+        }
+
+        return [
+            'agencyCode' => $agencyCode,
+            'docLimit' => $docLimit,
+            'monthlyDocCount' => $monthlyDocCount,
+            'isDocsOverLimit' => $docLimit > 0
+                ? $monthlyDocCount >= $docLimit
+                : false,
+        ];
     }
 
     public function customerDocuments($customerId)

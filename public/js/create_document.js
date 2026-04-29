@@ -146,15 +146,43 @@ async function fetchTemplateData(id) {
     }
 }
 
+function normalizePlaceholderToken(text) {
+    return String(text || "")
+        .replace(/{{|}}/g, "")
+        .replace(/\s+/g, "")
+        .trim();
+}
+
+function clearSpecialPlaceholders(items = []) {
+    return items.map((overlay) => {
+        const normalized = normalizePlaceholderToken(overlay?.text || "");
+
+        // Vaciar visualmente DocSign@ y DocDTime@
+        if (normalized === "DocSign@" || normalized === "DocDTime@") {
+            return {
+                ...overlay,
+                _placeholderToken: normalized,
+                text: "{{}}",
+            };
+        }
+
+        return {
+            ...overlay,
+            _placeholderToken: normalized,
+        };
+    });
+}
 // ---------------------------
 // PDF Viewer + Inputs overlay
 // ---------------------------
 async function loadPDF(templateData) {
     const pdfjsLib = window["pdfjs-dist/build/pdf"];
 
-    overlayData = Array.isArray(templateData.overlay_data)
-        ? templateData.overlay_data
-        : [];
+    overlayData = clearSpecialPlaceholders(
+        Array.isArray(templateData.overlay_data)
+            ? templateData.overlay_data
+            : [],
+    );
 
     try {
         // Ajusta aquí si tu PDF está en otra ruta.
@@ -214,8 +242,16 @@ function saveInputChangesForCurrentPage() {
             .replace(/{{|}}/g, "")
             .trim();
 
-        // ✅ No tocar DocCDate@
-        if (placeholder === "DocCDate@") return;
+        const overlayToken = overlay._placeholderToken || placeholder;
+
+        // No tocar placeholders automáticos
+        if (
+            overlayToken === "DocCDate@" ||
+            overlayToken === "DocDTime@" ||
+            overlayToken === "DocSign@"
+        ) {
+            return;
+        }
 
         overlay.text = `{{${inputField.value}}}`;
     });
@@ -247,6 +283,7 @@ async function renderPage(pageNumber, overlayDataParam) {
             overlay.text.includes("}}")
         ) {
             const placeholder = overlay.text.replace(/{{|}}/g, "").trim();
+            const overlayToken = overlay._placeholderToken || placeholder;
 
             // Escala visual real del canvas (si cambia por CSS)
             const rect = canvas.getBoundingClientRect();
@@ -291,6 +328,26 @@ async function renderPage(pageNumber, overlayDataParam) {
 
                 inputOverlay.appendChild(fixed);
                 return; // ✅ importante: no crear input
+            }
+
+            // ✅ DocSign@ y DocDTime@ -> caja vacía, solo para conservar posición
+            if (overlayToken === "DocSign@" || overlayToken === "DocDTime@") {
+                const ghost = document.createElement("div");
+
+                ghost.style.position = "absolute";
+                ghost.style.left = `${leftPx}px`;
+                ghost.style.top = `${topPx}px`;
+                ghost.style.minWidth = `${Math.max(110, Number(overlay.width || 140) * scaleFactor * scaleX)}px`;
+                ghost.style.minHeight = `${Math.max(24, Number(overlay.height || 24) * scaleFactor * scaleY)}px`;
+
+                ghost.style.pointerEvents = "none";
+                ghost.style.background = "transparent";
+                ghost.style.border = "1px solid rgba(255,255,255,.22)";
+                ghost.style.borderRadius = "6px";
+                ghost.style.boxSizing = "border-box";
+
+                inputOverlay.appendChild(ghost);
+                return;
             }
 
             // ✅ 2) resto de placeholders -> input normal
@@ -629,7 +686,6 @@ async function savePDFToServer() {
             .replace(/{{|}}/g, "")
             .trim();
 
-        // ✅ DocCDate@ -> fecha actual automática
         let textToDraw = placeholder;
 
         if (placeholder === "DocCDate@") {
@@ -639,6 +695,9 @@ async function savePDFToServer() {
             const dd = String(now.getDate()).padStart(2, "0");
             textToDraw = `${yyyy}-${mm}-${dd}`;
         }
+
+        // No dibujar texto vacío
+        if (!textToDraw) return;
 
         page.drawText(textToDraw, {
             x: overlay.x,

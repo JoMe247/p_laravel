@@ -76,7 +76,7 @@ button {
 
 .box::before{
     position: absolute;
-    content: attr(data-icon);
+    content:'';
     width: 24px;
     height: 24px;
     font-family: "boxicons";
@@ -88,6 +88,28 @@ button {
 .box[data-icon="docname"]::before{
     position: absolute;
     content: '\ee0d'; /* icono de user */
+    width: 24px;
+    height: 24px;
+    font-family: "boxicons";
+    font-size: 1.2em;
+    left: -23px;
+    top: 1px;
+}
+
+.box[data-icon="phone"]::before{
+    position: absolute;
+    content: '\eb7d';
+    width: 24px;
+    height: 24px;
+    font-family: "boxicons";
+    font-size: 1.2em;
+    left: -23px;
+    top: 1px;
+}
+
+.box[data-icon="policy"]::before{
+    position: absolute;
+    content: '\eb5a';
     width: 24px;
     height: 24px;
     font-family: "boxicons";
@@ -309,8 +331,8 @@ button {
     left: 54px;      /* a la derecha de los iconos */
     top: 230px;      /* debajo de los botones (ajusta si quieres) */
     width: 300px;
-    padding-top: 10px;
-    border-top: 1px dashed #e90c56;
+    padding-top: 90px;
+    /* border-top: 1px dashed #e90c56; */
 }
 
 .dtime-title{

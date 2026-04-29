@@ -10,6 +10,8 @@ use App\Models\SubUser;
 use App\Models\Agency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 
 
@@ -18,7 +20,10 @@ class OfficeController extends Controller
     public function index()
     {
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
-        if (!$authUser) return redirect()->route('login');
+
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
 
         $agency = $authUser->agency;
 
@@ -27,19 +32,35 @@ class OfficeController extends Controller
 
         $twilioNumber = $authUser->twilio_number ?? '';
 
+        $onlineLimit = now()->subMinutes(5);
+
         $users = User::where('agency', $agency)
-            ->select('id', 'username', 'name', 'email')
+            ->select('id', 'username', 'name', 'email', 'last_seen_at')
             ->get()
-            ->map(function ($u) {
+            ->map(function ($u) use ($onlineLimit) {
+                $lastSeen = $u->last_seen_at ? Carbon::parse($u->last_seen_at) : null;
+
                 $u->tipo = 'Administrador';
+                $u->is_online = $lastSeen && $lastSeen->greaterThanOrEqualTo($onlineLimit);
+                $u->last_seen_text = $lastSeen
+                    ? 'Last seen: ' . $lastSeen->format('m/d/Y h:i A')
+                    : 'Last seen: never';
+
                 return $u;
             });
 
         $subs = SubUser::where('agency', $agency)
-            ->select('id', 'username', 'name', 'email')
+            ->select('id', 'username', 'name', 'email', 'last_seen_at')
             ->get()
-            ->map(function ($s) {
+            ->map(function ($s) use ($onlineLimit) {
+                $lastSeen = $s->last_seen_at ? Carbon::parse($s->last_seen_at) : null;
+
                 $s->tipo = 'Usuario';
+                $s->is_online = $lastSeen && $lastSeen->greaterThanOrEqualTo($onlineLimit);
+                $s->last_seen_text = $lastSeen
+                    ? 'Last seen: ' . $lastSeen->format('m/d/Y h:i A')
+                    : 'Last seen: never';
+
                 return $s;
             });
 
@@ -166,29 +187,80 @@ class OfficeController extends Controller
     public function uploadLogo(Request $request)
     {
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
-        if (!$authUser) return redirect()->route('login');
+
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
 
         $request->validate([
-            'agency_logo' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048'
+            'agency_logo'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'cropped_logo' => 'required|string',
         ]);
 
         $agencyCode = $authUser->agency;
 
         $agency = Agency::where('agency_code', $agencyCode)->first();
+
         if (!$agency) {
             return back()->withErrors(['error' => 'Agencia no encontrada.']);
         }
 
-        // Guardar archivo
-        $file = $request->file('agency_logo');
-        $name = 'agency_logo_' . $agencyCode . '.' . $file->extension();
-        $path = $file->storeAs('agency_logos', $name, 'public');
+        $croppedLogo = $request->input('cropped_logo');
 
-        // Guardar ruta en base de datos
+        if (!preg_match('/^data:image\/(png|jpg|jpeg|webp);base64,/', $croppedLogo, $matches)) {
+            return back()->withErrors(['error' => 'Formato de imagen inválido.']);
+        }
+
+        $extension = $matches[1] === 'jpeg' ? 'jpg' : $matches[1];
+
+        $imageData = substr($croppedLogo, strpos($croppedLogo, ',') + 1);
+        $imageData = base64_decode($imageData, true);
+
+        if ($imageData === false) {
+            return back()->withErrors(['error' => 'No se pudo procesar la imagen.']);
+        }
+
+        $safeAgencyCode = preg_replace('/[^A-Za-z0-9_-]/', '_', $agencyCode);
+
+        $name = 'agency_logo_' . $safeAgencyCode . '.' . $extension;
+        $path = 'agency_logos/' . $name;
+
+        if ($agency->agency_logo && $agency->agency_logo !== $path && Storage::disk('public')->exists($agency->agency_logo)) {
+            Storage::disk('public')->delete($agency->agency_logo);
+        }
+
+        Storage::disk('public')->put($path, $imageData);
+
         $agency->agency_logo = $path;
         $agency->save();
 
         return back()->with('success', 'Logo actualizado correctamente.');
+    }
+
+    public function deleteLogo(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
+
+        $agencyCode = $authUser->agency;
+
+        $agency = Agency::where('agency_code', $agencyCode)->first();
+
+        if (!$agency) {
+            return back()->withErrors(['error' => 'Agencia no encontrada.']);
+        }
+
+        if ($agency->agency_logo && Storage::disk('public')->exists($agency->agency_logo)) {
+            Storage::disk('public')->delete($agency->agency_logo);
+        }
+
+        $agency->agency_logo = null;
+        $agency->save();
+
+        return back()->with('success', 'Logo eliminado correctamente.');
     }
 
     public function update(Request $request, $id)

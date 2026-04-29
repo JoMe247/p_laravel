@@ -22,6 +22,9 @@
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -31,7 +34,7 @@
 
 </head>
 
-<body >
+<body>
     <div id="main-container">
 
         <!-- Menu Include-->
@@ -47,19 +50,36 @@
                         <h3>Datos de Agencia</h3>
 
                         <div class="office-logo-box">
-                            <form action="{{ route('office.uploadLogo') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
+                            <div class="logo-preview">
+                                <img src="{{ $agencyData->agency_logo ? asset('storage/' . $agencyData->agency_logo) : asset('img/default-logo.png') }}"
+                                    alt="Logo Agencia">
+                            </div>
 
-                                <div class="logo-preview">
-                                    <img src="{{ $agencyData->agency_logo ? asset('storage/' . $agencyData->agency_logo) : asset('img/default-logo.png') }}"
-                                        alt="Logo Agencia">
-                                </div>
+                            <div class="office-logo-actions">
+                                <form id="agency-logo-upload-form" action="{{ route('office.uploadLogo') }}"
+                                    method="POST" enctype="multipart/form-data">
+                                    @csrf
 
-                                <label class="btn secondary upload-btn">
-                                    <i class='bx bx-image-alt'></i> &nbsp;Actualizar Logo
-                                    <input type="file" name="agency_logo" accept="image/*" onchange="this.form.submit()">
-                                </label>
-                            </form>
+                                    <input type="hidden" name="cropped_logo" id="cropped_agency_logo">
+
+                                    <label class="btn secondary upload-btn">
+                                        <i class='bx bx-image-alt'></i> &nbsp;Actualizar Logo
+                                        <input type="file" name="agency_logo" id="agency_logo_input" accept="image/*"
+                                            onchange="openAgencyLogoCropper(this)">
+                                    </label>
+                                </form>
+
+                                <form action="{{ route('office.deleteLogo') }}" method="POST"
+                                    class="delete-agency-logo-form">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit" class="btn secondary upload-btn" title="Eliminar logo"
+                                        @if (!$agencyData->agency_logo) disabled @endif>
+                                        <i class='bx bx-trash'></i> &nbsp;Eliminar
+                                    </button>
+                                </form>
+                            </div>
                         </div>
 
                         {{-- Código de Agencia heredado (solo lectura) --}}
@@ -85,7 +105,8 @@
 
                         <div class="agency-row">
                             <label>Nombre Oficina</label>
-                            <input type="text" name="agency_name" value="{{ $agencyData->agency_name ?? '' }}" required>
+                            <input type="text" name="agency_name" value="{{ $agencyData->agency_name ?? '' }}"
+                                required>
                         </div>
 
                         <div class="agency-row">
@@ -95,12 +116,14 @@
 
                         <div class="agency-row">
                             <label>Dirección Oficina</label>
-                            <input type="text" name="agency_address" value="{{ $agencyData->agency_address ?? '' }}">
+                            <input type="text" name="agency_address"
+                                value="{{ $agencyData->agency_address ?? '' }}">
                         </div>
 
                         <div class="agency-row">
                             <label>Correo Oficina</label>
-                            <input type="email" name="agency_email" value="{{ $agencyData->agency_email ?? '' }}" required>
+                            <input type="email" name="agency_email" value="{{ $agencyData->agency_email ?? '' }}"
+                                required>
                         </div>
 
 
@@ -110,122 +133,140 @@
 
                 <div class="container">
 
-                <div class="office-topbar">
-                    <button id="btn-open-overlay" class="btn primary"
-                        @if (auth('sub')->check()) disabled title="No tienes permisos para agregar usuarios."
+                    <div class="office-topbar">
+                        <button id="btn-open-overlay" class="btn primary"
+                            @if (auth('sub')->check()) disabled title="No tienes permisos para agregar usuarios."
                         @elseif ($isUserLimitReached)
                             disabled title="Límite de usuarios alcanzado para este plan" @endif>
-                        <i class='bx bx-user-plus'></i> Agregar Usuario
-                    </button>
+                            <i class='bx bx-user-plus'></i> Agregar Usuario
+                        </button>
 
-                </div>
+                    </div>
 
-                <div class="office-table-wrapper">
-                    <table class="office-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre de Usuario</th>
-                                <th>Nombre</th>
-                                <th>Correo</th>
-                                <th>Tipo</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($members as $member)
+                    <div class="office-table-wrapper">
+                        <table class="office-table">
+                            <thead>
                                 <tr>
-                                    <td><b>{{ $member->username }}</b></td>
-                                    <td>{{ $member->name }}</td>
-                                    <td>{{ $member->email }}</td>
-                                    <td>{{ $member->tipo }}</td>
-                                    <td>
-                                        @if ($member->tipo === 'Usuario')
-                                            @if (auth('web')->check())
-                                                <!-- Usuario principal SÍ puede eliminar -->
-                                                <form method="POST"
-                                                    action="{{ route('office.delete', ['id' => $member->id]) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn-delete" type="submit">
+                                    <th>Nombre de Usuario</th>
+                                    <th>Nombre</th>
+                                    <th>Correo</th>
+                                    <th>Tipo</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($members as $member)
+                                    <tr>
+                                        <td>
+                                            <div class="user-session-info">
+                                                <div class="user-session-name">
+                                                    <span
+                                                        class="session-dot {{ $member->is_online ? 'online' : 'offline' }}"
+                                                        title="{{ $member->is_online ? 'Sesión activa' : 'Sesión inactiva' }}"></span>
+
+                                                    <b>{{ $member->username }}</b>
+                                                </div>
+
+                                                <div class="last-seen-text">
+                                                    {{ $member->last_seen_text }}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ $member->name }}</td>
+                                        <td>{{ $member->email }}</td>
+                                        <td>{{ $member->tipo }}</td>
+                                        <td>
+                                            @if ($member->tipo === 'Usuario')
+                                                @if (auth('web')->check())
+                                                    <!-- Usuario principal SÍ puede eliminar -->
+                                                    <form method="POST"
+                                                        action="{{ route('office.delete', ['id' => $member->id]) }}"
+                                                        class="delete-subuser-form"
+                                                        data-subuser-name="{{ $member->name ?: $member->username }}">
+                                                        @csrf
+                                                        @method('DELETE')
+
+                                                        <button class="btn-delete" type="submit"
+                                                            title="Eliminar sub user">
+                                                            <i class='bx bx-trash'></i>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <!-- Sub User NO puede eliminar -->
+                                                    <button class="btn-delete" disabled
+                                                        title="Los sub users no pueden eliminar usuarios.">
                                                         <i class='bx bx-trash'></i>
                                                     </button>
-                                                </form>
+                                                @endif
                                             @else
-                                                <!-- Sub User NO puede eliminar -->
-                                                <button class="btn-delete" disabled
-                                                    title="Los sub users no pueden eliminar usuarios.">
-                                                    <i class='bx bx-trash'></i>
-                                                </button>
+                                                <span class="admin-lock"><i class='bx bx-lock'></i></span>
                                             @endif
-                                        @else
-                                            <span class="admin-lock"><i class='bx bx-lock'></i></span>
-                                        @endif
 
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Overlay para registrar Sub-User -->
-                <div id="overlay-subuser">
-                    <div class="overlay-content">
-                        
-                        <h2>Registrar Usuario</h2>
-
-                        <form method="POST" action="{{ route('office.store') }}" class="card">
-                            @csrf
-
-                            <div class="form-row">
-                                <label>Username</label>
-                                <input type="text" name="username" autocomplete="one-time-code" required>
-                            </div>
-
-                            <div class="form-row">
-                                <label>Nombre</label>
-                                <input type="text" name="name" autocomplete="one-time-code" required>
-                            </div>
-
-                            <div class="form-row">
-                                <label>Email</label>
-                                <input type="email" name="email" autocomplete="one-time-code" required>
-                            </div>
-
-                            <div class="form-row">
-                                <label>Password</label>
-                                <input type="password" name="password" autocomplete="one-time-code" required>
-                            </div>
-
-                            @isset($agency)
-                                <div class="form-row">
-                                    <label>Agency</label>
-                                    <input type="text" value="{{ $agency }}" disabled>
-                                </div>
-                            @endisset
-
-                            @isset($twilioNumber)
-                                <div class="form-row">
-                                    <label>Twilio From</label>
-                                    <input type="text" value="{{ $twilioNumber }}" disabled />
-                                </div>
-                            @endisset
-
-                            <div class="overlay-actions">
-                                <button type="submit" class="btn primary">Registrar</button>
-                                <div id="close-overlay">Cancelar</div>
-                               
-                            </div>
-                        </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
+
+                    <!-- Overlay para registrar Sub-User -->
+                    <div id="overlay-subuser">
+                        <div class="overlay-content">
+
+                            <h2>Registrar Usuario</h2>
+
+                            <form method="POST" action="{{ route('office.store') }}" class="card">
+                                @csrf
+
+                                <div class="form-row">
+                                    <label>Username</label>
+                                    <input type="text" name="username" autocomplete="one-time-code" required>
+                                </div>
+
+                                <div class="form-row">
+                                    <label>Nombre</label>
+                                    <input type="text" name="name" autocomplete="one-time-code" required>
+                                </div>
+
+                                <div class="form-row">
+                                    <label>Email</label>
+                                    <input type="email" name="email" autocomplete="one-time-code" required>
+                                </div>
+
+                                <div class="form-row">
+                                    <label>Password</label>
+                                    <input type="password" name="password" autocomplete="one-time-code" required>
+                                </div>
+
+                                @isset($agency)
+                                    <div class="form-row">
+                                        <label>Agency</label>
+                                        <input type="text" value="{{ $agency }}" disabled>
+                                    </div>
+                                @endisset
+
+                                @isset($twilioNumber)
+                                    <div class="form-row">
+                                        <label>Twilio From</label>
+                                        <input type="text" value="{{ $twilioNumber }}" disabled />
+                                    </div>
+                                @endisset
+
+                                <div class="overlay-actions">
+                                    <button type="submit" class="btn primary">Registrar</button>
+                                    <div id="close-overlay">Cancelar</div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+
                 </div>
 
-
             </div>
 
-            </div>
 
-            
 
         </section>
     </div>
@@ -391,8 +432,27 @@
 
     <div id="dim-screen"></div>
 
+    <div id="agency-logo-crop-overlay">
+        <div class="agency-logo-crop-content">
+            <h2>Recortar Logo</h2>
 
-    <script src="js/image.js"></script>
+            <div class="agency-logo-crop-preview">
+                <img id="agency-logo-crop-image" src="" alt="Logo Preview">
+            </div>
+
+            <div class="agency-logo-crop-actions">
+                <button type="button" class="btn primary" id="agency-logo-crop-save">
+                    <i class='bx bx-check'></i> Crop & Save
+                </button>
+
+                <button type="button" class="btn secondary upload-btn" id="agency-logo-crop-cancel">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <script src="js/dropdown.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/table.js"></script>
@@ -535,7 +595,173 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('submit', function(e) {
+                const form = e.target.closest('.delete-subuser-form');
 
+                if (!form) return;
+
+                e.preventDefault();
+
+                const subUserName = form.getAttribute('data-subuser-name') || 'este sub user';
+
+                Swal.fire({
+                    title: '¿Eliminar usuario?',
+                    text: `¿Seguro que deseas eliminar a ${subUserName}? Esta acción no se puede deshacer.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('submit', function(e) {
+                const form = e.target.closest('.delete-agency-logo-form');
+
+                if (!form) return;
+
+                e.preventDefault();
+
+                Swal.fire({
+                    title: '¿Eliminar logo?',
+                    text: '¿Seguro que deseas eliminar el logo de la agencia?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        let agencyLogoCropper = null;
+
+        function openAgencyLogoCropper(input) {
+            if (!input.files || !input.files[0]) return;
+
+            const file = input.files[0];
+
+            if (!file.type.startsWith('image/')) {
+                Swal.fire({
+                    title: 'Archivo inválido',
+                    text: 'Selecciona una imagen válida.',
+                    icon: 'error',
+                    confirmButtonText: 'Aceptar'
+                });
+
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const overlay = document.getElementById('agency-logo-crop-overlay');
+                const image = document.getElementById('agency-logo-crop-image');
+
+                image.src = e.target.result;
+                overlay.classList.add('show');
+
+                image.onload = function() {
+                    if (agencyLogoCropper) {
+                        agencyLogoCropper.destroy();
+                        agencyLogoCropper = null;
+                    }
+
+                    agencyLogoCropper = new Cropper(image, {
+                        aspectRatio: 20 / 9,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        responsive: true,
+                        background: false,
+                        movable: true,
+                        zoomable: true,
+                        rotatable: false,
+                        scalable: false
+                    });
+                };
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function closeAgencyLogoCropper() {
+            const overlay = document.getElementById('agency-logo-crop-overlay');
+            const image = document.getElementById('agency-logo-crop-image');
+            const input = document.getElementById('agency_logo_input');
+
+            overlay.classList.remove('show');
+
+            if (agencyLogoCropper) {
+                agencyLogoCropper.destroy();
+                agencyLogoCropper = null;
+            }
+
+            image.src = '';
+
+            if (input) {
+                input.value = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveBtn = document.getElementById('agency-logo-crop-save');
+            const cancelBtn = document.getElementById('agency-logo-crop-cancel');
+            const uploadForm = document.getElementById('agency-logo-upload-form');
+            const croppedInput = document.getElementById('cropped_agency_logo');
+
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', closeAgencyLogoCropper);
+            }
+
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    if (!agencyLogoCropper) return;
+
+                    const canvas = agencyLogoCropper.getCroppedCanvas({
+                        width: 1000,
+                        height: 450,
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high'
+                    });
+
+                    croppedInput.value = canvas.toDataURL('image/png');
+
+                    uploadForm.submit();
+                });
+            }
+
+            const overlay = document.getElementById('agency-logo-crop-overlay');
+
+            if (overlay) {
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) {
+                        closeAgencyLogoCropper();
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
 

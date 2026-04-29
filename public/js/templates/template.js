@@ -350,6 +350,26 @@ function docNameActive() {
         .setAttribute("contenteditable", "false");
 }
 
+function phoneActive() {
+    document
+        .getElementById("dragged-value")
+        .setAttribute("data-icon", "phone");
+    document.getElementById("dragged-value").innerHTML = "DocPhone@";
+    document
+        .getElementById("dragged-value")
+        .setAttribute("contenteditable", "false");
+}
+
+function policyActive() {
+    document
+        .getElementById("dragged-value")
+        .setAttribute("data-icon", "policy");
+    document.getElementById("dragged-value").innerHTML = "DocPolicy@";
+    document
+        .getElementById("dragged-value")
+        .setAttribute("contenteditable", "false");
+}
+
 function textActive() {
     document.getElementById("dragged-value").setAttribute("data-icon", "text");
     document.getElementById("dragged-value").innerHTML = "Add Text";

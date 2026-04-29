@@ -23,7 +23,18 @@ class SigningController extends Controller
             abort(403);
         }
 
-        // ✅ Registrar apertura real de la vista sign
+        // ✅ Si ya fue firmado, mostrar vista de documento ya firmado
+        if ($this->isDocumentAlreadySigned($doc, $urlRow)) {
+            return $this->signedReadyResponse($urlRow, $doc);
+        }
+
+        $templateOverlayJson = DB::table('pdf_overlays')
+            ->where('id', (int) ($doc->template_id ?? 0))
+            ->value('overlay_data');
+
+        $docdtimeOverlay = $this->extractDocDTimeOverlay($templateOverlayJson);
+
+        // ✅ Registrar apertura real solo si aún NO está firmado
         $this->touchSigningOpen($urlRow, $doc);
 
         return view('sign.sign', [
@@ -31,6 +42,7 @@ class SigningController extends Controller
             'docId' => $docId,
             'customerName' => $urlRow->name,
             'docsignOverlay' => json_decode($doc->docsign_overlay ?? 'null', true),
+            'docdtimeOverlay' => $docdtimeOverlay,
         ]);
     }
 
@@ -43,6 +55,11 @@ class SigningController extends Controller
         if (!$doc) abort(404);
 
         if (trim((string) $doc->insured_name) !== trim((string) $urlRow->name)) {
+            abort(403);
+        }
+
+        // ✅ No permitir cargar PDF público de firma si ya fue firmado
+        if ($this->isDocumentAlreadySigned($doc, $urlRow)) {
             abort(403);
         }
 
@@ -76,6 +93,25 @@ class SigningController extends Controller
 
             if (trim((string) $doc->insured_name) !== trim((string) $urlRow->name)) {
                 return response()->json(['ok' => false, 'error' => 'Forbidden'], 403);
+            }
+
+            $alreadySigned =
+                (int) ($doc->signed ?? 0) === 1 ||
+                strtolower(trim((string) ($urlRow->signed ?? 'No'))) === 'yes';
+
+            if ($alreadySigned) {
+                return response()->json([
+                    'ok' => false,
+                    'error' => 'This document has already been signed.',
+                    'redirect_url' => url('/s/' . $short),
+                ], 409);
+            }
+
+            if ($this->isDocumentAlreadySigned($doc, $urlRow)) {
+                return response()->json([
+                    'ok' => false,
+                    'error' => 'This document has already been signed and can no longer be signed again.',
+                ], 409);
             }
 
             $request->validate([
@@ -164,6 +200,7 @@ class SigningController extends Controller
             return response()->json([
                 'ok' => true,
                 'message' => 'PDF firmado guardado y certificado agregado correctamente.',
+                'redirect_url' => url('/s/' . $short),
             ]);
         } catch (\Throwable $e) {
             Log::error('SIGN SAVE ERROR', [
@@ -374,7 +411,7 @@ class SigningController extends Controller
             .sig-label {
                 font-size: 10px;
                 font-weight: 700;
-                color: #555;
+                color: #dddddd;
                 margin-bottom: 6px;
             }
 
@@ -387,6 +424,8 @@ class SigningController extends Controller
                 width: 50%;
                 vertical-align: top;
             }
+
+            
         </style>
     </head>
     <body>
@@ -444,7 +483,6 @@ class SigningController extends Controller
                     </td>
                 </tr>
             </table>
-
             <h3>Holder Agent Information</h3>
             
             <div class="row">Agent Name: ' . e((string) $agentInfo['name']) . '</div>
@@ -454,11 +492,11 @@ class SigningController extends Controller
             <div class="row">Agent City: ' . e((string) $signing->city_agent) . '</div>
             <div class="row">Agent Region: ' . e((string) $signing->agent_region) . '</div>
             <div class="row">Agent IP: ' . e((string) $signing->ip_agent) . '</div>
+            <div class="row">Agent Coordinates: ' . e((string) $signing->coordinates_agent) . '</div>
             <div class="row">Agent Device: ' . e((string) $signing->device_agent) . '</div>
             <div class="row">Agent Operative System: ' . e((string) $signing->os_agent) . '</div>
             <div class="row">Agent Browser: ' . e((string) $signing->browser_agent) . '</div>
-            <div class="row ua">Agent Device Name and Version: ' . e((string) $signing->dName_agent) . '</div>
-            <div class="row">Agent Coordinates: ' . e((string) $signing->coordinates_agent) . '</div>
+            <div class="row ua">Agent Device Name and Version: ' . e((string) $signing->dName_agent) . '</div>           
         </div>
     </body>
     </html>';
@@ -486,6 +524,45 @@ class SigningController extends Controller
         }
 
         $pdf->Output('F', $outputPath);
+    }
+
+    private function extractOverlayByToken(?string $overlayJson, string $token, array $defaults = []): ?array
+    {
+        if (!$overlayJson) {
+            return null;
+        }
+
+        $items = json_decode($overlayJson, true);
+        if (!is_array($items)) {
+            return null;
+        }
+
+        foreach ($items as $item) {
+            $rawText = (string) ($item['text'] ?? '');
+
+            $normalized = preg_replace('/\s+/', '', $rawText);
+            $normalized = str_replace(['{', '}'], '', $normalized);
+
+            if ($normalized === $token) {
+                return [
+                    'page'   => (int) ($item['page'] ?? 1),
+                    'x'      => (float) ($item['x'] ?? 0),
+                    'y'      => (float) ($item['y'] ?? 0),
+                    'width'  => (float) ($item['width'] ?? ($defaults['width'] ?? 160)),
+                    'height' => (float) ($item['height'] ?? ($defaults['height'] ?? 20)),
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    private function extractDocDTimeOverlay(?string $overlayJson): ?array
+    {
+        return $this->extractOverlayByToken($overlayJson, 'DocDTime@', [
+            'width' => 240,
+            'height' => 20,
+        ]);
     }
 
     private function resolveAgentInfo(string $createdBy): array
@@ -582,7 +659,6 @@ class SigningController extends Controller
             abort(404);
         }
 
-        // Validar coincidencia exacta de todo
         if ((int) $doc->id !== $docId) {
             abort(403);
         }
@@ -607,6 +683,17 @@ class SigningController extends Controller
             abort(403);
         }
 
+        // ✅ Si ya fue firmado, mostrar vista de documento ya firmado
+        if ($this->isDocumentAlreadySigned($doc, $urlRow)) {
+            return $this->signedReadyResponse($urlRow, $doc);
+        }
+
+        $templateOverlayJson = DB::table('pdf_overlays')
+            ->where('id', (int) ($doc->template_id ?? 0))
+            ->value('overlay_data');
+
+        $docdtimeOverlay = $this->extractDocDTimeOverlay($templateOverlayJson);
+
         $this->touchSigningOpen($urlRow, $doc);
 
         return view('sign.sign', [
@@ -614,6 +701,22 @@ class SigningController extends Controller
             'docId' => $docId,
             'customerName' => $urlRow->name,
             'docsignOverlay' => json_decode($doc->docsign_overlay ?? 'null', true),
+            'docdtimeOverlay' => $docdtimeOverlay,
+        ]);
+    }
+
+    private function isDocumentAlreadySigned(object $doc, object $urlRow): bool
+    {
+        $docSigned = (int) ($doc->signed ?? 0) === 1;
+        $urlSigned = strtolower(trim((string) ($urlRow->signed ?? ''))) === 'yes';
+
+        return $docSigned || $urlSigned;
+    }
+
+    private function signedReadyResponse(object $urlRow, object $doc)
+    {
+        return response()->view('sign.signed_ready', [
+            'customerName' => $urlRow->name ?? $doc->insured_name ?? 'Customer',
         ]);
     }
 }

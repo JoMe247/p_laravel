@@ -26,9 +26,9 @@ try {
             }
         });
     });
-    
+
 } catch (error) {
-    
+
 }
 
 
@@ -329,4 +329,193 @@ document.addEventListener("DOMContentLoaded", function () {
             nameEl.blur();
         }
     });
+});
+
+// ===============================
+// PROFILE – CUSTOMER VIEW LOG
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+    const openBtn = document.getElementById("view-profile-log-btn");
+    const overlay = document.getElementById("customer-views-overlay");
+    const closeBtn = document.getElementById("customer-views-close");
+    const printBtn = document.getElementById("customer-views-print");
+
+    if (openBtn && overlay) {
+        openBtn.addEventListener("click", function () {
+            overlay.style.display = "flex";
+        });
+    }
+
+    if (closeBtn && overlay) {
+        closeBtn.addEventListener("click", function () {
+            overlay.style.display = "none";
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener("click", function (e) {
+            if (e.target === overlay) {
+                overlay.style.display = "none";
+            }
+        });
+    }
+
+    function openPrintWindowForCustomerViews() {
+        const items = Array.from(document.querySelectorAll("#customer-views-list .customer-view-item"));
+
+        let contentHtml = "";
+
+        if (items.length) {
+            contentHtml = items.map(item => `
+            <div class="print-view-item">
+                ${item.innerHTML}
+            </div>
+        `).join("");
+        } else {
+            contentHtml = `<div class="print-empty">No views found.</div>`;
+        }
+
+        const printWindow = window.open("", "_blank", "width=900,height=700");
+        if (!printWindow) {
+            alert("Pop-up blocked. Please allow pop-ups to print the Customer View Log.");
+            return;
+        }
+
+        printWindow.document.write(`
+        <html>
+        <head>
+            <title>Customer View Log</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 30px;
+                    color: #222;
+                    background: #fff;
+                }
+
+                h1 {
+                    margin: 0 0 20px 0;
+                    font-size: 24px;
+                }
+
+                .print-view-item {
+                    border: 1px solid #ccc;
+                    border-radius: 8px;
+                    padding: 14px 16px;
+                    margin-bottom: 14px;
+                    page-break-inside: avoid;
+                }
+
+                .customer-view-meta {
+                    margin-bottom: 10px;
+                    line-height: 1.6;
+                }
+
+                .customer-view-text {
+                    white-space: pre-wrap;
+                    line-height: 1.6;
+                }
+
+                .print-empty {
+                    font-size: 14px;
+                    color: #666;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Customer View Log</h1>
+            ${contentHtml}
+        </body>
+        </html>
+    `);
+
+        printWindow.document.close();
+        printWindow.focus();
+
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    }
+
+    if (printBtn) {
+        printBtn.addEventListener("click", openPrintWindowForCustomerViews);
+    }
+});
+
+
+
+// ===============================
+// PROFILE – REGISTER VIEW ONLY ON ENTRY, NOT ON RELOAD
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+    const logUrl = document.querySelector('meta[name="customer-view-log-url"]')?.content;
+
+    if (!csrf || !logUrl) return;
+
+    function getNavigationType() {
+        const navEntries = performance.getEntriesByType("navigation");
+        if (navEntries && navEntries.length > 0) {
+            return navEntries[0].type; // navigate | reload | back_forward
+        }
+
+        // fallback navegadores viejos
+        if (performance.navigation) {
+            if (performance.navigation.type === 1) return "reload";
+            if (performance.navigation.type === 2) return "back_forward";
+        }
+
+        return "navigate";
+    }
+
+    const navType = getNavigationType();
+
+    // No registrar si fue recarga manual
+    if (navType === "reload") {
+        return;
+    }
+
+    fetch(logUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrf,
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        body: JSON.stringify({})
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success || !data.entry) return;
+
+            prependCustomerViewLog(data.entry);
+        })
+        .catch(err => {
+            console.error("Error logging customer view:", err);
+        });
+
+    function prependCustomerViewLog(entry) {
+        const list = document.getElementById("customer-views-list");
+        if (!list) return;
+
+        const empty = document.getElementById("customer-view-empty");
+        if (empty) empty.remove();
+
+        const item = document.createElement("div");
+        item.className = "customer-view-item";
+
+        item.innerHTML = `
+            <div class="customer-view-meta">
+                <div><strong>Date:</strong> ${entry.full_date ?? "-"}</div>
+                <div><strong>Note Type:</strong> ${entry.type ?? "CUSTOMER VIEW"}</div>
+                <div><strong>By:</strong> ${entry.by ?? "-"}</div>
+            </div>
+
+            <div class="customer-view-text">
+                ${entry.message ?? ""}
+            </div>
+        `;
+
+        list.prepend(item);
+    }
 });

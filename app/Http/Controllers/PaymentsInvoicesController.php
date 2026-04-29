@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use App\Models\Policy;
 
 class PaymentsInvoicesController extends Controller
 {
@@ -129,7 +130,7 @@ class PaymentsInvoicesController extends Controller
         $invoiceId = $meta->id ?? '';
         $invoiceNumber = $meta->invoice_number ?? ($isNew ? $this->getNextInvoiceNumber($agency) : '');
 
-        $policiesCount = DB::table('policies')
+        /* $policiesCount = DB::table('policies')
             ->where('customer_id', $customerId)
             ->count();
 
@@ -138,10 +139,48 @@ class PaymentsInvoicesController extends Controller
             ->orderBy('id', 'asc')
             ->pluck('pol_number')
             ->filter()
+            ->values();*/
+
+        $policies = Policy::where('customer_id', $customerId)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $policiesCount = $policies->count();
+
+        $policyNumbers = $policies
+            ->pluck('pol_number')
+            ->filter()
             ->values();
+
+        $policyVehiclesMap = $policies
+            ->filter(fn($policy) => !empty($policy->pol_number))
+            ->mapWithKeys(function ($policy) {
+                $vehicles = $this->normalizePolicyVehiclesForInvoice($policy->vehicules ?? []);
+
+                $options = collect($vehicles)
+                    ->values()
+                    ->map(function ($vehicle, $index) {
+                        $label = trim(implode(' ', array_filter([
+                            $vehicle['year'] ?? '',
+                            $vehicle['make'] ?? '',
+                            $vehicle['model'] ?? '',
+                        ])));
+
+                        return [
+                            'key'   => $this->buildPolicyVehicleKeyForInvoice($vehicle, $index),
+                            'label' => $label !== '' ? $label : ('Vehicle ' . ($index + 1)),
+                        ];
+                    })
+                    ->values()
+                    ->all();
+
+                return [(string) $policy->pol_number => $options];
+            })
+            ->all();
 
         $invRows = [];
         $grandTotalSaved = '';
+        $savedDeleteVehicleKey = '';
 
         if ($meta && !empty($meta->inv_prices)) {
             $decoded = json_decode($meta->inv_prices, true);
@@ -178,6 +217,8 @@ class PaymentsInvoicesController extends Controller
             'customer',
             'policiesCount',
             'policyNumbers',
+            'policyVehiclesMap',
+            'savedDeleteVehicleKey',
             'nextPyDate',
             'creationDate',
             'paymentDate',
@@ -345,7 +386,9 @@ class PaymentsInvoicesController extends Controller
         $authUser = \Illuminate\Support\Facades\Auth::guard('web')->user()
             ?? \Illuminate\Support\Facades\Auth::guard('sub')->user();
 
-        if (!$authUser) return response()->json(['ok' => false, 'error' => 'not_auth'], 401);
+        if (!$authUser) {
+            return response()->json(['ok' => false, 'error' => 'not_auth'], 401);
+        }
 
         $agency = $authUser->agency;
 
@@ -353,100 +396,147 @@ class PaymentsInvoicesController extends Controller
         $grandTotal = $request->input('grand_total', '');
         $policyNumber = $request->input('policy_number', '');
         $invoiceIdFromClient = (string) $request->input('invoice_id', '');
+        $selectedDeleteVehicleKey = trim((string) $request->input('selected_delete_vehicle_key', ''));
 
-        if (!is_array($rows)) $rows = [];
-
-        $payload = [
-            'rows' => $rows,
-            'grand_total' => $grandTotal,
-            'saved_at' => now()->format('Y-m-d H:i:s'),
-        ];
-
-        $invoice = null;
-
-        if (!empty($invoiceIdFromClient)) {
-            $invoice = Invoices::where('id', $invoiceIdFromClient)
-                ->where('agency', (string)$agency)
-                ->where('customer_id', (string)$customerId)
-                ->first();
+        if (!is_array($rows)) {
+            $rows = [];
         }
 
-        if (!$invoice) {
-            $invoice = new Invoices();
-            $invoice->id = (string) \Illuminate\Support\Str::uuid();
-            $invoice->agency = (string)$agency;
-            $invoice->customer_id = (string)$customerId;
-            $invoice->created_at = now()->format('Y-m-d H:i:s');
-            $invoice->created_by_name = $authUser->name ?? '';
+        $hasDeleteVehicleRow = collect($rows)->contains(function ($row) {
+            $item = strtolower(trim((string) ($row['item'] ?? '')));
+            return $item === 'delete vehicle';
+        });
+
+        if ($hasDeleteVehicleRow && empty($selectedDeleteVehicleKey)) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'missing_delete_vehicle',
+            ], 422);
         }
 
-        if (empty($invoice->invoice_number)) {
-            $invoice->invoice_number = $this->getNextInvoiceNumber($agency);
+        DB::beginTransaction();
+
+        try {
+            $payload = [
+                'rows' => $rows,
+                'grand_total' => $grandTotal,
+                'saved_at' => now()->format('Y-m-d H:i:s'),
+                'delete_vehicle_key' => $hasDeleteVehicleRow ? $selectedDeleteVehicleKey : null,
+            ];
+
+            $invoice = null;
+
+            if (!empty($invoiceIdFromClient)) {
+                $invoice = Invoices::where('id', $invoiceIdFromClient)
+                    ->where('agency', (string)$agency)
+                    ->where('customer_id', (string)$customerId)
+                    ->first();
+            }
+
+            if (!$invoice) {
+                $invoice = new Invoices();
+                $invoice->id = (string) \Illuminate\Support\Str::uuid();
+                $invoice->agency = (string)$agency;
+                $invoice->customer_id = (string)$customerId;
+                $invoice->created_at = now()->format('Y-m-d H:i:s');
+                $invoice->created_by_name = $authUser->name ?? '';
+            }
+
+            if (empty($invoice->invoice_number)) {
+                $invoice->invoice_number = $this->getNextInvoiceNumber($agency);
+            }
+
+            $feeSplit = $request->input('fee_split', '0');
+            $premiumSplit = $request->input('premium_split', '0');
+
+            $invoice->policy_number = $policyNumber ?: null;
+
+            $invoice->next_py_date = $request->input('next_py_date') ?: null;
+            $invoice->creation_date = $request->input('creation_date') ?: null;
+            $invoice->payment_date = $request->input('payment_date') ?: null;
+            $invoice->payment_method = $request->input('payment_method') ?: null;
+
+            $invoice->fee = $request->input('fee') ?: null;
+            $invoice->fee_split = $feeSplit;
+
+            if ($feeSplit === '1') {
+                $invoice->fee_payment1_method = $request->input('fee_payment1_method') ?: null;
+                $invoice->fee_payment1_value = $request->input('fee_payment1_value') ?: null;
+                $invoice->fee_payment2_method = $request->input('fee_payment2_method') ?: null;
+                $invoice->fee_payment2_value = $request->input('fee_payment2_value') ?: null;
+            } else {
+                $invoice->fee_payment1_method = null;
+                $invoice->fee_payment1_value = null;
+                $invoice->fee_payment2_method = null;
+                $invoice->fee_payment2_value = null;
+            }
+
+            $invoice->premium = $request->input('premium') ?: null;
+            $invoice->premium_split = $premiumSplit;
+
+            if ($premiumSplit === '1') {
+                $invoice->premium_payment1_method = $request->input('premium_payment1_method') ?: null;
+                $invoice->premium_payment1_value = $request->input('premium_payment1_value') ?: null;
+                $invoice->premium_payment2_method = $request->input('premium_payment2_method') ?: null;
+                $invoice->premium_payment2_value = $request->input('premium_payment2_value') ?: null;
+            } else {
+                $invoice->premium_payment1_method = null;
+                $invoice->premium_payment1_value = null;
+                $invoice->premium_payment2_method = null;
+                $invoice->premium_payment2_value = null;
+            }
+
+            $invoice->inv_prices = json_encode($payload, JSON_UNESCAPED_UNICODE);
+            $invoice->updated_at = now()->format('Y-m-d H:i:s');
+            $invoice->save();
+
+            if (!empty($policyNumber)) {
+                $lastPayment = is_numeric($grandTotal)
+                    ? (float) $grandTotal
+                    : (float) preg_replace('/[^\d.\-]/', '', (string) $grandTotal);
+
+                DB::table('policies')
+                    ->where('customer_id', (string)$customerId)
+                    ->where('pol_number', (string)$policyNumber)
+                    ->update([
+                        'last_payment' => $lastPayment,
+                    ]);
+
+                if ($hasDeleteVehicleRow) {
+                    $deleted = $this->deleteVehicleFromPolicyAndAppendLog(
+                        (string) $customerId,
+                        (string) $policyNumber,
+                        $selectedDeleteVehicleKey
+                    );
+
+                    if (!$deleted) {
+                        DB::rollBack();
+
+                        return response()->json([
+                            'ok' => false,
+                            'error' => 'vehicle_not_found',
+                        ], 422);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'ok' => true,
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'policy_number' => $invoice->policy_number,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+
+            return response()->json([
+                'ok' => false,
+                'error' => 'save_failed',
+            ], 500);
         }
-
-        $feeSplit = $request->input('fee_split', '0');
-        $premiumSplit = $request->input('premium_split', '0');
-
-        $invoice->policy_number = $policyNumber ?: null;
-
-        $invoice->next_py_date = $request->input('next_py_date') ?: null;
-        $invoice->creation_date = $request->input('creation_date') ?: null;
-        $invoice->payment_date = $request->input('payment_date') ?: null;
-        $invoice->payment_method = $request->input('payment_method') ?: null;
-
-        $invoice->fee = $request->input('fee') ?: null;
-        $invoice->fee_split = $feeSplit;
-
-        if ($feeSplit === '1') {
-            $invoice->fee_payment1_method = $request->input('fee_payment1_method') ?: null;
-            $invoice->fee_payment1_value = $request->input('fee_payment1_value') ?: null;
-            $invoice->fee_payment2_method = $request->input('fee_payment2_method') ?: null;
-            $invoice->fee_payment2_value = $request->input('fee_payment2_value') ?: null;
-        } else {
-            $invoice->fee_payment1_method = null;
-            $invoice->fee_payment1_value = null;
-            $invoice->fee_payment2_method = null;
-            $invoice->fee_payment2_value = null;
-        }
-
-        $invoice->premium = $request->input('premium') ?: null;
-        $invoice->premium_split = $premiumSplit;
-
-        if ($premiumSplit === '1') {
-            $invoice->premium_payment1_method = $request->input('premium_payment1_method') ?: null;
-            $invoice->premium_payment1_value = $request->input('premium_payment1_value') ?: null;
-            $invoice->premium_payment2_method = $request->input('premium_payment2_method') ?: null;
-            $invoice->premium_payment2_value = $request->input('premium_payment2_value') ?: null;
-        } else {
-            $invoice->premium_payment1_method = null;
-            $invoice->premium_payment1_value = null;
-            $invoice->premium_payment2_method = null;
-            $invoice->premium_payment2_value = null;
-        }
-
-        $invoice->inv_prices = json_encode($payload, JSON_UNESCAPED_UNICODE);
-        $invoice->updated_at = now()->format('Y-m-d H:i:s');
-        $invoice->save();
-
-        if (!empty($policyNumber)) {
-            $lastPayment = is_numeric($grandTotal)
-                ? (float) $grandTotal
-                : (float) preg_replace('/[^\d.\-]/', '', (string) $grandTotal);
-
-            DB::table('policies')
-                ->where('customer_id', (string)$customerId)
-                ->where('pol_number', (string)$policyNumber)
-                ->update([
-                    'last_payment' => $lastPayment,
-                ]);
-        }
-
-        return response()->json([
-            'ok' => true,
-            'invoice_id' => $invoice->id,
-            'invoice_number' => $invoice->invoice_number,
-            'policy_number' => $invoice->policy_number,
-        ]);
     }
 
 
@@ -682,5 +772,208 @@ class PaymentsInvoicesController extends Controller
         }
 
         return view('general_payments', compact('invoices', 'search', 'perPageInput'));
+    }
+
+    protected function normalizePolicyVehiclesForInvoice($vehicles): array
+    {
+        if (is_string($vehicles)) {
+            $decoded = json_decode($vehicles, true);
+            $vehicles = is_array($decoded) ? $decoded : [];
+        }
+
+        if (!is_array($vehicles)) {
+            return [];
+        }
+
+        return collect($vehicles)
+            ->map(function ($vehicle) {
+                $vehicle = is_array($vehicle) ? $vehicle : [];
+
+                return [
+                    'vin'   => trim((string) ($vehicle['vin'] ?? '')),
+                    'year'  => trim((string) ($vehicle['year'] ?? '')),
+                    'make'  => trim((string) ($vehicle['make'] ?? '')),
+                    'model' => trim((string) ($vehicle['model'] ?? '')),
+                ];
+            })
+            ->filter(function ($vehicle) {
+                return $vehicle['vin'] !== ''
+                    || $vehicle['year'] !== ''
+                    || $vehicle['make'] !== ''
+                    || $vehicle['model'] !== '';
+            })
+            ->values()
+            ->all();
+    }
+
+    protected function buildPolicyVehicleKeyForInvoice(array $vehicle, int $index): string
+    {
+        $vin = strtolower(trim((string) ($vehicle['vin'] ?? '')));
+
+        if ($vin !== '') {
+            return 'vin:' . $vin;
+        }
+
+        return 'idx:' . $index;
+    }
+
+    protected function makePolicySnapshotForInvoice(Policy $policy): array
+    {
+        return [
+            'pol_carrier'      => $policy->pol_carrier ?? '',
+            'pol_number'       => $policy->pol_number ?? '',
+            'pol_url'          => $policy->pol_url ?? '',
+            'pol_expiration'   => $policy->pol_expiration ?? '',
+            'pol_eff_date'     => $policy->pol_eff_date ?? '',
+            'pol_added_date'   => $policy->pol_added_date ?? '',
+            'pol_due_day'      => $policy->pol_due_day ?? '',
+            'pol_status'       => $policy->pol_status ?? 'Active',
+            'pol_agent_record' => $policy->pol_agent_record ?? '',
+            'vehicules'        => $this->normalizePolicyVehiclesForInvoice($policy->vehicules ?? []),
+        ];
+    }
+
+    protected function buildPolicyLogEntryFromInvoice(
+        array $snapshot,
+        string $action,
+        array $changedFields = [],
+        string $vehicleChangesText = '-'
+    ): array {
+        $actor = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        $changedBy = 'System';
+        if ($actor) {
+            $changedBy = $actor->name ?? $actor->username ?? $actor->email ?? 'System';
+        }
+
+        return [
+            'created_at'           => now()->format('Y-m-d H:i:s'),
+            'action'               => $action,
+            'changed_by'           => $changedBy,
+            'changed_fields'       => array_values($changedFields),
+            'vehicle_changes_text' => $vehicleChangesText,
+            'snapshot'             => $snapshot,
+        ];
+    }
+
+    protected function formatSingleVehicleForInvoiceLog(array $vehicle, ?int $number = null): string
+    {
+        $prefix = $number ? "Vehicle {$number}" : "Vehicle";
+
+        return $prefix . " (VIN: " . ($vehicle['vin'] ?: '-') .
+            " / Year: " . ($vehicle['year'] ?: '-') .
+            " / Make: " . ($vehicle['make'] ?: '-') .
+            " / Model: " . ($vehicle['model'] ?: '-') . ")";
+    }
+
+    protected function buildVehicleChangeSummaryFromInvoice(array $beforeVehicles = [], array $afterVehicles = []): string
+    {
+        $beforeVehicles = $this->normalizePolicyVehiclesForInvoice($beforeVehicles);
+        $afterVehicles = $this->normalizePolicyVehiclesForInvoice($afterVehicles);
+
+        $beforeMap = [];
+        foreach (array_values($beforeVehicles) as $index => $vehicle) {
+            $beforeMap[$this->buildPolicyVehicleKeyForInvoice($vehicle, $index)] = $vehicle;
+        }
+
+        $afterMap = [];
+        foreach (array_values($afterVehicles) as $index => $vehicle) {
+            $afterMap[$this->buildPolicyVehicleKeyForInvoice($vehicle, $index)] = $vehicle;
+        }
+
+        $added = [];
+        $removed = [];
+        $updated = [];
+
+        foreach ($beforeMap as $key => $vehicle) {
+            if (!array_key_exists($key, $afterMap)) {
+                $removed[] = $this->formatSingleVehicleForInvoiceLog($vehicle);
+                continue;
+            }
+
+            if ($beforeMap[$key] != $afterMap[$key]) {
+                $updated[] = 'From ' .
+                    $this->formatSingleVehicleForInvoiceLog($beforeMap[$key]) .
+                    ' to ' .
+                    $this->formatSingleVehicleForInvoiceLog($afterMap[$key]);
+            }
+        }
+
+        foreach ($afterMap as $key => $vehicle) {
+            if (!array_key_exists($key, $beforeMap)) {
+                $added[] = $this->formatSingleVehicleForInvoiceLog($vehicle);
+            }
+        }
+
+        $parts = [];
+
+        if (!empty($added)) {
+            $parts[] = 'Added: ' . implode('; ', $added);
+        }
+
+        if (!empty($removed)) {
+            $parts[] = 'Removed: ' . implode('; ', $removed);
+        }
+
+        if (!empty($updated)) {
+            $parts[] = 'Updated: ' . implode('; ', $updated);
+        }
+
+        return !empty($parts) ? implode(' | ', $parts) : '-';
+    }
+
+    protected function deleteVehicleFromPolicyAndAppendLog(string $customerId, string $policyNumber, string $selectedDeleteVehicleKey): bool
+    {
+        if ($selectedDeleteVehicleKey === '') {
+            return false;
+        }
+
+        $policy = Policy::where('customer_id', $customerId)
+            ->where('pol_number', $policyNumber)
+            ->first();
+
+        if (!$policy) {
+            return false;
+        }
+
+        $beforeSnapshot = $this->makePolicySnapshotForInvoice($policy);
+        $beforeVehicles = $beforeSnapshot['vehicules'] ?? [];
+
+        $afterVehicles = [];
+        $deleted = false;
+
+        foreach (array_values($beforeVehicles) as $index => $vehicle) {
+            $currentKey = $this->buildPolicyVehicleKeyForInvoice($vehicle, $index);
+
+            if ($currentKey === $selectedDeleteVehicleKey && !$deleted) {
+                $deleted = true;
+                continue;
+            }
+
+            $afterVehicles[] = $vehicle;
+        }
+
+        if (!$deleted) {
+            return false;
+        }
+
+        $policy->vehicules = array_values($afterVehicles);
+        $policy->save();
+        $policy->refresh();
+
+        $afterSnapshot = $this->makePolicySnapshotForInvoice($policy);
+
+        $currentLog = is_array($policy->policy_log) ? $policy->policy_log : [];
+        $currentLog[] = $this->buildPolicyLogEntryFromInvoice(
+            $afterSnapshot,
+            'updated',
+            ['vehicules'],
+            $this->buildVehicleChangeSummaryFromInvoice($beforeVehicles, $afterVehicles)
+        );
+
+        $policy->policy_log = array_values($currentLog);
+        $policy->save();
+
+        return true;
     }
 }

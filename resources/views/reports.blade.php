@@ -11,6 +11,7 @@
     <meta name="reports-items-url" content="{{ route('reports.items-data') }}">
     <meta name="reports-policies-url" content="{{ route('reports.policies-data') }}">
     <meta name="reports-messages-url" content="{{ route('reports.messages-data') }}">
+    <meta name="reports-documents-url" content="{{ route('reports.documents-data') }}">
     <title>Reports</title>
 
     <link rel="icon" href="img/favicon.png">
@@ -159,13 +160,44 @@
                                             <tr>
                                                 <th>Date</th>
                                                 <th>Phone Sent</th>
+                                                <th>Phone Received</th>
                                                 <th>ID</th>
                                                 <th>SID</th>
                                             </tr>
                                         </thead>
                                         <tbody id="smsLifetimeTableBody">
                                             <tr>
-                                                <td colspan="4" class="empty-row">Loading...</td>
+                                                <td colspan="5" class="empty-row">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="documentsReportsWrap" class="messages-reports-wrap" style="display:none;">
+                            <div class="messages-report-block">
+                                <div class="messages-report-head">
+                                    <h3>Documents Month</h3>
+
+                                    <div class="messages-report-controls">
+                                        <label for="documentsMonthYearSelect">Year</label>
+                                        <select id="documentsMonthYearSelect"
+                                            class="table-select messages-year-select"></select>
+                                    </div>
+                                </div>
+
+                                <div class="report-table-scroll messages-table-scroll">
+                                    <table class="reports-table messages-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Month</th>
+                                                <th>Documents Created</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="documentsMonthTableBody">
+                                            <tr>
+                                                <td colspan="2" class="empty-row">Loading...</td>
                                             </tr>
                                         </tbody>
                                     </table>

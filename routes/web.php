@@ -63,8 +63,14 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
     // =======================
     // 🏠 Dashboard y módulos protegidos
     // =======================
-    Route::middleware('auth.multi')->group(function () {
+    Route::middleware('auth.multi', 'last.seen')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+
+        Route::post('/dashboard/customers/export-csv', [DashboardController::class, 'exportSelectedCustomersCsv'])
+            ->name('dashboard.customers.exportCsv');
+
+        Route::delete('/dashboard/customers/delete-selected', [DashboardController::class, 'deleteSelectedCustomers'])
+            ->name('dashboard.customers.deleteSelected');
 
         // WhatsApp
         Route::get('/whatsapp', [WhatsappController::class, 'showInbox'])->name('whatsapp.inbox');
@@ -99,6 +105,8 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/customers', [CustomersController::class, 'index'])->name('customers.index');
         Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store'); // guarda los 4 campos (AJAX)
         Route::get('/profile/{id}', [CustomersController::class, 'profile'])->name('profile');
+        Route::post('/customers/{id}/profile-view-log', [CustomersController::class, 'logProfileView'])
+            ->name('customers.profile.view.log');
         Route::put('/profile/{id}', [CustomersController::class, 'update'])->name('customers.update'); // guarda el resto del perfil
         Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMultiple']);
         Route::post('/customers/{id}/upload-photo', [CustomersController::class, 'uploadPhoto'])
@@ -127,6 +135,8 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         // Logo upload
 
         Route::post('/office/upload-logo', [OfficeController::class, 'uploadLogo'])->name('office.uploadLogo');
+        Route::delete('/office/logo/delete', [OfficeController::class, 'deleteLogo'])
+            ->name('office.deleteLogo');
 
         Route::get('/account', [AccountController::class, 'show'])
             ->name('account.show');
@@ -199,6 +209,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])
             ->name('policies.destroy');
 
+
         // =======================
         // 📁 Customer Files
         // =======================
@@ -223,16 +234,15 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
             [App\Http\Controllers\RemindersController::class, 'destroy']
         )->name('reminders.destroy');
 
-        // Documents
-        Route::get('/profile/{customerId}/documents', [DocumentsController::class, 'customerDocuments'])
+        // Documents en profile
+
+        Route::get('/esign/{customerId}', [DocumentsController::class, 'customerDocuments'])
             ->name('profile.documents');
 
-        Route::delete('/profile/{customerId}/documents/delete-selected', [DocumentsController::class, 'deleteSelectedCustomerDocuments'])
+        Route::delete('/documents_c/{customerId}/delete-selected', [DocumentsController::class, 'deleteSelectedCustomerDocuments'])
             ->name('profile.documents.deleteSelected');
 
         // Schedules
-
-
 
         Route::get('/schedules', [SchedulesController::class, 'index'])->name('schedules.index');
 
@@ -253,7 +263,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
 
         // invoices
 
-        Route::get('/customers/{customerId}/payments', [PaymentsInvoicesController::class, 'payments'])
+        Route::get('/payments/{customerId}', [PaymentsInvoicesController::class, 'payments'])
             ->name('payments');
 
         Route::get('/customers/{customerId}/invoices', [PaymentsInvoicesController::class, 'invoices'])
@@ -394,7 +404,10 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::get('/reports/items-data', [ReportsController::class, 'itemsData'])->name('reports.items-data');
         Route::get('/reports/policies-data', [ReportsController::class, 'policiesData'])->name('reports.policies-data');
         Route::get('/reports/messages-data', [ReportsController::class, 'messagesData'])->name('reports.messages-data');
-        
+        Route::get('/reports/documents-data', [ReportsController::class, 'documentsData'])->name('reports.documents-data');
+
+
+        Route::get('/office', [OfficeController::class, 'index'])->name('office');
     });
 });
 

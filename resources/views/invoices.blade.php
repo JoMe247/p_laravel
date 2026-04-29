@@ -42,11 +42,17 @@
             <div class="invoices-page">
 
                 <!-- HEADER -->
-                <!-- <div class="logo-box">
-                    <img class="agency-logo"
-                        src="{{ $agencyInfo->agency_logo ? asset('storage/' . $agencyInfo->agency_logo) : asset('img/default-logo.png') }}"
-                        alt="Logo Agencia">
-                </div> -->
+                <div class="logo-box">
+                    @if (!empty($agencyInfo->agency_logo))
+                        <img class="agency-logo" src="{{ asset('storage/' . $agencyInfo->agency_logo) }}"
+                            alt="Logo Agencia">
+                    @else
+                        <div class="agency-name-logo"
+                            style="font-size:22px;font-weight:bold;text-align:center;line-height:1.2;color:#333;text-transform:uppercase;">
+                            {{ $agencyInfo->agency_name ?: 'Agency' }}
+                        </div>
+                    @endif
+                </div>
 
 
                 <!-- Agency info (arriba derecha) -->
@@ -78,25 +84,40 @@
                         <div class="customer-line"><i class='bx bx-envelope' ></i> {{ $customer->Email1 ?? '' }}</div>
                         <div class="customer-line"><i class='bx bx-map' ></i> {{ $customer->Address ?? '' }}</div>
                         <div class="customer-line">
-                            {{ $customer->City ?? '' }}{{ $customer->State ?? '' ? ', ' . $customer->State : '' }} {{ $customer->ZIP_Code ?? ''}}
+                            {{ $customer->City ?? '' }}{{ $customer->State ?? '' ? ', ' . $customer->State : '' }}
                         </div>
-                    </div>
 
-                    <div class="policy-select-wrap">
-                        <label class="policy-label">Policy</label>
+                        <div class="policy-select-wrap">
+                            <label class="policy-label">Policy</label>
 
-                        <select id="policySelect" class="policy-select">
-                            @if (($policyNumbers ?? collect())->count() === 0)
-                                <option value="">No policies</option>
-                            @else
-                                @foreach ($policyNumbers as $p)
-                                    <option value="{{ $p }}">{{ $p }}</option>
-                                @endforeach
-                            @endif
-                        </select>
+                            <select id="policySelect" class="policy-select">
+                                @if (($policyNumbers ?? collect())->count() === 0)
+                                    <option value="">No policies</option>
+                                @else
+                                    @foreach ($policyNumbers as $p)
+                                        <option value="{{ $p }}">{{ $p }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
 
-                        <div class="policy-small">
-                            Total Policies: <span>{{ $policiesCount }}</span>
+                            <div id="deleteVehicleWrap" style="display:none; margin-top:10px;">
+                                <label class="policy-label">Vehicle to Delete</label>
+
+                                <select id="deleteVehicleSelect" class="policy-select" style="border:1px solid red;">
+                                    <option value="">Select vehicle</option>
+                                </select>
+                            </div>
+
+                            <div class="policy-small">
+                                Total Policies: <span>{{ $policiesCount }}</span>
+                            </div>
+
+                            <div class="invoice-number-wrap">
+                                <label class="invoice-number-label">Invoice #</label>
+                                <input id="invoiceNumberBox" class="invoice-number-box" type="text"
+                                    value="{{ $invoiceNumber ?? '' }}" placeholder="INV-0000" readonly>
+                            </div>
+
                         </div>
 
                         <button id="btnSaveTable" class="btn-save-table">Save</button>
@@ -360,7 +381,7 @@
 
                                         <td>
                                             <input class="cell-input qty-input" type="text"
-                                                value="{{ $r['amount'] ?? '' }}">
+                                                value="{{ isset($r['amount']) && $r['amount'] !== '' ? $r['amount'] : '1' }}">
                                         </td>
 
                                         <td>
@@ -562,6 +583,11 @@
     <script src="{{ asset('js/help.js') }}"></script>
     <script src="{{ asset('js/profile.js') }}"></script>
     <script src="{{ asset('js/policies.js') }}"></script>
+
+    <script>
+        window.policyVehiclesMap = @json($policyVehiclesMap ?? []);
+        window.savedDeleteVehicleKey = @json($savedDeleteVehicleKey ?? '');
+    </script>
     <script src="{{ asset('js/invoices.js') }}"></script>
 </body>
 

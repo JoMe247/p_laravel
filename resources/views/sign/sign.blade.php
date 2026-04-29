@@ -85,10 +85,33 @@
     <script>
         const pdfUrlBase = @json(route('sign.pdf', ['short' => $short, 'docId' => $docId]));
         const docsignOverlay = @json($docsignOverlay);
+        const docdtimeOverlay = @json($docdtimeOverlay);
 
         function buildPdfUrl() {
             return pdfUrlBase + '?t=' + Date.now();
         }
+
+        function getSignedDateTimeLabel() {
+            const now = new Date();
+
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, "0");
+            const dd = String(now.getDate()).padStart(2, "0");
+
+            const hh = String(now.getHours()).padStart(2, "0");
+            const mi = String(now.getMinutes()).padStart(2, "0");
+            const ss = String(now.getSeconds()).padStart(2, "0");
+
+            const signedDate = `${yyyy}-${mm}-${dd}`;
+            const signedTime = `${hh}:${mi}:${ss}`;
+
+            return {
+                signedDate,
+                signedTime,
+                label: `Signature ${signedDate} at ${signedTime}`,
+            };
+        }
+
         let pdfDoc = null;
         let currentPageNumber = 1;
         let totalPages = 0;
@@ -520,7 +543,7 @@
                 const pageHeight = page.getHeight();
 
                 // Área base de DocSign@
-                // ESTA sigue viniendo del controller y sirve como referencia del centro
+                // Área base de DocSign@
                 const baseX = Number(docsignOverlay.x || 0);
                 const baseY = Number(docsignOverlay.y || 0);
                 const baseWidth = Number(docsignOverlay.width || 160);
@@ -529,32 +552,17 @@
                 // Convertir Y desde canvas (arriba-izquierda) a PDF (abajo-izquierda)
                 const basePdfY = pageHeight - baseY - baseHeight;
 
-                // ✅ 5) Rectángulo blanco independiente para tapar DocSign@
-                // Este ya NO controla el tamaño de la firma
-                const clearPadX = 12;
-                const clearPadY = 8;
+                // Tamaño solo de la firma
+                const signatureScale = 1.00;
 
-                page.drawRectangle({
-                    x: baseX - clearPadX,
-                    y: basePdfY - clearPadY,
-                    width: baseWidth + (clearPadX * 2),
-                    height: baseHeight + (clearPadY * 2),
-                    color: PDFLib.rgb(1, 1, 1),
-                    borderWidth: 0,
-                });
-
-                // ✅ 6) Tamaño SOLO de la firma
-                // Cambia este valor para hacerla más grande o más chica
-                const signatureScale = 1.20;
-
-                // Caja objetivo de firma, centrada sobre DocSign@
+                // Caja objetivo centrada en la posición de DocSign@
                 const targetBoxWidth = baseWidth * signatureScale;
                 const targetBoxHeight = baseHeight * signatureScale;
 
                 const targetBoxX = baseX - ((targetBoxWidth - baseWidth) / 2);
                 const targetBoxY = basePdfY - ((targetBoxHeight - baseHeight) / 2);
 
-                // Mantener proporción real de la firma recortada
+                // Mantener proporción real del PNG
                 const imgAspect = pngImage.width / pngImage.height;
 
                 let drawWidth = targetBoxWidth;
@@ -565,17 +573,38 @@
                     drawWidth = drawHeight * imgAspect;
                 }
 
-                // Centrar la firma dentro de la caja objetivo
+                // Centrar la firma dentro de la caja
                 const drawX = targetBoxX + ((targetBoxWidth - drawWidth) / 2);
                 const drawY = targetBoxY + ((targetBoxHeight - drawHeight) / 2);
 
-                // Dibujar firma
+                // Dibujar solo la firma PNG, sin fondo blanco
                 page.drawImage(pngImage, {
                     x: drawX,
                     y: drawY,
                     width: drawWidth,
-                    height: drawHeight
+                    height: drawHeight,
                 });
+
+                // Dibujar fecha/hora de firma en la posición de DocDTime@
+                if (docdtimeOverlay && docdtimeOverlay.page) {
+                    const signedMeta = getSignedDateTimeLabel();
+
+                    const dtTargetPageIndex = Math.max(0, (Number(docdtimeOverlay.page || 1) - 1));
+                    const dtPage = pages[dtTargetPageIndex];
+
+                    if (dtPage) {
+                        const dtPageHeight = dtPage.getHeight();
+                        const dtX = Number(docdtimeOverlay.x || 0);
+                        const dtY = Number(docdtimeOverlay.y || 0);
+
+                        dtPage.drawText(signedMeta.label, {
+                            x: dtX,
+                            y: dtPageHeight - dtY - 20,
+                            size: 12,
+                            color: PDFLib.rgb(221 / 255, 221 / 255, 221 / 255),
+                        });
+                    }
+                }
 
                 // 6) Generar PDF final
                 const signedPdfBytes = await pdfDocLib.save({
@@ -622,15 +651,17 @@
 
                 document.getElementById('ok-loading').style.display = 'none';
 
+                if (res.status === 409 && data.redirect_url) {
+                    window.location.replace(data.redirect_url);
+                    return;
+                }
+
                 if (!res.ok || !data.ok) {
                     alert(data.detail || data.error || 'Error guardando PDF firmado');
                     return;
                 }
 
-                alert('PDF firmado guardado correctamente.');
-
-                pdfDoc = null;
-                await loadPdfPreview();
+                window.location.replace(data.redirect_url || @json(url('/s/' . $short)));
 
             } catch (e) {
                 document.getElementById('ok-loading').style.display = 'none';

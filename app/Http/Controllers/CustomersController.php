@@ -73,23 +73,27 @@ class CustomersController extends Controller
     // muestra profile con los datos completos
     public function profile($id)
     {
-
         $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
-        // En caso de no estar autenticado, redirige al login
         if (!$user) {
             return redirect()->route('login');
         }
+
         $customer = Customer::findOrFail($id);
 
-        // Cargar notas
+        $customerViews = collect($customer->views ?? [])
+            ->sortByDesc(function ($item) {
+                return strtotime($item['created_at'] ?? '') ?: 0;
+            })
+            ->values()
+            ->all();
+
         $notes = CustomerNote::where('customer_id', $id)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('profile', compact('customer', 'notes'));
+        return view('profile', compact('customer', 'notes', 'customerViews'));
     }
-
     // guarda todos los campos desde profile form (POST)
     public function update(Request $request, $id)
     {
@@ -227,16 +231,43 @@ class CustomersController extends Controller
         return response()->json(['success' => true]);
     }
 
-    private function getPolicyCountsByCustomerId(array $customerIds): array
+    public function logProfileView($id)
     {
-        if (empty($customerIds)) return [];
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
-        // OJO: cambia 'policies' si tu tabla se llama diferente
-        return DB::table('policies')
-            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
-            ->selectRaw('customer_id, COUNT(*) as total')
-            ->groupBy('customer_id')
-            ->pluck('total', 'customer_id')
-            ->toArray();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $customer = Customer::findOrFail($id);
+
+        $viewerName = $user->name ?? $user->username ?? $user->email ?? 'System';
+        $now = now();
+
+        $views = is_array($customer->views) ? $customer->views : [];
+
+        $entry = [
+            'type'       => 'CUSTOMER VIEW',
+            'by'         => $viewerName,
+            'created_at' => $now->format('Y-m-d H:i:s'),
+            'message'    => 'Customer View By ' . $viewerName . ' on ' . $now->format('m/d/y h:i:s A'),
+        ];
+
+        $views[] = $entry;
+
+        $customer->views = array_values($views);
+        $customer->save();
+
+        return response()->json([
+            'success' => true,
+            'entry' => [
+                'type'       => $entry['type'],
+                'by'         => $entry['by'],
+                'created_at' => $entry['created_at'],
+                'full_date'  => $now->format('l, F j, Y h:i:s A'),
+                'short_date' => $now->format('m/d/y h:i:s A'),
+                'message'    => $entry['message'],
+            ]
+        ]);
     }
 }

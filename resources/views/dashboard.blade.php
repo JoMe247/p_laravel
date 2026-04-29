@@ -7,6 +7,8 @@
     <title>Dashboard</title>
     <link rel="icon" href="img/favicon.png">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="dashboard-export-customers-url" content="{{ route('dashboard.customers.exportCsv') }}">
+    <meta name="dashboard-delete-customers-url" content="{{ route('dashboard.customers.deleteSelected') }}">
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/variables.css">
@@ -69,43 +71,37 @@
                 <div class="quick-item">
                     <p>Total Customers</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bxs-user-badge'></i><text>1234</text>
+                    <i class='bx bxs-user-badge'></i><text>{{ $totalCustomers }}</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Commercial Insurance</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-buildings'></i><text>12</text>
+                    <i class='bx bx-buildings'></i><text>{{ $commercialCount }}</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Personal Insurance</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-building-house'></i><text>38</text>
+                    <i class='bx bx-building-house'></i><text>{{ $personalCount }}</text>
                 </div>
 
                 <div class="quick-item">
-                    <p>To Do List</p>
+                    <p>Tasks</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-list-check'></i><text>8</text>
+                    <i class='bx bx-list-check'></i><text>{{ $tasksCount }}</text>
                 </div>
 
                 <div class="quick-item">
                     <p>Today Messages</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-mail-send'></i><text>12</text>
+                    <i class='bx bx-mail-send'></i><text>{{ $todayMessagesCount }}</text>
                 </div>
 
                 <div class="quick-item" id="open-reminders">
                     <p>Reminders</p>
                     <i class='bx bxs-right-arrow' type='arrow-color'></i>
                     <i class='bx bxs-megaphone'></i><text>{{ $remindersCount }}</text>
-                </div>
-
-                <div class="quick-item" data="last-quick-item">
-                    <p>Comments</p>
-                    <i class='bx bxs-right-arrow' type='arrow-color'></i>
-                    <i class='bx bx-message-rounded-dots'></i><text style="font-size: 1.6em">20 New</text>
                 </div>
 
             </div>
@@ -125,30 +121,18 @@
                             </div>
 
                             <ul id="table-drop" class="options" style="display: none;">
-                                <li class="option">
-                                    <i class='bx bxs-message' style="color: rgb(80, 80, 80);"></i>
-                                    <span class="option-text" style="color: rgb(80, 80, 80);">SMS</span>
-                                </li>
-                                <li class="option">
-                                    <i class='bx bx-envelope' style="color: rgb(80, 80, 80);"></i>
-                                    <span class="option-text" style="color: rgb(80, 80, 80);">Email</span>
-                                </li>
-                                <li class="option">
+
+
+                                <li class="option" data-action="export_csv">
                                     <i class='bx bx-table' style="color: rgb(80, 80, 80);"></i>
                                     <span class="option-text" style="color: rgb(80, 80, 80);">Export CSV</span>
                                 </li>
-                                <li class="option">
-                                    <i class='bx bx-edit' style="color: rgb(80, 80, 80);"></i>
-                                    <span class="option-text" style="color: rgb(80, 80, 80);">Edit</span>
-                                </li>
-                                <li class="option">
+
+                                <li class="option" data-action="delete">
                                     <i class='bx bxs-trash' style="color: rgb(179, 57, 57);"></i>
                                     <span class="option-text" style="color: rgb(179, 57, 57);">Delete</span>
                                 </li>
-                                <li class="option">
-                                    <i class='bx bx-x-circle' style="color: #c2c2c2;"></i>
-                                    <span class="option-text" style="color: #c2c2c2;">Close</span>
-                                </li>
+
                             </ul>
                         </div>
 
@@ -180,7 +164,7 @@
                                     <tr>
                                         <td>
                                             <input type="checkbox" name="customer_select"
-                                                onchange="checkboxActive()">
+                                                value="{{ $c->ID }}" onchange="checkboxActive()">
                                         </td>
 
                                         <td class="customer-id"><a
@@ -190,7 +174,20 @@
                                         <td class="customer-policy"><a
                                                 href="{{ url('policies/' . $c->ID) }}">{{ $policyCounts[$c->ID] ?? 0 }}</a>
                                         </td>
-                                        <td class="customer-address">{{ $c->Address }}</td>
+                                        <td class="customer-address">
+                                            @if (!empty($c->Address))
+                                                @php
+                                                    $mapsAddress = preg_replace('/\s+/', '+', trim($c->Address));
+                                                @endphp
+
+                                                <a href="https://www.google.com/maps/search/{{ $mapsAddress }}"
+                                                    target="_blank">
+                                                    {{ $c->Address }}
+                                                </a>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
                                         <td class="customer-phone">{{ $c->Phone }}</td>
                                         <td class="customer-dob">{{ $c->DOB }}</td>
 
@@ -215,7 +212,8 @@
                                                 </p>
 
                                                 <p><i class='bx bx-file'></i>
-                                                    <a href="#">Invoice</a>
+                                                    <a
+                                                        href="{{ route('invoices', ['customerId' => $c->ID, 'new' => 1]) }}">Invoice</a>
                                                 </p>
                                             </label>
                                         </td>
@@ -266,7 +264,7 @@
 
                     <div id="recent-2">
 
-                        <h3 class="sub-title">Weekly Income</h3>
+                        <h3 class="sub-title" data-i18n="dashboard.weekly_income">Weekly Income</h3>
 
                         <div class="graph-container">
                             <div class="graph-levels-container">
@@ -278,43 +276,12 @@
                             </div>
 
                             <div class="graph-bars-containers">
-
-                                <label class="graph-bar-height" style="height: 100%;">
-                                    <p class="graph-bar-text">Monday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 25%;">
-                                    <p class="graph-bar-text">Thursday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 50%;">
-                                    <p class="graph-bar-text">Wednesday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 90%;">
-                                    <p class="graph-bar-text">Tuesday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 10%;">
-                                    <p class="graph-bar-text">Friday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 62%;">
-                                    <p class="graph-bar-text">Saturday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-                                <label class="graph-bar-height" style="height: 100%;">
-                                    <p class="graph-bar-text">Sunday</p>
-                                    <e class="graph-amount">$500</e>
-                                </label>
-
-
+                                @foreach ($weeklyIncome as $day)
+                                    <label class="graph-bar-height" style="height: {{ $day['percentage'] }}%;">
+                                        <p class="graph-bar-text">{{ $day['day'] }}</p>
+                                        <e class="graph-amount">${{ number_format($day['amount'], 2) }}</e>
+                                    </label>
+                                @endforeach
                             </div>
                         </div>
 
@@ -362,16 +329,16 @@
             <i class='bx bx-x' id="close-settings" onclick="closeSettings();"></i>
             <h2>Settings</h2>
 
-            <div class="settings-sub-title">Language</div>
+            <div class="settings-sub-title" data-i18n="settings.language">Language</div>
 
             <div id="language-settings">
                 <p>
-                    <input type="radio" id="test1" name="radio-group" checked>
-                    <label for="test1">English</label>
+                    <input type="radio" id="lang-en" name="app-language" value="en">
+                    <label for="lang-en" data-i18n="language.english">English</label>
                 </p>
                 <p>
-                    <input type="radio" id="test2" name="radio-group">
-                    <label for="test2">Spanish</label>
+                    <input type="radio" id="lang-es" name="app-language" value="es">
+                    <label for="lang-es" data-i18n="language.spanish">Spanish</label>
                 </p>
             </div>
 
@@ -385,7 +352,7 @@
                 <p>Dark Mode</p>
             </div> -->
 
-            <div class='settings-sub-title'>Action Color</div>
+            <div class='settings-sub-title' data-i18n="settings.action_color">Action Color</div>
 
             <div class="color-pick-container" id="action-color-container">
                 <div class="color-pick" color="default" onclick="selectActionColor(this)"></div>
@@ -404,12 +371,13 @@
                 <div class="color-pick" color="white" onclick="selectActionColor(this)"></div>
             </div>
 
-            <div class="settings-sub-title" style="margin-top:50px;">Side Panel Background</div>
+            <div class="settings-sub-title" style="margin-top:50px;" data-i18n="settings.side_panel_background">Side
+                Panel Background</div>
 
             <div id="background-side-settings">
                 <div id="background-color-option-container">
 
-                    <div class='settings-sub-title'>Select Color</div>
+                    <div class='settings-sub-title' data-i18n="settings.select_color">Select Color</div>
 
                     <div class="color-pick-container">
                         <div class="color-pick" color="default" onclick="selectColor(this)"></div>
@@ -433,7 +401,8 @@
 
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
-                        <div class='settings-sub-title'>Select Image</div>
+                        <div class='settings-sub-title' data-i18n="settings.select_image">Select Image</div>
+
                         <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
                                 alt=""></label>
                         <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
@@ -465,7 +434,8 @@
 
                 <div id="sideBlur-slider">
                     <div class="slider-wrap" id="side-image-slider">
-                        <label for="frac" style="display:block;margin-bottom:8px;">Side Image Blur</label>
+                        <label for="frac" style="display:block;margin-bottom:8px;"
+                            data-i18n="settings.side_image_blur">Side Image Blur</label>
                         <div class="row">
                             <input id="frac" type="range" min="0" max="1" step="0.01"
                                 value="0.00" />
@@ -476,7 +446,8 @@
                     </div>
 
                     <div class="slider-wrap" id="home-image-slider">
-                        <label for="frac2" style="display:block;margin-bottom:8px;">Home Image Blur</label>
+                        <label for="frac2" style="display:block;margin-bottom:8px;"
+                            data-i18n="settings.home_image_blur">Home Image Blur</label>
                         <div class="row">
                             <input id="frac2" type="range" min="0" max="1" step="0.01"
                                 value="0.00" />

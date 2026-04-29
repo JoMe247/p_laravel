@@ -1,3 +1,88 @@
+const DELETE_VEHICLE_ITEMS = ["delete vehicle"];
+
+function normalizeInvoiceItemValue(value) {
+    return String(value || "").trim().toLowerCase();
+}
+
+function isDeleteVehicleItem(value) {
+    return normalizeInvoiceItemValue(value) === "delete vehicle";
+}
+
+function hasDeleteVehicleRow() {
+    return Array.from(
+        document.querySelectorAll("#invoiceTbody .item-input"),
+    ).some((input) => isDeleteVehicleItem(input.value));
+}
+
+function populateDeleteVehicleSelect(preserveValue = true) {
+    const policySelect = document.getElementById("policySelect");
+    const deleteVehicleSelect = document.getElementById("deleteVehicleSelect");
+
+    if (!policySelect || !deleteVehicleSelect) return;
+
+    const policyNumber = policySelect.value || "";
+    const map = window.policyVehiclesMap || {};
+    const vehicles = Array.isArray(map[policyNumber]) ? map[policyNumber] : [];
+
+    const currentValue = preserveValue
+        ? deleteVehicleSelect.value || window.savedDeleteVehicleKey || ""
+        : "";
+
+    deleteVehicleSelect.innerHTML = "";
+
+    if (!vehicles.length) {
+        deleteVehicleSelect.disabled = true;
+        deleteVehicleSelect.innerHTML =
+            '<option value="">No vehicles available</option>';
+        return;
+    }
+
+    deleteVehicleSelect.disabled = false;
+    deleteVehicleSelect.innerHTML =
+        '<option value="">Select vehicle</option>';
+
+    vehicles.forEach((vehicle) => {
+        const option = document.createElement("option");
+        option.value = vehicle.key || "";
+        option.textContent = vehicle.label || "Vehicle";
+        deleteVehicleSelect.appendChild(option);
+    });
+
+    if (
+        currentValue &&
+        Array.from(deleteVehicleSelect.options).some(
+            (option) => option.value === currentValue,
+        )
+    ) {
+        deleteVehicleSelect.value = currentValue;
+    }
+}
+
+function toggleDeleteVehicleSelect() {
+    const wrap = document.getElementById("deleteVehicleWrap");
+    const select = document.getElementById("deleteVehicleSelect");
+
+    if (!wrap || !select) return;
+
+    const shouldShow = hasDeleteVehicleRow();
+
+    wrap.style.display = shouldShow ? "block" : "none";
+    select.required = shouldShow;
+
+    if (shouldShow) {
+        populateDeleteVehicleSelect(true);
+    } else {
+        select.required = false;
+        select.disabled = false;
+        select.value = "";
+        select.innerHTML = '<option value="">Select vehicle</option>';
+    }
+
+    if (typeof validateInvoiceForm === "function") {
+        validateInvoiceForm();
+    }
+}
+
 (function () {
     const tbody = document.getElementById("invoiceTbody");
     const btnAddRow = document.getElementById("btnAddRow");
@@ -21,6 +106,9 @@
         const rows = tbody.querySelectorAll("tr.row-item");
         rows.forEach((tr) => {
             const qtyInput = tr.querySelector(".qty-input");
+            if (qtyInput && !String(qtyInput.value || "").trim()) {
+                qtyInput.value = "1";
+            }
             const priceInput = tr.querySelector(".price-input");
             const rowTotalEl = tr.querySelector(".row-total");
 
@@ -56,6 +144,7 @@
             trashBtn.addEventListener("click", () => {
                 tr.remove(); // elimina de la tabla visual
                 recalc(); // recalcula total general
+                toggleDeleteVehicleSelect(); // muestra/oculta select de vehículo a eliminar
             });
         }
 
@@ -73,10 +162,18 @@
 
             // al cargar (por si ya trae valor desde BD)
             toggleArrow();
+            toggleDeleteVehicleSelect();
 
             // al escribir o seleccionar
-            itemInput.addEventListener("input", toggleArrow);
-            itemInput.addEventListener("change", toggleArrow);
+            itemInput.addEventListener("input", () => {
+                toggleArrow();
+                toggleDeleteVehicleSelect();
+            });
+
+            itemInput.addEventListener("change", () => {
+                toggleArrow();
+                toggleDeleteVehicleSelect();
+            });
         }
 
         // ===== DATALIST: mostrar TODAS las opciones al enfocar =====
@@ -154,7 +251,7 @@
   </div>
 </td>
 
-      <td><input class="cell-input qty-input" type="text" value=""></td>
+      <td><input class="cell-input qty-input" type="text" value="1"></td>
       <td><input class="cell-input price-input" type="text" value=""></td>
       <td class="row-total">$0.00</td>
       <td class="row-actions"><button type="button" class="btn-trash" title="Delete row"><i class="bx bx-trash"></i></button></td>
@@ -176,6 +273,22 @@
 
     // bind existentes
     tbody.querySelectorAll("tr.row-item").forEach(bindRow);
+
+    const policySelectGlobal = document.getElementById("policySelect");
+    const deleteVehicleSelectGlobal = document.getElementById("deleteVehicleSelect");
+
+    if (policySelectGlobal) {
+        policySelectGlobal.addEventListener("change", () => {
+            populateDeleteVehicleSelect(false);
+            toggleDeleteVehicleSelect();
+        });
+    }
+
+    if (deleteVehicleSelectGlobal) {
+        deleteVehicleSelectGlobal.addEventListener("change", validateInvoiceForm);
+    }
+
+    toggleDeleteVehicleSelect();
 
     recalc();
 
@@ -288,7 +401,7 @@
                         ? premiumP2Value.value
                         : "",
                 }),
-            }).catch(() => {});
+            }).catch(() => { });
         }
 
         // toggles
@@ -360,7 +473,7 @@ function saveDates() {
             creation_date: creationInput ? creationInput.value : "",
             payment_date: paymentInput ? paymentInput.value : "",
         }),
-    }).catch(() => {});
+    }).catch(() => { });
 }
 
 if (nextPaymentInput) nextPaymentInput.addEventListener("change", saveDates);
@@ -409,6 +522,12 @@ function saveTableJson() {
     const policySelect = document.getElementById("policySelect");
     const policyNumber = policySelect ? policySelect.value : "";
 
+    const deleteVehicleSelect = document.getElementById("deleteVehicleSelect");
+    const selectedDeleteVehicleKey =
+        hasDeleteVehicleRow() && deleteVehicleSelect
+            ? deleteVehicleSelect.value
+            : "";
+
     const invoiceIdMeta = document.querySelector('meta[name="invoice-id"]');
     const currentInvoiceId = getCurrentInvoiceId();
 
@@ -441,6 +560,7 @@ function saveTableJson() {
             rows,
             grand_total: grandTotal,
             policy_number: policyNumber,
+            selected_delete_vehicle_key: selectedDeleteVehicleKey,
 
             next_py_date: nextPaymentInput ? nextPaymentInput.value : "",
             creation_date: creationInput ? creationInput.value : "",
@@ -468,9 +588,14 @@ function saveTableJson() {
             premium_payment2_value: premiumP2Value ? premiumP2Value.value : "",
         }),
     })
-        .then((res) => {
-            if (!res.ok) throw new Error("Save failed");
-            return res.json();
+        .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw data;
+            }
+
+            return data;
         })
         .then((data) => {
             if (data && data.invoice_number && invoiceBox) {
@@ -500,10 +625,19 @@ function saveTableJson() {
         })
         .catch((err) => {
             console.error(err);
+
+            let message = "Could not save invoice information";
+
+            if (err?.error === "missing_delete_vehicle") {
+                message = "Select the vehicle you want to delete.";
+            } else if (err?.error === "vehicle_not_found") {
+                message = "The selected vehicle was not found in the selected policy.";
+            }
+
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: "Could not save invoice information",
+                text: message,
             });
         });
 }
@@ -515,30 +649,30 @@ function validateInvoiceForm() {
 
     let valid = true;
 
-    /* Policy seleccionada */
     const policySelect = document.getElementById("policySelect");
     if (!policySelect || !policySelect.value) {
         valid = false;
     }
 
-    /*  Al menos una fila válida */
     const rows = document.querySelectorAll("#invoiceTbody tr.row-item");
     if (!rows.length) {
         valid = false;
     } else {
         let hasValidRow = false;
+
         rows.forEach((tr) => {
             const item = tr.querySelector(".item-input")?.value.trim();
             const qty = tr.querySelector(".qty-input")?.value.trim();
             const price = tr.querySelector(".price-input")?.value.trim();
+
             if (item && qty && price) {
                 hasValidRow = true;
             }
         });
+
         if (!hasValidRow) valid = false;
     }
 
-    /* Validar REQUIRED visibles */
     document
         .querySelectorAll("input[required], select[required]")
         .forEach((el) => {
@@ -547,10 +681,21 @@ function validateInvoiceForm() {
             }
         });
 
+    const deleteVehicleSelect = document.getElementById("deleteVehicleSelect");
+    if (
+        deleteVehicleSelect &&
+        deleteVehicleSelect.required &&
+        !deleteVehicleSelect.value
+    ) {
+        valid = false;
+    }
+
     btnSave.disabled = !valid;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    validateInvoiceForm();
     document.addEventListener("input", validateInvoiceForm);
     document.addEventListener("change", validateInvoiceForm);
     document.addEventListener("click", validateInvoiceForm);
-}
-
-document.addEventListener("DOMContentLoaded", validateInvoiceForm);
+});

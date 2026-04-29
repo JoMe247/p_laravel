@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         estimates: getMetaContent("reports-estimates-url"),
         customers: getMetaContent("reports-customers-url"),
         policies: getMetaContent("reports-policies-url"),
+        documents: getMetaContent("reports-documents-url"),
         messages: getMetaContent("reports-messages-url"),
     };
 
@@ -100,6 +101,15 @@ document.addEventListener("DOMContentLoaded", () => {
             filePrefix: "reports_policies",
             columns: [],
         },
+        documents: {
+            title: "Documents Report",
+            url: reportUrls.documents,
+            usePeriodFilter: true,
+            useAgentFilter: true,
+            includeTotals: false,
+            filePrefix: "reports_documents",
+            columns: [],
+        },
     };
 
     const reportTabs = document.querySelectorAll(".report-tab");
@@ -124,6 +134,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const reportTableWrap = document.getElementById("reportTableWrap");
     const reportsTableHead = document.getElementById("reportsTableHead");
     const reportsTableBody = document.getElementById("reportsTableBody");
+    const documentsReportsWrap = document.getElementById(
+        "documentsReportsWrap",
+    );
+    const documentsMonthYearSelect = document.getElementById(
+        "documentsMonthYearSelect",
+    );
+    const documentsMonthTableBody = document.getElementById(
+        "documentsMonthTableBody",
+    );
 
     const messagesReportsWrap = document.getElementById("messagesReportsWrap");
     const smsMonthYearSelect = document.getElementById("smsMonthYearSelect");
@@ -147,6 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeColumns = [...(reportConfigs.invoices.columns || [])];
     let smsMonthRowsState = [];
     let smsLifetimeRowsState = [];
+    let documentsMonthRowsState = [];
 
     function getActiveConfig() {
         return reportConfigs[activeReport] || null;
@@ -209,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (smsLifetimeTableBody) {
             smsLifetimeTableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-row">No records found.</td>
+                    <td colspan="5" class="empty-row">No records found.</td>
                 </tr>
             `;
         }
@@ -264,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!Array.isArray(rows) || !rows.length) {
             smsLifetimeTableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="empty-row">No records found.</td>
+                    <td colspan="5" class="empty-row">No records found.</td>
                 </tr>
             `;
             return;
@@ -276,8 +296,43 @@ document.addEventListener("DOMContentLoaded", () => {
                 <tr>
                     <td>${escapeHtml(row.date_sent ?? "")}</td>
                     <td>${escapeHtml(row.phone_sent ?? "")}</td>
+                    <td>${escapeHtml(row.phone_received ?? "")}</td>
                     <td>${escapeHtml(row.sent_by_id ?? "")}</td>
                     <td>${escapeHtml(row.sid ?? "")}</td>
+                </tr>
+            `,
+            )
+            .join("");
+    }
+
+    function setDocumentsMonthEmptyState() {
+        if (documentsMonthTableBody) {
+            documentsMonthTableBody.innerHTML = `
+            <tr>
+                <td colspan="2" class="empty-row">No records found.</td>
+            </tr>
+        `;
+        }
+    }
+
+    function renderDocumentsMonthRows(rows) {
+        if (!documentsMonthTableBody) return;
+
+        if (!Array.isArray(rows) || !rows.length) {
+            documentsMonthTableBody.innerHTML = `
+            <tr>
+                <td colspan="2" class="empty-row">No records found.</td>
+            </tr>
+        `;
+            return;
+        }
+
+        documentsMonthTableBody.innerHTML = rows
+            .map(
+                (row) => `
+                <tr>
+                    <td>${escapeHtml(row.month_label ?? "")}</td>
+                    <td>${escapeHtml(row.documents_count ?? 0)}</td>
                 </tr>
             `,
             )
@@ -623,6 +678,10 @@ document.addEventListener("DOMContentLoaded", () => {
         showLoading();
         buildTableHead();
 
+        if (activeReport === "documents") {
+            setDocumentsMonthEmptyState();
+        }
+
         const params = new URLSearchParams();
 
         if (config.usePeriodFilter) {
@@ -638,11 +697,31 @@ document.addEventListener("DOMContentLoaded", () => {
             params.append("agent", agentFilter.value || "");
         }
 
+        if (activeReport === "documents" && documentsMonthYearSelect?.value) {
+            params.append("docs_month_year", documentsMonthYearSelect.value);
+        }
+
         fetch(`${config.url}?${params.toString()}`, {
             headers: { "X-Requested-With": "XMLHttpRequest" },
         })
             .then((response) => response.json())
             .then((data) => {
+                if (activeReport === "documents") {
+                    renderYearOptions(
+                        documentsMonthYearSelect,
+                        data.documents_month_years || [],
+                        data.selected_documents_month_year || "",
+                    );
+
+                    documentsMonthRowsState = Array.isArray(
+                        data.documents_month_rows,
+                    )
+                        ? data.documents_month_rows
+                        : [];
+
+                    renderDocumentsMonthRows(documentsMonthRowsState);
+                }
+
                 activeColumns =
                     Array.isArray(data.columns) && data.columns.length
                         ? data.columns
@@ -656,6 +735,12 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .catch((error) => {
                 console.error(error);
+
+                if (activeReport === "documents") {
+                    documentsMonthRowsState = [];
+                    setDocumentsMonthEmptyState();
+                }
+
                 allRows = [];
                 setEmptyState("Error loading report.");
                 hideLoading();
@@ -782,6 +867,7 @@ document.addEventListener("DOMContentLoaded", () => {
             [
                 csvEscape("Date"),
                 csvEscape("Phone Sent"),
+                csvEscape("Phone Received"),
                 csvEscape("ID"),
                 csvEscape("SID"),
             ].join(","),
@@ -792,6 +878,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 [
                     csvEscape(row.date_sent ?? ""),
                     csvEscape(row.phone_sent ?? ""),
+                    csvEscape(row.phone_received ?? ""),
                     csvEscape(row.sent_by_id ?? ""),
                     csvEscape(row.sid ?? ""),
                 ].join(","),
@@ -960,6 +1047,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 messagesReportsWrap.style.display = "flex";
             }
 
+            if (documentsReportsWrap) {
+                documentsReportsWrap.style.display = "none";
+            }
+
             loadMessagesData();
             return;
         }
@@ -1007,6 +1098,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 messagesReportsWrap.style.display = "none";
             }
 
+            if (documentsReportsWrap) {
+                documentsReportsWrap.style.display =
+                    report === "documents" ? "flex" : "none";
+            }
+
             loadActiveReportData();
             return;
         }
@@ -1018,6 +1114,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (messagesReportsWrap) {
             messagesReportsWrap.style.display = "none";
+        }
+
+        if (documentsReportsWrap) {
+            documentsReportsWrap.style.display = "none";
         }
 
         if (agentFilterBlock) {
@@ -1109,6 +1209,13 @@ document.addEventListener("DOMContentLoaded", () => {
         smsLifetimeYearSelect.addEventListener("change", () => {
             if (activeReport !== "messages") return;
             loadMessagesData();
+        });
+    }
+
+    if (documentsMonthYearSelect) {
+        documentsMonthYearSelect.addEventListener("change", () => {
+            if (activeReport !== "documents") return;
+            loadActiveReportData();
         });
     }
 

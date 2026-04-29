@@ -1,3 +1,135 @@
+const LANG_STORAGE_KEY = "appLanguage";
+
+const translations = {
+    en: {
+        "settings.title": "Settings",
+        "settings.language": "Language",
+        "language.english": "English",
+        "language.spanish": "Spanish",
+        "settings.action_color": "Action Color",
+        "settings.side_panel_background": "Side Panel Background",
+        "settings.select_color": "Select Color",
+        "settings.select_image": "Select Image",
+        "settings.side_image_blur": "Side Image Blur",
+        "settings.home_image_blur": "Home Image Blur",
+
+        // ejemplos para otras partes de la página
+        "menu.dashboard": "Dashboard",
+        "menu.customers": "Customers",
+        "menu.policies": "Policies",
+        "menu.documents": "Documents",
+        "menu.reports": "Reports",
+        "common.search": "Search...",
+        "common.save": "Save",
+        "common.cancel": "Cancel",
+        "common.delete": "Delete",
+        "common.edit": "Edit",
+        "common.view": "View"
+    },
+    es: {
+        "settings.title": "Configuración",
+        "settings.language": "Idioma",
+        "language.english": "Inglés",
+        "language.spanish": "Español",
+        "settings.action_color": "Color de acción",
+        "settings.side_panel_background": "Fondo del panel lateral",
+        "settings.select_color": "Seleccionar color",
+        "settings.select_image": "Seleccionar imagen",
+        "settings.side_image_blur": "Desenfoque de imagen lateral",
+        "settings.home_image_blur": "Desenfoque de imagen principal",
+
+        // ejemplos para otras partes de la página
+        "menu.dashboard": "Panel",
+        "menu.customers": "Clientes",
+        "menu.policies": "Pólizas",
+        "menu.documents": "Documentos",
+        "menu.reports": "Reportes",
+        "common.search": "Buscar...",
+        "common.save": "Guardar",
+        "common.cancel": "Cancelar",
+        "common.delete": "Eliminar",
+        "common.edit": "Editar",
+        "common.view": "Ver"
+    }
+};
+
+function getSavedLanguage() {
+    return localStorage.getItem(LANG_STORAGE_KEY) || "en";
+}
+
+function syncLanguageRadios(lang) {
+    const enRadio = document.getElementById("lang-en");
+    const esRadio = document.getElementById("lang-es");
+
+    if (enRadio) enRadio.checked = lang === "en";
+    if (esRadio) esRadio.checked = lang === "es";
+}
+
+function applyLanguage(lang) {
+    const finalLang = translations[lang] ? lang : "en";
+    const dict = translations[finalLang];
+
+    localStorage.setItem(LANG_STORAGE_KEY, finalLang);
+    document.documentElement.setAttribute("lang", finalLang);
+
+    // texto normal
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key] !== undefined) {
+            el.textContent = dict[key];
+        }
+    });
+
+    // placeholder
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (dict[key] !== undefined) {
+            el.setAttribute("placeholder", dict[key]);
+        }
+    });
+
+    // title
+    document.querySelectorAll("[data-i18n-title]").forEach(el => {
+        const key = el.getAttribute("data-i18n-title");
+        if (dict[key] !== undefined) {
+            el.setAttribute("title", dict[key]);
+        }
+    });
+
+    // value de botones/input
+    document.querySelectorAll("[data-i18n-value]").forEach(el => {
+        const key = el.getAttribute("data-i18n-value");
+        if (dict[key] !== undefined) {
+            el.value = dict[key];
+        }
+    });
+
+    syncLanguageRadios(finalLang);
+}
+
+function initLanguageSettings() {
+    const enRadio = document.getElementById("lang-en");
+    const esRadio = document.getElementById("lang-es");
+
+    const savedLang = getSavedLanguage();
+    applyLanguage(savedLang);
+
+    if (enRadio) {
+        enRadio.addEventListener("change", function () {
+            if (this.checked) applyLanguage("en");
+        });
+    }
+
+    if (esRadio) {
+        esRadio.addEventListener("change", function () {
+            if (this.checked) applyLanguage("es");
+        });
+    }
+}
+
+// para poder reutilizarla desde otras vistas o contenido dinámico
+window.applyLanguage = applyLanguage;
+
 function openSettings(){
     dimScreenOn();
     document.getElementById("settings-menu").style.display = "flex";
@@ -255,6 +387,8 @@ try {
         // Init
         update(slider2.value);
     })();
+
+    initLanguageSettings();
     
 } catch (error) {
     

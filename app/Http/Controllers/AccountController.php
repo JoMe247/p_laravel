@@ -99,9 +99,18 @@ class AccountController extends Controller
         //      CONTADOR DOCS
         // ============================
 
-        // Aún no tienes tabla de documentos, lo dejamos en 0 por ahora
-        $monthlyDocCount = 0;
-        $isDocsOverLimit = false;
+        $monthlyDocCount = DB::table('documents as d')
+            ->join('customers as c', 'c.ID', '=', 'd.id_customer')
+            ->where('c.agency', $agencyCode)
+            ->whereBetween('d.date', [
+                $startMonth->toDateString(),
+                $endMonth->toDateString(),
+            ])
+            ->count();
+
+        $isDocsOverLimit = $docLimit > 0
+            ? $monthlyDocCount >= $docLimit
+            : false;
 
         // ============================
         //      CONTADOR USERS

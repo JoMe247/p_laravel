@@ -10,6 +10,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
     <meta name="customer-id" content="{{ $customer->ID }}">
+    <meta name="customer-view-log-url" content="{{ route('customers.profile.view.log', $customer->ID) }}">
 
 
     <!-- Archivos CSS -->
@@ -97,7 +98,8 @@
 
                         <div class="notes-header">
                             <h3>Notes</h3>
-                            <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i> &nbsp;Add
+                            <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i>
+                                &nbsp;Add
                                 Note</button>
                         </div>
 
@@ -160,11 +162,17 @@
 
 
                         <div class="profile-photo-section">
-                            <div class="profile-photo-frame">
-                                <img id="customer-photo"
-                                    onclick="window.open('{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}')"
-                                    src="{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}"
-                                    alt="Profile Photo">
+                            <div class="profile-photo-top">
+                                <div class="profile-photo-frame">
+                                    <img id="customer-photo"
+                                        onclick="window.open('{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}')"
+                                        src="{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}"
+                                        alt="Profile Photo">
+                                </div>
+
+                                <button id="view-profile-log-btn" class="btn profile-view-log-btn" type="button">
+                                    <i class='bx bx-show-alt'></i> View
+                                </button>
                             </div>
 
                             <button id="upload-photo-btn" class="btn upload-photo-btn">
@@ -530,6 +538,46 @@
     <script src="{{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/help.js') }}"></script>
     <script src="{{ asset('js/profile.js') }}"></script>
+
+    <div id="customer-views-overlay" class="customer-views-overlay" style="display:none;">
+        <div class="customer-views-box">
+            <div class="customer-views-header">
+                <h2>Customer View Log</h2>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button type="button" id="customer-views-print" class="btn">
+                        <i class='bx bx-printer'></i> Print
+                    </button>
+
+                    <button type="button" id="customer-views-close" class="btn secondary">Close</button>
+                </div>
+            </div>
+
+            <div class="customer-views-list" id="customer-views-list">
+                @forelse($customerViews as $view)
+                    @php
+                        $rawDate = $view['created_at'] ?? null;
+                        $fullDate = $rawDate ? \Carbon\Carbon::parse($rawDate)->format('l, F j, Y h:i:s A') : '-';
+                        $shortDate = $rawDate ? \Carbon\Carbon::parse($rawDate)->format('m/d/y h:i:s A') : '-';
+                    @endphp
+
+                    <div class="customer-view-item">
+                        <div class="customer-view-meta">
+                            <div><strong>Date:</strong> {{ $fullDate }}</div>
+                            <div><strong>Note Type:</strong> {{ $view['type'] ?? 'CUSTOMER VIEW' }}</div>
+                            <div><strong>By:</strong> {{ $view['by'] ?? '-' }}</div>
+                        </div>
+
+                        <div class="customer-view-text">
+                            {{ $view['message'] ?? 'Customer View By ' . ($view['by'] ?? '-') . ' on ' . $shortDate }}
+                        </div>
+                    </div>
+                @empty
+                    <div class="customer-view-empty" id="customer-view-empty">No views found.</div>
+                @endforelse
+            </div>
+        </div>
+    </div>
 
 </body>
 
