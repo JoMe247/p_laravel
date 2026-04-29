@@ -7,6 +7,8 @@
     <title>Dashboard</title>
     <link rel="icon" href="img/favicon.png">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="dashboard-export-customers-url" content="{{ route('dashboard.customers.exportCsv') }}">
+    <meta name="dashboard-delete-customers-url" content="{{ route('dashboard.customers.deleteSelected') }}">
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/variables.css">
@@ -119,18 +121,18 @@
                             </div>
 
                             <ul id="table-drop" class="options" style="display: none;">
-                                
-                                
-                                <li class="option">
+
+
+                                <li class="option" data-action="export_csv">
                                     <i class='bx bx-table' style="color: rgb(80, 80, 80);"></i>
                                     <span class="option-text" style="color: rgb(80, 80, 80);">Export CSV</span>
                                 </li>
-                                
-                                <li class="option">
+
+                                <li class="option" data-action="delete">
                                     <i class='bx bxs-trash' style="color: rgb(179, 57, 57);"></i>
                                     <span class="option-text" style="color: rgb(179, 57, 57);">Delete</span>
                                 </li>
-                                
+
                             </ul>
                         </div>
 
@@ -162,7 +164,7 @@
                                     <tr>
                                         <td>
                                             <input type="checkbox" name="customer_select"
-                                                onchange="checkboxActive()">
+                                                value="{{ $c->ID }}" onchange="checkboxActive()">
                                         </td>
 
                                         <td class="customer-id"><a

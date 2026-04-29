@@ -66,6 +66,12 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
     Route::middleware('auth.multi', 'last.seen')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
 
+        Route::post('/dashboard/customers/export-csv', [DashboardController::class, 'exportSelectedCustomersCsv'])
+            ->name('dashboard.customers.exportCsv');
+
+        Route::delete('/dashboard/customers/delete-selected', [DashboardController::class, 'deleteSelectedCustomers'])
+            ->name('dashboard.customers.deleteSelected');
+
         // WhatsApp
         Route::get('/whatsapp', [WhatsappController::class, 'showInbox'])->name('whatsapp.inbox');
         Route::post('/whatsapp/sync', [WhatsappController::class, 'syncFromTwilio'])->name('whatsapp.sync');

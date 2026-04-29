@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use App\Models\Customer;
 use App\Models\Reminder;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
@@ -198,5 +199,143 @@ class DashboardController extends Controller
             ->groupBy('customer_id')
             ->pluck('total', 'customer_id')
             ->toArray();
+    }
+
+    public function exportSelectedCustomersCsv(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        if (!$authUser) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'not_auth',
+            ], 401);
+        }
+
+        $agency = $authUser->agency;
+
+        $ids = $request->input('ids', []);
+
+        if (!is_array($ids)) {
+            $ids = [];
+        }
+
+        $ids = collect($ids)
+            ->map(fn($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($ids)) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'no_customers_selected',
+            ], 422);
+        }
+
+        $columns = Schema::getColumnListing('customers');
+
+        /*
+    |--------------------------------------------------------------------------
+    | Excluir columnas que no son útiles en CSV
+    |--------------------------------------------------------------------------
+    | En Reports normalmente se ocultan Picture y Alert.
+    */
+        $excludedColumns = ['Picture', 'Alert'];
+
+        $exportColumns = array_values(array_filter($columns, function ($column) use ($excludedColumns) {
+            return !in_array($column, $excludedColumns);
+        }));
+
+        $customers = DB::table('customers')
+            ->where('agency', $agency)
+            ->whereIn('ID', $ids)
+            ->orderBy('ID', 'asc')
+            ->get($exportColumns);
+
+        if ($customers->isEmpty()) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'customers_not_found',
+            ], 404);
+        }
+
+        $fileName = 'customers_selected_' . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () use ($customers, $exportColumns) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM para que Excel abra bien acentos y caracteres especiales
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            // Header
+            fputcsv($handle, $exportColumns);
+
+            // Rows
+            foreach ($customers as $customer) {
+                $row = [];
+
+                foreach ($exportColumns as $column) {
+                    $value = $customer->{$column} ?? '';
+
+                    if (is_array($value) || is_object($value)) {
+                        $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+                    }
+
+                    $row[] = $value;
+                }
+
+                fputcsv($handle, $row);
+            }
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    public function deleteSelectedCustomers(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        if (!$authUser) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'not_auth',
+            ], 401);
+        }
+
+        $agency = $authUser->agency;
+
+        $ids = $request->input('ids', []);
+
+        if (!is_array($ids)) {
+            $ids = [];
+        }
+
+        $ids = collect($ids)
+            ->map(fn($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($ids)) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'no_customers_selected',
+            ], 422);
+        }
+
+        $deleted = DB::table('customers')
+            ->where('agency', $agency)
+            ->whereIn('ID', $ids)
+            ->delete();
+
+        return response()->json([
+            'ok' => true,
+            'deleted' => $deleted,
+        ]);
     }
 }
