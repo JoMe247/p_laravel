@@ -38,8 +38,14 @@ class OfficeController extends Controller
             ->select('id', 'username', 'name', 'email', 'last_seen_at')
             ->get()
             ->map(function ($u) use ($onlineLimit) {
+                $lastSeen = $u->last_seen_at ? Carbon::parse($u->last_seen_at) : null;
+
                 $u->tipo = 'Administrador';
-                $u->is_online = $u->last_seen_at && Carbon::parse($u->last_seen_at)->greaterThanOrEqualTo($onlineLimit);
+                $u->is_online = $lastSeen && $lastSeen->greaterThanOrEqualTo($onlineLimit);
+                $u->last_seen_text = $lastSeen
+                    ? 'Last seen: ' . $lastSeen->format('m/d/Y h:i A')
+                    : 'Last seen: never';
+
                 return $u;
             });
 
@@ -47,8 +53,14 @@ class OfficeController extends Controller
             ->select('id', 'username', 'name', 'email', 'last_seen_at')
             ->get()
             ->map(function ($s) use ($onlineLimit) {
+                $lastSeen = $s->last_seen_at ? Carbon::parse($s->last_seen_at) : null;
+
                 $s->tipo = 'Usuario';
-                $s->is_online = $s->last_seen_at && Carbon::parse($s->last_seen_at)->greaterThanOrEqualTo($onlineLimit);
+                $s->is_online = $lastSeen && $lastSeen->greaterThanOrEqualTo($onlineLimit);
+                $s->last_seen_text = $lastSeen
+                    ? 'Last seen: ' . $lastSeen->format('m/d/Y h:i A')
+                    : 'Last seen: never';
+
                 return $s;
             });
 

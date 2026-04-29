@@ -158,10 +158,19 @@
                                 @foreach ($members as $member)
                                     <tr>
                                         <td>
-                                            <span class="session-dot {{ $member->is_online ? 'online' : 'offline' }}"
-                                                title="{{ $member->is_online ? 'Sesión activa' : 'Sesión inactiva' }}"></span>
+                                            <div class="user-session-info">
+                                                <div class="user-session-name">
+                                                    <span
+                                                        class="session-dot {{ $member->is_online ? 'online' : 'offline' }}"
+                                                        title="{{ $member->is_online ? 'Sesión activa' : 'Sesión inactiva' }}"></span>
 
-                                            <b>{{ $member->username }}</b>
+                                                    <b>{{ $member->username }}</b>
+                                                </div>
+
+                                                <div class="last-seen-text">
+                                                    {{ $member->last_seen_text }}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>{{ $member->name }}</td>
                                         <td>{{ $member->email }}</td>

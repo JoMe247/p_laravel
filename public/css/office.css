@@ -228,6 +228,7 @@
     background: #fff;
     /* box-shadow: 0 4px 10px rgba(0,0,0,0.4); */
     box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    text-align: center;
 }
 
 .office-table {
@@ -588,4 +589,40 @@
 
 .session-dot.offline {
     background-color: #ef4444;
+}
+
+.user-session-info {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.user-session-name {
+    display: flex;
+    align-items: center;
+}
+
+.last-seen-text {
+    margin-top: 3px;
+    margin-left: 18px;
+    font-size: 0.75em;
+    color: #aaa;
+    font-family: var(--montserrat);
+}
+
+.office-table td:first-child {
+    text-align: center;
+}
+
+.office-table td:first-child .user-session-info {
+    align-items: center;
+}
+
+.office-table td:first-child .user-session-name {
+    justify-content: center;
+}
+
+.office-table td:first-child .last-seen-text {
+    margin-left: 0;
+    text-align: center;
 }
