@@ -48,7 +48,7 @@
                             alt="Logo Agencia">
                     @else
                         <div class="agency-name-logo"
-                            style="font-size:22px;font-weight:bold;text-align:center;line-height:1.2;color:#333;">
+                            style="font-size:22px;font-weight:bold;text-align:center;line-height:1.2;color:#333;text-transform:uppercase;">
                             {{ $agencyInfo->agency_name ?: 'Agency' }}
                         </div>
                     @endif

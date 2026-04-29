@@ -119,30 +119,18 @@
                             </div>
 
                             <ul id="table-drop" class="options" style="display: none;">
-                                <li class="option">
-                                    <i class='bx bxs-message' style="color: rgb(80, 80, 80);"></i>
-                                    <span class="option-text" style="color: rgb(80, 80, 80);">SMS</span>
-                                </li>
-                                <li class="option">
-                                    <i class='bx bx-envelope' style="color: rgb(80, 80, 80);"></i>
-                                    <span class="option-text" style="color: rgb(80, 80, 80);">Email</span>
-                                </li>
+                                
+                                
                                 <li class="option">
                                     <i class='bx bx-table' style="color: rgb(80, 80, 80);"></i>
                                     <span class="option-text" style="color: rgb(80, 80, 80);">Export CSV</span>
                                 </li>
-                                <li class="option">
-                                    <i class='bx bx-edit' style="color: rgb(80, 80, 80);"></i>
-                                    <span class="option-text" style="color: rgb(80, 80, 80);">Edit</span>
-                                </li>
+                                
                                 <li class="option">
                                     <i class='bx bxs-trash' style="color: rgb(179, 57, 57);"></i>
                                     <span class="option-text" style="color: rgb(179, 57, 57);">Delete</span>
                                 </li>
-                                <li class="option">
-                                    <i class='bx bx-x-circle' style="color: #c2c2c2;"></i>
-                                    <span class="option-text" style="color: #c2c2c2;">Close</span>
-                                </li>
+                                
                             </ul>
                         </div>
 

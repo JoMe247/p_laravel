@@ -701,6 +701,16 @@ body{
     font-weight: 600;
 }
 
+.recent-pdf-title a,
+.recent-pdf-title a:visited {
+    color: #333;
+    text-decoration: none;
+}
+
+.recent-pdf-title a:hover {
+    text-decoration: underline;
+}
+
 .recent-pdf-date{
     width: 65%;
     font-size: 0.8em;

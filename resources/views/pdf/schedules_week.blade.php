@@ -169,7 +169,7 @@
             @else
                 <div class="agency-name-logo"
                     style="width:200px;margin-top:40px;margin-left:30px;font-size:22px;font-weight:bold;text-align:center;line-height:1.2;color:#333;">
-                    {{ $agencyName ?? 'Agency' }}
+                    {{ strtoupper($agencyName ?? 'Agency') }}
                 </div>
             @endif
         </div>
