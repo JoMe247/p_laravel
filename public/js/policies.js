@@ -4,7 +4,6 @@ $(document).ready(function () {
     // =========================================================================
     const csrf = $('meta[name="csrf-token"]').attr("content");
 
-<<<<<<< HEAD
     const $overlayNew = $('#policy-overlay');
     const $newBtn = $('#new-policy-btn');
     const $cancelNew = $('#policy-cancel-btn');
@@ -626,7 +625,6 @@ $(document).ready(function () {
             markFieldError($(this), value === '');
         }
     );
-=======
     const $overlayNew = $("#policy-overlay");
     const $newBtn = $("#new-policy-btn");
     const $cancelNew = $("#policy-cancel-btn");
@@ -726,19 +724,16 @@ $(document).ready(function () {
             printWindow.print();
         }, 250);
     });
->>>>>>> rama-fea
 
     // =========================================================================
     //   OVERLAY NUEVA POLICY
     // =========================================================================
-<<<<<<< HEAD
     $newBtn.on('click', function () {
         $overlayNew.css('display', 'flex').hide().fadeIn(150);
     });
 
     $cancelNew.on('click', function (e) {
         e.preventDefault();
-=======
     const polStatusInput = document.getElementById("pol_status");
 
     function resetNewPolicyFormStatus() {
@@ -754,13 +749,11 @@ $(document).ready(function () {
     });
 
     $cancelNew.on("click", function () {
->>>>>>> rama-fea
         $overlayNew.fadeOut(150);
         return false;
     });
 
     // =========================================================================
-<<<<<<< HEAD
     //   GUARDAR NUEVA POLICY
     // =========================================================================
     $saveNew.off('click').on('click', function (e) {
@@ -774,14 +767,12 @@ $(document).ready(function () {
         let vehicules = [];
 
         $('#vehicle-container .vehicle-card').each(function () {
-=======
     //   GUARDAR NUEVA POLICY (CREAR)
     // =========================================================================
     $saveNew.on("click", function () {
         let vehicules = [];
 
         $(".vehicle-card").each(function () {
->>>>>>> rama-fea
             const $card = $(this);
 
             const vin = ($card.find(".vin-input").val() || "").trim();
@@ -837,12 +828,9 @@ $(document).ready(function () {
             },
         });
 
-<<<<<<< HEAD
         return false;
     });
 
-=======
->>>>>>> rama-fea
     // =========================================================================
     //   ELIMINAR POLICY
     // =========================================================================
@@ -878,7 +866,6 @@ $(document).ready(function () {
     $('#add-vehicle-btn').on('click', function (e) {
         e.preventDefault();
 
-<<<<<<< HEAD
         const count = $('#vehicle-container .vehicle-card').length;
         if (count >= MAX_VEHICLES) {
             alert('Máximo ' + MAX_VEHICLES + ' vehículos por póliza.');
@@ -887,7 +874,6 @@ $(document).ready(function () {
 
         const id = Date.now();
         $('#vehicle-container').append(createVehicleCardHtml(id));
-=======
     $("#add-vehicle-btn").on("click", function () {
         const count = $(".vehicle-card").length;
         if (count >= MAX_VEHICLES) {
@@ -934,20 +920,17 @@ $(document).ready(function () {
             </div>
         `);
 
->>>>>>> rama-fea
         initYearsForCard($(`.vehicle-card[data-id='${id}']`));
 
         return false;
     });
 
-<<<<<<< HEAD
     $(document).on('click', '#vehicle-container .vehicle-delete-btn', function () {
         $(this).closest('.vehicle-card').remove();
     });
 
     // --- VIN Autocompletar (CREACIÓN) ---
     $(document).on('blur', '.vin-input', function () {
-=======
     function initYearsForCard($card) {
         const $yearSel = $card.find(".year-select");
         const currentYear = new Date().getFullYear();
@@ -966,7 +949,6 @@ $(document).ready(function () {
 
     // --- VIN Autocompletar ---
     $(document).on("blur", ".vin-input", function () {
->>>>>>> rama-fea
         const vin = $(this).val();
         const $card = $(this).closest(".vehicle-card");
 
@@ -998,7 +980,6 @@ $(document).ready(function () {
                 fillMakeSelect($makeSel, make);
 
                 if (make) {
-<<<<<<< HEAD
                     loadModelsForMake($card, make, model, false);
                 } else {
                     $modelSel.empty().append('<option value="">Seleccione modelo</option>');
@@ -1024,7 +1005,6 @@ $(document).ready(function () {
         if (year === 'other') {
             $(this).hide();
             $card.find('.year-other').show();
-=======
                     $makeSel
                         .empty()
                         .append(`<option value="${make}">${make}</option>`);
@@ -1087,14 +1067,12 @@ $(document).ready(function () {
         if (year === "other") {
             $(this).hide();
             $card.find(".year-other").show();
->>>>>>> rama-fea
             return;
         }
 
         fillMakeSelect($makeSel);
     });
 
-<<<<<<< HEAD
     // Marca -> modelos (CREACIÓN)
     $(document).on('change', '.make-select', function () {
         const make = $(this).val();
@@ -1119,7 +1097,6 @@ $(document).ready(function () {
         const $card = $(this).closest('.vehicle-card');
         const year = $card.find('.year-select').val();
         const make = $card.find('.make-select').val();
-=======
     $(document).on("change", ".make-select", function () {
         const make = $(this).val();
         const $card = $(this).closest(".vehicle-card");
@@ -1170,7 +1147,6 @@ $(document).ready(function () {
         const $card = $(this).closest(".vehicle-card");
         const year = $card.find(".year-select").val();
         const make = $card.find(".make-select").val();
->>>>>>> rama-fea
         const model = $(this).val();
 
         $card.find('.model-other').hide().val('');
@@ -1185,14 +1161,12 @@ $(document).ready(function () {
         updateImageForCard($card, make, model, year);
     });
 
-<<<<<<< HEAD
     // =========================================================================
     //   OVERLAY VER / EDITAR POLICY
     // =========================================================================
     $(document).on('click', '.policy-info-btn', function () {
         const showUrl = $(this).data('url');
         const updateUrl = $(this).data('update-url');
-=======
     function updateImageForCard($card, make, model, year) {
         if (!make || !model || !year) return;
 
@@ -1218,7 +1192,6 @@ $(document).ready(function () {
     $(document).on("click", ".policy-info-btn", function () {
         const showUrl = $(this).data("url");
         const updateUrl = $(this).data("update-url");
->>>>>>> rama-fea
 
         $.get(showUrl, function (res) {
             if (!res || !res.success) {
@@ -1239,7 +1212,6 @@ $(document).ready(function () {
 
             if (!Array.isArray(veh)) veh = [];
 
-<<<<<<< HEAD
             function isValidUrl(string) {
                 try {
                     new URL(string);
@@ -1304,7 +1276,6 @@ $(document).ready(function () {
                     </div>
                 </div>
             `;
-=======
             initialPolicySnapshot = {
                 pol_carrier: p.pol_carrier ?? "",
                 pol_number: p.pol_number ?? "",
@@ -1437,7 +1408,6 @@ $(document).ready(function () {
     </div>
 </div>
 `;
->>>>>>> rama-fea
 
             $overlayContent.html(html);
             setRequiredPolicyFields('edit_');
@@ -1452,7 +1422,6 @@ $(document).ready(function () {
 
             $overlayEdit.fadeIn(150);
 
-<<<<<<< HEAD
             $overlaySave.off('click').on('click', function (e) {
                 e.preventDefault();
 
@@ -1481,7 +1450,6 @@ $(document).ready(function () {
                     let model = $card.find('.edit_model_select').val();
                     if (!model || model === 'other') {
                         model = ($card.find('.edit_model_other').val() || '').trim();
-=======
             $("#policy-edit-content .vehicle-edit-card").each(function (i) {
                 initEditVehicleCard($(this), veh[i] || {});
             });
@@ -1513,7 +1481,6 @@ $(document).ready(function () {
                         model = (
                             $card.find(".edit_model_other").val() || ""
                         ).trim();
->>>>>>> rama-fea
                     }
 
                     if (!vin && !year && !make && !model) return;
@@ -1554,7 +1521,6 @@ $(document).ready(function () {
                     type: "POST",
                     data: {
                         _token: csrf,
-<<<<<<< HEAD
                         pol_carrier: $('#edit_pol_carrier').val(),
                         pol_number: $('#edit_pol_number').val(),
                         pol_url: $('#edit_pol_url').val(),
@@ -1565,7 +1531,6 @@ $(document).ready(function () {
                         pol_status: $('#edit_pol_status').val(),
                         pol_agent_record: $('#edit_pol_agent_record').val(),
                         vehicules: JSON.stringify(updatedVeh)
-=======
                         pol_carrier: currentPolicySnapshot.pol_carrier,
                         pol_number: currentPolicySnapshot.pol_number,
                         pol_url: currentPolicySnapshot.pol_url,
@@ -1577,7 +1542,6 @@ $(document).ready(function () {
                         pol_agent_record:
                             currentPolicySnapshot.pol_agent_record,
                         vehicules: currentPolicySnapshot.vehicules,
->>>>>>> rama-fea
                     },
                     success: function (r) {
                         if (r.success) {
@@ -1594,16 +1558,12 @@ $(document).ready(function () {
                         alert("Error updating policy");
                     },
                 });
-<<<<<<< HEAD
 
                 return false;
-=======
->>>>>>> rama-fea
             });
         });
     });
 
-<<<<<<< HEAD
     // =========================================================================
     //   EVENTOS DE VEHÍCULOS EN EDICIÓN
     // =========================================================================
@@ -1635,7 +1595,6 @@ $(document).ready(function () {
         const vin = $(this).val();
         const index = $(this).closest('.vehicle-edit-card').data('index');
 
-=======
     $overlayCancel.on("click", function () {
         $overlayEdit.fadeOut(150);
     });
@@ -1838,7 +1797,6 @@ $(document).ready(function () {
         const vin = ($(this).val() || "").trim();
         const $card = $(this).closest(".vehicle-edit-card");
 
->>>>>>> rama-fea
         if (!vin || vin.length < 5) return;
 
         $.get(
@@ -1851,7 +1809,6 @@ $(document).ready(function () {
                 const make = v.Make || "";
                 const model = v.Model || "";
 
-<<<<<<< HEAD
                 if (v.ModelYear) {
                     if ($card.find(`.edit_year_select option[value="${v.ModelYear}"]`).length === 0) {
                         $card.find('.edit_year_select').append(`<option value="${v.ModelYear}">${v.ModelYear}</option>`);
@@ -1943,7 +1900,6 @@ $(document).ready(function () {
     });
 
     
-=======
                 if (year) {
                     initYearsForEditCard($card, year);
                 }
@@ -2095,7 +2051,6 @@ $(document).ready(function () {
             {},
         );
     });
->>>>>>> rama-fea
 });
 
 function closeOverlayEdit() {
