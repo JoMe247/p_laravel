@@ -94,14 +94,14 @@
             font-size: 14px;
             color: #0f172a;
             font-weight: 700;
-           }
+        }
 
         .nameCell .t {
             margin-top: 2px;
             font-size: 10px;
             color: #64748b;
             font-weight: 400;
-           }
+        }
 
         /* ===== Shift cell ===== */
         .shiftWrap {
@@ -121,7 +121,7 @@
             line-height: 1.15;
             margin-top: 2px;
             font-weight: 700;
-           }
+        }
 
         /* etiqueta abajo (csr) */
         .shiftTag {
@@ -130,7 +130,7 @@
             color: #64748b;
             text-transform: lowercase;
             font-weight: 400;
-            }
+        }
 
         /* cuando no hay shift */
         .empty {
@@ -163,8 +163,14 @@
 
     <div class="header">
         <div class="logo-box">
-            @if ($logoBase64)
-                <img src="{{ $logoBase64 }}" class="agency-logo" style="width:200px;object-fit:contain;margin-top:40px;margin-left:30px">
+            @if (!empty($logoBase64))
+                <img src="{{ $logoBase64 }}" class="agency-logo"
+                    style="width:200px;object-fit:contain;margin-top:40px;margin-left:30px">
+            @else
+                <div class="agency-name-logo"
+                    style="width:200px;margin-top:40px;margin-left:30px;font-size:22px;font-weight:bold;text-align:center;line-height:1.2;color:#333;">
+                    {{ $agencyName ?? 'Agency' }}
+                </div>
             @endif
         </div>
 

@@ -43,9 +43,15 @@
 
                 <!-- HEADER -->
                 <div class="logo-box">
-                    <img class="agency-logo"
-                        src="{{ $agencyInfo->agency_logo ? asset('storage/' . $agencyInfo->agency_logo) : asset('img/default-logo.png') }}"
-                        alt="Logo Agencia">
+                    @if (!empty($agencyInfo->agency_logo))
+                        <img class="agency-logo" src="{{ asset('storage/' . $agencyInfo->agency_logo) }}"
+                            alt="Logo Agencia">
+                    @else
+                        <div class="agency-name-logo"
+                            style="font-size:22px;font-weight:bold;text-align:center;line-height:1.2;color:#333;">
+                            {{ $agencyInfo->agency_name ?: 'Agency' }}
+                        </div>
+                    @endif
                 </div>
 
 

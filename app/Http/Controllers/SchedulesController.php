@@ -11,6 +11,7 @@ use App\Models\ScheduleShift;
 use App\Models\ScheduleAssignment;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Agency;
 
 class SchedulesController extends Controller
 {
@@ -446,10 +447,19 @@ class SchedulesController extends Controller
         // ordenar filas por nombre
         $rows = collect($rows)->sortBy('name')->values();
 
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        $agencyCode = $authUser->agency ?? null;
+
+        $agencyData = Agency::where('agency_code', $agencyCode)->first();
+
+        $agencyName = $agencyData->agency_name ?? 'Agency';
+
 
         $pdf = Pdf::loadView('pdf.schedules_week', [
             'agency' => $agency,
             'logoBase64' => $logoBase64,
+            'agencyName' => $agencyName,
             'start' => $start,
             'end' => $end,
             'days' => $days,
