@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\CustomerNote;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+
 
 
 class CustomersController extends Controller
@@ -14,52 +16,70 @@ class CustomersController extends Controller
     // Listado simple
     public function index()
     {
-        $customers = Customer::orderBy('ID', 'desc')->get();
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
 
-        // ids de customers
-        $customerIds = $customers->pluck('ID')->filter()->values()->all();
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
 
-        // Consulta independiente (NO depende de relaciones)
-        $policyCounts = $this->getPolicyCountsByCustomerId($customerIds);
+        $customers = Customer::orderBy('ID', 'desc')->paginate(50);
+
+        // Obtener los IDs de los customers que están en esta página
+        $customerIds = $customers->pluck('ID')->toArray();
+
+        // Contar cuántas policies tiene cada customer
+        $policyCounts = DB::table('policies')
+            ->select('customer_id', DB::raw('COUNT(*) as total'))
+            ->whereIn('customer_id', $customerIds)
+            ->groupBy('customer_id')
+            ->pluck('total', 'customer_id')
+            ->toArray();
 
         return view('customers', compact('customers', 'policyCounts'));
     }
 
-    private function getPolicyCountsByCustomerId(array $customerIds): array
-    {
-        if (empty($customerIds)) return [];
-
-        // OJO: cambia 'policies' si tu tabla se llama diferente
-        return DB::table('policies')
-            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
-            ->selectRaw('customer_id, COUNT(*) as total')
-            ->groupBy('customer_id')
-            ->pluck('total', 'customer_id')
-            ->toArray();
-    }
-
-    // store: guarda los 4 campos rápidos (recibe JSON o form)
     public function store(Request $request)
     {
-        $data = $request->only(['Name', 'Address', 'Phone', 'DOB']);
-
         $validated = $request->validate([
-            'Name' => 'required|string|max:120',
+            'Name'    => 'required|string|max:120',
             'Address' => 'nullable|string|max:240',
-            'Phone' => 'nullable|string|max:20',
-            'DOB' => 'nullable|date',
+            'Phone'   => 'nullable|string|max:20',
+            'DOB'     => 'nullable|date',
         ]);
 
+        // Detectar quién está logueado (user o sub user)
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // name del agente (user/sub user)
+        $agentName = $user->name ??  null;
+
+        // agency_code del agente (ajusta si tu columna se llama distinto)
+        $agencyCode = $user->agency ?? null;
+
         $validated['Added'] = now()->format('Y-m-d');
+
+        // Guardar en columnas del customer
+        // OJO: si tu DB tiene límites de varchar más chicos, ajusta max o usa Str::limit.
+        $validated['Agent_of_Record'] = $agentName ? Str::limit($agentName, 30, '') : null;
+        $validated['Agency']          = $agencyCode ? Str::limit($agencyCode, 30, '') : null;
 
         $customer = Customer::create($validated);
 
         return response()->json(['id' => $customer->ID], 201);
     }
 
+
     // muestra profile con los datos completos
     public function profile($id)
     {
+
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $customer = Customer::findOrFail($id);
 
         // Cargar notas
@@ -104,7 +124,7 @@ class CustomersController extends Controller
         $customer->fill($validated);
         $customer->save();
 
-        return redirect('profile/'.$id)->with('success', 'Customer updated.');
+        return redirect()->route('customers.index')->with('success', 'Customer updated.');
     }
     public function deleteMultiple(Request $request)
     {
@@ -132,7 +152,7 @@ class CustomersController extends Controller
 
         // Guardar nueva foto
         $file = $request->file('photo');
-        $newName = $id . '.' . $file->getClientOriginalExtension();
+        $newName = uniqid('cust_') . '.' . $file->getClientOriginalExtension();
         $file->move(public_path('uploads/customers'), $newName);
 
         $path = 'uploads/customers/' . $newName;
@@ -205,5 +225,18 @@ class CustomersController extends Controller
         CustomerNote::where('id', $noteId)->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    private function getPolicyCountsByCustomerId(array $customerIds): array
+    {
+        if (empty($customerIds)) return [];
+
+        // OJO: cambia 'policies' si tu tabla se llama diferente
+        return DB::table('policies')
+            ->whereIn('customer_id', $customerIds) // OJO: cambia customer_id si tu campo se llama diferente
+            ->selectRaw('customer_id, COUNT(*) as total')
+            ->groupBy('customer_id')
+            ->pluck('total', 'customer_id')
+            ->toArray();
     }
 }

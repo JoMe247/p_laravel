@@ -81,23 +81,39 @@ class LoginController extends Controller
 
         // Iniciar sesión
         if ($isSubUser) {
-            Auth::guard('sub')->login($user, $rememberMe);
+            Auth::guard('sub')->login($user, false);
             session(['auth_guard' => 'sub']);
         } else {
-            Auth::guard('web')->login($user, $rememberMe);
+            Auth::guard('web')->login($user, false);
             session(['auth_guard' => 'web']);
         }
 
         // Si el usuario marcó "Recordarme"
-        if ($rememberMe && !$isSubUser) {
-            $token = bin2hex(random_bytes(16));
-            DB::table('user_tokens')->insert([
-                'user_id' => $user->id,
-                'token' => $token,
-                'expires_at' => now()->addDays(30),
-            ]);
-            Cookie::queue('rememberme_token', $token, 60 * 24 * 30);
+        if ($rememberMe) {
+            $token = bin2hex(random_bytes(32));
+
+            if ($isSubUser) {
+                DB::table('sub_user_tokens')->insert([
+                    'sub_user_id' => $user->id,
+                    'token'       => $token,
+                    'expires_at'  => now()->addDays(30),
+                ]);
+
+                Cookie::queue('rememberme_token', 'sub|' . $token, 60 * 24 * 30);
+            } else {
+                DB::table('user_tokens')->insert([
+                    'user_id'    => $user->id,
+                    'token'      => $token,
+                    'expires_at' => now()->addDays(30),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                Cookie::queue('rememberme_token', 'web|' . $token, 60 * 24 * 30);
+            }
         }
+
+
 
         return redirect()->route('dashboard');
     }
@@ -119,6 +135,9 @@ class LoginController extends Controller
             if ($guard === 'sub') {
                 // 🧹 Limpiar token de sesión para sub_users
                 \App\Models\SubUser::where('id', $user->id)->update(['current_session_token' => null]);
+
+                // ✅ BORRAR tokens remember del sub user (tabla correcta)
+                DB::table('sub_user_tokens')->where('sub_user_id', $user->id)->delete();
             } else {
                 // 🧹 Limpiar token de sesión para users
                 DB::table('user_tokens')->where('user_id', $user->id)->delete();
@@ -137,10 +156,15 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // 🧹 Borrar cookie remember_me solo si era user normal
-        if ($guard !== 'sub') {
-            Cookie::queue(Cookie::forget('rememberme_token'));
+        // ✅ Borrar cookies remember_* de Laravel (recaller) SIN getRecallerName()
+        foreach ($request->cookies->all() as $name => $value) {
+            if (str_starts_with($name, 'remember_')) {
+                Cookie::queue(Cookie::forget($name));
+            }
         }
+
+        // ✅ Borrar tu cookie custom SIEMPRE (user y sub)
+        Cookie::queue(Cookie::forget('rememberme_token'));
 
         // Limpiar el valor del guard activo en la sesión
         session()->forget('auth_guard');

@@ -456,6 +456,6 @@ class SchedulesController extends Controller
             'rows' => $rows,
         ])->setPaper('letter', 'landscape');
 
-        return $pdf->download("Schedule_{$agency}_{$start->format('Ymd')}_to_{$end->format('Ymd')}.pdf");
+        return $pdf->stream("Schedule_{$agency}_{$start->format('Ymd')}_to_{$end->format('Ymd')}.pdf");
     }
 }

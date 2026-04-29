@@ -41,8 +41,12 @@
                     <!-- <h1>📥 SMS Inbox</h1> -->
                     <div class="top-actions">
                         <button id="btnSync" class="btn secondary"><i class='bx bx-sync'></i></button>
-                        <input id="search" placeholder="Buscar..."
-                            style="margin-left:10px;padding:8px;border-radius:6px;border:1px solid #ddd" />
+                        
+                        <div id="search-container" style="position:unset;margin-top:unset;margin-left:unset !important;">
+                            <label for="tableSearch"><i class='bx bx-search'></i></label>
+                            <input id="search" placeholder="Buscar..." />
+                        </div>
+
                         <button style="margin-left: auto;" id="newMessageBtn" class="btn secondary"><i
                                 class='bx bxs-comment-add'></i> &nbsp;NUEVO MENSAJE</button>
                     </div>
@@ -333,7 +337,6 @@
     <script src="js/table.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/operations.js"></script>
-    <script src="js/inbox.js"></script>
 
     <script>
         window.smsLimitReached = {{ $isSmsOverLimit ? 'true' : 'false' }};

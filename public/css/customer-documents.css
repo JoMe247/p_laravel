@@ -1,0 +1,202 @@
+.customer-documents-card {
+    background: var(--white2);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    width: 100%;
+}
+
+.customer-documents-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    font-family: var(--montserrat);
+}
+
+.customer-documents-header h2 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.customer-documents-header p {
+    margin: 6px 0 0;
+    color: #666;
+}
+
+.customer-documents-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.customer-documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.customer-document-item {
+    width: 100%;
+}
+
+.customer-document-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    background: #f7f7f7;
+    border: 1px solid #ececec;
+    border-radius: 18px;
+    padding: 16px 14px 14px;
+    min-height: 150px;
+    transition: .2s ease;
+}
+
+.doc-card-actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.customer-document-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 18px rgba(0,0,0,.08);
+}
+
+.doc-icon-wrap img {
+    width: 80px;
+    object-fit: contain;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.doc-icon-wrap img:hover {
+    transform: scale(1.1);
+    transition: 0.3s;
+}
+
+.doc-name {
+    font-size: 0.8em;
+    width: 100%;
+    font-family: var(--montserrat);
+    font-weight: 600;
+    text-align: center;
+    word-break: break-word;
+}
+
+.doc-date {
+    width: 65%;
+    font-size: 0.8em;
+    text-align: center;
+    font-family: var(--montserrat);
+    color: #777;
+    margin: 0 auto;
+}
+
+.doc-sheet {
+    width: 92px;
+    height: 110px;
+    background: #fff;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 6px 14px rgba(0,0,0,.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.doc-sheet i {
+    font-size: 54px;
+    color: #e53935;
+}
+
+.doc-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #e53935;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+    letter-spacing: .5px;
+}
+
+.doc-info {
+    width: 100%;
+    text-align: center;
+}
+
+.doc-name {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.35;
+    word-break: break-word;
+    min-height: 38px;
+}
+
+.doc-date {
+    width: 100%;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #777;
+}
+
+.doc-card-actions {
+    margin-top: auto;
+}
+
+.customer-documents-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.customer-documents-empty i {
+    font-size: 70px;
+    margin-bottom: 12px;
+    color: #bbb;
+}
+
+[data="customer-docs-delete"]{
+    width: 30px;
+    height: 30px;
+    /* display: flex; */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    margin: 0 8px;
+    font-size: 1.2em;
+    background: transparent;
+    color: #333;
+    border: 1px solid #cdcdcd;
+    /* border: none; */
+    cursor: pointer;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.3s;
+    position: absolute;
+    top: 5px;
+    right: 0px;
+}
+
+[data="customer-docs-delete"]:hover{
+    background: #cdcdcd;
+    border: 1px solid #cdcdcd;
+}
+
+.customer-document-card:hover [data="customer-docs-delete"]{
+    display: flex;
+}

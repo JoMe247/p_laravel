@@ -38,306 +38,322 @@
         @include('menu')
 
         <section id="dash">
-            
-            
 
-                {{-- CONTENEDOR GENERAL DEL PROFILE --}}
-                <div id="profile-wrapper" data-id="{{ $customer->ID }}">
+            {{-- CONTENEDOR GENERAL DEL PROFILE --}}
+            <div id="profile-wrapper" data-id="{{ $customer->ID }}">
 
-                    <div class="left-column">
+                <div class="left-column">
 
-                        {{-- MENU LATERAL --}}
-                        <aside class="profile-side-menu">
-                            <nav class="profile-side-nav">
-                                <button type="button" class="profile-menu-item active"
-                                    onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
-                                    <i class='bx bx-id-card'></i>
-                                    <span>Profile</span>
-                                </button>
+                    {{-- MENU LATERAL --}}
+                    <aside class="profile-side-menu">
+                        <nav class="profile-side-nav">
+                            <button type="button" class="profile-menu-item active"
+                                onclick="window.location.href='{{ route('profile', $customer->ID) }}'">
+                                <i class='bx bx-id-card'></i>
+                                <span>Profile</span>
+                            </button>
 
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
-                                    <i class='bx bx-shield-quarter'></i>
-                                    <span>Policies</span>
-                                </button>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('policies.index', $customer->ID) }}'">
+                                <i class='bx bx-shield-quarter'></i>
+                                <span>Policies</span>
+                            </button>
 
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
-                                    <i class='bx bx-credit-card'></i>
-                                    <span>Invoices (Payments)</span>
-                                </button>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
+                                <i class='bx bx-file'></i>
+                                <span>Invoices</span>
+                            </button>
 
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
-                                    <i class='bx bx-task'></i>
-                                    <span>Reminders</span>
-                                </button>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('estimates', $customer->ID) }}'">
+                                <i class='bx bx-bar-chart-alt'></i>
+                                <span>Estimates</span>
+                            </button>
 
-                                <button type="button" class="profile-menu-item"
-                                    onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
-                                    <i class='bx bx-folder'></i>
-                                    <span>Files</span>
-                                </button>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('reminders.index', $customer->ID) }}'">
+                                <i class='bx bx-task'></i>
+                                <span>Reminders</span>
+                            </button>
 
-                                <button type="button" class="profile-menu-item">
-                                    <i class='bx bx-file'></i>
-                                    <span>Documents</span>
-                                </button>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('files.customer', $customer->ID) }}'">
+                                <i class='bx bx-folder'></i>
+                                <span>Files</span>
+                            </button>
 
-                                <button type="button" class="profile-menu-item">
-                                    <i class='bx bx-map'></i>
-                                    <span>Map</span>
-                                </button>
-                            </nav>
-                        </aside>
+                            <button type="button" class="profile-menu-item"
+                                onclick="window.location.href='{{ route('profile.documents', $customer->ID) }}'">
+                                <i class='bx bx-file'></i>
+                                <span>Documents</span>
+                            </button>
 
-                        {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
-                        <div class="profile-notes sticky-notes">
+                        </nav>
+                    </aside>
 
-                            <div class="notes-header">
-                                <h3>Notes</h3>
-                                <button id="add-note-btn" class="btn small">+ Add Note</button>
-                            </div>
+                    {{-- ⭐ NOTES – FUERA DEL MENÚ, STICKY ⭐ --}}
+                    <div class="profile-notes sticky-notes">
 
-                            <div class="notes-scroll">
-                                <div id="notes-list"></div>
-                            </div>
-
+                        <div class="notes-header">
+                            <h3>Notes</h3>
+                            <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i> &nbsp;Add
+                                Note</button>
                         </div>
 
-                    </div> <!-- /.left-column -->
+                        <div class="notes-scroll">
+                            <div id="notes-list"></div>
+                        </div>
+
+                    </div>
+
+                </div> <!-- /.left-column -->
 
 
-                    {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
-                    <div id="note-overlay">
-                        <div class="note-window">
-                            <h2 style="margin-bottom:15px;">Add Note</h2>
+                {{-- ⭐ OVERLAY PARA NUEVA NOTA ⭐ --}}
+                <div id="note-overlay">
+                    <div class="note-window">
+                        <h2 style="margin-bottom:15px;">Add Note</h2>
 
-                            <label>Policy</label>
-                            <input type="text" id="note-policy">
+                        <label>Policy</label>
+                        <select id="note-policy">
+                            <option value="">— Select policy —</option>
+                        </select>
 
-                            <label>Subject</label>
-                            <input type="text" id="note-subject">
 
-                            <label>Note</label>
-                            <textarea id="note-text" rows="5"></textarea>
+                        <label>Subject</label>
+                        <input type="text" id="note-subject">
 
-                            <div class="overlay-actions">
-                                <button class="btn secondary" id="note-cancel">Cancel</button>
-                                <button class="btn" id="note-save">Save</button>
-                            </div>
+                        <label>Note</label>
+                        <textarea id="note-text" rows="5"></textarea>
+
+                        <div class="overlay-actions">
+                            <button class="btn secondary" id="note-cancel">Cancel</button>
+                            <button class="btn" id="note-save">Save</button>
                         </div>
                     </div>
-                    {{-- /.left-column --}}
+                </div>
+                {{-- /.left-column --}}
 
 
 
-                    {{-- CONTENIDO PRINCIPAL --}}
-                    <div class="profile-main">
+                {{-- CONTENIDO PRINCIPAL --}}
+                <div class="profile-main">
 
-                        <div class="profile-card-container">
+                    <div class="profile-card-container">
 
-                            <div id="profile-alert-container">
-                                @if (!$customer->Alert)
-                                    <button id="add-alert-btn" class="button" style="margin-bottom: 15px;">
-                                        <i class='bx bx-error'></i> Add Alert
-                                    </button>
-                                @else
-                                    <div id="customer-alert-box" class="alert-box">
-                                        <i class='bx bx-x alert-delete'></i>
-                                        <div id="alert-border">
-                                            <i class='bx bx-error bx-tada'></i>
-                                        </div>
-                                        <span>{{ $customer->Alert }}</span>
-                                    </div>
-                                @endif
-                            </div>
-
-
-                            <div class="profile-photo-section">
-                                <div class="profile-photo-frame">
-                                    <img id="customer-photo" onclick="window.open('{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}')"
-                                        src="{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}"
-                                        alt="Profile Photo">
-                                </div>
-
-                                <button id="upload-photo-btn" class="btn upload-photo-btn">
-                                    <i class='bx bx-image-alt'></i> Change Photo
+                        <div id="profile-alert-container">
+                            @if (!$customer->Alert)
+                                <button id="add-alert-btn" class="button" style="margin-bottom: 15px;">
+                                    <i class='bx bx-error'></i> Add Alert
                                 </button>
+                            @else
+                                <div id="customer-alert-box" class="alert-box">
+                                    <i class='bx bx-x alert-delete'></i>
+                                    <div id="alert-border">
+                                        <i class='bx bx-error bx-tada'></i>
+                                    </div>
+                                    <span>{{ $customer->Alert }}</span>
+                                </div>
+                            @endif
+                        </div>
 
-                                <form id="photo-upload-form" enctype="multipart/form-data" style="display:none;">
-                                    @csrf
-                                    <input type="file" name="photo" id="photo-input" accept="image/*">
-                                </form>
+
+                        <div class="profile-photo-section">
+                            <div class="profile-photo-frame">
+                                <img id="customer-photo"
+                                    onclick="window.open('{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}')"
+                                    src="{{ $customer->Picture ? asset($customer->Picture) : asset('img/default-profile.png') }}"
+                                    alt="Profile Photo">
                             </div>
 
-                            <h2 class="profile-name">{{ $customer->Name }}</h2>
+                            <button id="upload-photo-btn" class="btn upload-photo-btn">
+                                <i class='bx bx-image-alt'></i> Change Photo
+                            </button>
 
-                            {{-- *** FORMULARIO ABIERTO AQUÍ *** --}}
-                            <form id="profile-form" method="POST"
-                                action="{{ route('customers.update', $customer->ID) }}">
+                            <form id="photo-upload-form" enctype="multipart/form-data" style="display:none;">
                                 @csrf
-                                @method('PUT')
-
-                                @php
-                                    function calculateAge($dob)
-                                    {
-                                        if (!$dob) {
-                                            return null;
-                                        }
-                                        return \Carbon\Carbon::parse($dob)->age;
-                                    }
-                                    $age = calculateAge($customer->DOB);
-                                @endphp
-
-                                <div class="profile-info-grid editable-top">
-
-                                    <div class="info-row">
-                                        <label>DOB</label>
-                                        <input type="date" name="DOB" value="{{ $customer->DOB }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Age</label>
-                                        <span class="value age-box">{{ $age !== null ? $age : '—' }}</span>
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Gender</label>
-                                        <input type="text" name="Gender" value="{{ $customer->Gender }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Marital</label>
-                                        <input type="text" name="Marital" value="{{ $customer->Marital }}">
-                                    </div>
-
-                                </div>
-
-                                {{-- CONTACT INFO --}}
-                                <div class="profile-info-grid profile-contact-grid">
-
-                                    <div class="info-row">
-                                        <label>Phone 1</label>
-                                        <input type="text" name="Phone" value="{{ $customer->Phone }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Phone 2</label>
-                                        <input type="text" name="Phone2" value="{{ $customer->Phone2 }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Email 1</label>
-                                        <input type="email" name="Email1" value="{{ $customer->Email1 }}">
-                                    </div>
-
-                                    <div class="info-row">
-                                        <label>Email 2</label>
-                                        <input type="email" name="Email2" value="{{ $customer->Email2 }}">
-                                    </div>
-
-                                </div>
-
-                                {{-- DETAILS --}}
-                                <div class="profile-section-box">
-                                    <h3>Details</h3>
-
-                                    <div class="details-grid">
-
-                                        <div class="info-row">
-                                            <label>Address</label>
-                                            <input type="text" name="Address" value="{{ $customer->Address }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>City</label>
-                                            <input type="text" name="City" value="{{ $customer->City }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>State</label>
-                                            <input type="text" name="State" value="{{ $customer->State }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Zip Code</label>
-                                            <input type="text" name="ZIP_Code" value="{{ $customer->ZIP_Code }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Drivers License</label>
-                                            <input type="text" name="Drivers_License"
-                                                value="{{ $customer->Drivers_License }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>DL State</label>
-                                            <input type="text" name="DL_State" value="{{ $customer->DL_State }}">
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                {{-- OFFICE INFO --}}
-                                <div class="profile-section-box">
-                                    <h3>Office</h3>
-
-                                    <div class="details-grid">
-
-                                        <div class="info-row">
-                                            <label>Office</label>
-                                            <input type="text" name="Office" value="{{ $customer->Office }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>CID</label>
-                                            <input type="text" name="CID" value="{{ $customer->CID }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Agent of Record</label>
-                                            <input type="text" name="Agent_of_Record"
-                                                value="{{ $customer->Agent_of_Record }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Agency</label>
-                                            <input type="text" name="Agency" value="{{ $customer->Agency }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Source</label>
-                                            <input type="text" name="Source" value="{{ $customer->Source }}">
-                                        </div>
-
-                                        <div class="info-row">
-                                            <label>Added Date</label>
-                                            <span class="added-display">
-                                                {{ $customer->Added ? \Carbon\Carbon::parse($customer->Added)->format('Y-m-d') : '—' }}
-                                            </span>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <div class="profile-actions">
-
-                                    <button id="profile-save" type="submit" class="btn profile-btn-save">Guardar</button>
-
-                                    <a id="profile-back" href="{{ route('customers.index') }}" class="btn secondary"><i class='bx bx-arrow-back'></i></a>
-
-                                    <button type="button" id="delete-customer-btn" class="btn delete-btn"><i class='bx bx-trash' ></i></button>
-                                </div>
+                                <input type="file" name="photo" id="photo-input" accept="image/*">
                             </form>
-
                         </div>
+
+                        <h2 class="profile-name" id="customer-name-edit" contenteditable="true" spellcheck="false">
+                            {{ $customer->Name }}
+                        </h2>
+
+                        {{-- *** FORMULARIO ABIERTO AQUÍ *** --}}
+                        <form id="profile-form" method="POST"
+                            action="{{ route('customers.update', $customer->ID) }}">
+                            @csrf
+                            <input type="hidden" name="Name" id="customer-name-input"
+                                value="{{ $customer->Name }}">
+                            @method('PUT')
+
+                            @php
+                                function calculateAge($dob)
+                                {
+                                    if (!$dob) {
+                                        return null;
+                                    }
+                                    return \Carbon\Carbon::parse($dob)->age;
+                                }
+                                $age = calculateAge($customer->DOB);
+                            @endphp
+
+                            <div class="profile-info-grid editable-top">
+
+                                <div class="info-row">
+                                    <label>DOB</label>
+                                    <input type="date" name="DOB" value="{{ $customer->DOB }}">
+                                </div>
+
+                                <div class="info-row">
+                                    <label>Age</label>
+                                    <span class="value age-box">{{ $age !== null ? $age : '—' }}</span>
+                                </div>
+
+                                <div class="info-row">
+                                    <label>Gender</label>
+                                    <input type="text" name="Gender" value="{{ $customer->Gender }}">
+                                </div>
+
+                                <div class="info-row">
+                                    <label>Marital</label>
+                                    <input type="text" name="Marital" value="{{ $customer->Marital }}">
+                                </div>
+
+                            </div>
+
+                            {{-- CONTACT INFO --}}
+                            <div class="profile-info-grid profile-contact-grid">
+
+                                <div class="info-row">
+                                    <label>Phone 1</label>
+                                    <input type="text" name="Phone" value="{{ $customer->Phone }}">
+                                </div>
+
+                                <div class="info-row">
+                                    <label>Phone 2</label>
+                                    <input type="text" name="Phone2" value="{{ $customer->Phone2 }}">
+                                </div>
+
+                                <div class="info-row">
+                                    <label>Email 1</label>
+                                    <input type="email" name="Email1" value="{{ $customer->Email1 }}">
+                                </div>
+
+                                <div class="info-row">
+                                    <label>Email 2</label>
+                                    <input type="email" name="Email2" value="{{ $customer->Email2 }}">
+                                </div>
+
+                            </div>
+
+                            {{-- DETAILS --}}
+                            <div class="profile-section-box">
+                                <h3>Details</h3>
+
+                                <div class="details-grid">
+
+                                    <div class="info-row">
+                                        <label>Address</label>
+                                        <input type="text" name="Address" value="{{ $customer->Address }}">
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>City</label>
+                                        <input type="text" name="City" value="{{ $customer->City }}">
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>State</label>
+                                        <input type="text" name="State" value="{{ $customer->State }}">
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>Zip Code</label>
+                                        <input type="text" name="ZIP_Code" value="{{ $customer->ZIP_Code }}">
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>Drivers License</label>
+                                        <input type="text" name="Drivers_License"
+                                            value="{{ $customer->Drivers_License }}">
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>DL State</label>
+                                        <input type="text" name="DL_State" value="{{ $customer->DL_State }}">
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            {{-- OFFICE INFO --}}
+                            <div class="profile-section-box">
+                                <h3>Office</h3>
+
+                                <div class="details-grid">
+
+                                    <div class="info-row">
+                                        <label>Office</label>
+                                        <input type="text" name="Office" value="{{ $customer->Office }}">
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>CID</label>
+                                        <input type="text" name="CID" value="{{ $customer->CID }}">
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>Agent of Record</label>
+                                        <span class="added-display">
+                                            {{ $customer->Agent_of_Record }}
+                                        </span>
+                                    </div>
+
+                                    <div class="info-row" style="display:block;">
+
+                                        <label>Agency</label>
+                                        <span class="added-display">
+                                            {{ $customer->Agency }}
+                                        </span>
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>Source</label>
+                                        <input type="text" name="Source" value="{{ $customer->Source }}">
+                                    </div>
+
+                                    <div class="info-row">
+                                        <label>Added Date</label>
+                                        <span class="added-display">
+                                            {{ $customer->Added ? \Carbon\Carbon::parse($customer->Added)->format('Y-m-d') : '—' }}
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="profile-actions">
+                                <a id="profile-back" href="{{ route('customers.index') }}" class="btn secondary"><i
+                                        class='bx bx-arrow-back'></i></a>
+
+                                <button type="button" id="delete-customer-btn" class="btn delete-btn"><i
+                                        class='bx bx-trash'></i></button>
+
+                                <button id="profile-save" type="submit" class="btn profile-btn-save"><i
+                                        class='bx bxs-save'></i></button>
+                            </div>
+                        </form>
 
                     </div>
 
-                </div> {{-- /#profile-wrapper --}}
+                </div>
 
-            
+            </div> {{-- /#profile-wrapper --}}
+
+
         </section>
     </div>
 
@@ -443,30 +459,30 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="{{ asset('../img/menu/thumbs/1.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(2)"><img src="{{ asset('../img/menu/thumbs/2.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(3)"><img src="{{ asset('../img/menu/thumbs/3.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(4)"><img src="{{ asset('../img/menu/thumbs/4.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(5)"><img src="{{ asset('../img/menu/thumbs/5.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(6)"><img src="{{ asset('../img/menu/thumbs/6.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(7)"><img src="{{ asset('../img/menu/thumbs/7.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(8)"><img src="{{ asset('../img/menu/thumbs/8.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(9)"><img src="{{ asset('../img/menu/thumbs/9.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(10)"><img src="{{ asset('../img/menu/thumbs/10.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(11)"><img src="{{ asset('../img/menu/thumbs/11.jpg') }}"
-                                alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(12)"><img src="{{ asset('../img/menu/thumbs/12.jpg') }}"
-                                alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(1)"><img
+                                src="{{ asset('../img/menu/thumbs/1.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(2)"><img
+                                src="{{ asset('../img/menu/thumbs/2.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(3)"><img
+                                src="{{ asset('../img/menu/thumbs/3.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(4)"><img
+                                src="{{ asset('../img/menu/thumbs/4.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(5)"><img
+                                src="{{ asset('../img/menu/thumbs/5.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(6)"><img
+                                src="{{ asset('../img/menu/thumbs/6.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(7)"><img
+                                src="{{ asset('../img/menu/thumbs/7.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(8)"><img
+                                src="{{ asset('../img/menu/thumbs/8.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(9)"><img
+                                src="{{ asset('../img/menu/thumbs/9.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(10)"><img
+                                src="{{ asset('../img/menu/thumbs/10.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(11)"><img
+                                src="{{ asset('../img/menu/thumbs/11.jpg') }}" alt=""></label>
+                        <label class="thumb-options" onclick="selectImage(12)"><img
+                                src="{{ asset('../img/menu/thumbs/12.jpg') }}" alt=""></label>
 
 
                     </div>

@@ -12,6 +12,24 @@ use Illuminate\Support\Str;
 
 class PaymentsInvoicesController extends Controller
 {
+
+    private function getNextInvoiceNumber($agency)
+    {
+        $last = DB::table('invoices')
+            ->where('agency', (string)$agency)
+            ->whereNotNull('invoice_number')
+            ->orderBy('invoice_number', 'desc')
+            ->value('invoice_number');
+
+        $num = 0;
+        if ($last && preg_match('/^INV-(\d+)$/', $last, $m)) {
+            $num = (int)$m[1];
+        }
+
+        $num++;
+        return 'INV-' . str_pad((string)$num, 4, '0', STR_PAD_LEFT);
+    }
+
     public function payments($customerId)
     {
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
@@ -69,7 +87,7 @@ class PaymentsInvoicesController extends Controller
         $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
         if (!$authUser) return redirect()->route('login');
 
-        $agency = $authUser->agency; // MISMA agency donde subes logo
+        $agency = $authUser->agency;
 
         $agencyInfo = DB::table('agency')
             ->where('agency_code', $agency)
@@ -86,68 +104,30 @@ class PaymentsInvoicesController extends Controller
         $customer = DB::table('customers')->where('ID', $customerId)->first();
         if (!$customer) abort(404, 'Customer no encontrado');
 
-        $invoiceIdParam = request('invoiceId');
+        $invoiceIdParam = (string) request('invoiceId', '');
+        $isNew = request()->boolean('new');
+
+        $meta = null;
 
         if (!empty($invoiceIdParam)) {
-            $meta = Invoices::where('id', (string)$invoiceIdParam)
+            $meta = Invoices::where('id', $invoiceIdParam)
                 ->where('agency', (string)$agency)
                 ->where('customer_id', (string)$customerId)
                 ->first();
 
-            if (!$meta) abort(404, 'Invoice not found');
-        } else {
-
-            $new = request()->boolean('new'); // true si ?new=1
-
-            if ($new) {
-                // Crear invoice nuevo (vacío) con consecutivo
-                $invoice = new Invoices();
-                $invoice->id = (string) \Illuminate\Support\Str::uuid();
-                $invoice->agency = (string)$agency;
-                $invoice->customer_id = (string)$customerId;
-                $invoice->created_at = now()->format('Y-m-d H:i:s');
-                $invoice->updated_at = now()->format('Y-m-d H:i:s');
-                $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
-                $invoice->created_by_name = $authUser->name ?? '';
-
-                // Generar invoice_number INV-0001 por agency
-                $next = DB::transaction(function () use ($agency) {
-                    $last = DB::table('invoices')
-                        ->where('agency', (string)$agency)
-                        ->whereNotNull('invoice_number')
-                        ->orderBy('invoice_number', 'desc')
-                        ->lockForUpdate()
-                        ->value('invoice_number');
-
-                    $num = 0;
-                    if ($last && preg_match('/^INV-(\d+)$/', $last, $m)) {
-                        $num = (int)$m[1];
-                    }
-                    $num++;
-                    return 'INV-' . str_pad((string)$num, 4, '0', STR_PAD_LEFT);
-                });
-
-                $invoice->invoice_number = $next;
-                $today = now()->format('Y-m-d');
-                $invoice->creation_date = $today;
-                $invoice->payment_date  = $today;
-
-                $invoice->save();
-
-                // Este será el invoice "actual" en la vista
-                $meta = $invoice;
-            } else {
-                // tu lógica actual (abrir el último)
-                $meta = Invoices::where('agency', (string)$agency)
-                    ->where('customer_id', (string)$customerId)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
+            if (!$meta) {
+                abort(404, 'Invoice not found');
             }
+        } elseif (!$isNew) {
+            // Solo abrir último invoice si NO viene ?new=1
+            $meta = Invoices::where('agency', (string)$agency)
+                ->where('customer_id', (string)$customerId)
+                ->orderBy('created_at', 'desc')
+                ->first();
         }
 
-
         $invoiceId = $meta->id ?? '';
-        $invoiceNumber = $meta->invoice_number ?? '';
+        $invoiceNumber = $meta->invoice_number ?? ($isNew ? $this->getNextInvoiceNumber($agency) : '');
 
         $policiesCount = DB::table('policies')
             ->where('customer_id', $customerId)
@@ -159,24 +139,6 @@ class PaymentsInvoicesController extends Controller
             ->pluck('pol_number')
             ->filter()
             ->values();
-
-
-        $invoiceMeta = Invoices::where('agency', (string)$agency)
-            ->where('customer_id', (string)$customerId)
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        $creationDate = $invoiceMeta->creation_date ?? '';
-        $paymentDate  = $invoiceMeta->payment_date ?? '';
-
-        $meta = Invoices::where('agency', (string)$agency)
-            ->where('customer_id', (string)$customerId)
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        $invoiceId = $meta->id ?? '';
-        $invoiceNumber = $meta->invoice_number ?? '';
-
 
         $invRows = [];
         $grandTotalSaved = '';
@@ -190,25 +152,24 @@ class PaymentsInvoicesController extends Controller
             }
         }
 
-
+        $nextPyDate = $meta->next_py_date ?? '';
         $creationDate = $meta->creation_date ?? '';
-        $paymentDate  = $meta->payment_date ?? '';
+        $paymentDate = $meta->payment_date ?? '';
+        $paymentMethod = $meta->payment_method ?? '';
 
-        $fee                 = $meta->fee ?? '';
-        $feeSplit            = ($meta->fee_split ?? '') === '1';
-        $feeP1Method         = $meta->fee_payment1_method ?? '';
-        $feeP1Value          = $meta->fee_payment1_value ?? '';
-        $feeP2Method         = $meta->fee_payment2_method ?? '';
-        $feeP2Value          = $meta->fee_payment2_value ?? '';
+        $fee             = $meta->fee ?? '';
+        $feeSplit        = ($meta->fee_split ?? '') === '1';
+        $feeP1Method     = $meta->fee_payment1_method ?? '';
+        $feeP1Value      = $meta->fee_payment1_value ?? '';
+        $feeP2Method     = $meta->fee_payment2_method ?? '';
+        $feeP2Value      = $meta->fee_payment2_value ?? '';
 
-        $premium             = $meta->premium ?? '';
-        $premiumSplit        = ($meta->premium_split ?? '') === '1';
-        $premiumP1Method     = $meta->premium_payment1_method ?? '';
-        $premiumP1Value      = $meta->premium_payment1_value ?? '';
-        $premiumP2Method     = $meta->premium_payment2_method ?? '';
-        $premiumP2Value      = $meta->premium_payment2_value ?? '';
-
-
+        $premium         = $meta->premium ?? '';
+        $premiumSplit    = ($meta->premium_split ?? '') === '1';
+        $premiumP1Method = $meta->premium_payment1_method ?? '';
+        $premiumP1Value  = $meta->premium_payment1_value ?? '';
+        $premiumP2Method = $meta->premium_payment2_method ?? '';
+        $premiumP2Value  = $meta->premium_payment2_value ?? '';
 
         return view('invoices', compact(
             'customerId',
@@ -216,17 +177,17 @@ class PaymentsInvoicesController extends Controller
             'agencyInfo',
             'customer',
             'policiesCount',
-
             'policyNumbers',
+            'nextPyDate',
             'creationDate',
             'paymentDate',
+            'paymentMethod',
             'fee',
             'feeSplit',
             'feeP1Method',
             'feeP1Value',
             'feeP2Method',
             'feeP2Value',
-
             'premium',
             'premiumSplit',
             'premiumP1Method',
@@ -235,8 +196,6 @@ class PaymentsInvoicesController extends Controller
             'premiumP2Value',
             'invRows',
             'grandTotalSaved',
-            'invoiceId',
-            'invoiceNumber',
             'invoiceId',
             'invoiceNumber',
         ));
@@ -285,6 +244,7 @@ class PaymentsInvoicesController extends Controller
         }
 
         $data = $request->validate([
+            'next_py_date' => 'nullable|string|max:30',
             'creation_date' => 'nullable|string|max:30',
             'payment_date'  => 'nullable|string|max:30',
         ]);
@@ -293,6 +253,7 @@ class PaymentsInvoicesController extends Controller
             ->where('agency', (string)$agency)
             ->where('customer_id', (string)$customerId)
             ->update([
+                'next_py_date' => $data['next_py_date'] ?? '',
                 'creation_date' => $data['creation_date'] ?? '',
                 'payment_date'  => $data['payment_date'] ?? '',
                 'updated_at'    => now()->format('Y-m-d H:i:s'),
@@ -311,15 +272,15 @@ class PaymentsInvoicesController extends Controller
 
         $agency = $authUser->agency;
 
-        // ✅ invoice_id separado (NO dentro de $data para update)
         $invoiceId = (string) $request->input('invoice_id', '');
 
         if (empty($invoiceId)) {
             return response()->json(['ok' => false, 'error' => 'missing_invoice_id'], 422);
         }
 
-        // ✅ valida SOLO los campos de charges (sin invoice_id)
-        $data = $request->validate([
+        $validated = $request->validate([
+            'payment_method' => 'nullable|string|max:50',
+
             'fee' => 'nullable|string|max:50',
             'fee_split' => 'nullable|string|max:10',
             'fee_payment1_method' => 'nullable|string|max:30',
@@ -335,12 +296,46 @@ class PaymentsInvoicesController extends Controller
             'premium_payment2_value' => 'nullable|string|max:50',
         ]);
 
+        $data = [
+            'payment_method' => $request->input('payment_method') ?: null,
+
+            'fee' => $request->input('fee') ?: null,
+            'fee_split' => $request->input('fee_split', '0'),
+
+            'premium' => $request->input('premium') ?: null,
+            'premium_split' => $request->input('premium_split', '0'),
+
+            'updated_at' => now()->format('Y-m-d H:i:s'),
+        ];
+
+        if (($request->input('fee_split', '0')) === '1') {
+            $data['fee_payment1_method'] = $request->input('fee_payment1_method') ?: null;
+            $data['fee_payment1_value']  = $request->input('fee_payment1_value') ?: null;
+            $data['fee_payment2_method'] = $request->input('fee_payment2_method') ?: null;
+            $data['fee_payment2_value']  = $request->input('fee_payment2_value') ?: null;
+        } else {
+            $data['fee_payment1_method'] = null;
+            $data['fee_payment1_value']  = null;
+            $data['fee_payment2_method'] = null;
+            $data['fee_payment2_value']  = null;
+        }
+
+        if (($request->input('premium_split', '0')) === '1') {
+            $data['premium_payment1_method'] = $request->input('premium_payment1_method') ?: null;
+            $data['premium_payment1_value']  = $request->input('premium_payment1_value') ?: null;
+            $data['premium_payment2_method'] = $request->input('premium_payment2_method') ?: null;
+            $data['premium_payment2_value']  = $request->input('premium_payment2_value') ?: null;
+        } else {
+            $data['premium_payment1_method'] = null;
+            $data['premium_payment1_value']  = null;
+            $data['premium_payment2_method'] = null;
+            $data['premium_payment2_value']  = null;
+        }
+
         $updated = Invoices::where('id', $invoiceId)
             ->where('agency', (string)$agency)
             ->where('customer_id', (string)$customerId)
-            ->update(array_merge($data, [
-                'updated_at' => now()->format('Y-m-d H:i:s'),
-            ]));
+            ->update($data);
 
         return response()->json(['ok' => true, 'updated' => $updated]);
     }
@@ -357,7 +352,7 @@ class PaymentsInvoicesController extends Controller
         $rows = $request->input('rows', []);
         $grandTotal = $request->input('grand_total', '');
         $policyNumber = $request->input('policy_number', '');
-        $invoiceIdFromClient = $request->input('invoice_id', '');
+        $invoiceIdFromClient = (string) $request->input('invoice_id', '');
 
         if (!is_array($rows)) $rows = [];
 
@@ -367,62 +362,84 @@ class PaymentsInvoicesController extends Controller
             'saved_at' => now()->format('Y-m-d H:i:s'),
         ];
 
-        // 1) Intentar usar el invoice_id enviado por el cliente
         $invoice = null;
+
         if (!empty($invoiceIdFromClient)) {
-            $invoice = Invoices::where('id', (string)$invoiceIdFromClient)
+            $invoice = Invoices::where('id', $invoiceIdFromClient)
                 ->where('agency', (string)$agency)
                 ->where('customer_id', (string)$customerId)
                 ->first();
         }
 
-        // 2) Si no hay invoice actual, toma el más reciente
-        if (!$invoice) {
-            $invoice = Invoices::where('agency', (string)$agency)
-                ->where('customer_id', (string)$customerId)
-                ->orderBy('created_at', 'desc')
-                ->first();
-        }
-
-        // 3) Si aún no existe, crea uno nuevo
         if (!$invoice) {
             $invoice = new Invoices();
             $invoice->id = (string) \Illuminate\Support\Str::uuid();
             $invoice->agency = (string)$agency;
             $invoice->customer_id = (string)$customerId;
             $invoice->created_at = now()->format('Y-m-d H:i:s');
+            $invoice->created_by_name = $authUser->name ?? '';
         }
 
-        // 4) Si NO tiene invoice_number, generar consecutivo INV-0001 por agency
         if (empty($invoice->invoice_number)) {
-            $next = DB::transaction(function () use ($agency) {
-                // Tomamos el último consecutivo por agency
-                $last = DB::table('invoices')
-                    ->where('agency', (string)$agency)
-                    ->whereNotNull('invoice_number')
-                    ->orderBy('invoice_number', 'desc')
-                    ->lockForUpdate()
-                    ->value('invoice_number');
-
-                $num = 0;
-                if ($last && preg_match('/^INV-(\d+)$/', $last, $m)) {
-                    $num = (int)$m[1];
-                }
-
-                $num++;
-                return 'INV-' . str_pad((string)$num, 4, '0', STR_PAD_LEFT);
-            });
-
-            $invoice->invoice_number = $next;
+            $invoice->invoice_number = $this->getNextInvoiceNumber($agency);
         }
 
-        // 5) Guardar policy_number seleccionado
-        $invoice->policy_number = (string)$policyNumber;
+        $feeSplit = $request->input('fee_split', '0');
+        $premiumSplit = $request->input('premium_split', '0');
 
-        // 6) Guardar el JSON de tabla
+        $invoice->policy_number = $policyNumber ?: null;
+
+        $invoice->next_py_date = $request->input('next_py_date') ?: null;
+        $invoice->creation_date = $request->input('creation_date') ?: null;
+        $invoice->payment_date = $request->input('payment_date') ?: null;
+        $invoice->payment_method = $request->input('payment_method') ?: null;
+
+        $invoice->fee = $request->input('fee') ?: null;
+        $invoice->fee_split = $feeSplit;
+
+        if ($feeSplit === '1') {
+            $invoice->fee_payment1_method = $request->input('fee_payment1_method') ?: null;
+            $invoice->fee_payment1_value = $request->input('fee_payment1_value') ?: null;
+            $invoice->fee_payment2_method = $request->input('fee_payment2_method') ?: null;
+            $invoice->fee_payment2_value = $request->input('fee_payment2_value') ?: null;
+        } else {
+            $invoice->fee_payment1_method = null;
+            $invoice->fee_payment1_value = null;
+            $invoice->fee_payment2_method = null;
+            $invoice->fee_payment2_value = null;
+        }
+
+        $invoice->premium = $request->input('premium') ?: null;
+        $invoice->premium_split = $premiumSplit;
+
+        if ($premiumSplit === '1') {
+            $invoice->premium_payment1_method = $request->input('premium_payment1_method') ?: null;
+            $invoice->premium_payment1_value = $request->input('premium_payment1_value') ?: null;
+            $invoice->premium_payment2_method = $request->input('premium_payment2_method') ?: null;
+            $invoice->premium_payment2_value = $request->input('premium_payment2_value') ?: null;
+        } else {
+            $invoice->premium_payment1_method = null;
+            $invoice->premium_payment1_value = null;
+            $invoice->premium_payment2_method = null;
+            $invoice->premium_payment2_value = null;
+        }
+
         $invoice->inv_prices = json_encode($payload, JSON_UNESCAPED_UNICODE);
         $invoice->updated_at = now()->format('Y-m-d H:i:s');
         $invoice->save();
+
+        if (!empty($policyNumber)) {
+            $lastPayment = is_numeric($grandTotal)
+                ? (float) $grandTotal
+                : (float) preg_replace('/[^\d.\-]/', '', (string) $grandTotal);
+
+            DB::table('policies')
+                ->where('customer_id', (string)$customerId)
+                ->where('pol_number', (string)$policyNumber)
+                ->update([
+                    'last_payment' => $lastPayment,
+                ]);
+        }
 
         return response()->json([
             'ok' => true,
@@ -583,5 +600,87 @@ class PaymentsInvoicesController extends Controller
             ]);
 
         return response()->json(['ok' => true]);
+    }
+
+    // general payments (payments)
+
+    public function generalPayments(Request $request)
+    {
+        $authUser = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+        if (!$authUser) {
+            return redirect()->route('login');
+        }
+
+        $agency = $authUser->agency;
+
+        $search = trim($request->get('search', ''));
+        $perPageInput = strtolower($request->get('per_page', '50'));
+
+        $allowedPerPage = ['50', '100', '200', 'all'];
+        if (!in_array($perPageInput, $allowedPerPage)) {
+            $perPageInput = '50';
+        }
+
+        $query = DB::table('invoices as i')
+            ->leftJoin('customers as c', 'c.ID', '=', 'i.customer_id')
+            ->where('i.agency', $agency)
+            ->select(
+                'i.*',
+                'c.Name as customer_name'
+            )
+            ->orderByDesc('i.id');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('c.Name', 'like', "%{$search}%")
+                    ->orWhere('i.creation_date', 'like', "%{$search}%");
+            });
+        }
+
+        if ($perPageInput === 'all') {
+            $invoices = $query->get();
+        } else {
+            $invoices = $query->paginate((int) $perPageInput)->withQueryString();
+        }
+
+        $formatInvoice = function ($invoice) {
+            $prices = json_decode($invoice->inv_prices ?? '{}', true);
+
+            $invoice->amount = 0;
+            $invoice->description_item = '—';
+
+            if (is_array($prices)) {
+                $invoice->amount = (float) ($prices['grand_total'] ?? 0);
+
+                if (!empty($prices['rows']) && is_array($prices['rows'])) {
+                    $items = collect($prices['rows'])
+                        ->map(function ($row) {
+                            return $row['item']
+                                ?? $row['description']
+                                ?? $row['name']
+                                ?? null;
+                        })
+                        ->filter()
+                        ->implode(', ');
+
+                    $invoice->description_item = $items !== '' ? $items : '—';
+                }
+            }
+
+            $invoice->fee_amount = (float) ($invoice->fee ?? 0);
+            $invoice->premium_amount = (float) ($invoice->premium ?? 0);
+
+            return $invoice;
+        };
+
+        if ($perPageInput === 'all') {
+            $invoices = $invoices->map($formatInvoice);
+        } else {
+            $invoices->setCollection(
+                $invoices->getCollection()->map($formatInvoice)
+            );
+        }
+
+        return view('general_payments', compact('invoices', 'search', 'perPageInput'));
     }
 }

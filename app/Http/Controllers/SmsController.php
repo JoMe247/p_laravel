@@ -24,6 +24,15 @@ class SmsController extends Controller
     // 📩 Vista principal (inbox)
     public function index(Request $request)
     {
+
+     // Obtener usuario autenticado (funciona también con remember me)
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
         $twilio = $this->getAgencyTwilioNumber(); // 🔹 NUEVO
 
         $list = $this->buildInboxList($twilio);

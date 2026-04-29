@@ -5,128 +5,237 @@
     <meta charset="utf-8">
     <title>Invoice PDF</title>
     <style>
-        * {
-            font-family: DejaVu Sans, sans-serif;
+        @font-face {
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 400;
+            /* Regular */
+             src: url("{{ storage_path('fonts/montserrat/Montserrat-Regular.ttf') }}") format("truetype");
+        }
+
+        @font-face {
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 700;
+            /* Bold */
+            src: url("{{ storage_path('fonts/montserrat/Montserrat-Bold.ttf') }}") format("truetype");
+        }
+
+        /* =========================================================
+   VARIABLES RÁPIDAS
+   ✅ Cambia aquí tamaños y espacios globales
+========================================================= */
+        :root {
+            /* (1) Tamaño base del documento */
+            --font-base: 12px;
+
+            /* (2) Tamaños clave */
+            --title-size: 22px;
+            /* "INVOICE" (si lo usas) */
+            --total-size: 24px;
+            /* total grande */
+            --label-size: 10px;
+            /* labels (Invoice#, Date...) */
+            --table-head-size: 10px;
+            /* header tabla */
+            --table-row-size: 11.5px;
+            /* filas tabla */
+            --footer-size: 10px;
+            /* footer abajo */
+
+            /* (3) Colores */
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --border-soft: #eef2f7;
+            --head-bg: #f9fafb;
+
+            /* (4) Bordes y padding */
+            --radius: 8px;
+            --pad: 12px;
+
+            /* ✅ alto del logo (no distorsiona) */
+            --footer-img-h: 105px;
+            /* ✅ alto imagen inferior (no distorsiona) */
+        }
+
+        /* =========================================================
+   BASE
+========================================================= */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            /* ✅ solo Montserrat */
+            font-weight: 400;
         }
 
         body {
-            margin: 26px 28px;
-            color: #111827;
-            font-size: 12px;
+            margin: 0px;
+            /* ✅ márgenes del PDF */
+            color: var(--text);
+            font-size: var(--font-base);
+            /* ✅ cambia tamaño general */
+            line-height: 1.25;
         }
 
-        /* Encabezados */
-        .title {
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: .4px;
-            margin: 0;
-        }
-
-        .label {
-            color: #6b7280;
-            font-weight: 700;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: .6px;
-        }
-
-        .value {
-            font-weight: 800;
-            color: #111827;
-        }
-
-        /* Cards formales (menos “rounded”, más factura) */
-        .card {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 12px;
-            background: #fff;
-        }
-
+        /* Utilidades */
         .right {
             text-align: right;
         }
 
         .muted {
-            color: #6b7280;
-            font-weight: 600;
+            color: var(--muted);
+            font-weight: 400;
         }
 
-        /* Tabla grid */
-        table {
+        .bold {
+            font-weight: 700;
+        }
+
+        .avoid-break {
+            page-break-inside: avoid;
+        }
+
+        @page {
+            margin: 26px 28px 42px 28px;
+        }
+
+        /* =========================================================
+   TIPOGRAFÍA FORMAL
+========================================================= */
+        .h-invoice {
+            font-size: var(--title-size);
+            /* ✅ tamaño título */
+            font-weight: 700;
+            letter-spacing: .9px;
+            margin: 0;
+        }
+
+        .label {
+            font-size: var(--label-size);
+            /* ✅ tamaño labels */
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .75px;
+            color: var(--muted);
+        }
+
+        .value {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* =========================================================
+   CAJAS / CARDS (FORMAL)
+========================================================= */
+
+        .card {
+            padding: var(--pad);
+            background: #fff;
+
+        }
+
+        /* Separadores de espacio (por si los usas) */
+        .sp-10 {
+            height: 50px;
+        }
+
+        .sp-14 {
+            height: 14px;
+        }
+
+        /* =========================================================
+   LOGO (NO DISTORSIÓN)
+   ✅ Cambia el alto en --logo-h
+========================================================= */
+        .logo-wrap {
+            width: 70%;
+            overflow: hidden;
+        }
+
+        .logo-img {
+            width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* =========================================================
+   CAJA TOTAL (derecha)
+========================================================= */
+        .total-box {
+            padding: 14px;
+            background: #fff;
+        }
+
+        .total-title {
+            font-size: var(--label-size);
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .75px;
+            margin-bottom: 6px;
+        }
+
+        .total-big {
+            font-size: var(--total-size);
+            /* ✅ tamaño total grande */
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        /* Key/Value list */
+        .kv {
             width: 100%;
             border-collapse: collapse;
         }
 
-        .top-gap {
-            height: 10px;
-        }
-
-        .section-gap {
-            height: 14px;
-        }
-
-        /* Logo */
-        .logo {
-            width: 220px;
-            height: 90px;
-            object-fit: contain;
-        }
-
-        /* Invoice Total */
-        .total-box .total-title {
-            font-weight: 900;
-            font-size: 11px;
-            color: #6b7280;
-            letter-spacing: .6px;
-        }
-
-        .total-box .total-amount {
-            font-size: 22px;
-            font-weight: 900;
-            margin: 6px 0 10px 0;
-        }
-
         .kv td {
-            padding: 4px 0;
+            padding: 0px 0;
             vertical-align: top;
         }
 
         .kv td:first-child {
-            width: 92px;
-            color: #6b7280;
+            width: 112px;
+            /* ✅ ancho labels */
+            color: var(--muted);
             font-weight: 700;
         }
 
         .kv td:last-child {
-            font-weight: 900;
+            font-weight: 700;
         }
 
-        /* Items table - estilo contable */
+        /* =========================================================
+   TABLA DE ITEMS (FORMAL / CLÁSICA)
+========================================================= */
         .items {
             margin-top: 14px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
         }
 
         .items thead th {
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 10px;
-            font-size: 11px;
+            background: var(--head-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 10px;
+            font-size: var(--table-head-size);
             text-transform: uppercase;
-            letter-spacing: .6px;
-            color: #6b7280;
-            font-weight: 900;
+            letter-spacing: .75px;
+            color: var(--muted);
+            font-weight: 700;
         }
 
         .items tbody td {
-            border-bottom: 1px solid #eef2f7;
-            padding: 10px;
-            font-size: 12px;
-            vertical-align: top;
+            padding: 10px 10px;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: var(--table-row-size);
+            font-weight: 400;
+        }
+
+        .items tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .num {
@@ -134,97 +243,64 @@
             white-space: nowrap;
         }
 
-        /* Totales */
-        .totals {
+        /* =========================================================
+   GRAND TOTAL (LÍNEA FINAL)
+========================================================= */
+        .footer-total {
             margin-top: 10px;
             width: 100%;
             border-collapse: collapse;
         }
 
-        .totals td {
-            padding: 10px;
-            font-weight: 900;
+        .footer-total td {
+            padding: 10px 0;
+            font-weight: 700;
             border-top: 2px solid #111827;
-            font-size: 13px;
         }
 
-        .totals td:last-child {
+        .footer-total td:last-child {
             text-align: right;
         }
 
-        /* Footer */
-        .footer {
-            margin-top: 12px;
-            font-size: 10px;
-            color: #6b7280;
-            text-align: center;
-        }
-
-        /* ============================================
-       IMAGEN FOOTER: SIEMPRE 1 PÁGINA
-       - Reservamos espacio fijo (contenedor)
-       - La imagen se ajusta dentro sin crecer
-    ============================================ */
-
+        /* =========================================================
+   IMAGEN INFERIOR (NO DISTORSIÓN / 1 PÁGINA)
+   ✅ Alto fijo en --footer-img-h
+========================================================= */
         .footer-image-wrap {
-            margin-top: 12px;
-            width: 100%;
-            height: 140px;
-            /* ✅ AJUSTA AQUÍ: reserva espacio fijo */
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            overflow: hidden;
-            page-break-inside: avoid;
-            /* evita corte dentro del contenedor */
-        }
 
-        .footer-image-wrap img {
-            width: 100%;
-            height: 140px;
-            /* mismo que el contenedor */
-            object-fit: contain;
-            /* ✅ encaja sin salirse */
-            display: block;
-        }
-
-        /* Evita que dompdf intente partir secciones críticas */
-        .avoid-break {
-            page-break-inside: avoid;
-        }
-
-        .logo-wrap {
-            width: 100%;
-            height: 90px;
-            /* altura controlada */
-            overflow: hidden;
-        }
-
-        .logo-img {
-            width: 100%;
-            height: 90px;
-            object-fit: contain;
-            /* ✅ no distorsiona */
-            display: block;
-        }
-
-        .footer-image-wrap {
-            margin-top: 12px;
-            width: 100%;
-            height: 120px;
-            /* ✅ para 5 filas */
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            overflow: hidden;
-            page-break-inside: avoid;
         }
 
         .footer-img {
-            width: 100%;
-            height: 120px;
+            display: inline-block;
+            /* clave para centrar */
+            max-width: 100%;
+            /* controla ancho */
+            max-height: 300px;
+            /* controla alto */
             object-fit: contain;
-            /* ✅ no distorsiona */
-            display: block;
+            /* NO distorsiona */
             background: #fff;
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            
+        }
+
+        /* =========================================================
+   FOOTER PEQUEÑO
+========================================================= */
+        .pdf-fixed-footer {
+            position: fixed;
+            right: 28px;
+            /* debe coincidir con margen derecho @page */
+            bottom: 14px;
+            /* separación del borde inferior */
+            font-size: 10px;
+            color: #6b7280;
+            font-weight: 400;
+            text-align: right;
+            white-space: nowrap;
         }
     </style>
 
@@ -232,99 +308,129 @@
 
 <body>
 
-    {{-- TOP: Logo (izq) + Customer info (der) --}}
+    {{-- TOP: Logo (izq) + Agency info (der) EN LA MISMA FILA --}}
     <table class="top-grid" style="width:100%; border-collapse:collapse;">
         <tr>
-            {{-- IZQUIERDA: Logo + Agency info separado --}}
-            <td style="width:50%; vertical-align:top; padding-right:12px;">
+            <td style="width:100%; vertical-align:top;">
 
-                {{-- Logo SOLO --}}
                 <div class="card">
-                    <div class="logo-wrap">
-                        @if (!empty($agencyInfo->agency_logo))
-                            <img class="logo-img" src="{{ public_path('storage/' . $agencyInfo->agency_logo) }}"
-                                alt="Logo">
-                        @else
-                            <div class="muted"
-                                style="height:90px; display:flex; align-items:center; justify-content:center;">
-                                LOGO
-                            </div>
-                        @endif
-                    </div>
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr>
+                            {{-- LOGO (izquierda) --}}
+                            <td style="width:35%; vertical-align:middle;">
+                                <div class="logo-wrap">
+                                    @if (!empty($agencyInfo->agency_logo))
+                                        <img class="logo-img"
+                                            src="{{ public_path('storage/' . $agencyInfo->agency_logo) }}"
+                                            alt="Logo">
+                                    @else
+                                        <div class="muted"
+                                            style="height:90px; display:flex; align-items:center; justify-content:center;">
+                                            LOGO
+                                        </div>
+                                    @endif
+                                </div>
+                            </td>
+
+                            {{-- AGENCY INFO (derecha del logo) --}}
+                            <td style="width:65%; vertical-align:top; padding-left:0px; font-size:20px;">
+                                {{-- ✅ AQUÍ CAMBIAS LA SEPARACIÓN DEL TEXTO VS LOGO:
+                                 padding-left: 10px (más pegado)
+                                 padding-left: 24px (más separado) --}}
+                                <div style="font-weight:700;">
+                                    {{ $agencyInfo->agency_name ?? '' }}
+                                </div>
+                                <div class="muted">{{ $agencyInfo->agency_address ?? '' }}</div>
+                                <div class="muted">{{ $agencyInfo->office_phone ?? '' }}</div>
+                                @if (!empty($agencyInfo->office_email))
+                                    <div class="muted">{{ $agencyInfo->office_email }}</div>
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
                 </div>
 
-
-
-                <div style="height:10px;"></div>
-
-                {{-- Agency info SEPARADO del logo --}}
-                <div class="card">
-                    <div style="font-weight:900; font-size:14px;">{{ $agencyInfo->agency_name ?? '' }}</div>
-                    <div class="muted">{{ $agencyInfo->agency_address ?? '' }}</div>
-                    <div class="muted">{{ $agencyInfo->office_phone ?? '' }}</div>
-                    @if (!empty($agencyInfo->office_email))
-                        <div class="muted">{{ $agencyInfo->office_email }}</div>
-                    @endif
-                </div>
-
-            </td>
-
-            {{-- DERECHA: Customer info (SOLO una vez) --}}
-            <td style="width:50%; vertical-align:top; padding-left:12px;">
-                <div class="card right">
-                    <p class="h2" style="margin-bottom:6px;">Invoice to:</p>
-                    <div style="font-weight:900;">{{ $customer->Name ?? '' }}</div>
-                    <div class="muted">{{ $customer->Address ?? '' }}</div>
-                    <div class="muted">
-                        {{ $customer->City ?? '' }}{{ !empty($customer->State) ? ', ' . $customer->State : '' }}
-                    </div>
-                    <div class="muted">{{ $customer->Email1 ?? '' }}</div>
-                    <div class="muted">{{ $customer->Phone ?? '' }}</div>
-                </div>
             </td>
         </tr>
     </table>
 
 
+
     {{-- MID: Invoice To (izq) + Totals/Invoice meta (der) --}}
-    <table class="mid-grid">
+    {{-- MID: Customer (izq) + Totals/Invoice meta (der) --}}
+    {{-- MID: TOTAL + META (izq) | CUSTOMER (der) --}}
+    <table class="mid-grid" style="width:100%; border-collapse:collapse; margin-top:14px;">
         <tr>
-            <td style="width:55%;"></td>
-            <td style="width:45%; padding-left:10px;">
-                <div class="box">
-                    <div class="muted" style="font-weight:900;">INVOICE TOTAL</div>
+
+            {{-- IZQUIERDA: TOTAL + META --}}
+            <td style="width:45%; vertical-align:top; padding-right:12px;">
+                <div class="total-box" style="font-size: 12px">
+
+                    <div class="total-title" style="font-size: 14px">Invoice total</div>
                     <div class="total-big">
                         ${{ number_format((float) ($grandTotal ?: 0), 2) }}
                     </div>
 
                     <table class="kv">
                         <tr>
+                            <td>Next payment date</td>
+                            <td class="bold">{{ $invoice->next_py_date ?? '' }}</td>
+                        </tr>
+                        <tr>
                             <td>Invoice #</td>
-                            <td style="font-weight:900;">{{ $invoice->invoice_number ?? '' }}</td>
+                            <td class="bold">{{ $invoice->invoice_number ?? '' }}</td>
                         </tr>
                         <tr>
                             <td>Date</td>
-                            <td style="font-weight:900;">{{ $invoice->creation_date ?? '' }}</td>
+                            <td class="bold">{{ $invoice->creation_date ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td>Due Date</td>
-                            <td style="font-weight:900;">{{ $invoice->payment_date ?? '' }}</td>
+                            <td>Due date</td>
+                            <td class="bold">{{ $invoice->payment_date ?? '' }}</td>
                         </tr>
                         <tr>
                             <td>Policy #</td>
-                            <td style="font-weight:900;">{{ $invoice->policy_number ?? '' }}</td>
+                            <td class="bold">{{ $invoice->policy_number ?? '' }}</td>
                         </tr>
                         <tr>
-                            <td>Sales Agent</td>
-                            <td style="font-weight:900;">
-                                {{ $invoice->created_by_name ?? '' }}
-                            </td>
+                            <td>Sales agent</td>
+                            <td class="bold">{{ $invoice->created_by_name ?? '' }}</td>
                         </tr>
                     </table>
+
                 </div>
             </td>
+
+            {{-- DERECHA: CUSTOMER --}}
+            <td style="width:55%; vertical-align:top; padding-left:12px;">
+                <div class="card right" style="font-size: 20px">
+                    <div class="label" style="margin-bottom:6px; font-size:14px;">Invoice to</div>
+
+                    <div class="bold" style="margin-bottom:2px;">
+                        {{ $customer->Name ?? '' }}
+                    </div>
+
+                    @if (!empty($customer->Address))
+                        <div class="muted">{{ $customer->Address }}</div>
+                    @endif
+
+                    <div class="muted">
+                        {{ $customer->City ?? '' }}{{ !empty($customer->State) ? ', ' . $customer->State : '' }}
+                    </div>
+
+                    @if (!empty($customer->Email1))
+                        <div class="muted">{{ $customer->Email1 }}</div>
+                    @endif
+
+                    @if (!empty($customer->Phone))
+                        <div class="muted">{{ $customer->Phone }}</div>
+                    @endif
+                </div>
+            </td>
+
         </tr>
     </table>
+
 
     {{-- ITEMS TABLE --}}
     <table class="items">
@@ -376,12 +482,10 @@
     @endif
 
 
-
-
-
-    <div class="small-footer">
+    <div class="pdf-fixed-footer">
         {{ $agencyInfo->agency_name ?? '' }} • {{ date('Y') }}
     </div>
+
 
 </body>
 

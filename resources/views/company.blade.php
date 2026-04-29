@@ -36,14 +36,25 @@
 
         <section id="dash">
 
-            <div id="dash-content">
+            <div id="dash-content" style="overflow:hidden;">
 
                 <div class="main-container">
 
-                    {{-- ✔ Botón Add Company --}}
-                    <button id="btn-add-company" class="btn-add-company">
-                        <i class='bx bx-plus'></i> Add Company
-                    </button>
+                    <!-- Top bar: Add + Search -->
+                    <div class="company-topbar">
+                        <div class="company-search-wrap">
+                            <i class='bx bx-search'></i>
+                            <input id="company-search" class="company-search" type="text"
+                                placeholder="Search by company name or phone..." autocomplete="off" />
+                        </div>
+
+                        <button id="btn-add-company" class="btn-add-company">
+                            <i class='bx bx-plus'></i> Add Company
+                        </button>
+
+                        
+                    </div>
+
 
                     <div class="company-filters">
 
@@ -75,6 +86,10 @@
                                     <b>User:</b> <span>{{ $c->user_name }}</span>
                                 </div>
 
+                                <div class="company-field field-phone">
+                                    <b>Phone:</b> <span>{{ $c->phone_number }}</span>
+                                </div>
+
                                 <div class="company-field field-password">
                                     <b>Password:</b> <span>{{ $c->password }}</span>
                                 </div>
@@ -102,11 +117,11 @@
                                 {{-- Botones --}}
                                 <div class="company-card-buttons">
                                     <button class="btn-edit" onclick="editCompany({{ $c->id }})">
-                                        <i class="bx bx-edit"></i> Edit
+                                        <i class="bx bx-edit"></i>
                                     </button>
 
                                     <button class="btn-delete" onclick="deleteCompany({{ $c->id }})">
-                                        <i class="bx bx-trash"></i> Delete
+                                        <i class="bx bx-trash"></i>
                                     </button>
                                 </div>
 
@@ -121,7 +136,7 @@
                 <div id="company-overlay">
                     <div id="company-modal">
 
-                        <h2>Add / Edit Company</h2>
+                        <h3>Add / Edit Company</h3>
 
                         <form id="company-form" enctype="multipart/form-data">
 
@@ -129,6 +144,12 @@
 
                             <label>Company Name</label>
                             <input type="text" name="company_name" required>
+
+                            <label>Phone Number (10 Digits)</label>
+                            <input type="text" name="phone_number" inputmode="numeric" maxlength="10"
+                                placeholder="" required>
+                            <!-- <small class="field-hint">Must be exactly 10 digits.</small> -->
+
 
                             <label>User</label>
                             <input type="text" name="user_name" required>
@@ -168,7 +189,7 @@
         </section>
     </div>
 
-        <!-- UI Elements -->
+    <!-- UI Elements -->
     <div class="window-confirm">
         <div class="confirm-window-container">
             <div class="confirm-window-content">

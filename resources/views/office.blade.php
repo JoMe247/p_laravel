@@ -398,7 +398,7 @@
     <script src="js/table.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/operations.js"></script>
-    <script src="{{ asset('js/add-customer.js') }}"></script>
+
 
 
 
@@ -408,15 +408,134 @@
             const btnClose = document.getElementById('close-overlay');
             const overlay = document.getElementById('overlay-subuser');
 
-            if (btnOpen && overlay && btnClose) {
-                btnOpen.addEventListener('click', () => overlay.classList.add('show'));
-                btnClose.addEventListener('click', () => overlay.classList.remove('show'));
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) overlay.classList.remove('show');
+            if (!overlay) return;
+
+            const baseUrlMeta = document.querySelector('meta[name="base-url"]');
+            const baseUrl = baseUrlMeta ? baseUrlMeta.getAttribute('content') : '';
+
+            const form = document.getElementById('subuser-form');
+            const title = document.getElementById('overlay-title');
+            const submitBtn = document.getElementById('subuser-submit-btn');
+
+            const rowUsername = document.getElementById('row-username');
+            const rowPassword = document.getElementById('row-password');
+
+            const inputUsername = document.getElementById('subuser-username');
+            const inputName = document.getElementById('subuser-name');
+            const inputEmail = document.getElementById('subuser-email');
+            const inputPassword = document.getElementById('subuser-password');
+
+            function openOverlay() {
+                overlay.classList.add('show');
+            }
+
+            function closeOverlay() {
+                overlay.classList.remove('show');
+            }
+
+            function removeMethodSpoof() {
+                if (!form) return;
+                const m = form.querySelector('input[name="_method"]');
+                if (m) m.remove();
+            }
+
+            function setCreateMode() {
+                if (title) title.textContent = 'Registrar Sub-User';
+                if (submitBtn) submitBtn.textContent = 'Registrar';
+
+                if (form) {
+                    form.action = "{{ route('office.store') }}";
+                    removeMethodSpoof();
+                }
+
+                // Username visible y editable
+                if (rowUsername) rowUsername.style.display = '';
+                if (inputUsername) {
+                    inputUsername.disabled = false;
+                    inputUsername.readOnly = false;
+                    inputUsername.required = true;
+                    inputUsername.value = '';
+                }
+
+                // Password requerido en create
+                if (rowPassword) rowPassword.style.display = '';
+                if (inputPassword) {
+                    inputPassword.required = true;
+                    inputPassword.value = '';
+                }
+
+                if (inputName) inputName.value = '';
+                if (inputEmail) inputEmail.value = '';
+            }
+
+            function setEditMode(data) {
+                if (title) title.textContent = 'Editar Sub-User';
+                if (submitBtn) submitBtn.textContent = 'Guardar cambios';
+
+                if (form) {
+                    form.action = baseUrl ? `${baseUrl}/office/${data.id}` : `/office/${data.id}`;
+                    removeMethodSpoof();
+
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'PUT';
+                    form.appendChild(method);
+                }
+
+                // Username visible SOLO LECTURA
+                if (rowUsername) rowUsername.style.display = '';
+                if (inputUsername) {
+                    inputUsername.required = false;
+                    inputUsername.disabled = true; // no se envía
+                    inputUsername.readOnly = true; // visual
+                    inputUsername.value = data.username || '';
+                }
+
+                // Password opcional en edit
+                if (rowPassword) rowPassword.style.display = '';
+                if (inputPassword) {
+                    inputPassword.required = false;
+                    inputPassword.value = '';
+                }
+
+                if (inputName) inputName.value = data.name || '';
+                if (inputEmail) inputEmail.value = data.email || '';
+            }
+
+            // Abrir overlay (crear)
+            if (btnOpen) {
+                btnOpen.addEventListener('click', () => {
+                    setCreateMode();
+                    openOverlay();
                 });
             }
+
+            // Cerrar overlay
+            if (btnClose) btnClose.addEventListener('click', closeOverlay);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeOverlay();
+            });
+
+            // Abrir overlay (editar)
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-edit-subuser');
+                if (!btn || btn.disabled) return;
+
+                const data = {
+                    id: btn.getAttribute('data-id'),
+                    username: btn.getAttribute('data-username'),
+                    name: btn.getAttribute('data-name'),
+                    email: btn.getAttribute('data-email'),
+                };
+
+                setEditMode(data);
+                openOverlay();
+            });
         });
     </script>
+
+
 
 </body>
 

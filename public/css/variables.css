@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;700;900&family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;700;900&family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,400;1,500;1,700&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;1,100;1,200;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+
 :root{
   --red1:#e50055;
   --red2:#a60853;
@@ -7,6 +13,8 @@
   --whiteText:#f9fafb;
   --text1:#333;
   --text2:#535353;
+  --blue:#2e90f2;
+  --blue2:#2c80d4;
 
   /* Fonts */
   --montserrat: 'Montserrat', sans-serif;
@@ -15,7 +23,7 @@
   --lato: 'Lato', sans-serif;
   --poppins: 'Poppins', sans-serif;
 
-
+  --fc-today-bg-color:var(--red1);
   /*Button Border Radius*/
   --radius:7px;
 }

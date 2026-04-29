@@ -26,7 +26,7 @@ class DashboardController extends Controller
             ->take(50)
             ->get();
 
-            // ids de customers
+        // ids de customers
         $customerIds = $customers->pluck('ID')->filter()->values()->all();
 
         // Consulta independiente (NO depende de relaciones)
@@ -56,13 +56,27 @@ class DashboardController extends Controller
 
         $remindersCount = $reminders->count();
 
+        $recentDocuments = DB::table('documents as d')
+            ->leftJoin('pdf_overlays as p', 'p.id', '=', 'd.template_id')
+            ->select(
+                'd.id',
+                'd.insured_name',
+                'd.date',
+                'd.time',
+                'p.template_name'
+            )
+            ->orderByDesc('d.id')
+            ->limit(6)
+            ->get();
+
         // 🔹 AHORA SÍ, TODO EXISTE
         return view('dashboard', [
             'username'  => $user->name ?? $user->username,
             'customers' => $customers,
             'reminders' => $reminders,
             'remindersCount'  => $remindersCount,
-            'policyCounts' => $policyCounts 
+            'policyCounts' => $policyCounts,
+            'recentDocuments' => $recentDocuments, 
         ]);
     }
 

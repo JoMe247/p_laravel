@@ -14,6 +14,15 @@ class CalendarController extends Controller
 {
     public function index()
     {
+
+        // Obtener usuario autenticado (funciona también con remember me)
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // En caso de no estar autenticado, redirige al login
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
         $today = Carbon::today()->toDateString();
 
         // ===============================

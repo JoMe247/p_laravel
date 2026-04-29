@@ -21,82 +21,381 @@ use App\Http\Controllers\CustomerFilesController;
 use App\Http\Controllers\RemindersController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\PaymentsInvoicesController;
-
+use App\Http\Controllers\SmsMonthlyCounterController;
+use App\Http\Controllers\EstimatesController;
+use App\Http\Controllers\DocumentsController;
+use App\Http\Controllers\TemplatesController;
+use App\Http\Controllers\ShortUrlController;
+use App\Http\Controllers\SigningController;
+use App\Http\Controllers\ReportsController;
 
 // Página inicial
 Route::get('/', function () {
-    return redirect()->route('send.form');
+    return redirect()->route('login');
 });
 
 // =======================
-// 🔐 Autenticación
-// =======================
-Route::get('/login', [LoginController::class, 'show'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-Route::get('/register', [RegisterController::class, 'show'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
-Route::get('/verify-email', [RegisterController::class, 'verifyEmail'])->name('verify.email');
-
-// =======================
-// 🏠 Dashboard y módulos protegidos
-// =======================
-Route::middleware('auth.multi')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
-
-    // WhatsApp
-    Route::get('/whatsapp', [WhatsappController::class, 'showInbox'])->name('whatsapp.inbox');
-    Route::post('/whatsapp/sync', [WhatsappController::class, 'syncFromTwilio'])->name('whatsapp.sync');
-    Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('send.action');
-    Route::delete('/whatsapp/delete/{id}', [WhatsappController::class, 'delete'])->name('whatsapp.delete');
-    Route::delete('/whatsapp/delete-multiple', [WhatsappController::class, 'deleteMultiple'])->name('whatsapp.deleteMultiple');
-    Route::get('/sent', [WhatsappController::class, 'showSent'])->name('whatsapp.sent');
-
-    // Office (registro de sub-users)
-    Route::get('/office', [SubUserController::class, 'create'])->name('office.create');
-    Route::post('/office', [SubUserController::class, 'store'])->name('office.store');
-    Route::get('/verify-subuser-email', [SubUserController::class, 'verifyEmail'])->name('subuser.verify');
-});
-
-// =======================
-// 💬 SMS (protegido para users y sub_users)
-// =======================
-Route::middleware('auth.multi')->group(function () {
-    Route::get('/sms', [SmsController::class, 'index'])->name('sms.index');
-    Route::get('/sms/messages/{contact}', [SmsController::class, 'messages'])->name('sms.messages');
-    Route::post('/sms/sync', [SmsController::class, 'sync'])->name('sms.sync');
-    Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
-    Route::delete('/sms/delete/{contact}', [SmsController::class, 'deleteOne'])->name('sms.deleteOne');
-    Route::post('/sms/delete-multiple', [SmsController::class, 'deleteMany'])->name('sms.deleteMany');
-    Route::get('/sms/search', [SmsController::class, 'search'])->name('sms.search');
-});
-
-// =======================
-// 👥 Customers
-// =======================
-Route::get('/customers', [CustomersController::class, 'index'])->name('customers.index');
-Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store'); // guarda los 4 campos (AJAX)
-Route::get('/profile/{id}', [CustomersController::class, 'profile'])->name('profile');
-Route::put('/profile/{id}', [CustomersController::class, 'update'])->name('customers.update'); // guarda el resto del perfil
-Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMultiple']);
-Route::post('/customers/{id}/upload-photo', [CustomersController::class, 'uploadPhoto'])
-    ->name('customers.uploadPhoto');
-Route::post('/customers/{id}/alert', [CustomersController::class, 'saveAlert']);
-Route::post('/customers/{id}/alert/remove', [CustomersController::class, 'removeAlert']);
-// Listar notas
-Route::get('/customers/{id}/notes', [CustomerNotesController::class, 'index']);
-Route::post('/customers/{id}/notes', [CustomerNotesController::class, 'store']);
-Route::delete('/customers/notes/{id}', [CustomerNotesController::class, 'destroy']);
-
-
-
-
-// =======================
-// 🍪 Middleware RememberMe
+// 🍪 RememberMe (debe correr ANTES de auth.multi)
 // =======================
 Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(function () {
+
+    // =======================
+    // 🔐 Autenticación
+    // =======================
     Route::get('/login', [LoginController::class, 'show'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    Route::get('/register', [RegisterController::class, 'show'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register']);
+    Route::get('/verify-email', [RegisterController::class, 'verifyEmail'])->name('verify.email');
+
+    // Recuperar contraseña (simulado)
+
+    Route::get('/reset', [ForgotPasswordController::class, 'showResetForm'])->name('password.request');
+    Route::post('/reset', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
+
+
+    // Nueva contraseña
+    Route::get('/new-password/{token}', [ForgotPasswordController::class, 'showNewPassForm'])->name('password.reset');
+    Route::post('/new-password', [ForgotPasswordController::class, 'updatePassword'])->name('password.update');
+
+    // =======================
+    // 🏠 Dashboard y módulos protegidos
+    // =======================
+    Route::middleware('auth.multi')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+
+        // WhatsApp
+        Route::get('/whatsapp', [WhatsappController::class, 'showInbox'])->name('whatsapp.inbox');
+        Route::post('/whatsapp/sync', [WhatsappController::class, 'syncFromTwilio'])->name('whatsapp.sync');
+        Route::post('/send', [WhatsappController::class, 'sendMessage'])->name('send.action');
+        Route::delete('/whatsapp/delete/{id}', [WhatsappController::class, 'delete'])->name('whatsapp.delete');
+        Route::delete('/whatsapp/delete-multiple', [WhatsappController::class, 'deleteMultiple'])->name('whatsapp.deleteMultiple');
+        Route::get('/sent', [WhatsappController::class, 'showSent'])->name('whatsapp.sent');
+
+        // Office (registro de sub-users)
+        Route::get('/office', [SubUserController::class, 'create'])->name('office.create');
+        Route::post('/office', [SubUserController::class, 'store'])->name('office.store');
+        Route::get('/verify-subuser-email', [SubUserController::class, 'verifyEmail'])->name('subuser.verify');
+
+
+        // =======================
+        // 💬 SMS (protegido para users y sub_users)
+        // =======================
+
+        Route::get('/sms', [SmsController::class, 'index'])->name('sms.index');
+        Route::get('/sms/messages/{contact}', [SmsController::class, 'messages'])->name('sms.messages');
+        Route::post('/sms/sync', [SmsController::class, 'sync'])->name('sms.sync');
+        Route::post('/sms/send', [SmsController::class, 'send'])->name('sms.send');
+        Route::delete('/sms/delete/{contact}', [SmsController::class, 'deleteOne'])->name('sms.deleteOne');
+        Route::post('/sms/delete-multiple', [SmsController::class, 'deleteMany'])->name('sms.deleteMany');
+        Route::get('/sms/search', [SmsController::class, 'search'])->name('sms.search');
+
+
+        // =======================
+        // 👥 Customers
+        // =======================
+        Route::get('/customers', [CustomersController::class, 'index'])->name('customers.index');
+        Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store'); // guarda los 4 campos (AJAX)
+        Route::get('/profile/{id}', [CustomersController::class, 'profile'])->name('profile');
+        Route::put('/profile/{id}', [CustomersController::class, 'update'])->name('customers.update'); // guarda el resto del perfil
+        Route::post('/customers/delete-multiple', [CustomersController::class, 'deleteMultiple']);
+        Route::post('/customers/{id}/upload-photo', [CustomersController::class, 'uploadPhoto'])
+            ->name('customers.uploadPhoto');
+        Route::post('/customers/{id}/alert', [CustomersController::class, 'saveAlert']);
+        Route::post('/customers/{id}/alert/remove', [CustomersController::class, 'removeAlert']);
+        // Listar notas
+        Route::get('/customers/{id}/notes', [CustomerNotesController::class, 'index']);
+        Route::post('/customers/{id}/notes', [CustomerNotesController::class, 'store']);
+        Route::get('/customers/{id}/policies', [CustomerNotesController::class, 'policies']);
+        Route::delete('/customers/notes/{id}', [CustomerNotesController::class, 'destroy']);
+
+
+        Route::get('/office', [OfficeController::class, 'index'])->name('office.index');
+
+        // ✅ Ruta de eliminación con model binding
+        Route::delete('/office/subusers/{id}', [OfficeController::class, 'destroy'])
+            ->name('office.delete');
+
+        Route::put('/office/{id}', [OfficeController::class, 'update'])->name('office.update');
+
+
+        Route::post('/office/agency/save', [OfficeController::class, 'saveAgency'])
+            ->name('agency.save');
+
+        // Logo upload
+
+        Route::post('/office/upload-logo', [OfficeController::class, 'uploadLogo'])->name('office.uploadLogo');
+
+        Route::get('/account', [AccountController::class, 'show'])
+            ->name('account.show');
+
+        // Company Routes
+        Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
+        Route::post('/companies/store', [CompanyController::class, 'store']);
+        Route::get('/companies/edit/{id}', [CompanyController::class, 'edit']);
+        Route::post('/companies/update/{id}', [CompanyController::class, 'update']);
+        Route::post('/companies/delete/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
+
+        // Help Routes
+        Route::get('/help', [HelpController::class, 'index'])->name('help');
+        Route::post('/help/store', [HelpController::class, 'store'])
+            ->name('help.store');
+        Route::post('/help/update-status', [HelpController::class, 'updateStatus']);
+        Route::post('/help/update-priority', [HelpController::class, 'updatePriority']);
+        Route::post('/help/delete', [HelpController::class, 'delete'])->name('help.delete');
+
+
+
+        // Tasks Routes
+        Route::get('/tasks', [TaskController::class, 'index'])
+            ->name('tasks.index');
+
+        Route::post('/tasks/store', [TaskController::class, 'store'])
+            ->name('tasks.store');
+        Route::post('/tasks/update-priority', [TaskController::class, 'updatePriority']);
+        Route::post('/tasks/update-status', [TaskController::class, 'updateStatus']);
+        Route::post('/tasks/delete', [TaskController::class, 'delete']);
+
+
+        // Calendar Routes
+
+
+        // Calendar Routes (PROTEGIDAS)
+        Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
+
+        Route::post('/calendar/save', [CalendarController::class, 'store'])->name('calendar.save');
+
+        Route::get('/calendar/events', [CalendarController::class, 'load'])->name('calendar.load');
+
+        Route::post('/calendar/update', [CalendarController::class, 'update'])->name('calendar.update');
+
+        Route::delete('/calendar/delete/{id}', [CalendarController::class, 'delete'])->name('calendar.delete');
+
+
+
+        // =======================
+        // 📄 Policies
+        // =======================
+
+        // Listar policies por customer
+        Route::get('/policies/{customer_id}', [PoliciesController::class, 'index'])
+            ->name('policies.index');
+
+        // Crear nueva policy
+        Route::post('/customers/{customer_id}/policies/store', [PoliciesController::class, 'store'])
+            ->name('policies.store');
+
+        // Mostrar policy para edición (AJAX)
+        Route::get('/policies/{id}/show', [PoliciesController::class, 'show'])
+            ->name('policies.show');
+
+        // Actualizar policy
+        Route::post('/policies/{id}/update', [PoliciesController::class, 'update'])
+            ->name('policies.update');
+
+        // Eliminar policy
+        Route::delete('/policies/{id}', [PoliciesController::class, 'destroy'])
+            ->name('policies.destroy');
+
+        // =======================
+        // 📁 Customer Files
+        // =======================
+
+        // Vista files por customer
+        Route::get('/files/{id}', [CustomerFilesController::class, 'index'])
+            ->name('files.customer');
+
+        // Subir archivo
+        Route::post('/files/{id}', [CustomerFilesController::class, 'store'])
+            ->name('files.store');
+
+        // Eliminar archivo
+        Route::delete('/files/delete/{fileId}', [CustomerFilesController::class, 'destroy'])
+            ->name('files.delete');
+
+        // Reminders
+        Route::get('/reminders/{id}', [RemindersController::class, 'index'])->name('reminders.index');
+        Route::post('/reminders/{id}', [RemindersController::class, 'store'])->name('reminders.store');
+        Route::delete(
+            '/reminders/{id}/{reminder}',
+            [App\Http\Controllers\RemindersController::class, 'destroy']
+        )->name('reminders.destroy');
+
+        // Documents
+        Route::get('/profile/{customerId}/documents', [DocumentsController::class, 'customerDocuments'])
+            ->name('profile.documents');
+
+        Route::delete('/profile/{customerId}/documents/delete-selected', [DocumentsController::class, 'deleteSelectedCustomerDocuments'])
+            ->name('profile.documents.deleteSelected');
+
+        // Schedules
+
+
+
+        Route::get('/schedules', [SchedulesController::class, 'index'])->name('schedules.index');
+
+        // API (puede ir en web para que use sesión/csrf)
+        Route::get('/schedules/week', [SchedulesController::class, 'weekData'])->name('schedules.week');
+
+        Route::get('/schedules/shifts', [SchedulesController::class, 'getShifts'])->name('schedules.shifts.get');
+
+        Route::post('/schedules/shifts', [SchedulesController::class, 'storeShift'])->name('schedules.shifts.store');
+        Route::put('/schedules/shifts/{id}', [SchedulesController::class, 'updateShift'])->name('schedules.shifts.update');
+        Route::delete('/schedules/shifts/{id}', [SchedulesController::class, 'deleteShift'])->name('schedules.shifts.delete');
+
+        Route::post('/schedules/assign', [SchedulesController::class, 'assignShift'])->name('schedules.assign');
+        Route::delete('/schedules/assign', [SchedulesController::class, 'removeAssignment'])->name('schedules.assign.delete');
+        Route::get('/schedules/pdf', [SchedulesController::class, 'downloadWeekPdf'])
+            ->name('schedules.pdf');
+
+
+        // invoices
+
+        Route::get('/customers/{customerId}/payments', [PaymentsInvoicesController::class, 'payments'])
+            ->name('payments');
+
+        Route::get('/customers/{customerId}/invoices', [PaymentsInvoicesController::class, 'invoices'])
+            ->name('invoices');
+
+        Route::post('/customers/{customerId}/invoices/rows', [PaymentsInvoicesController::class, 'storeRow'])
+            ->name('invoices.rows.store');
+
+        Route::post('/customers/{customerId}/invoices/dates', [PaymentsInvoicesController::class, 'saveDates'])
+            ->name('invoices.dates.save');
+
+        Route::post('/customers/{customerId}/invoices/charges', [PaymentsInvoicesController::class, 'saveCharges'])
+            ->name('invoices.charges.save');
+
+        Route::post('/customers/{customerId}/invoices/save-table', [PaymentsInvoicesController::class, 'saveInvoiceTable'])
+            ->name('invoices.table.save');
+
+        Route::delete('/invoices/{invoiceId}', [PaymentsInvoicesController::class, 'destroy'])
+            ->name('invoices.destroy');
+
+        Route::get('/invoices/{invoiceId}/pdf', [PaymentsInvoicesController::class, 'downloadPdf'])
+            ->name('invoices.pdf');
+
+        Route::post('/payments/invoice-footer-image', [PaymentsInvoicesController::class, 'uploadInvoiceFooterImage'])
+            ->name('payments.invoice_footer_image.upload');
+
+        Route::post('/payments/invoice-footer-image/enabled', [PaymentsInvoicesController::class, 'setInvoiceFooterEnabled'])
+            ->name('payments.invoice_footer_image.enabled');
+
+        Route::post('/payments/invoice-footer-image/delete', [PaymentsInvoicesController::class, 'deleteInvoiceFooterImage'])
+            ->name('payments.invoice_footer_image.delete');
+
+        // SMS MONTHLY COUNTER
+        Route::post('/sms/monthly-counter/store', [SmsMonthlyCounterController::class, 'store'])
+            ->name('sms.monthlyCounter.store');
+
+        Route::post('/sms/monthly-counter/backfill', [SmsMonthlyCounterController::class, 'backfill'])
+            ->name('sms.monthlyCounter.backfill');
+
+
+
+
+
+
+        Route::get('/estimates/{customerId}', [EstimatesController::class, 'estimates'])->name('estimates');
+
+        Route::get('/estimate/register/{customerId}', [EstimatesController::class, 'register'])->name('estimate.register');
+
+        Route::post('/estimates/table/save/{customerId}', [EstimatesController::class, 'saveEstimateTable'])->name('estimates.table.save');
+
+        Route::post('/estimates/dates/save/{customerId}', [EstimatesController::class, 'saveDates'])->name('estimates.dates.save');
+
+        Route::post('/estimates/charges/save/{customerId}', [EstimatesController::class, 'saveCharges'])->name('estimates.charges.save');
+
+        Route::delete('/estimates/{estimateId}', [EstimatesController::class, 'destroy'])->name('estimates.destroy');
+
+        // Footer image estimates (independiente)
+        Route::post('/estimates/estimate-footer-image', [EstimatesController::class, 'uploadEstimateFooterImage']);
+        Route::post('/estimates/estimate-footer-image/enabled', [EstimatesController::class, 'setEstimateFooterEnabled']);
+        Route::post('/estimates/estimate-footer-image/delete', [EstimatesController::class, 'deleteEstimateFooterImage']);
+        Route::get('/estimates/pdf/{customerId}/{estimateId}', [EstimatesController::class, 'pdf'])->name('estimates.pdf');
+
+
+
+        // Documents
+        Route::get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
+
+
+
+        Route::get('/templates/create', [TemplatesController::class, 'create'])->name('templates.create');
+        Route::post('/templates/save', [TemplatesController::class, 'store'])->name('templates.store');
+
+        Route::get('/documents/create-document', [DocumentsController::class, 'createDocument'])
+            ->name('documents.create_document');
+
+        Route::get('/documents/templates/options', [DocumentsController::class, 'templateOptions'])
+            ->name('documents.templates.options');
+
+        Route::get('/documents/templates/{id}', [DocumentsController::class, 'templateData'])
+            ->name('documents.templates.data');
+
+        Route::get('/documents/customers/search', [DocumentsController::class, 'searchCustomers'])
+            ->name('documents.customers.search');
+
+        Route::get('/documents/customers/{customerId}/policies', [DocumentsController::class, 'customerPolicies'])
+            ->name('documents.customers.policies');
+
+        Route::post('/documents/save-generated', [DocumentsController::class, 'saveGeneratedPdf'])
+            ->name('documents.save_generated');
+
+        Route::get('/documents/templates/file/{id}', [DocumentsController::class, 'streamTemplatePdf'])
+            ->name('documents.templates.file');
+
+        Route::get('/documents/{id}/pdf', [DocumentsController::class, 'viewPdf'])
+            ->name('documents.view_pdf');
+
+        Route::post('/documents/{id}/resend-phone', [DocumentsController::class, 'resendToPhone'])
+            ->name('documents.resend_phone');
+
+        Route::post('/documents/{id}/resend-email', [DocumentsController::class, 'resendByEmail'])
+            ->name('documents.resend_email');
+
+        Route::delete('/documents/{id}', [DocumentsController::class, 'destroy'])
+            ->name('documents.destroy');
+
+
+
+
+        Route::get('/s/{short}', [ShortUrlController::class, 'show'])->name('short.show');
+        Route::post('/s/{short}', [ShortUrlController::class, 'verify'])->name('short.verify');
+
+        // (luego) pages estáticas
+        Route::view('/signed', 'short.signed')->name('short.signed');
+        Route::view('/error', 'short.error')->name('short.error');
+        Route::view('/success', 'short.success')->name('short.success');
+
+
+
+        Route::get('/sign', [SigningController::class, 'showByQuery'])->name('sign.query');
+        Route::get('/sign/{short}/{docId}', [SigningController::class, 'show'])->name('sign.show');
+        Route::get('/sign/{short}/{docId}/pdf', [SigningController::class, 'pdf'])->name('sign.pdf');
+        Route::post('/sign/{short}/{docId}/signature', [SigningController::class, 'saveSignature'])->name('sign.signature');
+
+
+
+
+
+
+        Route::get('/payments', [PaymentsInvoicesController::class, 'generalPayments'])
+            ->name('payments.general');
+
+
+
+        Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+        Route::get('/reports/invoices-data', [ReportsController::class, 'invoicesData'])->name('reports.invoices-data');
+        Route::get('/reports/estimates-data', [ReportsController::class, 'estimatesData'])->name('reports.estimates-data');
+        Route::get('/reports/customers-data', [ReportsController::class, 'customersData'])->name('reports.customers-data');
+        Route::get('/reports/items-data', [ReportsController::class, 'itemsData'])->name('reports.items-data');
+        Route::get('/reports/policies-data', [ReportsController::class, 'policiesData'])->name('reports.policies-data');
+        Route::get('/reports/messages-data', [ReportsController::class, 'messagesData'])->name('reports.messages-data');
+        
+    });
 });
 
 
@@ -130,12 +429,12 @@ Route::middleware(['auth:web,sub'])->group(function () {
         ->name('account.show');
 });
 
-// Company Routes
-Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
-Route::post('/companies/store', [CompanyController::class, 'store']);
-Route::get('/companies/edit/{id}', [CompanyController::class, 'edit']);
-Route::post('/companies/update/{id}', [CompanyController::class, 'update']);
-Route::post('/companies/delete/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
+    // Company Routes
+    Route::get('/companies', [CompanyController::class, 'index'])->name('companies');
+    Route::post('/companies/store', [CompanyController::class, 'store']);
+    Route::get('/companies/edit/{id}', [CompanyController::class, 'edit']);
+    Route::post('/companies/update/{id}', [CompanyController::class, 'update']);
+    Route::post('/companies/delete/{id}', [CompanyController::class, 'delete'])->name('companies.delete');
 
 // Help Routes
 Route::get('/help', [HelpController::class, 'index'])->name('help');
@@ -242,7 +541,133 @@ Route::middleware(['auth.multi'])->group(function () {
     Route::delete('/schedules/assign', [SchedulesController::class, 'removeAssignment'])->name('schedules.assign.delete');
     Route::get('/schedules/pdf', [SchedulesController::class, 'downloadWeekPdf'])
         ->name('schedules.pdf');
+
+
+    // invoices
+
+    Route::get('/customers/{customerId}/payments', [PaymentsInvoicesController::class, 'payments'])
+        ->name('payments');
+
+    Route::get('/customers/{customerId}/invoices', [PaymentsInvoicesController::class, 'invoices'])
+        ->name('invoices');
+
+    Route::post('/customers/{customerId}/invoices/rows', [PaymentsInvoicesController::class, 'storeRow'])
+        ->name('invoices.rows.store');
+
+    Route::post('/customers/{customerId}/invoices/dates', [PaymentsInvoicesController::class, 'saveDates'])
+        ->name('invoices.dates.save');
+
+    Route::post('/customers/{customerId}/invoices/charges', [PaymentsInvoicesController::class, 'saveCharges'])
+        ->name('invoices.charges.save');
+
+    Route::post('/customers/{customerId}/invoices/save-table', [PaymentsInvoicesController::class, 'saveInvoiceTable'])
+        ->name('invoices.table.save');
+
+    Route::delete('/invoices/{invoiceId}', [PaymentsInvoicesController::class, 'destroy'])
+        ->name('invoices.destroy');
+
+    Route::get('/invoices/{invoiceId}/pdf', [PaymentsInvoicesController::class, 'downloadPdf'])
+        ->name('invoices.pdf');
+
+    Route::post('/payments/invoice-footer-image', [PaymentsInvoicesController::class, 'uploadInvoiceFooterImage'])
+        ->name('payments.invoice_footer_image.upload');
+
+    Route::post('/payments/invoice-footer-image/enabled', [PaymentsInvoicesController::class, 'setInvoiceFooterEnabled'])
+        ->name('payments.invoice_footer_image.enabled');
+
+    Route::post('/payments/invoice-footer-image/delete', [PaymentsInvoicesController::class, 'deleteInvoiceFooterImage'])
+        ->name('payments.invoice_footer_image.delete');
+
+    // SMS MONTHLY COUNTER
+    Route::post('/sms/monthly-counter/store', [SmsMonthlyCounterController::class, 'store'])
+        ->name('sms.monthlyCounter.store');
+
+    Route::post('/sms/monthly-counter/backfill', [SmsMonthlyCounterController::class, 'backfill'])
+        ->name('sms.monthlyCounter.backfill');
+
+
+    Route::get('/estimates/{customerId}', [EstimatesController::class, 'estimates'])->name('estimates');
+
+    Route::get('/estimate/register/{customerId}', [EstimatesController::class, 'register'])->name('estimate.register');
+
+    Route::post('/estimates/table/save/{customerId}', [EstimatesController::class, 'saveEstimateTable'])->name('estimates.table.save');
+
+    Route::post('/estimates/dates/save/{customerId}', [EstimatesController::class, 'saveDates'])->name('estimates.dates.save');
+
+    Route::post('/estimates/charges/save/{customerId}', [EstimatesController::class, 'saveCharges'])->name('estimates.charges.save');
+
+    Route::delete('/estimates/{estimateId}', [EstimatesController::class, 'destroy'])->name('estimates.destroy');
+
+    // Footer image estimates (independiente)
+    Route::post('/estimates/estimate-footer-image', [EstimatesController::class, 'uploadEstimateFooterImage']);
+    Route::post('/estimates/estimate-footer-image/enabled', [EstimatesController::class, 'setEstimateFooterEnabled']);
+    Route::post('/estimates/estimate-footer-image/delete', [EstimatesController::class, 'deleteEstimateFooterImage']);
+    Route::get('/estimates/pdf/{customerId}/{estimateId}', [EstimatesController::class, 'pdf'])->name('estimates.pdf');
+
+
+
+    // Documents
+    Route::get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
+
+
+
+    Route::get('/templates/create', [TemplatesController::class, 'create'])->name('templates.create');
+    Route::post('/templates/save', [TemplatesController::class, 'store'])->name('templates.store');
+
+    Route::get('/documents/create-document', [DocumentsController::class, 'createDocument'])
+        ->name('documents.create_document');
+
+    Route::get('/documents/templates/options', [DocumentsController::class, 'templateOptions'])
+        ->name('documents.templates.options');
+
+    Route::get('/documents/templates/{id}', [DocumentsController::class, 'templateData'])
+        ->name('documents.templates.data');
+
+    Route::get('/documents/customers/search', [DocumentsController::class, 'searchCustomers'])
+        ->name('documents.customers.search');
+
+    Route::get('/documents/customers/{customerId}/policies', [DocumentsController::class, 'customerPolicies'])
+        ->name('documents.customers.policies');
+
+    Route::post('/documents/save-generated', [DocumentsController::class, 'saveGeneratedPdf'])
+        ->name('documents.save_generated');
+
+    Route::get('/documents/templates/file/{id}', [DocumentsController::class, 'streamTemplatePdf'])
+        ->name('documents.templates.file');
+
+
+        
+
+    Route::get('/s/{short}', [ShortUrlController::class, 'show'])->name('short.show');
+    Route::post('/s/{short}', [ShortUrlController::class, 'verify'])->name('short.verify');
+
+    // (luego) pages estáticas
+    Route::view('/signed', 'short.signed')->name('short.signed');
+    Route::view('/error', 'short.error')->name('short.error');
+    Route::view('/success', 'short.success')->name('short.success');
+
+
+
+
+    Route::get('/sign/{short}/{docId}', [SigningController::class, 'show'])->name('sign.show');
+    Route::get('/sign/{short}/{docId}/pdf', [SigningController::class, 'pdf'])->name('sign.pdf');
+    Route::post('/sign/{short}/{docId}/signature', [SigningController::class, 'saveSignature'])->name('sign.signature');
+
+    
+
+    //Rutas para la visualización y descarga de files en customer files
+    Route::get('/customers/files/{id}', [CustomerFilesController::class, 'index'])->name('files.customer');
+    Route::post('/customers/files/{id}/store', [CustomerFilesController::class, 'store'])->name('files.store');
+    Route::put('/customers/files/{id}/update', [CustomerFilesController::class, 'update'])->name('files.update');
+    Route::delete('/customers/files/{id}', [CustomerFilesController::class, 'destroy'])->name('files.delete');
+
+    Route::get('/customers/file/{id}/view', [CustomerFilesController::class, 'view'])->name('files.view');
+    Route::get('/customers/file/{id}/download', [CustomerFilesController::class, 'download'])->name('files.download');
+
+
+    //FIN DE FUNCIÓN MIDDLEWARE
 });
+
 
 // invoices
 

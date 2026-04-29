@@ -39,7 +39,7 @@
     gap: 12px;
 
     padding: 12px 14px;
-    border-radius: 16px;
+    border-radius: 5px;
     border: none;
 
     background: #f3f3f3;
@@ -68,9 +68,9 @@
 /* =========================== */
 
 .profile-menu-item.active {
-    background: #3498db; /* AZUL PRINCIPAL */
+    background: var(--red1); /* AZUL PRINCIPAL */
     color: #ffffff;
-    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.45);
+    /* box-shadow: 0 4px 10px rgba(52, 152, 219, 0.45); */
 }
 
 /* Ícono activo */
@@ -304,8 +304,8 @@
 }
 
 #profile-save{
-    width: 120px;
-    background: #3c86e7;
+    /* width: 120px; */
+    background: #0b6ede;
     color: #fff;
     border: none;
     padding: 8px 14px;
@@ -315,7 +315,7 @@
 }
 
 #profile-save:hover{
-    background: #3574c6;
+    background: #0651a7;
 }
 
 /* TOP ROW EDITABLE (DOB, GENDER, MARITAL) */
@@ -621,6 +621,31 @@
     position: sticky;
     top: 20px;  /* se pega debajo del menú */
     z-index: 9;
+    min-height: 300px;
+    font-family: var(--montserrat);
+}
+
+#add-note-btn{
+    width: 140px;
+    background: var(--red1);
+    font-weight: bold;
+    font-size: 1em;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#add-note-btn:hover{
+    background-color: var(--red2);
+}
+#add-note-btn i{
+    font-size: 1.5em;
 }
 
 
@@ -634,6 +659,7 @@
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    backdrop-filter: blur(1px);
 }
 
 .note-window {
@@ -642,6 +668,22 @@
     width: 480px;
     border-radius: 18px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.note-window h2{
+    font-size: 1.3rem;
+    color: #1a1a1a;
+    font-weight: 500;
+    font-family: var(--montserrat);
+    text-align: center;
+}
+
+.note-window label{
+    font-size: 1rem;
+    color: #1a1a1a;
+    font-family: var(--montserrat);
+    text-align: center;
+    margin-top: 5px;
 }
 
 .note-window input,

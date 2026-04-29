@@ -17,14 +17,14 @@ class RedirectIfAuthenticated
         if (Auth::guard('web')->check() || Auth::guard('sub')->check()) {
             // Si intenta acceder a login o register, lo mandamos al dashboard
             if ($request->is('login') || $request->is('register')) {
-                return redirect('/dashboard');
+                return redirect('dashboard');
             }
-        } else {
+        } /* else {
             // Si NO está autenticado y trata de acceder al dashboard
             if ($request->is('dashboard')) {
                 return redirect('/login');
             }
-        }
+        } */ 
 
         return $next($request);
     }

@@ -30,16 +30,23 @@
             <div id="lower-table-clients" type="fullscreen">
                 <div class="sent-container mt-10">
                     <div class="sent-card">
-                        <h1>📨 Mensajes Enviados</h1>
+                        <h1>Mensajes Enviados</h1>
 
                         <div class="sent-actions">
-                            <a href="{{ route('whatsapp.inbox') }}" class="btn btn-secondary">📥 Volver al Inbox</a>
+                            <a id="profile-back" href="{{ route('whatsapp.inbox') }}" class="btn btn-secondary"><i class="bx bx-arrow-back"></i></a>
+
+                            <div id="search-container" style="position:unset;margin-top:unset;margin-left:unset !important;" bis_skin_checked="1">
+                                <label for="searchInput"><i class="bx bx-search"></i></label>
+                                <input id="searchInput" type="text" placeholder="Buscar por fecha, número o mensaje...">
+                            </div>
                         </div>
 
-                        <!-- 🔍 Cuadro de búsqueda -->
-                        <div class="search-bar">
+                        <!-- Cuadro de búsqueda -->
+                        <!-- <div class="search-bar">
                             <input type="text" id="searchInput" placeholder="Buscar por fecha, número o mensaje...">
-                        </div>
+                        </div> -->
+
+                        
 
                         <div class="overflow-x-auto">
                             <table class="sent-table" id="sentTable">

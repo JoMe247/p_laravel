@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let selectedEvent = null;
     let selectedColor = '#3B82F6';
 
-    let calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+    let calendar = new FullCalendar.Calendar(document.getElementById('calendar-2'), {
         initialView: 'dayGridMonth',
         height: 'auto',
 

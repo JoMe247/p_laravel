@@ -36,90 +36,85 @@
 
         <section id="dash">
 
-            <div id="dash-content">
+            <!-- LEFT PANEL -->
+            <div class="calendar-left-panel">
 
-                <div class="main-container calendar-layout">
+                <a href="{{ route('schedules.index') }}" class="left-action-btn">
+                    <i class='bx bx-time-five'></i> Schedules
+                </a>
 
-                    <!-- LEFT PANEL -->
-                    <div class="calendar-left-panel">
+                @php
+                    $monday = \Carbon\Carbon::now(config('app.timezone'))->startOfWeek(\Carbon\Carbon::MONDAY);
+                    $days = collect(range(0, 6))->map(fn($i) => $monday->copy()->addDays($i));
+                    $weekByDate = ($weekShifts ?? collect())->keyBy(
+                        fn($a) => \Carbon\Carbon::parse($a->shift_date)->toDateString(),
+                    );
+                @endphp
 
-                        <div class="left-big-icon">
-                            <i class='bx bx-time-five'></i>
-                        </div>
-
-                        <a href="{{ route('schedules.index') }}" class="left-action-btn">
-                            Schedules
-                        </a>
-
-                        @php
-                            $monday = \Carbon\Carbon::now(config('app.timezone'))->startOfWeek(\Carbon\Carbon::MONDAY);
-                            $days = collect(range(0, 6))->map(fn($i) => $monday->copy()->addDays($i));
-                            $weekByDate = ($weekShifts ?? collect())->keyBy(
-                                fn($a) => \Carbon\Carbon::parse($a->shift_date)->toDateString(),
-                            );
-                        @endphp
-
-                        <div class="today-shift-card">
-                            <div class="today-shift-title">
-                                <i class='bx bx-time-five'></i>
-                                This Week (Mon–Sun)
-                            </div>
-
-                            <div class="week-shifts">
-                                @foreach ($days as $d)
-                                    @php
-                                        $dateKey = $d->toDateString();
-                                        $a = $weekByDate->get($dateKey);
-                                    @endphp
-
-                                    <div class="week-row">
-                                        <div class="week-left">
-                                            <div class="week-dow">{{ $d->format('D') }}</div>
-                                            <div class="week-date">{{ $d->format('M d') }}</div>
-                                        </div>
-
-                                        <div class="week-right">
-                                            @if ($a && $a->shift)
-                                                {{ $a->shift->is_time_off ? $a->shift->time_off_type ?? 'Time Off' : $a->shift->time_text ?? '—' }}
-                                            @else
-                                                <span class="week-muted">No shift</span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-
+                <div class="today-shift-card">
+                    <div class="today-shift-title">
+                        <i class='bx bx-time-five'></i>
+                        Your schedule this week
                     </div>
 
-                    <!-- CALENDAR -->
-                    <div id='calendar'></div>
+                    <div class="week-shifts">
+                        @foreach ($days as $d)
+                            @php
+                                $dateKey = $d->toDateString();
+                                $a = $weekByDate->get($dateKey);
+                            @endphp
 
-                    <!-- Overlay -->
-                    <div id="event-overlay">
-                        <div class="overlay-box">
+                            <div class="week-row">
+                                <div class="week-left">
+                                    <div class="week-dow">{{ $d->format('D') }}</div>
+                                    <div class="week-date">{{ $d->format('M d') }}</div>
+                                </div>
 
-                            <h3 id="overlay-title">Add new event</h3> <label>Event title *</label> <input type="text"
-                                id="event-title"> <label>Description</label>
-                            <textarea id="event-description"></textarea> <label>Start Date *</label> <input type="datetime-local"
-                                id="event-start"> <label>End Date</label> <input type="datetime-local" id="event-end">
-                            <label>Notification</label>
-                            <div class="notif-row"> <input type="number" id="notif-value" value="30"
-                                    min="0"> <select id="notif-unit">
-                                    <option value="minutes">Minutes</option>
-                                    <option value="hours">Hours</option>
-                                </select> </div> <label>Event Color</label>
-                            <div class="color-row"> @php $colors = [ '#3B82F6', '#06B6D4', '#0EA5E9', '#F97316', '#EF4444', '#22C55E', '#A855F7', '#EAB308', '#14B8A6', '#475569', '#F43F5E', ]; @endphp @foreach ($colors as $c)
-                                    <div class="color-box" data-color="{{ $c }}"
-                                        style="background: {{ $c }}"></div>
-                                @endforeach
+                                <div class="week-right">
+                                    @if ($a && $a->shift)
+                                        {{ $a->shift->is_time_off ? $a->shift->time_off_type ?? 'Time Off' : $a->shift->time_text ?? '—' }}
+                                    @else
+                                        <span class="week-muted">No shift</span>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="public-box"> <input type="checkbox" id="is-public"> <label
-                                    for="is-public">Public Event</label> </div>
-                            <div class="buttons"> <button id="close-overlay">Close</button> <button id="save-event"
-                                    class="save-btn">Save</button> <button id="delete-event" class="delete-btn"
-                                    style="display:none;">Delete</button> </div>
-                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CALENDAR -->
+            <div id='calendar-2'></div>
+
+            <!-- Overlay -->
+            <div id="event-overlay">
+                <div class="overlay-box">
+
+                    <h3 id="overlay-title">Add new event</h3> <label>Event title *</label> <input type="text"
+                        id="event-title"> <label>Description</label>
+                    <textarea id="event-description"></textarea> <label>Start Date *</label> <input type="datetime-local"
+                        id="event-start"> <label>End Date</label> <input type="datetime-local" id="event-end">
+                    <label>Notification</label>
+                    <div class="notif-row" style="display:flex"> <input type="number" id="notif-value" value="30"
+                            min="0"> <select id="notif-unit">
+                            <option value="minutes">Minutes</option>
+                            <option value="hours">Hours</option>
+                        </select> </div> <label>Event Color</label>
+                    <div class="color-row"> @php $colors = [ '#3B82F6', '#06B6D4', '#0EA5E9', '#F97316', '#EF4444', '#22C55E', '#A855F7', '#EAB308', '#14B8A6', '#475569', '#F43F5E', ]; @endphp @foreach ($colors as $c)
+                            <div class="color-box" data-color="{{ $c }}"
+                                style="background: {{ $c }}"></div>
+                        @endforeach
+                    </div>
+                    <div class="public-box">
+                        <input type="checkbox" id="is-public">
+                        <label for="is-public">Public Event</label>
+                    </div>
+                    <div class="buttons">
+                        <button id="save-event" class="save-btn">Save</button>
+                        <button id="delete-event" class="delete-btn" style="display:none;"><i
+                                class="bx bx-trash"></i></button>
+                        <button id="close-overlay">Close</button>
                     </div>
                 </div>
             </div>

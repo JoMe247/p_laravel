@@ -1,22 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inbox WhatsApp</title>
-    <link rel="icon" href="img/favicon.png">
 
-    <!-- Styles -->
+    <title>Documents</title>
+    <link rel="icon" href="{{ asset('img/favicon.png') }}">
+
+    <!-- CSS base del proyecto -->
+    <!-- Estilos globales -->
     <link rel="stylesheet" href="{{ asset('css/variables.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash.css') }}">
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dropdown.css') }}">
     <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/inbox.css') }}">
+
+    <!-- CSS de Documents -->
+    <link rel="stylesheet" href="{{ asset('css/documents.css') }}">
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -26,154 +29,153 @@
 
     <!-- Alerts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 </head>
 
 <body>
+
     <div id="main-container">
         @include('menu')
 
         <section id="dash">
-            <div id="lower-table-clients" type="fullscreen">
-                <div class="inbox-container mt-10">
-                    <div class="inbox-card">
-                        <h1>📥 Inbox WhatsApp</h1>
 
-                        <div class="inbox-actions">
-                            <a href="{{ route('whatsapp.sent') }}" class="btn btn-primary">📤 Ir a Enviar</a>
+            {{-- Si ya tienes sidebar/header global por layout, puedes integrarlo a tu layout.
+         Aquí lo dejo standalone para que lo pegues fácil. --}}
 
-                            <form method="POST" action="{{ route('whatsapp.sync') }}">
-                                @csrf
-                                <button type="submit" class="btn btn-secondary">🔄 Sincronizar</button>
-                            </form>
+            <main class="documents-page">
 
-                            <button type="button" class="btn btn-danger" onclick="bulkDelete()">🗑️ Eliminar
-                                seleccionados</button>
+                <div class="documents-topbar">
+                    <div class="documents-actions">
+                        <!-- Botón Nuevo Documento (sin funcionamiento por ahora) -->
+                        <a href="{{ route('documents.create_document') }}" class="btn btn-primary" id="newDocumentBtn">
+                            New Document
+                        </a>
+
+                        <a href="{{ route('templates.create') }}" class="btn-template" id="btn-new-template">
+                            <i class='bx bx-plus'></i>
+                            New Template
+                        </a>
+
+
+                        <!-- Botón Imprimir (sin funcionamiento por ahora) -->
+                        <button type="button" class="btn-secondary" id="btn-print-documents">
+                            <i class='bx bx-printer'></i>
+                            Print
+                        </button>
+                    </div>
+                </div>
+
+                <section class="documents-card">
+                    <div class="documents-card-header">
+                        <div class="documents-title">
+                            <h2>Documents</h2>
+                            <p class="documents-count">
+                                Total documents: <span id="documents-total">{{ $totalDocuments }}</span>
+                            </p>
                         </div>
+                    </div>
 
-                        <!-- 🔍 Cuadro de búsqueda -->
-                        <div class="search-bar">
-                            <input type="text" id="searchInput" placeholder="Buscar por fecha, número o mensaje...">
-                        </div>
+                    <div class="documents-table-wrap">
+                        <table class="documents-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">ID</th>
+                                    <th style="min-width: 220px;">CUSTOMER'S NAME</th>
+                                    <th style="min-width: 140px;">PHONE</th>
+                                    <th style="min-width: 120px;">TEMPLATE</th>
+                                    <th style="min-width: 120px;">POLICY #</th>
+                                    <th style="min-width: 140px;">DATE</th>
+                                    <th style="min-width: 220px;">URL</th>
+                                    <th style="min-width: 120px;">STATUS</th>
+                                    <th style="width: 160px; text-align:center;">TOOLS</th>
+                                </tr>
+                            </thead>
 
-                        @if (session('ok'))
-                            <div class="alert alert-success">{{ session('ok') }}</div>
-                        @endif
+                            <tbody>
+                                @if (isset($documents) && $documents->count() > 0)
+                                    @foreach ($documents as $doc)
+                                        @php
+                                            $isSigned = (int) ($doc->is_signed ?? 0) === 1;
+                                            $formattedDate =
+                                                !empty($doc->date) && strtotime($doc->date)
+                                                    ? date('m/d/Y', strtotime($doc->date))
+                                                    : 'N/A';
+                                        @endphp
 
-                        @if ($errors->any())
-                            <div class="alert alert-error">
-                                <ul>
-                                    @foreach ($errors->all() as $e)
-                                        <li>{{ $e }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        <!-- Form oculto para borrado múltiple -->
-                        <form id="bulkDeleteForm" method="POST" action="{{ route('whatsapp.deleteMultiple') }}"
-                            style="display:none;">
-                            @csrf
-                            @method('DELETE')
-                            <div id="bulk-hidden-inputs"></div>
-                        </form>
-
-                        <div class="overflow-x-auto">
-                            <table class="inbox-table" id="inboxTable">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox" id="select-all"></th>
-                                        <th>Fecha</th>
-                                        <th>De</th>
-                                        <th>Dirección</th>
-                                        <th>Estado</th>
-                                        <th>Mensaje</th>
-                                        <th>Responder</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($messages as $m)
                                         <tr>
-                                            <td><input type="checkbox" class="row-check" value="{{ $m->id }}">
-                                            </td>
-                                            <td>{{ $m->date_sent?->format('Y-m-d H:i') }}</td>
-                                            <td>{{ $m->from }}</td>
-                                            <td>
-                                                <span
-                                                    class="badge {{ $m->direction_label === 'Entrante' ? 'badge-in' : 'badge-out' }}">
-                                                    {{ $m->direction_label }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span
-                                                    class="badge
-                                                @if ($m->status_label === 'Entregado') badge-success
-                                                @elseif($m->status_label === 'En cola') badge-warning
-                                                @elseif($m->status_label === 'No entregado' || $m->status_label === 'Fallido') badge-error
-                                                @else badge-default @endif">
-                                                    {{ $m->status_label }}
-                                                </span>
-                                            </td>
-                                            <td class="message-body">{{ $m->body }}</td>
+                                            <td>{{ $doc->id }}</td>
+                                            <td>{{ $doc->customer_name ?: 'N/A' }}</td>
+                                            <td>{{ $doc->phone ?: 'N/A' }}</td>
+                                            <td>{{ $doc->template_name ?: 'N/A' }}</td>
+                                            <td>{{ $doc->policy_number ?: 'N/A' }}</td>
+                                            <td>{{ $formattedDate }}</td>
 
-                                            <!-- RESPONDER -->
-                                            <td>
-                                                @if ($m->direction_label === 'Entrante' && $m->date_sent)
-                                                    @php
-                                                        // obtener la fecha del mensaje y convertirla a la zona configurada en app.php
-                                                        $receivedAt = \Carbon\Carbon::parse($m->date_sent)->setTimezone(
-                                                            config('app.timezone'),
-                                                        );
-                                                        $diffHours = $receivedAt->diffInHours(
-                                                            \Carbon\Carbon::now(config('app.timezone')),
-                                                        );
-                                                    @endphp
-
-                                                    @if ($diffHours < 24)
-                                                        <!-- Dentro de 24 horas: mostrar formulario normal -->
-                                                        <form method="POST" action="{{ route('send.action') }}"
-                                                            class="reply-form">
-                                                            @csrf
-                                                            <input type="hidden" name="to"
-                                                                value="{{ $m->from }}">
-                                                            <textarea name="body" rows="2" placeholder="Escribe tu respuesta..." class="reply-textarea"></textarea>
-                                                            <button type="submit" class="btn btn-send">Enviar</button>
-                                                        </form>
-                                                    @else
-                                                        <!-- Después de 24 horas: mostrar botón WhatsApp Web -->
-                                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $m->from) }}"
-                                                            target="_blank" class="btn btn-whatsapp">
-                                                            <i class='bx bxl-whatsapp'></i> Responder en WhatsApp
-                                                        </a>
-                                                    @endif
+                                            <td class="td-url">
+                                                @if (!empty($doc->short_url))
+                                                    <a href="{{ url('/s/' . $doc->short_url) }}" class="url-link"
+                                                        target="_blank" rel="noopener noreferrer">
+                                                        {{ $doc->short_url }}
+                                                    </a>
                                                 @else
-                                                    <span class="no-reply">—</span>
+                                                    <span>N/A</span>
                                                 @endif
                                             </td>
 
-                                            <!-- ACCIONES -->
                                             <td>
-                                                <form method="POST" action="{{ route('whatsapp.delete', $m->id) }}"
-                                                    onsubmit="return confirm('¿Seguro que quieres eliminar este mensaje?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">🗑️</button>
-                                                </form>
+                                                <span
+                                                    class="badge-status {{ $isSigned ? 'badge-success' : 'badge-danger' }}">
+                                                    {{ $isSigned ? 'SI' : 'NO' }}
+                                                </span>
+                                            </td>
+
+                                            <td class="td-tools">
+                                                @if (!empty($doc->id))
+                                                    <a href="{{ route('documents.view_pdf', $doc->id) }}"
+                                                        class="tool-btn" title="View" target="_blank"
+                                                        rel="noopener noreferrer">
+                                                        <i class='bx bx-show'></i>
+                                                    </a>
+                                                @else
+                                                    <button type="button" class="tool-btn" title="View" disabled>
+                                                        <i class='bx bx-show'></i>
+                                                    </button>
+                                                @endif
+
+                                                <button type="button" class="tool-btn btn-resend-phone"
+                                                    title="Resend to phone" data-doc-id="{{ $doc->id }}">
+                                                    <i class='bx bx-message-rounded-dots'></i>
+                                                </button>
+
+                                                <button type="button" class="tool-btn btn-resend-email"
+                                                    title="Resend by email" data-doc-id="{{ $doc->id }}">
+                                                    <i class='bx bx-envelope'></i>
+                                                </button>
+
+                                                <button type="button" class="tool-btn tool-danger btn-delete-document"
+                                                    title="Delete" data-doc-id="{{ $doc->id }}">
+                                                    <i class='bx bx-trash'></i>
+                                                </button>
                                             </td>
                                         </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="text-center">No hay mensajes</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="mt-4">{{ $messages->links() }}</div>
+                                    @endforeach
+                                @else
+                                    <tr class="empty-row">
+                                        <td colspan="9">
+                                            <div class="empty-state">
+                                                <i class='bx bx-folder-open'></i>
+                                                <p>No documents yet.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-            </div>
+                </section>
+
+            </main>
+
         </section>
     </div>
 
@@ -339,15 +341,23 @@
     <div id="dim-screen"></div>
 
 
-    <script src="js/image.js"></script>
-    <script src="js/weather.js"></script>
-    <script src="js/dropdown.js"></script>
-    <script src="js/menu.js"></script>
-    <script src="js/table.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/operations.js"></script>
-    <script src="js/inbox.js"></script>
+    <script src=" {{ asset('js/dropdown.js') }}"></script>
+    <script src=" {{ asset('js/menu.js') }}"></script>
+    <script src=" {{ asset('js/table.js') }}"></script>
+    <script src=" {{ asset('js/settings.js') }}"></script>
+    <script src=" {{ asset('js/operations.js') }}"></script>
 
+    <script>
+        window.documentsRoutes = {
+            resendPhone: "{{ route('documents.resend_phone', ':id') }}",
+            resendEmail: "{{ route('documents.resend_email', ':id') }}",
+            destroy: "{{ route('documents.destroy', ':id') }}"
+        };
+
+        window.documentsCsrf = "{{ csrf_token() }}";
+    </script>
+
+    <script src="{{ asset('js/documents.js') }}"></script>
 </body>
 
 </html>

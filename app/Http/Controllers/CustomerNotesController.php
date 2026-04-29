@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\CustomerNote;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use App\Models\Policy;
+
 
 class CustomerNotesController extends Controller
 {
@@ -48,6 +51,20 @@ class CustomerNotesController extends Controller
             'type' => get_class($user)
         ]);
 
+        $request->validate([
+            'policy'  => [
+                'nullable',
+                'string',
+                'max:120',
+                Rule::exists('policies', 'pol_number')->where(function ($q) use ($customerId, $user) {
+                    $q->where('customer_id', $customerId);
+                }),
+            ],
+            'subject' => 'required|string|max:200',
+            'note'    => 'required|string|max:2000',
+        ]);
+
+
         $creatorName = $user->name ?? $user->username;
 
         $note = CustomerNote::create([
@@ -76,5 +93,18 @@ class CustomerNotesController extends Controller
         return response()->json([
             'success' => true
         ]);
+    }
+
+    public function policies($customerId)
+    {
+        $user = Auth::guard('web')->user() ?? Auth::guard('sub')->user();
+
+        // Traer pólizas del customer (filtrando por agency si tu tabla policies tiene agency)
+        $policies = Policy::where('customer_id', $customerId)
+            ->orderBy('pol_number', 'asc')
+            ->get(['pol_number']);
+
+        // Regresamos solo un array simple
+        return response()->json($policies->pluck('pol_number'));
     }
 }
