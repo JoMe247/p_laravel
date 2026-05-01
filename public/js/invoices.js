@@ -254,7 +254,7 @@ function toggleDeleteVehicleSelect() {
       <td><input class="cell-input qty-input" type="text" value="1"></td>
       <td><input class="cell-input price-input" type="text" value=""></td>
       <td class="row-total">$0.00</td>
-      <td class="row-actions"><button type="button" class="btn-trash" title="Delete row">🗑</button></td>
+      <td class="row-actions"><button type="button" class="btn-trash" title="Delete row"><i class="bx bx-trash"></i></button></td>
     `;
 
         bindRow(tr);

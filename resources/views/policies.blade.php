@@ -60,8 +60,8 @@
 
                             <button type="button" class="profile-menu-item"
                                 onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
-                                <i class='bx bx-credit-card'></i>
-                                <span>Invoices (Payments)</span>
+                                <i class='bx bx-file'></i>
+                                <span>Invoices</span>
                             </button>
 
                             <button type="button" class="profile-menu-item"
@@ -238,14 +238,16 @@
                         {{-- LEFT PANEL (POLICY FIELDS) --}}
                         <div class="policy-left">
 
-                            <label>Carrier</label>
-                            <input type="text" id="pol_carrier">
+                                <label>Policy Number</label>
+                                <input type="text" id="pol_number">
 
-                            <label>Number</label>
-                            <input type="text" id="pol_number">
+                                <label>Carrier</label>
+                                <input type="text" id="pol_carrier">
 
-                            <label>URL (Company Website)</label>
-                            <input type="text" id="pol_url">
+                                <label style="position:relative">URL (Company Website) 
+                                    <div id="company-website-button"><i class='bx bx-globe'></i></div>
+                                </label>
+                                <input type="text" id="pol_url">
 
                             <label>Expiration Date</label>
                             <input type="date" id="pol_expiration">
@@ -293,17 +295,22 @@
                 </div>
             </div>
 
-            <div id="policy-edit-overlay" class="policy-edit-overlay" style="display:none;">
-                <div class="policy-edit-box">
+
+
+
+
+                <div id="policy-edit-overlay" class="policy-edit-overlay" style="display:none;">
+                    <div class="policy-edit-box policy-flex">
 
                     <div id="policy-edit-content">
                         <h3>Policy</h3>
                         <!-- Aquí JS insertará todos los campos -->
                     </div>
 
-                    <div class="policy-edit-actions">
-                        <button id="policy-edit-save" class="btn">Save Changes</button>
-                        <button id="policy-edit-cancel" class="btn secondary">Close</button>
+                        <div class="policy-edit-actions" style="position:absolute;margin-top:-30px;">
+                            <button id="policy-edit-save" class="btn policy-save-btn">Save Changes</button>
+                            <button id="policy-edit-cancel" class="btn secondary" onclick="closeOverlayEdit()">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -122,7 +122,7 @@ p.cust-input-name-upper {
 }
 
 #cust-addCustomer-btn:hover {
-    background-color: #1e6fe1;
+    background-color: var(--red2);
 }
 
 /* === Grupo de botones === */

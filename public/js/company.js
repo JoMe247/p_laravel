@@ -226,7 +226,7 @@ window.deleteCompany = function (id) {
         if (!res.isConfirmed) return;
 
         try {
-            let req = await fetch(`${baseUrl}/company/delete/${id}`, {
+            let req = await fetch(`${baseUrl}/companies/delete/${id}`, {
                 method: "POST",
                 headers: {
                     "X-CSRF-TOKEN": token

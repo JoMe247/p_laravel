@@ -226,6 +226,16 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
         Route::delete('/files/delete/{fileId}', [CustomerFilesController::class, 'destroy'])
             ->name('files.delete');
 
+
+        //Rutas para la visualización y descarga de files en customer files
+        Route::get('/customers/files/{id}', [CustomerFilesController::class, 'index'])->name('files.customer');
+        Route::post('/customers/files/{id}/store', [CustomerFilesController::class, 'store'])->name('files.store');
+        Route::put('/customers/files/{id}/update', [CustomerFilesController::class, 'update'])->name('files.update');
+        Route::delete('/customers/files/{id}', [CustomerFilesController::class, 'destroy'])->name('files.delete');
+
+        Route::get('/customers/file/{id}/view', [CustomerFilesController::class, 'view'])->name('files.view');
+        Route::get('/customers/file/{id}/download', [CustomerFilesController::class, 'download'])->name('files.download');
+
         // Reminders
         Route::get('/reminders/{id}', [RemindersController::class, 'index'])->name('reminders.index');
         Route::post('/reminders/{id}', [RemindersController::class, 'store'])->name('reminders.store');
@@ -392,7 +402,7 @@ Route::middleware(\App\Http\Middleware\RememberMeMiddleware::class)->group(funct
 
 
 
-        Route::get('/general-payments', [PaymentsInvoicesController::class, 'generalPayments'])
+        Route::get('/payments', [PaymentsInvoicesController::class, 'generalPayments'])
             ->name('payments.general');
 
 

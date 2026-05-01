@@ -8,9 +8,16 @@ use App\Models\User;
 use App\Models\SubUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\ServiceProvider;
 
 class RemindersController extends Controller
 {
+    public function boot()
+    {
+        Paginator::useBootstrap();
+    }
+    
     private function currentActor()
     {
         $user = auth('web')->user();

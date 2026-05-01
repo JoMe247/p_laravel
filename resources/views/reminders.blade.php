@@ -17,8 +17,8 @@
     <link rel="stylesheet" href="{{ asset('css/graph.css') }}">
     <link rel="stylesheet" href="{{ asset('css/editCustomer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/ui_elements.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/sms-inbox.css') }}">
     <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> -->
 
     <!-- Estilos de esta vista -->
     <link rel="stylesheet" href="{{ asset('css/reminders.css') }}">
@@ -42,7 +42,7 @@
 
         <section id="dash">
 
-            <div id="lower-table-clients" type="fullscreen">
+            <div style="width:100%">
 
                 {{-- CONTENEDOR GENERAL DEL PROFILE --}}
                 <div id="profile-wrapper" data-id="{{ $customer->ID }}">
@@ -64,9 +64,10 @@
                                     <span>Policies</span>
                                 </button>
 
-                                <button type="button" class="profile-menu-item">
-                                    <i class='bx bx-credit-card'></i>
-                                    <span>Invoices (Payments)</span>
+                                <button type="button" class="profile-menu-item"
+                                    onclick="window.location.href='{{ route('payments', ['customerId' => $customer->ID]) }}'">
+                                    <i class='bx bx-file'></i>
+                                    <span>Invoices</span>
                                 </button>
 
                                 <button type="button" class="profile-menu-item"
@@ -101,7 +102,7 @@
 
                             <div class="notes-header">
                                 <h3>Notes</h3>
-                                <button id="add-note-btn" class="btn small">+ Add Note</button>
+                                <button id="add-note-btn" class="btn small"><i class='bx bx-message-alt-add'></i>  &nbsp;Add Note</button>
                             </div>
 
                             <div class="notes-scroll">
@@ -128,8 +129,8 @@
                             <textarea id="note-text" rows="5"></textarea>
 
                             <div class="overlay-actions">
-                                <button class="btn secondary" id="note-cancel">Cancel</button>
                                 <button class="btn" id="note-save">Save</button>
+                                <button class="btn secondary" id="note-cancel">Cancel</button>
                             </div>
                         </div>
                     </div>
@@ -138,7 +139,9 @@
 
                         <div class="reminders-header">
                             <div class="left">
-                                <h1 class="title">Reminders</h1>
+                                <button id="openReminderOverlay" class="btn-primary">
+                                    <i class='bx bx-stopwatch' ></i> &nbsp;Set Reminder
+                                </button>
 
                                 @if (session('success'))
                                     <div class="flash-success">{{ session('success') }}</div>
@@ -146,9 +149,6 @@
                             </div>
 
                             <div class="right">
-                                <button id="openReminderOverlay" class="btn-primary">
-                                    Set Reminder
-                                </button>
 
                                 <div class="perpage-wrap">
                                     <label class="perpage-label" for="perPageSelect">Show</label>
@@ -175,7 +175,7 @@
                                             class="search-input" placeholder="Search in reminders..."
                                             autocomplete="off">
                                         <input type="hidden" name="perPage" value="{{ (int) $perPage }}">
-                                        <button class="search-btn" type="submit">Search</button>
+                                        <button id="search-reminder" class="search-btn" type="submit"><i class='bx bx-search'></i></button>
                                     </form>
                                 </div>
                             </div>
@@ -233,7 +233,7 @@
                                 <div class="footer-right">
                                     <div class="pagination-wrap">
                                         {{-- Mantiene tu estilo "Previous 1,2,3 Next" usando el paginator default --}}
-                                        {{ $reminders->links() }}
+                                        {{ $reminders->links( "pagination::bootstrap-4") }}
                                     </div>
                                 </div>
                             </div>
@@ -254,38 +254,35 @@
                                 @csrf
 
                                 <div class="field">
-                                    <label>Date to be notified <span class="req">*</span></label>
+                                    <label>Date to be notified *</label>
                                     <input type="datetime-local" name="remind_at" required>
                                     <small class="hint">Select date and time (hh:mm).</small>
                                 </div>
 
                                 <div class="field">
-                                    <label>Set Reminder to <span class="req">*</span></label>
+                                    <label>Set Reminder to *</label>
                                     <select name="remind_to" required>
-                                        <option value="" disabled selected>Select a user...</option>
+                                        <option value="" disabled selected>Select user...</option>
 
-                                        <optgroup label="Users">
-                                            @foreach ($users as $u)
-                                                <option value="user:{{ $u->id }}">{{ $u->name }}</option>
-                                            @endforeach
-                                        </optgroup>
+                                        @foreach ($users as $u)
+                                            <option value="user:{{ $u->id }}">{{ $u->name }}</option>
+                                        @endforeach
 
-                                        <optgroup label="Sub Users">
-                                            @foreach ($subs as $s)
-                                                <option value="sub:{{ $s->id }}">{{ $s->name }}</option>
-                                            @endforeach
-                                        </optgroup>
+                                        @foreach ($subs as $s)
+                                            <option value="sub:{{ $s->id }}">{{ $s->name }}</option>
+                                        @endforeach
+                                       
                                     </select>
                                 </div>
 
                                 <div class="field">
-                                    <label>Description <span class="req">*</span></label>
+                                    <label>Description *</label>
                                     <textarea name="description" rows="5" required placeholder="Write the reminder details..."></textarea>
                                 </div>
 
                                 <div class="overlay-actions">
-                                    <button type="button" class="btn-ghost" id="cancelReminderBtn">Cancel</button>
                                     <button type="submit" class="btn-primary">Save</button>
+                                    <button type="button" class="btn-ghost" id="cancelReminderBtn">Cancel</button>
                                 </div>
 
                             </form>
@@ -407,29 +404,29 @@
                     <div id="images-container">
                         <!-- <img id="settings-img-option" src="img/menu/1.jpg" alt=""> -->
                         <div class='settings-sub-title'>Select Image</div>
-                        <label class="thumb-options" onclick="selectImage(1)"><img src="img/menu/thumbs/1.jpg"
+                        <label class="thumb-options" onclick="selectImage(1)"><img src="../img/menu/thumbs/1.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(2)"><img src="img/menu/thumbs/2.jpg"
+                        <label class="thumb-options" onclick="selectImage(2)"><img src="../img/menu/thumbs/2.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(3)"><img src="img/menu/thumbs/3.jpg"
+                        <label class="thumb-options" onclick="selectImage(3)"><img src="../img/menu/thumbs/3.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(4)"><img src="img/menu/thumbs/4.jpg"
+                        <label class="thumb-options" onclick="selectImage(4)"><img src="../img/menu/thumbs/4.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(5)"><img src="img/menu/thumbs/5.jpg"
+                        <label class="thumb-options" onclick="selectImage(5)"><img src="../img/menu/thumbs/5.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(6)"><img src="img/menu/thumbs/6.jpg"
+                        <label class="thumb-options" onclick="selectImage(6)"><img src="../img/menu/thumbs/6.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(7)"><img src="img/menu/thumbs/7.jpg"
+                        <label class="thumb-options" onclick="selectImage(7)"><img src="../img/menu/thumbs/7.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(8)"><img src="img/menu/thumbs/8.jpg"
+                        <label class="thumb-options" onclick="selectImage(8)"><img src="../img/menu/thumbs/8.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(9)"><img src="img/menu/thumbs/9.jpg"
+                        <label class="thumb-options" onclick="selectImage(9)"><img src="../img/menu/thumbs/9.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(10)"><img src="img/menu/thumbs/10.jpg"
+                        <label class="thumb-options" onclick="selectImage(10)"><img src="../img/menu/thumbs/10.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(11)"><img src="img/menu/thumbs/11.jpg"
+                        <label class="thumb-options" onclick="selectImage(11)"><img src="../img/menu/thumbs/11.jpg"
                                 alt=""></label>
-                        <label class="thumb-options" onclick="selectImage(12)"><img src="img/menu/thumbs/12.jpg"
+                        <label class="thumb-options" onclick="selectImage(12)"><img src="../img/menu/thumbs/12.jpg"
                                 alt=""></label>
 
 
@@ -474,7 +471,7 @@
     <script src="{{ asset('js/weather.js') }}"></script>
     <script src="{{ asset('js/dropdown.js') }}"></script>
     <script src="{{ asset('js/menu.js') }}"></script>
-    <script src="{{ asset('js/table.js') }}"></script>
+    <!-- <script src="{{ asset('js/table.js') }}"></script> -->
     <script src="{{ asset('js/settings.js') }}"></script>
     <script src="{{ asset('js/operations.js') }}"></script>
     <script src="{{ asset('js/help.js') }}"></script>
